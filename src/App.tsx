@@ -1,22 +1,15 @@
-import { Routes, Route, Link } from "react-router";
+import {Route, Routes} from "react-router";
+import MultiplicationTrainer from "./pages/MultiplicationTrainer.tsx";
+import Menu from "./pages/Menu.tsx";
 
 export default function App() {
-  return (
-    <div className="p-6">
-      <nav className="flex gap-4 mb-6">
-        <Link to="/">Home</Link>
-        <Link to="/about">About</Link>
-      </nav>
-      <Routes>
-        <Route
-          path="/"
-          element={<h1 className="text-2xl font-bold">Home Page</h1>}
-        />
-        <Route
-          path="/about"
-          element={<h1 className="text-2xl">About Page</h1>}
-        />
-      </Routes>
-    </div>
-  );
+    return (
+        <>
+            <Routes>
+                <Route path="/" element={<Menu/>}/>
+                <Route path="/about" element={<h1 className="text-2xl">About Page</h1>}/>
+                <Route path="/game1" element={<MultiplicationTrainer/>}/>
+            </Routes>
+        </>
+    );
 }
