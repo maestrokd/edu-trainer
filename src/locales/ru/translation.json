@@ -231,10 +231,20 @@
       "answer": "Ответ",
       "result": "Результат",
       "empty": "Пока нет попыток.",
-      "correct": "Правильно"
+      "correct": "Правильно",
+      "incorrect": "{{explanation}} (правильный: {{correct}})"
     },
     "sr": {
       "to": "до"
+    },
+    "hint": {
+      "template": "Посмотрите на {{lower}} числа {{num}}: {{digit}} {{arrow}}"
+    },
+    "expl": {
+      "template": "Округлить до {{target}}: посмотрите на {{lower}} ({{check}}) → {{direction}} → {{correct}}",
+      "target": { "tens": "десятки", "hundreds": "сотни", "thousands": "тысячи" },
+      "lower": { "ones": "единицы", "tens": "десятки", "hundreds": "сотни" },
+      "dir": { "up": "вверх", "down": "вниз" }
     },
     "input": {
       "placeholder": "ваш ответ",
