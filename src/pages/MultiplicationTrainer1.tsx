@@ -42,7 +42,7 @@ function formatTime(totalSec: number) {
     return `${pad(m)}:${pad(ss)}`;
 }
 
-export default function MultiplicationTrainer() {
+export default function MultiplicationTrainer1() {
     const {t} = useTranslation();
     const [mode, setMode] = React.useState<Mode>("input");
     const [screen, setScreen] = React.useState<Screen>("setup");
