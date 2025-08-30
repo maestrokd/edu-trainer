@@ -231,10 +231,20 @@
       "answer": "Answer",
       "result": "Result",
       "empty": "No attempts yet.",
-      "correct": "Correct"
+      "correct": "Correct",
+      "incorrect": "{{explanation}} (correct: {{correct}})"
     },
     "sr": {
       "to": "to"
+    },
+    "hint": {
+      "template": "Look at {{lower}} digit of {{num}}: {{digit}} {{arrow}}"
+    },
+    "expl": {
+      "template": "Round to {{target}}: look at {{lower}} ({{check}}) → {{direction}}",
+      "target": { "tens": "tens", "hundreds": "hundreds", "thousands": "thousands" },
+      "lower": { "ones": "ones", "tens": "tens", "hundreds": "hundreds" },
+      "dir": { "up": "up", "down": "down" }
     },
     "input": {
       "placeholder": "your answer",
