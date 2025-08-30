@@ -1,6 +1,7 @@
 import {Route, Routes} from "react-router";
 import MultiplicationTrainer1 from "./pages/MultiplicationTrainer1.tsx";
-import Menu from "./pages/Menu.tsx";
+import Menu from "./pages/Menu1.tsx";
+import MenuPage from "./pages/Menu.tsx";
 import RabbitJumpX9 from "./pages/JumpingRabbit.tsx";
 import MultiplicationTrainer2 from "@/pages/multiplication-trainer/MultiplicationTrainer2.tsx";
 import RoundingTrainer from "@/pages/rounding-trainer/RoundingTrainer.tsx";
@@ -10,7 +11,8 @@ export default function App() {
     return (
         <>
             <Routes>
-                <Route path="/" element={<Menu/>}/>
+                <Route path="/old" element={<Menu/>}/>
+                <Route path="/" element={<MenuPage/>}/>
                 <Route path="/about" element={<h1 className="text-2xl">About Page</h1>}/>
                 <Route path="/multiplication-trainer1" element={<MultiplicationTrainer1/>}/>
                 <Route path="/multiplication-trainer2" element={<MultiplicationTrainer2/>}/>
