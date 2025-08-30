@@ -34,6 +34,14 @@ function randInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function formatTime(totalSec: number) {
+    const s = Math.max(0, Math.floor(totalSec));
+    const m = Math.floor(s / 60);
+    const ss = s % 60;
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${pad(m)}:${pad(ss)}`;
+}
+
 export default function MultiplicationTrainer() {
     const {t} = useTranslation();
     const [mode, setMode] = React.useState<Mode>("input");
@@ -60,11 +68,60 @@ export default function MultiplicationTrainer() {
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
+    // Timer and session controls
+    const [timerMinutes, setTimerMinutes] = React.useState<number>(0); // 0 = unlimited
+    const [maxExercises, setMaxExercises] = React.useState<number>(0); // 0 = unlimited
+    // const [startTs, setStartTs] = React.useState<number | null>(null);
+    const [elapsedSec, setElapsedSec] = React.useState<number>(0);
+    const [gameOver, setGameOver] = React.useState<boolean>(false);
+    const [endReason, setEndReason] = React.useState<"time" | "ex" | null>(null);
+    const tickRef = React.useRef<number | null>(null);
+
     const accuracy = React.useMemo(() => {
         const total = correctCount + wrongCount;
         if (total === 0) return 0;
         return Math.round((correctCount / total) * 100);
     }, [correctCount, wrongCount]);
+
+    function clearTick() {
+        if (tickRef.current != null) {
+            clearInterval(tickRef.current);
+            tickRef.current = null;
+        }
+    }
+
+    function startTimer() {
+        clearTick();
+        setElapsedSec(0);
+        setGameOver(false);
+        setEndReason(null);
+        // Tick every 1s
+        tickRef.current = window.setInterval(() => {
+            setElapsedSec((s) => s + 1);
+        }, 1000) as unknown as number;
+    }
+
+    function endGame(reason: "time" | "ex") {
+        clearTick();
+        setGameOver(true);
+        setEndReason(reason);
+    }
+
+    // Cleanup on unmount
+    React.useEffect(() => {
+        return () => clearTick();
+    }, []);
+
+    // Auto-stop when countdown reaches zero
+    React.useEffect(() => {
+        if (screen !== "play" || gameOver) return;
+        if (timerMinutes > 0) {
+            const total = timerMinutes * 60;
+            if (elapsedSec >= total) {
+                endGame("time");
+            }
+        }
+    }, [elapsedSec, screen, gameOver, timerMinutes]);
 
     function shuffle<T>(arr: T[]): T[] {
         const a = [...arr];
@@ -173,12 +230,18 @@ export default function MultiplicationTrainer() {
         setHistory([]);
         setLastLine("");
         setLastCorrect(null);
+        setGameOver(false);
+        setEndReason(null);
+        setElapsedSec(0);
 
         setScreen("play");
+        // start timer and first task
+        startTimer();
         nextTask(startMin, startMax);
     }
 
     function submit(chosen?: number) {
+        if (gameOver) return;
         let user: number;
         if (typeof chosen === "number") {
             user = chosen;
@@ -201,20 +264,32 @@ export default function MultiplicationTrainer() {
         if (isCorrect) setCorrectCount((c) => c + 1);
         else setWrongCount((w) => w + 1);
 
+        const totalAnswered = correctCount + wrongCount + 1;
+        if (maxExercises > 0 && totalAnswered >= maxExercises) {
+            endGame("ex");
+            return;
+        }
         nextTask();
     }
 
     function newSession() {
-        // Почати заново, залишивши обраний діапазон, або повернутися на екран налаштування
+        // Почати заново, залишивши обраний діапазон
         setCorrectCount(0);
         setWrongCount(0);
         setHistory([]);
         setLastLine("");
         setLastCorrect(null);
+        setGameOver(false);
+        setEndReason(null);
+        setElapsedSec(0);
+        startTimer();
         nextTask();
     }
 
     function backToSetup() {
+        clearTick();
+        setGameOver(false);
+        setEndReason(null);
         setScreen("setup");
     }
 
@@ -347,6 +422,36 @@ export default function MultiplicationTrainer() {
                                 </div>
                             </div>
 
+                            <label className="flex flex-col">
+                                <span className="text-sm text-gray-600 mb-1">{t('multiT.setup.timer')}</span>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    className="rounded-xl border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                    value={timerMinutes}
+                                    onChange={(e) => {
+                                        const v = parseInt(e.target.value, 10);
+                                        setTimerMinutes(Number.isFinite(v) ? Math.max(0, v) : 0);
+                                    }}
+                                    aria-label={t('multiT.aria.timerMinutes')}
+                                />
+                            </label>
+
+                            <label className="flex flex-col">
+                                <span className="text-sm text-gray-600 mb-1">{t('multiT.setup.maxExercises')}</span>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    className="rounded-xl border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                    value={maxExercises}
+                                    onChange={(e) => {
+                                        const v = parseInt(e.target.value, 10);
+                                        setMaxExercises(Number.isFinite(v) ? Math.max(0, v) : 0);
+                                    }}
+                                    aria-label={t('multiT.aria.maxExercises')}
+                                />
+                            </label>
+
                             <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:col-span-2 lg:col-span-3">
                                 <button
                                     onClick={startGame}
@@ -379,11 +484,21 @@ export default function MultiplicationTrainer() {
                                     <Stat label={t('multiT.stats.correct')} value={correctCount}/>
                                     <Stat label={t('multiT.stats.wrong')} value={wrongCount}/>
                                     <Stat label={t('multiT.stats.accuracy')} value={`${accuracy}%`}/>
-
+                                    <Stat label={t('multiT.stats.time')} value={formatTime(elapsedSec)}/>
+                                    {timerMinutes > 0 && (
+                                        <Stat label={t('multiT.stats.timeLeft')}
+                                              value={formatTime(timerMinutes * 60 - elapsedSec)}/>
+                                    )}
                                 </div>
 
                                 {/* Поточний приклад */}
                                 <div className="text-center mb-6">
+                                    {gameOver && (
+                                        <div
+                                            className="mb-4 inline-block rounded-xl bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-2">
+                                            {endReason === "time" ? t('multiT.finished.timeUp') : t('multiT.finished.exLimit', {count: correctCount + wrongCount})}
+                                        </div>
+                                    )}
                                     <div
                                         className="text-4xl sm:text-6xl font-semibold tracking-wide text-gray-900 select-none">
                                         {a} <span aria-hidden>{op === "mul" ? "×" : "÷"}</span> <span
@@ -397,16 +512,18 @@ export default function MultiplicationTrainer() {
                                                     type="number"
                                                     inputMode="numeric"
                                                     pattern="[0-9]*"
-                                                    className="w-40 text-center text-2xl sm:text-3xl rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                                    className="w-40 text-center text-2xl sm:text-3xl rounded-xl px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-100 disabled:text-gray-400"
                                                     placeholder={t('multiT.input.placeholder')}
                                                     aria-label={t('multiT.aria.answerField')}
                                                     value={answer}
                                                     onChange={(e) => setAnswer(e.target.value)}
                                                     onKeyDown={onKeyDown}
+                                                    disabled={gameOver}
                                                 />
                                                 <button
                                                     onClick={() => submit()}
-                                                    className="rounded-xl px-5 py-3 bg-indigo-600 text-white text-lg font-medium hover:bg-indigo-700 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                                    className="rounded-xl px-5 py-3 bg-indigo-600 text-white text-lg font-medium hover:bg-indigo-700 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    disabled={gameOver}
                                                 >
                                                     {t('multiT.input.submit')}
                                                 </button>
@@ -418,13 +535,14 @@ export default function MultiplicationTrainer() {
                                                         key={`${taskId}-${idx}`}
                                                         onClick={(e) => {
                                                             (e.currentTarget as HTMLButtonElement).blur();
-                                                            submit(opt);
+                                                            if (!gameOver) submit(opt);
                                                         }}
                                                         onTouchEnd={(e) => {
                                                             (e.currentTarget as HTMLButtonElement).blur();
                                                         }}
-                                                        className="rounded-xl px-5 py-4 bg-white border border-gray-300 hover:bg-indigo-50 text-2xl font-medium text-gray-900 shadow-sm"
+                                                        className="rounded-xl px-5 py-4 bg-white border border-gray-300 hover:bg-indigo-50 text-2xl font-medium text-gray-900 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                         aria-label={t('multiT.quiz.optionAria', {opt})}
+                                                        disabled={gameOver}
                                                     >
                                                         {opt}
                                                     </button>
