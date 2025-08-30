@@ -1,7 +1,8 @@
 import {Route, Routes} from "react-router";
-import MultiplicationTrainer from "./pages/MultiplicationTrainer.tsx";
+import MultiplicationTrainer1 from "./pages/MultiplicationTrainer1.tsx";
 import Menu from "./pages/Menu.tsx";
 import RabbitJumpX9 from "./pages/JumpingRabbit.tsx";
+import MultiplicationTrainer2 from "@/pages/multiplication-trainer/MultiplicationTrainer2.tsx";
 
 export default function App() {
     return (
@@ -9,8 +10,9 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Menu/>}/>
                 <Route path="/about" element={<h1 className="text-2xl">About Page</h1>}/>
-                <Route path="/game1" element={<MultiplicationTrainer/>}/>
-                <Route path="/game2" element={<RabbitJumpX9/>}/>
+                <Route path="/multiplication-trainer1" element={<MultiplicationTrainer1/>}/>
+                <Route path="/multiplication-trainer2" element={<MultiplicationTrainer2/>}/>
+                <Route path="/multiplication-rabbit" element={<RabbitJumpX9/>}/>
             </Routes>
         </>
     );

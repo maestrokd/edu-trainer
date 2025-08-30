@@ -39,15 +39,23 @@ export default function Menu() {
                                 </li>
                                 <li>
                                     <Link
-                                        to="/game1"
+                                        to="/multiplication-trainer1"
                                         className="block w-full rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white visited:text-white hover:bg-indigo-700 antialiased drop-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
                                     >
-                                        Multiplication Trainer
+                                        Multiplication Trainer 1
                                     </Link>
                                 </li>
                                 <li>
                                     <Link
-                                        to="/game2"
+                                        to="/multiplication-trainer2"
+                                        className="block w-full rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white visited:text-white hover:bg-indigo-700 antialiased drop-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                                    >
+                                        Multiplication Trainer 2
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/multiplication-rabbit"
                                         className="block w-full rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white visited:text-white hover:bg-indigo-700 antialiased drop-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
                                     >
                                         Jumping Rabbit
