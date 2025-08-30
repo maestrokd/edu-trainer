@@ -8,5 +8,68 @@
   },
   "menu": {
     "title": "Edu Trainer"
+  },
+  "multiT": {
+    "menu": "Menu",
+    "title": "Multiplication Trainer",
+    "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
+    "newSession": "New session",
+    "changeRange": "Change range",
+    "aria": {
+      "backToMenu": "Back to menu",
+      "newSession": "New session",
+      "changeRange": "Change range",
+      "minRange": "Minimum value of the range",
+      "maxRange": "Maximum value of the range",
+      "mode": "Trainer mode",
+      "includeMul": "Include multiplication exercises",
+      "includeDiv": "Include division exercises",
+      "startGame": "Start the game",
+      "answerField": "Answer input field",
+      "correct": "Correct",
+      "wrong": "Incorrect"
+    },
+    "setup": {
+      "intro": "Choose the range of factors (min and max), e.g.",
+      "min": "Minimum",
+      "max": "Maximum",
+      "mode": "Mode",
+      "exercises": "Exercises",
+      "note": "The range will be automatically ordered (min ≤ max) and limited to 2…12."
+    },
+    "mode": {
+      "input": "Keyboard input",
+      "quiz": "Quiz (4 options)"
+    },
+    "ex": {
+      "mul": "Multiplication",
+      "div": "Division"
+    },
+    "start": "Start",
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy"
+    },
+    "sr": {
+      "mul": "multiplied by",
+      "div": "divided by"
+    },
+    "input": {
+      "placeholder": "Answer",
+      "submit": "Submit",
+      "hint": "Press Enter to submit your answer."
+    },
+    "quiz": {
+      "optionAria": "Answer option {{opt}}"
+    },
+    "table": {
+      "example": "Example",
+      "answer": "Answer",
+      "result": "Result",
+      "empty": "Your answer history will appear here.",
+      "correct": "Correct",
+      "incorrect": "Incorrect (correct: {{correct}})"
+    }
   }
 }
