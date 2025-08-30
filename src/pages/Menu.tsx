@@ -1,11 +1,19 @@
 import {Link} from "react-router";
+import LanguageSelector, {LanguageSelectorMode} from "@/components/lang/LanguageSelector.tsx";
+import {useTranslation} from "react-i18next";
 
 export default function Menu() {
+    const {t} = useTranslation();
+
     return (
         <div className="min-h-dvh w-full bg-gradient-to-br from-sky-50 to-indigo-50">
             <div className="mx-auto max-w-5xl p-6">
                 <header className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Edu Trainer</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">{t('menu.title')}</h1>
+
+                    <div className="flex items-center gap-2">
+                        <LanguageSelector mode={LanguageSelectorMode.FULL}/>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6">

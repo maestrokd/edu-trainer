@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import "./index.css";
+import './i18n';
 
 const raw = import.meta.env.VITE_UI_BASE_ENV_PATH || '/'
 const basename = raw === '/' ? undefined : raw.replace(/\/+$/,'') // no trailing slash
