@@ -7,7 +7,28 @@
     }
   },
   "menu": {
-    "title": "Edu Trainer"
+    "title": "Edu Trainer",
+    "search": "Search",
+    "searchPlaceholder": "Search games…",
+    "noResults": "No results",
+    "allGames": "All games",
+    "sidebarLabel": "Games",
+    "categories": { "title": "Categories", "all": "All", "math": "Math Trainers", "arcade": "Arcade", "info": "Info" },
+    "play": "Play",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "info": "Info",
+    "about": "About",
+    "continue": "Continue playing",
+    "continueEmpty": "Your recent games will appear here.",
+    "futureSectionsHint": "Favorites and recent will appear here soon."
+  },
+  "games": {
+    "multiplication1": { "title": "Multiplication Trainer 1", "desc": "Practice multiplication facts." },
+    "multiplication2": { "title": "Multiplication Trainer 2", "desc": "Advanced practice & drills." },
+    "rounding1": { "title": "Rounding Trainer 1", "desc": "Round numbers to tens and hundreds." },
+    "rounding2": { "title": "Rounding Trainer 2", "desc": "More rounding challenges." },
+    "rabbit": { "title": "Jumping Rabbit", "desc": "Arcade jumping with math twists." }
   },
   "multiT": {
     "menu": "Menu",
