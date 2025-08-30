@@ -27,7 +27,9 @@
       "startGame": "Start the game",
       "answerField": "Answer input field",
       "correct": "Correct",
-      "wrong": "Incorrect"
+      "wrong": "Incorrect",
+      "timerMinutes": "Timer minutes",
+      "maxExercises": "Maximum exercises"
     },
     "setup": {
       "intro": "Choose the range of factors (min and max), e.g.",
@@ -35,6 +37,8 @@
       "max": "Maximum",
       "mode": "Mode",
       "exercises": "Exercises",
+      "timer": "Timer (minutes)",
+      "maxExercises": "Max exercises (0 = unlimited)",
       "note": "The range will be automatically ordered (min ≤ max) and limited to 2…12."
     },
     "mode": {
@@ -49,7 +53,9 @@
     "stats": {
       "correct": "Correct",
       "wrong": "Wrong",
-      "accuracy": "Accuracy"
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "timeLeft": "Time left"
     },
     "sr": {
       "mul": "multiplied by",
@@ -62,6 +68,10 @@
     },
     "quiz": {
       "optionAria": "Answer option {{opt}}"
+    },
+    "finished": {
+      "timeUp": "Time is up!",
+      "exLimit": "Exercises complete ({{count}})."
     },
     "table": {
       "example": "Example",
