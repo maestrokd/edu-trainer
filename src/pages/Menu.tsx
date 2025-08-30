@@ -61,6 +61,22 @@ export default function Menu() {
                                         Jumping Rabbit
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link
+                                        to="/rounding-trainer"
+                                        className="block w-full rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white visited:text-white hover:bg-indigo-700 antialiased drop-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                                    >
+                                        Rounding Trainer
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/rounding-trainer2"
+                                        className="block w-full rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white visited:text-white hover:bg-indigo-700 antialiased drop-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                                    >
+                                        Rounding Trainer 2
+                                    </Link>
+                                </li>
                             </ul>
                         </nav>
                     </aside>
