@@ -231,10 +231,20 @@
       "answer": "Відповідь",
       "result": "Результат",
       "empty": "Спроб поки що немає.",
-      "correct": "Правильно"
+      "correct": "Правильно",
+      "incorrect": "{{explanation}} (правильна: {{correct}})"
     },
     "sr": {
       "to": "до"
+    },
+    "hint": {
+      "template": "Подивіться на {{lower}} числа {{num}}: {{digit}} {{arrow}}"
+    },
+    "expl": {
+      "template": "Округлити до {{target}}: подивіться на {{lower}} ({{check}}) → {{direction}} → {{correct}}",
+      "target": { "tens": "десятки", "hundreds": "сотні", "thousands": "тисячі" },
+      "lower": { "ones": "одиниці", "tens": "десятки", "hundreds": "сотні" },
+      "dir": { "up": "вгору", "down": "вниз" }
     },
     "input": {
       "placeholder": "ваша відповідь",

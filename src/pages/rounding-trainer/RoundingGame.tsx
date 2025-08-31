@@ -235,13 +235,6 @@ function getCheckDigitForPlace(n: number, place: TargetPlace): number {
     return Math.floor((abs % place) / lower);
 }
 
-function makeExplanation(n: number, place: TargetPlace, correct: number): string {
-    const targetLabel = place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
-    const check = getCheckDigitForPlace(n, place);
-    const direction = check >= 5 ? "up" : "down";
-    return `Round to ${targetLabel}: look at ${place === 10 ? "ones" : place === 100 ? "tens" : "hundreds"} (${check}) → ${direction} → ${correct}`;
-}
-
 // ----------------------------------
 // Audio (simple SFX gated by a checkbox, single shared context)
 // ----------------------------------
@@ -547,17 +540,31 @@ export default function RoundingGame() {
         const correctRounded = roundHalfUpTo(original, target);
         const isCorrect = user === correctRounded;
 
+        function buildExplanationLocalized(n: number, place: TargetPlace, correct: number): string {
+            const check = getCheckDigitForPlace(n, place);
+            const directionKey = check >= 5 ? "up" : "down";
+            const targetKey = place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
+            const lowerKey = place === 10 ? "ones" : place === 100 ? "tens" : "hundreds";
+            return RT.t("roundT.expl.template", {
+                target: RT.t(`roundT.expl.target.${targetKey}`),
+                lower: RT.t(`roundT.expl.lower.${lowerKey}`),
+                check,
+                direction: RT.t(`roundT.expl.dir.${directionKey}`),
+                correct: fmt(correct),
+            });
+        }
+
         const item: HistoryItem = {
             original,
             target,
             user,
             correctRounded,
             correct: isCorrect,
-            explanation: makeExplanation(original, target, correctRounded),
+            explanation: buildExplanationLocalized(original, target, correctRounded),
         };
 
         setHistory((h) => [item, ...h].slice(0, 200));
-        setLastLine(`${fmt(original)} → ${targetLabel(target)} = ${fmt(user)}`);
+        setLastLine(`${fmt(original)} → ${targetLabelL(target)} = ${fmt(user)}`);
         setLastCorrect(isCorrect);
 
         if (isCorrect) {
@@ -695,7 +702,7 @@ export default function RoundingGame() {
                                 <CardContent className="p-4 sm:p-6 grid gap-4">
                                     <div>
                                         <div className="text-sm text-gray-600 mb-2">{RT.labels.numberTypes}</div>
-                                        <div className="flex flex-wrap items-center gap-4">
+                                        <div className="flex flex-col gap-2">
                                             <label className="inline-flex items-center gap-2">
                                                 <Checkbox id="whole-check" checked={includeWhole}
                                                           onCheckedChange={(v) => setIncludeWhole(Boolean(v))}/>
@@ -730,7 +737,7 @@ export default function RoundingGame() {
 
                                     <div>
                                         <div className="text-sm text-gray-600 mb-2">{RT.labels.signs}</div>
-                                        <div className="flex flex-wrap items-center gap-4">
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                                             <label className="inline-flex items-center gap-2">
                                                 <Checkbox id="pos-check" checked={includePositives}
                                                           onCheckedChange={(v) => setIncludePositives(Boolean(v))}/>
@@ -751,9 +758,9 @@ export default function RoundingGame() {
                         <div className="grid gap-6 lg:grid-cols-2 mt-6">
                             <Card>
                                 <CardContent className="p-4 sm:p-6 grid gap-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                         <div className="text-sm text-gray-600">{RT.labels.magnitude}</div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
                                             <Button
                                                 variant={magMode === "digits" ? "default" : "outline"}
                                                 className="h-8 px-3"
@@ -772,7 +779,7 @@ export default function RoundingGame() {
                                     </div>
 
                                     {magMode === "digits" ? (
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <LabeledField label={RT.labels.minDigits} htmlFor="min-digits">
                                                 <Select value={String(minDigits)}
                                                         onValueChange={(val) => setMinDigits(parseInt(val, 10))}>
@@ -805,7 +812,7 @@ export default function RoundingGame() {
                                             </LabeledField>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <LabeledField label={RT.labels.minValue} htmlFor="min-value">
                                                 <Input
                                                     id="min-value"
@@ -832,7 +839,7 @@ export default function RoundingGame() {
                             <Card>
                                 <CardContent className="p-4 sm:p-6 grid gap-4">
                                     <div className="text-sm text-gray-600">{RT.labels.targets}</div>
-                                    <div className="flex flex-wrap items-center gap-4">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                                         <label className="inline-flex items-center gap-2">
                                             <Checkbox id="t10" checked={target10}
                                                       onCheckedChange={(v) => setTarget10(Boolean(v))}/>
@@ -911,7 +918,7 @@ export default function RoundingGame() {
                                         <div
                                             className="text-3xl sm:text-5xl font-semibold tracking-wide text-gray-900 select-none">
                                             {fmt(original)} <span aria-hidden>→</span> <span
-                                            className="sr-only">{RT.labels.srTo}</span> {targetLabel(target)}
+                                            className="sr-only">{RT.labels.srTo}</span> {targetLabelL(target)}
                                         </div>
 
                                         {showHint && (
@@ -1007,8 +1014,16 @@ export default function RoundingGame() {
                                         ) : (
                                             history.map((h, idx) => (
                                                 <TableRow key={idx} className="border-t border-gray-100">
-                                                    <TableCell className="px-4 py-2 text-center whitespace-nowrap">
-                                                        {fmt(h.original)} → {targetLabel(h.target)}
+                                                    <TableCell className="px-2 sm:px-4 py-2 text-center">
+                                                        {/* Mobile: split into two lines; Desktop: keep single line */}
+                                                        <span className="hidden sm:inline whitespace-nowrap">
+                                                            {fmt(h.original)} → {targetLabelL(h.target)}
+                                                        </span>
+                                                        <span
+                                                            className="inline sm:hidden leading-tight whitespace-normal">
+                                                            <span className="block">{fmt(h.original)}</span>
+                                                            <span className="block">→ {targetLabelL(h.target)}</span>
+                                                        </span>
                                                     </TableCell>
                                                     <TableCell
                                                         className="px-4 py-2 text-center">{fmt(h.user)}</TableCell>
@@ -1028,7 +1043,10 @@ export default function RoundingGame() {
                                   <span role="img" aria-label={RT.labels.ariaWrong}>
                                     ❌
                                   </span>
-                                    {h.explanation} (correct: {fmt(h.correctRounded)})
+                                    {RT.t("roundT.table.incorrect", {
+                                        explanation: h.explanation,
+                                        correct: fmt(h.correctRounded)
+                                    })}
                                 </span>
                                                             </div>
                                                         )}
@@ -1058,28 +1076,21 @@ export default function RoundingGame() {
         return fmt(maxValue);
     }
 
+    function targetLabelL(place: TargetPlace): string {
+        const key = place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
+        return RT.t(`roundT.expl.target.${key}`);
+    }
+
     function renderHint(n: number, place: TargetPlace) {
         const abs = Math.abs(Math.trunc(n));
         const check = getCheckDigitForPlace(n, place);
         const dir = check >= 5 ? "↑" : "↓";
+        const lowerKey = place === 10 ? "ones" : place === 100 ? "tens" : "hundreds";
+        const lower = RT.t(`roundT.expl.lower.${lowerKey}`);
         return (
             <span>
-        {place === 10 && (
-            <>
-                Look at <b>ones</b> digit of {fmt(abs)}: <b>{abs % 10}</b> {dir}
-            </>
-        )}
-                {place === 100 && (
-                    <>
-                        Look at <b>tens</b> digit of {fmt(abs)}: <b>{Math.floor((abs % 100) / 10)}</b> {dir}
-                    </>
-                )}
-                {place === 1000 && (
-                    <>
-                        Look at <b>hundreds</b> digit of {fmt(abs)}: <b>{Math.floor((abs % 1000) / 100)}</b> {dir}
-                    </>
-                )}
-      </span>
+                {RT.t("roundT.hint.template", {lower, num: fmt(abs), digit: check, arrow: dir})}
+            </span>
         );
     }
 }
@@ -1112,12 +1123,6 @@ function generateOptions(n: number, place: TargetPlace): number[] {
     }
 
     return shuffle(Array.from(set)).slice(0, 4);
-}
-
-function targetLabel(place: TargetPlace): string {
-    if (place === 10) return "tens";
-    if (place === 100) return "hundreds";
-    return "thousands";
 }
 
 // ----------------------------------
