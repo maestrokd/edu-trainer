@@ -5,10 +5,19 @@ import AppSidebar from "@/components/menu/AppSidebar";
 import GameCard from "@/components/menu/GameCard";
 import {categories, type CategoryKey, games} from "@/components/menu/menuItems";
 import {useTranslation} from "react-i18next";
+import {useCustomHeader} from "@/layout/CommonLayout";
 
 export default function MenuPage() {
     const {t} = useTranslation();
     const [category, setCategory] = React.useState<CategoryKey | "all">("all");
+
+    const headerNode = React.useMemo(() => (
+        <div className="flex items-center text-center justify-center-safe w-full h-full px-2">
+            <span className="text-lg font-semibold leading-none">{t("menu.title")}</span>
+        </div>
+    ), [t]);
+
+    useCustomHeader(headerNode, {visible: true, deps: [headerNode]});
 
     const visibleGames = games.filter((g) => category === "all" || g.category === category);
 

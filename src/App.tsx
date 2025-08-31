@@ -6,11 +6,12 @@ import RabbitJumpX9 from "./pages/JumpingRabbit.tsx";
 import MultiplicationTrainer2 from "@/pages/multiplication-trainer/MultiplicationTrainer2.tsx";
 import RoundingTrainer from "@/pages/rounding-trainer/RoundingTrainer.tsx";
 import RoundingGame from "@/pages/rounding-trainer/RoundingGame.tsx";
+import CommonLayout from "@/layout/CommonLayout.tsx";
 
 export default function App() {
     return (
-        <>
-            <Routes>
+        <Routes>
+            <Route element={<CommonLayout/>}>
                 <Route path="/old" element={<Menu/>}/>
                 <Route path="/" element={<MenuPage/>}/>
                 <Route path="/about" element={<h1 className="text-2xl">About Page</h1>}/>
@@ -19,7 +20,7 @@ export default function App() {
                 <Route path="/multiplication-rabbit" element={<RabbitJumpX9/>}/>
                 <Route path="/rounding-trainer" element={<RoundingTrainer/>}/>
                 <Route path="/rounding-trainer2" element={<RoundingGame/>}/>
-            </Routes>
-        </>
+            </Route>
+        </Routes>
     );
 }
