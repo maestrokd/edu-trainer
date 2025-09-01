@@ -1,0 +1,257 @@
+{
+  "lang": {
+    "code": {
+      "en": "En",
+      "uk": "Ук",
+      "ru": "Ру"
+    }
+  },
+  "menu": {
+    "mainMenuLabel": "Main Menu",
+    "title": "Edu Trainer",
+    "search": "Search",
+    "searchPlaceholder": "Search games…",
+    "noResults": "No results",
+    "allGames": "All games",
+    "sidebarLabel": "Games",
+    "categories": { "title": "Categories", "all": "All", "math": "Math Trainers", "arcade": "Arcade", "info": "Info" },
+    "play": "Play",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "info": "Info",
+    "about": "About",
+    "continue": "Continue playing",
+    "continueEmpty": "Your recent games will appear here.",
+    "futureSectionsHint": "Favorites and recent will appear here soon."
+  },
+  "games": {
+    "multiplication1": { "title": "Multiplication Trainer 1", "desc": "Practice multiplication facts." },
+    "multiplication2": { "title": "Multiplication Trainer 2", "desc": "Advanced practice & drills." },
+    "rounding1": { "title": "Rounding Trainer 1", "desc": "Round numbers to tens and hundreds." },
+    "rounding2": { "title": "Rounding Trainer 2", "desc": "More rounding challenges." },
+    "rabbit": { "title": "Jumping Rabbit", "desc": "Arcade jumping with math twists." }
+  },
+  "multiT": {
+    "menu": "Menu",
+    "title": "Multiplication Trainer",
+    "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
+    "newSession": "New session",
+    "changeRange": "Change range",
+    "aria": {
+      "backToMenu": "Back to menu",
+      "newSession": "New session",
+      "changeRange": "Change range",
+      "minRange": "Minimum value of the range",
+      "maxRange": "Maximum value of the range",
+      "mode": "Trainer mode",
+      "includeMul": "Include multiplication exercises",
+      "includeDiv": "Include division exercises",
+      "startGame": "Start the game",
+      "answerField": "Answer input field",
+      "correct": "Correct",
+      "wrong": "Incorrect",
+      "timerMinutes": "Timer minutes",
+      "maxExercises": "Maximum exercises"
+    },
+    "setup": {
+      "intro": "Choose the range of factors (min and max), e.g.",
+      "min": "Minimum",
+      "max": "Maximum",
+      "mode": "Mode",
+      "exercises": "Exercises",
+      "timer": "Timer (minutes)",
+      "maxExercises": "Max exercises (0 = unlimited)",
+      "note": "The range will be automatically ordered (min ≤ max) and limited to 2…12."
+    },
+    "mode": {
+      "input": "Keyboard input",
+      "quiz": "Quiz (4 options)"
+    },
+    "ex": {
+      "mul": "Multiplication",
+      "div": "Division"
+    },
+    "start": "Start",
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "timeLeft": "Time left"
+    },
+    "sr": {
+      "mul": "multiplied by",
+      "div": "divided by"
+    },
+    "input": {
+      "placeholder": "Answer",
+      "submit": "Submit",
+      "hint": "Press Enter to submit your answer."
+    },
+    "quiz": {
+      "optionAria": "Answer option {{opt}}"
+    },
+    "finished": {
+      "timeUp": "Time is up!",
+      "exLimit": "Exercises complete ({{count}})."
+    },
+    "table": {
+      "example": "Example",
+      "answer": "Answer",
+      "result": "Result",
+      "empty": "Your answer history will appear here.",
+      "correct": "Correct",
+      "incorrect": "Incorrect (correct: {{correct}})"
+    }
+  },
+  "roundT1": {
+    "menu": "Menu",
+    "title": "Rounding Trainer",
+    "rangeAccuracy": "Range: {{min}}s–{{max}}s · Round to: {{unit}} · Accuracy: {{acc}}%",
+    "newSession": "New session",
+    "changeRange": "Change range",
+    "aria": {
+      "backToMenu": "Back to menu",
+      "newSession": "New session",
+      "changeRange": "Change range",
+      "startGame": "Start the game",
+      "answerField": "Answer input field",
+      "correct": "Correct",
+      "wrong": "Incorrect",
+      "timerMinutes": "Timer minutes",
+      "maxExercises": "Maximum exercises"
+    },
+    "setup": {
+      "label": "Settings",
+      "intro": "Choose the magnitude range (e.g., 10s…1000s) and rounding unit.",
+      "minMag": "Min magnitude",
+      "maxMag": "Max magnitude",
+      "roundTo": "Round to",
+      "mode": "Mode",
+      "timer": "Timer (minutes)",
+      "maxExercises": "Max exercises (0 = unlimited)",
+      "note": "Numbers will be generated within the selected magnitude (e.g., 10…99 for 10s)."
+    },
+    "mode": {
+      "input": "Keyboard input",
+      "quiz": "Quiz (4 options)"
+    },
+    "units": {
+      "tens": "tens (10)",
+      "hundreds": "hundreds (100)",
+      "thousands": "thousands (1000)"
+    },
+    "unitsLabel": "to nearest {{unit}}",
+    "start": "Start",
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "timeLeft": "Time left"
+    },
+    "input": {
+      "placeholder": "Answer",
+      "submit": "Submit",
+      "hint": "Press Enter to submit your answer."
+    },
+    "quiz": {
+      "optionAria": "Answer option {{opt}}"
+    },
+    "finished": {
+      "timeUp": "Time is up!",
+      "exLimit": "Exercises complete ({{count}})."
+    },
+    "table": {
+      "example": "Number · Round",
+      "answer": "Answer",
+      "result": "Result",
+      "empty": "Your answer history will appear here.",
+      "correct": "Correct",
+      "incorrect": "Incorrect (correct: {{correct}})"
+    }
+  },
+  "roundT": {
+    "menu": "Menu",
+    "title": "Rounding Game",
+    "newSession": "New session",
+    "changeRange": "Change setup",
+    "aria": {
+      "backToMenu": "Back to Menu",
+      "correct": "correct",
+      "wrong": "wrong"
+    },
+    "setup": {
+      "intro": "Choose what kind of numbers and places to practice.",
+      "mode": "Mode",
+      "timer": "Timer (minutes, 0 = unlimited)",
+      "maxExercises": "Max exercises (0 = unlimited)",
+      "numberTypes": "Number types",
+      "whole": "Whole numbers",
+      "decimals": "Decimals",
+      "decimalPlaces": "Decimal places",
+      "signs": "Sign filters",
+      "positives": "Positives",
+      "negatives": "Negatives",
+      "magnitude": "Magnitude",
+      "digitsMode": "Digits range",
+      "rangeMode": "Numeric range",
+      "minDigits": "Min digits",
+      "maxDigits": "Max digits",
+      "minValue": "Min value",
+      "maxValue": "Max value",
+      "targets": "Round to (multi-select)",
+      "sounds": "Enable sounds",
+      "includeTie": "Guarantee at least one tie-case (5) per session",
+      "showHint": "Show place-value hint under the prompt",
+      "note": "Tip: leave filters empty to include everything."
+    },
+    "mode": {
+      "input": "Input",
+      "quiz": "Quiz"
+    },
+    "targets": {
+      "tens": "tens (10s)",
+      "hundreds": "hundreds (100s)",
+      "thousands": "thousands (1000s)"
+    },
+    "start": "Start",
+    "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "timeLeft": "Time left"
+    },
+    "finished": {
+      "timeUp": "Time is up!",
+      "exLimit": "Finished! You answered {{count}} tasks."
+    },
+    "table": {
+      "example": "Exercise",
+      "answer": "Answer",
+      "result": "Result",
+      "empty": "No attempts yet.",
+      "correct": "Correct",
+      "incorrect": "{{explanation}} (correct: {{correct}})"
+    },
+    "sr": {
+      "to": "to"
+    },
+    "hint": {
+      "template": "Look at {{lower}} digit of {{num}}: {{digit}} {{arrow}}"
+    },
+    "expl": {
+      "template": "Round to {{target}}: look at {{lower}} ({{check}}) → {{direction}}",
+      "target": { "tens": "tens", "hundreds": "hundreds", "thousands": "thousands" },
+      "lower": { "ones": "ones", "tens": "tens", "hundreds": "hundreds" },
+      "dir": { "up": "up", "down": "down" }
+    },
+    "input": {
+      "placeholder": "your answer",
+      "submit": "Submit",
+      "hint": "Press Enter to submit, Esc to clear."
+    }
+  }
+}
