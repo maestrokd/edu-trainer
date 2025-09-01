@@ -24,6 +24,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
+import LanguageSelector, {LanguageSelectorMode} from "@/components/lang/LanguageSelector.tsx";
 
 // ----------------------------------
 // Types & constants
@@ -640,18 +641,20 @@ export default function RoundingGame() {
                                 aria-label={RT.labels.setupLabel}
                                 className="size-8"
                             >
-                                <Settings className="h-4 w-4"/>
+                                <Settings className="size-6"/>
                             </Button>
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuLabel>
                                 <div className="flex items-center justify-between gap-2">
-                                    <div></div>
                                     <div className="flex items-center text-center">
                                         <span className="w-full">{RT.labels.menu}</span>
                                     </div>
-                                    <ThemeToggle/>
+                                    <div className="flex items-center gap-2">
+                                        <ThemeToggle/>
+                                        <LanguageSelector mode={LanguageSelectorMode.ICON}/>
+                                    </div>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator/>
@@ -926,7 +929,7 @@ export default function RoundingGame() {
                     </div>
                 ) : (
                     <div
-                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
+                        className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
                             {/* Left column */}
                             <div className="flex flex-col min-h-0">
