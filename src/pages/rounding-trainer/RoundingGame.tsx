@@ -11,6 +11,19 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {Card, CardContent} from "@/components/ui/card";
 import {Switch} from "@/components/ui/switch";
+import {Label} from "@/components/ui/label.tsx";
+
+import {Settings} from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
 
 // ----------------------------------
 // Types & constants
@@ -45,16 +58,15 @@ function useRoundT() {
         t,
         i18n,
         labels: {
+            mainMenu: t("menu.mainMenuLabel", "Main Menu"),
             menu: t("roundT.menu", "Menu"),
             title: t("roundT.title", "Rounding Game"),
             backToMenu: t("roundT.aria.backToMenu", "Back to Menu"),
             newSession: t("roundT.newSession", "New session"),
             changeRange: t("roundT.changeRange", "Change setup"),
             start: t("roundT.start", "Start"),
-            setupIntro: t(
-                "roundT.setup.intro",
-                "Choose what kind of numbers and places to practice."
-            ),
+            setupLabel: t("roundT.setup.label", "Settings"),
+            setupIntro: t("roundT.setup.intro", "Choose what kind of numbers and places to practice."),
             mode: t("roundT.setup.mode", "Mode"),
             modeInput: t("roundT.mode.input", "Input"),
             modeQuiz: t("roundT.mode.quiz", "Quiz"),
@@ -595,58 +607,86 @@ export default function RoundingGame() {
 
     return (
         <div
-            className="min-h-dvh w-full bg-gradient-to-br from-sky-50 to-indigo-50 flex flex-col p-2 sm:p-4 overflow-hidden">
+            className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
             <div className="w-full flex flex-col h-full">
-                {/* Top bar */}
-                <div className="flex items-center gap-2 justify-between mb-2">
+
+                {/* Header */}
+                <div className="flex items-center justify-between gap-2">
+                    {/* Left: Home + Title */}
                     <div className="flex items-center gap-2">
-                        <Button asChild variant="outline" className="px-3 py-2 h-auto text-xs sm:text-sm">
-                            <Link to="/" aria-label={RT.labels.backToMenu}>
-                                {RT.labels.menu}
-                            </Link>
-                        </Button>
-                        <span className="hidden sm:inline text-xs text-gray-600">{RT.labels.title}</span>
+                        <span className="hidden sm:inline text-xs text-muted-foreground">{RT.labels.title}</span>
                     </div>
 
-                    {screen === "play" && (
-                        <div className="flex items-center gap-2">
+                    <div className="flex items-center text-center">
+                        {screen === "play" && (
+                            <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
+                                {RT.labels.rangeAccuracy(minRangeLabel(), maxRangeLabel(), accuracy)}
+                            </span>
+                        )}
+
+                        {screen === "setup" && (
+                            <span className="w-full text-muted-foreground">
+                                {RT.labels.setupLabel}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Right: Settings menu */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                             <Button
-                                onClick={newSession}
-                                variant="outline"
-                                className="text-xs sm:text-sm h-auto px-3 py-2"
-                                aria-label={RT.labels.newSession}
+                                variant="ghost"
+                                size="icon"
+                                aria-label={RT.labels.setupLabel}
+                                className="size-8"
                             >
-                                {RT.labels.newSession}
+                                <Settings className="h-4 w-4"/>
                             </Button>
-                            <Button
-                                onClick={backToSetup}
-                                variant="outline"
-                                className="text-xs sm:text-sm h-auto px-3 py-2"
-                                aria-label={RT.labels.changeRange}
-                            >
-                                {RT.labels.changeRange}
-                            </Button>
-                        </div>
-                    )}
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div></div>
+                                    <div className="flex items-center text-center">
+                                        <span className="w-full">{RT.labels.menu}</span>
+                                    </div>
+                                    <ThemeToggle/>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator/>
+
+                            <DropdownMenuGroup>
+                                {screen === "play" && (
+                                    <>
+                                        <DropdownMenuItem onSelect={() => newSession()}>
+                                            {RT.labels.newSession}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onSelect={() => backToSetup()}>
+                                            {RT.labels.changeRange}
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuSeparator/>
+                                    </>
+                                )}
+                            </DropdownMenuGroup>
+
+                            <DropdownMenuItem asChild>
+                                <Link to="/">{RT.labels.mainMenu}</Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
-                <div className="flex items-center text-center">
-                    {screen === "play" && (
-                        <span className="w-full text-[10px] sm:text-xs text-gray-500">
-              {RT.labels.rangeAccuracy(minRangeLabel(), maxRangeLabel(), accuracy)}
-            </span>
-                    )}
-                </div>
 
                 {screen === "setup" ? (
                     <div
-                        className="bg-white/80 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-5xl mx-auto w-full">
-                        <p className="text-gray-700 mb-4">{RT.labels.setupIntro}</p>
+                        className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg pb-5 sm:p-8 max-w-5xl mx-auto w-full">
 
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Left: Mode, Timer, Max, Sounds */}
                             <Card>
-                                <CardContent className="p-4 sm:p-6 grid gap-4">
+                                <CardContent className="grid gap-6">
                                     <LabeledField label={RT.labels.mode} htmlFor="mode-select">
                                         <Select value={mode} onValueChange={(val) => setMode(val as Mode)}>
                                             <SelectTrigger id="mode-select" className="rounded-xl w-full h-10">
@@ -687,34 +727,33 @@ export default function RoundingGame() {
                                         />
                                     </LabeledField>
 
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
                                         <Switch checked={soundsEnabled} onCheckedChange={setSoundsEnabled}
                                                 id="sound-switch"/>
-                                        <label htmlFor="sound-switch" className="text-sm text-gray-700">
+                                        <Label htmlFor="sound-switch">
                                             {RT.labels.sounds}
-                                        </label>
+                                        </Label>
                                     </div>
                                 </CardContent>
                             </Card>
 
                             {/* Right: Number type & sign filters */}
                             <Card>
-                                <CardContent className="p-4 sm:p-6 grid gap-4">
-                                    <div>
-                                        <div className="text-sm text-gray-600 mb-2">{RT.labels.numberTypes}</div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="inline-flex items-center gap-2">
+                                <CardContent className="grid gap-6">
+                                    <LabeledField label={RT.labels.numberTypes} htmlFor="">
+                                        <div className="flex gap-4">
+                                            <div className="inline-flex items-center gap-2">
                                                 <Checkbox id="whole-check" checked={includeWhole}
                                                           onCheckedChange={(v) => setIncludeWhole(Boolean(v))}/>
-                                                <span className="text-sm text-gray-700">{RT.labels.wholeNumbers}</span>
-                                            </label>
-                                            <label className="inline-flex items-center gap-2">
+                                                <Label>{RT.labels.wholeNumbers}</Label>
+                                            </div>
+                                            <div className="inline-flex items-center gap-2">
                                                 <Checkbox id="dec-check" checked={includeDecimals}
                                                           onCheckedChange={(v) => setIncludeDecimals(Boolean(v))}/>
-                                                <span className="text-sm text-gray-700">{RT.labels.decimals}</span>
-                                            </label>
+                                                <Label>{RT.labels.decimals}</Label>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </LabeledField>
 
                                     <LabeledField label={RT.labels.decimalPlaces} htmlFor="dec-places">
                                         <Select
@@ -735,21 +774,20 @@ export default function RoundingGame() {
                                         </Select>
                                     </LabeledField>
 
-                                    <div>
-                                        <div className="text-sm text-gray-600 mb-2">{RT.labels.signs}</div>
-                                        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                                            <label className="inline-flex items-center gap-2">
+                                    <LabeledField label={RT.labels.signs} htmlFor="">
+                                        <div className="flex gap-4">
+                                            <div className="inline-flex items-center gap-2">
                                                 <Checkbox id="pos-check" checked={includePositives}
                                                           onCheckedChange={(v) => setIncludePositives(Boolean(v))}/>
-                                                <span className="text-sm text-gray-700">{RT.labels.positives}</span>
-                                            </label>
-                                            <label className="inline-flex items-center gap-2">
+                                                <Label>{RT.labels.positives}</Label>
+                                            </div>
+                                            <div className="inline-flex items-center gap-2">
                                                 <Checkbox id="neg-check" checked={includeNegatives}
                                                           onCheckedChange={(v) => setIncludeNegatives(Boolean(v))}/>
-                                                <span className="text-sm text-gray-700">{RT.labels.negatives}</span>
-                                            </label>
+                                                <Label>{RT.labels.negatives}</Label>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </LabeledField>
                                 </CardContent>
                             </Card>
                         </div>
@@ -757,10 +795,9 @@ export default function RoundingGame() {
                         {/* Magnitude & Targets */}
                         <div className="grid gap-6 lg:grid-cols-2 mt-6">
                             <Card>
-                                <CardContent className="p-4 sm:p-6 grid gap-4">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                        <div className="text-sm text-gray-600">{RT.labels.magnitude}</div>
-                                        <div className="flex flex-wrap items-center gap-2">
+                                <CardContent className="grid gap-6">
+                                    <LabeledField label={RT.labels.magnitude} htmlFor="">
+                                        <div className="flex gap-2">
                                             <Button
                                                 variant={magMode === "digits" ? "default" : "outline"}
                                                 className="h-8 px-3"
@@ -776,10 +813,10 @@ export default function RoundingGame() {
                                                 {RT.labels.rangeMode}
                                             </Button>
                                         </div>
-                                    </div>
+                                    </LabeledField>
 
                                     {magMode === "digits" ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-4">
                                             <LabeledField label={RT.labels.minDigits} htmlFor="min-digits">
                                                 <Select value={String(minDigits)}
                                                         onValueChange={(val) => setMinDigits(parseInt(val, 10))}>
@@ -812,7 +849,7 @@ export default function RoundingGame() {
                                             </LabeledField>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-4">
                                             <LabeledField label={RT.labels.minValue} htmlFor="min-value">
                                                 <Input
                                                     id="min-value"
@@ -837,37 +874,38 @@ export default function RoundingGame() {
                             </Card>
 
                             <Card>
-                                <CardContent className="p-4 sm:p-6 grid gap-4">
-                                    <div className="text-sm text-gray-600">{RT.labels.targets}</div>
-                                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                                        <label className="inline-flex items-center gap-2">
-                                            <Checkbox id="t10" checked={target10}
-                                                      onCheckedChange={(v) => setTarget10(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{RT.labels.tens}</span>
-                                        </label>
-                                        <label className="inline-flex items-center gap-2">
-                                            <Checkbox id="t100" checked={target100}
-                                                      onCheckedChange={(v) => setTarget100(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{RT.labels.hundreds}</span>
-                                        </label>
-                                        <label className="inline-flex items-center gap-2">
-                                            <Checkbox id="t1000" checked={target1000}
-                                                      onCheckedChange={(v) => setTarget1000(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{RT.labels.thousands}</span>
-                                        </label>
-                                    </div>
+                                <CardContent className="grid gap-4">
+                                    <LabeledField label={RT.labels.targets} htmlFor="">
+                                        <div className="flex flex-wrap gap-4">
+                                            <div className="inline-flex items-center gap-2">
+                                                <Checkbox id="t10" checked={target10}
+                                                          onCheckedChange={(v) => setTarget10(Boolean(v))}/>
+                                                <Label>{RT.labels.tens}</Label>
+                                            </div>
+                                            <div className="inline-flex items-center gap-2">
+                                                <Checkbox id="t100" checked={target100}
+                                                          onCheckedChange={(v) => setTarget100(Boolean(v))}/>
+                                                <Label>{RT.labels.hundreds}</Label>
+                                            </div>
+                                            <div className="inline-flex items-center gap-2">
+                                                <Checkbox id="t1000" checked={target1000}
+                                                          onCheckedChange={(v) => setTarget1000(Boolean(v))}/>
+                                                <Label>{RT.labels.thousands}</Label>
+                                            </div>
+                                        </div>
+                                    </LabeledField>
 
                                     <div className="flex flex-col gap-3 mt-2">
-                                        <label className="inline-flex items-center gap-2">
+                                        <div className="inline-flex items-center gap-2">
                                             <Checkbox id="tie" checked={includeTieCase}
                                                       onCheckedChange={(v) => setIncludeTieCase(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{RT.labels.includeTie}</span>
-                                        </label>
-                                        <label className="inline-flex items-center gap-2">
+                                            <Label>{RT.labels.includeTie}</Label>
+                                        </div>
+                                        <div className="inline-flex items-center gap-2">
                                             <Checkbox id="hint" checked={showHint}
                                                       onCheckedChange={(v) => setShowHint(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{RT.labels.showHint}</span>
-                                        </label>
+                                            <Label>{RT.labels.showHint}</Label>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -879,21 +917,23 @@ export default function RoundingGame() {
                             </Button>
                             <Button asChild variant="outline" className="w-full sm:w-auto">
                                 <Link to="/" aria-label={RT.labels.backToMenu}>
-                                    {RT.labels.menu}
+                                    {RT.labels.mainMenu}
                                 </Link>
                             </Button>
                         </div>
 
-                        <p className="text-xs text-gray-500 mt-3">{RT.labels.note}</p>
+                        <p className="text-xs mt-3">{RT.labels.note}</p>
                     </div>
                 ) : (
-                    <div className="bg-white/80 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
+                    <div
+                        className="bg-white/80 dark:bg-slate-900/60 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
                             {/* Left column */}
                             <div className="flex flex-col min-h-0">
                                 {/* Finished banner */}
                                 {gameOver && (
-                                    <Alert className="mb-4 bg-emerald-50 border-emerald-200 text-emerald-900">
+                                    <Alert
+                                        className="mb-4 bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-300">
                                         <AlertDescription>
                                             {endReason === "time" ? RT.labels.finishedTime : RT.labels.finishedCount}
                                         </AlertDescription>
@@ -916,13 +956,13 @@ export default function RoundingGame() {
                                 {gameOver === false && (
                                     <div className="text-center mb-6">
                                         <div
-                                            className="text-3xl sm:text-5xl font-semibold tracking-wide text-gray-900 select-none">
+                                            className="text-3xl sm:text-5xl font-semibold tracking-wide select-none">
                                             {fmt(original)} <span aria-hidden>→</span> <span
                                             className="sr-only">{RT.labels.srTo}</span> {targetLabelL(target)}
                                         </div>
 
                                         {showHint && (
-                                            <div className="mt-2 text-sm text-gray-600">
+                                            <div className="mt-2 text-sm text-muted-foreground">
                                                 {renderHint(original, target)}
                                             </div>
                                         )}
@@ -988,16 +1028,16 @@ export default function RoundingGame() {
                                         </div>
 
                                         {mode === "input" && (
-                                            <p className="mt-2 text-xs text-gray-500">{RT.labels.inputHint}</p>
+                                            <p className="mt-2 text-xs text-muted-foreground">{RT.labels.inputHint}</p>
                                         )}
                                     </div>
                                 )}
                             </div>
 
                             {/* Right column: history */}
-                            <div className="h-full overflow-auto rounded-xl border border-gray-200 bg-white">
+                            <div className="h-full overflow-auto rounded-xl border">
                                 <Table>
-                                    <TableHeader className="sticky top-0 bg-gray-50">
+                                    <TableHeader className="sticky top-0 bg-muted">
                                         <TableRow>
                                             <TableHead className="px-4 text-center">{RT.labels.tableExample}</TableHead>
                                             <TableHead className="px-4 text-center">{RT.labels.tableAnswer}</TableHead>
@@ -1007,13 +1047,13 @@ export default function RoundingGame() {
                                     <TableBody>
                                         {history.length === 0 ? (
                                             <TableRow>
-                                                <TableCell className="px-4 py-3 text-gray-500" colSpan={3}>
+                                                <TableCell className="px-4 py-3 text-muted-foreground" colSpan={3}>
                                                     {RT.labels.tableEmpty}
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
                                             history.map((h, idx) => (
-                                                <TableRow key={idx} className="border-t border-gray-100">
+                                                <TableRow key={idx} className="border-t">
                                                     <TableCell className="px-2 sm:px-4 py-2 text-center">
                                                         {/* Mobile: split into two lines; Desktop: keep single line */}
                                                         <span className="hidden sm:inline whitespace-nowrap">
@@ -1139,19 +1179,19 @@ function LabeledField({
     children: React.ReactNode;
 }) {
     return (
-        <label className="flex flex-col" htmlFor={htmlFor}>
-            <span className="text-sm text-gray-600 mb-1">{label}</span>
+        <div className="grid gap-2">
+            <Label htmlFor={htmlFor}>{label}:</Label>
             {children}
-        </label>
+        </div>
     );
 }
 
 function StatCard({label, value}: { label: string; value: number | string }) {
     return (
-        <Card className="rounded-xl border border-gray-200 shadow-sm min-w-20 py-0">
+        <Card className="rounded-xl border shadow-sm min-w-20 py-0">
             <CardContent className="px-3 py-1.5">
-                <div className="text-[11px] text-gray-500 leading-tight">{label}</div>
-                <div className="text-base font-semibold text-gray-900 leading-tight">{value}</div>
+                <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
+                <div className="text-base font-semibold leading-tight">{value}</div>
             </CardContent>
         </Card>
     );
