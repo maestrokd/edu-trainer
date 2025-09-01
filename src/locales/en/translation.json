@@ -7,6 +7,7 @@
     }
   },
   "menu": {
+    "mainMenuLabel": "Main Menu",
     "title": "Edu Trainer",
     "search": "Search",
     "searchPlaceholder": "Search games…",
