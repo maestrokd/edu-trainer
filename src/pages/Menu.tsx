@@ -1,52 +1,59 @@
-import {Link} from "react-router";
+import * as React from "react";
+import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar";
+import AppHeader from "@/components/menu/AppHeader";
+import AppSidebar from "@/components/menu/AppSidebar";
+import GameCard from "@/components/menu/GameCard";
+import {categories, type CategoryKey, games} from "@/components/menu/menuItems";
+import {useTranslation} from "react-i18next";
+import {useCustomHeader} from "@/layout/CommonLayout";
 
-export default function Menu() {
+export default function MenuPage() {
+    const {t} = useTranslation();
+    const [category, setCategory] = React.useState<CategoryKey | "all">("all");
+
+    const headerNode = React.useMemo(() => (
+        <div className="flex items-center text-center justify-center-safe w-full h-full px-2">
+            <span className="text-lg font-semibold leading-none">{t("menu.title")}</span>
+        </div>
+    ), [t]);
+
+    useCustomHeader(headerNode, {visible: true, deps: [headerNode]});
+
+    const visibleGames = games.filter((g) => category === "all" || g.category === category);
+
     return (
-        <div className="min-h-dvh w-full bg-gradient-to-br from-sky-50 to-indigo-50">
-            <div className="mx-auto max-w-5xl p-6">
-                <header className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Edu Trainer</h1>
-                </header>
+        <div
+            className="min-h-dvh w-full bg-gradient-to-br from-sky-50 to-indigo-50 dark:from-slate-900 dark:to-slate-950">
+            <SidebarProvider>
+                <AppSidebar activeCategory={category} onSelectCategory={setCategory}/>
+                <SidebarInset>
+                    <AppHeader/>
+                    <div className="max-w-6xl mx-auto w-full px-4 py-4">
+                        <div
+                            className="bg-white/80 dark:bg-slate-900/60 backdrop-blur rounded-2xl p-4 md:p-6 border shadow">
+                            {/* Continue section (mock) */}
+                            <section aria-labelledby="continue-title" className="mb-6">
+                                <h2 id="continue-title" className="text-base font-semibold mb-2">
+                                    {t("menu.continue")}
+                                </h2>
+                                <p className="text-sm text-muted-foreground">{t("menu.continueEmpty")}</p>
+                            </section>
 
-                <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6">
-                    <aside className="md:sticky md:top-4">
-                        <nav
-                            className="bg-white/80 backdrop-blur rounded-2xl p-3 border border-gray-200 shadow-sm max-h-[70dvh] overflow-y-auto">
-                            <ul className="flex flex-col gap-2">
-                                <li>
-                                    <Link
-                                        to="/"
-                                        className="block w-full rounded-xl px-4 py-2 text-sm font-medium text-indigo-700 visited:text-indigo-700 hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
-                                    >
-                                        Home
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/about"
-                                        className="block w-full rounded-xl px-4 py-2 text-sm font-medium text-indigo-700 visited:text-indigo-700 hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
-                                    >
-                                        About
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/game1"
-                                        className="block w-full rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white visited:text-white hover:bg-indigo-700 antialiased drop-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
-                                    >
-                                        Multiplication Trainer
-                                    </Link>
-                                </li>
-                            </ul>
-                        </nav>
-                    </aside>
-
-                    <main className="bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-200 shadow">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome</h2>
-                        <p className="text-gray-700">Choose a trainer from the menu to start practicing.</p>
-                    </main>
-                </div>
-            </div>
+                            {/* Category heading */}
+                            <section aria-labelledby="games-title">
+                                <h2 id="games-title" className="text-base font-semibold mb-3">
+                                    {category === "all" ? t("menu.allGames") : t(categories[category].labelKey)}
+                                </h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                                    {visibleGames.map((g) => (
+                                        <GameCard key={g.id} game={g}/>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </SidebarInset>
+            </SidebarProvider>
         </div>
     );
 }
