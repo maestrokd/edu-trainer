@@ -13,6 +13,18 @@ import {Card, CardContent} from "@/components/ui/card";
 import {Switch} from "@/components/ui/switch";
 import {Label} from "@/components/ui/label.tsx";
 
+import {Settings} from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
+
 // ----------------------------------
 // Types & constants
 // ----------------------------------
@@ -46,13 +58,14 @@ function useRoundT() {
         t,
         i18n,
         labels: {
+            mainMenu: t("menu.mainMenuLabel", "Main Menu"),
             menu: t("roundT.menu", "Menu"),
             title: t("roundT.title", "Rounding Game"),
             backToMenu: t("roundT.aria.backToMenu", "Back to Menu"),
             newSession: t("roundT.newSession", "New session"),
             changeRange: t("roundT.changeRange", "Change setup"),
             start: t("roundT.start", "Start"),
-            setupLabel: t("roundT.setup.label", "Settings."),
+            setupLabel: t("roundT.setup.label", "Settings"),
             setupIntro: t("roundT.setup.intro", "Choose what kind of numbers and places to practice."),
             mode: t("roundT.setup.mode", "Mode"),
             modeInput: t("roundT.mode.input", "Input"),
@@ -596,51 +609,79 @@ export default function RoundingGame() {
         <div
             className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
             <div className="w-full flex flex-col h-full">
-                {/* Top bar */}
-                <div className="flex items-center gap-2 justify-between mb-2">
+
+                {/* Header */}
+                <div className="flex items-center justify-between gap-2">
+                    {/* Left: Home + Title */}
                     <div className="flex items-center gap-2">
-                        <Button asChild variant="outline" className="px-3 py-2 h-auto text-xs sm:text-sm">
-                            <Link to="/" aria-label={RT.labels.backToMenu}>
-                                {RT.labels.menu}
-                            </Link>
-                        </Button>
                         <span className="hidden sm:inline text-xs text-muted-foreground">{RT.labels.title}</span>
                     </div>
 
-                    {screen === "play" && (
-                        <div className="flex items-center gap-2">
+                    <div className="flex items-center text-center">
+                        {screen === "play" && (
+                            <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
+                                {RT.labels.rangeAccuracy(minRangeLabel(), maxRangeLabel(), accuracy)}
+                            </span>
+                        )}
+
+                        {screen === "setup" && (
+                            <span className="w-full text-muted-foreground">
+                                {RT.labels.setupLabel}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Right: Settings menu */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                             <Button
-                                onClick={newSession}
-                                variant="outline"
-                                className="text-xs sm:text-sm h-auto px-3 py-2"
-                                aria-label={RT.labels.newSession}
+                                variant="ghost"
+                                size="icon"
+                                aria-label={RT.labels.setupLabel}
+                                className="size-8"
                             >
-                                {RT.labels.newSession}
+                                <Settings className="h-4 w-4"/>
                             </Button>
-                            <Button
-                                onClick={backToSetup}
-                                variant="outline"
-                                className="text-xs sm:text-sm h-auto px-3 py-2"
-                                aria-label={RT.labels.changeRange}
-                            >
-                                {RT.labels.changeRange}
-                            </Button>
-                        </div>
-                    )}
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div></div>
+                                    <div className="flex items-center text-center">
+                                        <span className="w-full">{RT.labels.menu}</span>
+                                    </div>
+                                    <ThemeToggle/>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator/>
+
+                            <DropdownMenuGroup>
+                                {screen === "play" && (
+                                    <>
+                                        <DropdownMenuItem onSelect={() => newSession()}>
+                                            {RT.labels.newSession}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onSelect={() => backToSetup()}>
+                                            {RT.labels.changeRange}
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuSeparator/>
+                                    </>
+                                )}
+                            </DropdownMenuGroup>
+
+                            <DropdownMenuItem asChild>
+                                <Link to="/">{RT.labels.mainMenu}</Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
-                <div className="flex items-center text-center">
-                    {screen === "play" && (
-                        <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
-              {RT.labels.rangeAccuracy(minRangeLabel(), maxRangeLabel(), accuracy)}
-            </span>
-                    )}
-                </div>
 
                 {screen === "setup" ? (
                     <div
-                        className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg py-5 sm:p-8 max-w-5xl mx-auto w-full">
-                        <p className="text-center text-muted-foreground mb-4">{RT.labels.setupLabel}</p>
+                        className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg pb-5 sm:p-8 max-w-5xl mx-auto w-full">
 
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Left: Mode, Timer, Max, Sounds */}
@@ -876,7 +917,7 @@ export default function RoundingGame() {
                             </Button>
                             <Button asChild variant="outline" className="w-full sm:w-auto">
                                 <Link to="/" aria-label={RT.labels.backToMenu}>
-                                    {RT.labels.menu}
+                                    {RT.labels.mainMenu}
                                 </Link>
                             </Button>
                         </div>
