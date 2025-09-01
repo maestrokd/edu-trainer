@@ -10,7 +10,7 @@ export type GameItem = {
     descriptionKey?: string;  // i18n key
     category: CategoryKey;
     icon: LucideIcon;
-    badge?: "new" | "beta" | null;
+    badge?: "new" | "beta" | "End-of-Life" | null;
     tags?: string[];          // used by Command palette search
 };
 
@@ -22,25 +22,16 @@ export const categories: Record<CategoryKey, { labelKey: string; icon: LucideIco
 
 export const games: GameItem[] = [
     {
-        id: "mt1",
-        path: "/multiplication-trainer1",
-        titleKey: "games.multiplication1.title",
-        descriptionKey: "games.multiplication1.desc",
-        category: "math",
-        icon: Calculator,
-        tags: ["multiplication", "таблиця множення", "множення", "умножение", "таблица"],
-    },
-    {
         id: "mt2",
         path: "/multiplication-trainer2",
         titleKey: "games.multiplication2.title",
         descriptionKey: "games.multiplication2.desc",
         category: "math",
         icon: Calculator,
-        badge: "beta",
+        badge: "new",
         tags: ["multiplication", "множення", "умножение"],
     },
-    {
+/*    {
         id: "round1",
         path: "/rounding-trainer",
         titleKey: "games.rounding1.title",
@@ -48,7 +39,7 @@ export const games: GameItem[] = [
         category: "math",
         icon: Ruler,
         tags: ["rounding", "округлення", "округление"],
-    },
+    },*/
     {
         id: "round2",
         path: "/rounding-trainer2",
@@ -56,6 +47,7 @@ export const games: GameItem[] = [
         descriptionKey: "games.rounding2.desc",
         category: "math",
         icon: Ruler,
+        badge: "new",
         tags: ["rounding"],
     },
     {
@@ -65,8 +57,18 @@ export const games: GameItem[] = [
         descriptionKey: "games.rabbit.desc",
         category: "arcade",
         icon: Rabbit,
-        badge: "new",
+        badge: "beta",
         tags: ["rabbit", "jump", "arcade"],
+    },
+    {
+        id: "mt1",
+        path: "/multiplication-trainer1",
+        titleKey: "games.multiplication1.title",
+        descriptionKey: "games.multiplication1.desc",
+        category: "math",
+        icon: Calculator,
+        badge: "End-of-Life",
+        tags: ["multiplication", "таблиця множення", "множення", "умножение", "таблица"],
     },
 ];
 
