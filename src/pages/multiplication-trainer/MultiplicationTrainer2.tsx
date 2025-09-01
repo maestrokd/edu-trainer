@@ -10,6 +10,19 @@ import {Checkbox} from "@/components/ui/checkbox";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {Card, CardContent} from "@/components/ui/card";
+import {Label} from "@/components/ui/label.tsx";
+import {Settings} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
+import LanguageSelector, {LanguageSelectorMode} from "@/components/lang/LanguageSelector.tsx";
 
 // ----------------------------
 // Types & helpers
@@ -297,46 +310,76 @@ export default function MultiplicationTrainer2() {
     // ----------------------------
     return (
         <div
-            className="min-h-dvh w-full bg-gradient-to-br from-sky-50 to-indigo-50 flex flex-col p-2 sm:p-4 overflow-hidden">
+            className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
             <div className="w-full flex flex-col h-full">
-                {/* Top bar */}
-                <div className="flex items-center gap-2 justify-between mb-2">
+                {/* Header */}
+                <div className="flex items-center justify-between gap-2">
+                    {/* Left: Title */}
                     <div className="flex items-center gap-2">
-                        <Button asChild variant="outline" className="px-3 py-2 h-auto text-xs sm:text-sm">
-                            <Link to="/" aria-label={t("multiT.aria.backToMenu")!}>
-                                {t("multiT.menu")}
-                            </Link>
-                        </Button>
-                        <span className="hidden sm:inline text-xs text-gray-600">{t("multiT.title")}</span>
+                        <span className="hidden sm:inline text-xs text-muted-foreground">{t("multiT.title")}</span>
                     </div>
 
-                    {screen === "play" && (
-                        <div className="flex items-center gap-2">
-                            <Button onClick={newSession} variant="outline"
-                                    className="text-xs sm:text-sm h-auto px-3 py-2"
-                                    aria-label={t("multiT.aria.newSession")!}>
-                                {t("multiT.newSession")}
+                    <div className="flex items-center text-center">
+                        {screen === "play" && (
+                            <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
+                                {t("multiT.rangeAccuracy", {min: minVal, max: maxVal, acc: accuracy})}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Right: Settings menu */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={t("multiT.menu") || "Menu"}
+                                className="size-8"
+                            >
+                                <Settings className="size-6"/>
                             </Button>
-                            <Button onClick={backToSetup} variant="outline"
-                                    className="text-xs sm:text-sm h-auto px-3 py-2"
-                                    aria-label={t("multiT.aria.changeRange")!}>
-                                {t("multiT.changeRange")}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-                <div className="flex items-center text-center">
-                    {screen === "play" && (
-                        <span className="w-full text-[10px] sm:text-xs text-gray-500">
-                            {t("multiT.rangeAccuracy", {min: minVal, max: maxVal, acc: accuracy})}
-                        </span>
-                    )}
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center text-center">
+                                        <span className="w-full">{t("multiT.menu")}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <ThemeToggle/>
+                                        <LanguageSelector mode={LanguageSelectorMode.ICON}/>
+                                    </div>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator/>
+
+                            <DropdownMenuGroup>
+                                {screen === "play" && (
+                                    <>
+                                        <DropdownMenuItem onSelect={() => newSession()}>
+                                            {t("multiT.newSession")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onSelect={() => backToSetup()}>
+                                            {t("multiT.changeRange")}
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuSeparator/>
+                                    </>
+                                )}
+                            </DropdownMenuGroup>
+
+                            <DropdownMenuItem asChild>
+                                <Link to="/">{t("menu.mainMenuLabel")}</Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
                 {screen === "setup" ? (
                     <div
-                        className="bg-white/80 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-4xl mx-auto w-full">
-                        <p className="text-gray-700 mb-4">{t("multiT.setup.intro")} <b>4…9</b>.</p>
+                        className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-4xl mx-auto w-full">
+                        <p className="text-muted-foreground mb-4">{t("multiT.setup.intro")} <b>4…9</b>.</p>
 
                         <div className="grid gap-6 md:grid-cols-2">
                             {/* Range & Mode */}
@@ -392,16 +435,16 @@ export default function MultiplicationTrainer2() {
                             <Card>
                                 <CardContent className="p-4 sm:p-6 grid gap-4">
                                     <div className="flex flex-wrap items-center gap-4">
-                                        <label className="inline-flex items-center gap-2">
+                                        <div className="inline-flex items-center gap-2">
                                             <Checkbox id="mul-check" checked={includeMul}
                                                       onCheckedChange={(v) => setIncludeMul(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{t("multiT.ex.mul")}</span>
-                                        </label>
-                                        <label className="inline-flex items-center gap-2">
+                                            <Label htmlFor="mul-check">{t("multiT.ex.mul")}</Label>
+                                        </div>
+                                        <div className="inline-flex items-center gap-2">
                                             <Checkbox id="div-check" checked={includeDiv}
                                                       onCheckedChange={(v) => setIncludeDiv(Boolean(v))}/>
-                                            <span className="text-sm text-gray-700">{t("multiT.ex.div")}</span>
-                                        </label>
+                                            <Label htmlFor="div-check">{t("multiT.ex.div")}</Label>
+                                        </div>
                                     </div>
 
                                     <LabeledField label={t("multiT.setup.timer")!} htmlFor="timer-min">
@@ -446,17 +489,17 @@ export default function MultiplicationTrainer2() {
                             </Button>
                         </div>
 
-                        <p className="text-xs text-gray-500 mt-3">{t("multiT.setup.note")}</p>
+                        <p className="text-xs text-muted-foreground mt-3">{t("multiT.setup.note")}</p>
                     </div>
                 ) : (
-                    <div className="bg-white/80 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
+                    <div
+                        className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
                             {/* Left column */}
                             <div className="flex flex-col min-h-0">
                                 {/* Finished banner */}
                                 {gameOver && (
-                                    <Alert
-                                        className="mb-4 bg-emerald-50 border-emerald-200 text-emerald-900">{/* neutral style */}
+                                    <Alert className="mb-4">
                                         <AlertDescription>
                                             {endReason === "time"
                                                 ? t("multiT.finished.timeUp")
@@ -481,79 +524,79 @@ export default function MultiplicationTrainer2() {
 
                                 {/* Current task */}
                                 {gameOver === false &&
-                                <div className="text-center mb-6">
-                                    <div
-                                        className="text-4xl sm:text-6xl font-semibold tracking-wide text-gray-900 select-none">
-                                        {a} <span aria-hidden>{op === "mul" ? "×" : "÷"}</span>{" "}
-                                        <span
-                                            className="sr-only">{op === "mul" ? t("multiT.sr.mul") : t("multiT.sr.div")}</span> {b} =
-                                    </div>
+                                    <div className="text-center mb-6">
+                                        <div
+                                            className="text-4xl sm:text-6xl font-semibold tracking-wide select-none">
+                                            {a} <span aria-hidden>{op === "mul" ? "×" : "÷"}</span>{" "}
+                                            <span
+                                                className="sr-only">{op === "mul" ? t("multiT.sr.mul") : t("multiT.sr.div")}</span> {b} =
+                                        </div>
 
-                                    <div className="mt-4 flex items-center justify-center gap-3">
-                                        {mode === "input" ? (
-                                            <>
-                                                <Input
-                                                    ref={inputRef}
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
-                                                    placeholder={t("multiT.input.placeholder") || ""}
-                                                    aria-label={t("multiT.aria.answerField") || undefined}
-                                                    value={answer}
-                                                    onChange={(e) => setAnswer(e.target.value)}
-                                                    onKeyDown={onKeyDown}
-                                                    disabled={gameOver}
-                                                    className="w-40 text-center text-2xl sm:text-3xl rounded-xl"
-                                                />
-                                                <Button onClick={() => submit()} disabled={gameOver}
-                                                        className="text-lg">
-                                                    {t("multiT.input.submit")}
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <div className="grid grid-cols-2 gap-3 w-full max-w-md">
-                                                {options.map((opt, idx) => (
-                                                    <Button
-                                                        key={`${taskId}-${idx}`}
-                                                        variant="outline"
-                                                        onClick={(e) => {
-                                                            (e.currentTarget as HTMLButtonElement).blur();
-                                                            if (!gameOver) submit(opt);
-                                                        }}
-                                                        onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
-                                                        aria-label={t("multiT.quiz.optionAria", {opt}) || undefined}
+                                        <div className="mt-4 flex items-center justify-center gap-3">
+                                            {mode === "input" ? (
+                                                <>
+                                                    <Input
+                                                        ref={inputRef}
+                                                        type="number"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        placeholder={t("multiT.input.placeholder") || ""}
+                                                        aria-label={t("multiT.aria.answerField") || undefined}
+                                                        value={answer}
+                                                        onChange={(e) => setAnswer(e.target.value)}
+                                                        onKeyDown={onKeyDown}
                                                         disabled={gameOver}
-                                                        className="px-5 py-4 text-2xl font-medium"
-                                                    >
-                                                        {opt}
+                                                        className="w-40 text-center text-2xl sm:text-3xl rounded-xl"
+                                                    />
+                                                    <Button onClick={() => submit()} disabled={gameOver}
+                                                            className="text-lg">
+                                                        {t("multiT.input.submit")}
                                                     </Button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                                                    {options.map((opt, idx) => (
+                                                        <Button
+                                                            key={`${taskId}-${idx}`}
+                                                            variant="outline"
+                                                            onClick={(e) => {
+                                                                (e.currentTarget as HTMLButtonElement).blur();
+                                                                if (!gameOver) submit(opt);
+                                                            }}
+                                                            onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
+                                                            aria-label={t("multiT.quiz.optionAria", {opt}) || undefined}
+                                                            disabled={gameOver}
+                                                            className="px-5 py-4 text-2xl font-medium"
+                                                        >
+                                                            {opt}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
 
-                                    <div className="mt-4 text-lg sm:text-xl" aria-live="polite" aria-atomic="true">
-                                        {lastLine && (
-                                            <span className="inline-flex items-center gap-2">
+                                        <div className="mt-4 text-lg sm:text-xl" aria-live="polite" aria-atomic="true">
+                                            {lastLine && (
+                                                <span className="inline-flex items-center gap-2">
                         <span className="font-medium">{lastLine}</span>
-                                                {lastCorrect === true && <span role="img"
-                                                                               aria-label={t("multiT.aria.correct") || undefined}>✅</span>}
-                                                {lastCorrect === false && <span role="img"
-                                                                                aria-label={t("multiT.aria.wrong") || undefined}>❌</span>}
+                                                    {lastCorrect === true && <span role="img"
+                                                                                   aria-label={t("multiT.aria.correct") || undefined}>✅</span>}
+                                                    {lastCorrect === false && <span role="img"
+                                                                                    aria-label={t("multiT.aria.wrong") || undefined}>❌</span>}
                       </span>
-                                        )}
-                                    </div>
+                                            )}
+                                        </div>
 
-                                    {mode === "input" && (
-                                        <p className="mt-2 text-xs text-gray-500">{t("multiT.input.hint")}</p>
-                                    )}
-                                </div>}
+                                        {mode === "input" && (
+                                            <p className="mt-2 text-xs text-muted-foreground">{t("multiT.input.hint")}</p>
+                                        )}
+                                    </div>}
                             </div>
 
                             {/* Right column: history */}
-                            <div className="h-full overflow-auto rounded-xl border border-gray-200 bg-white">
+                            <div className="h-full overflow-auto rounded-xl border">
                                 <Table>
-                                    <TableHeader className="sticky top-0 bg-gray-50">
+                                    <TableHeader className="sticky top-0 bg-muted">
                                         <TableRow>
                                             <TableHead
                                                 className="px-4 text-center">{t("multiT.table.example")}</TableHead>
@@ -566,13 +609,13 @@ export default function MultiplicationTrainer2() {
                                     <TableBody>
                                         {history.length === 0 ? (
                                             <TableRow>
-                                                <TableCell className="px-4 py-3 text-gray-500" colSpan={3}>
+                                                <TableCell className="px-4 py-3 text-muted-foreground" colSpan={3}>
                                                     {t("multiT.table.empty")}
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
                                             history.map((h, idx) => (
-                                                <TableRow key={idx} className="border-t border-gray-100">
+                                                <TableRow key={idx} className="border-t">
                                                     <TableCell className="px-4 py-2 text-center whitespace-nowrap">
                                                         {h.a} {h.op === "mul" ? "×" : "÷"} {h.b}
                                                     </TableCell>
@@ -614,19 +657,19 @@ export default function MultiplicationTrainer2() {
 // ----------------------------
 function LabeledField({label, htmlFor, children}: { label: string; htmlFor: string; children: React.ReactNode }) {
     return (
-        <label className="flex flex-col" htmlFor={htmlFor}>
-            <span className="text-sm text-gray-600 mb-1">{label}</span>
+        <div className="grid gap-2">
+            <Label htmlFor={htmlFor}>{label}:</Label>
             {children}
-        </label>
+        </div>
     );
 }
 
 function StatCard({label, value}: { label: string; value: number | string }) {
     return (
-        <Card className="rounded-xl border border-gray-200 shadow-sm min-w-20 py-0">
+        <Card className="rounded-xl border shadow-sm min-w-20 py-0">
             <CardContent className="px-3 py-1.5">
-                <div className="text-[11px] text-gray-500 leading-tight">{label}</div>
-                <div className="text-base font-semibold text-gray-900 leading-tight">{value}</div>
+                <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
+                <div className="text-base font-semibold leading-tight">{value}</div>
             </CardContent>
         </Card>
     );
