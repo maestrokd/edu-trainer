@@ -121,6 +121,7 @@
       "maxExercises": "Maximum exercises"
     },
     "setup": {
+      "label": "Settings",
       "intro": "Choose the magnitude range (e.g., 10s…1000s) and rounding unit.",
       "minMag": "Min magnitude",
       "maxMag": "Max magnitude",
