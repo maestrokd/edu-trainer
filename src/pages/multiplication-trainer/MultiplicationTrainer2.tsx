@@ -451,9 +451,14 @@ export default function MultiplicationTrainer2() {
                                         <Input
                                             id="timer-min"
                                             type="number"
+                                            inputMode="numeric"
                                             min={0}
                                             value={timerMinutes}
                                             onChange={(e) => {
+                                                const v = parseInt(e.target.value, 10);
+                                                setTimerMinutes(v);
+                                            }}
+                                            onBlur={(e) => {
                                                 const v = parseInt(e.target.value, 10);
                                                 setTimerMinutes(Number.isFinite(v) ? Math.max(0, v) : 0);
                                             }}
@@ -465,9 +470,14 @@ export default function MultiplicationTrainer2() {
                                         <Input
                                             id="max-ex"
                                             type="number"
+                                            inputMode="numeric"
                                             min={0}
                                             value={maxExercises}
                                             onChange={(e) => {
+                                                const v = parseInt(e.target.value, 10);
+                                                setMaxExercises(v);
+                                            }}
+                                            onBlur={(e) => {
                                                 const v = parseInt(e.target.value, 10);
                                                 setMaxExercises(Number.isFinite(v) ? Math.max(0, v) : 0);
                                             }}
