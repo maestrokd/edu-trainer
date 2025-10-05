@@ -60,7 +60,7 @@ export const games: GameItem[] = [
         badge: "beta",
         tags: ["rabbit", "jump", "arcade"],
     },
-    {
+    /*{
         id: "mt1",
         path: "/multiplication-trainer1",
         titleKey: "games.multiplication1.title",
@@ -69,7 +69,7 @@ export const games: GameItem[] = [
         icon: Calculator,
         badge: "End-of-Life",
         tags: ["multiplication", "таблиця множення", "множення", "умножение", "таблица"],
-    },
+    },*/
 ];
 
 export const infoLinks: GameItem[] = [
