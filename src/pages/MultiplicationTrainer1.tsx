@@ -431,6 +431,10 @@ export default function MultiplicationTrainer1() {
                                     value={timerMinutes}
                                     onChange={(e) => {
                                         const v = parseInt(e.target.value, 10);
+                                        setTimerMinutes(v);
+                                    }}
+                                    onBlur={(e) => {
+                                        const v = parseInt(e.target.value, 10);
                                         setTimerMinutes(Number.isFinite(v) ? Math.max(0, v) : 0);
                                     }}
                                     aria-label={t('multiT.aria.timerMinutes')}
@@ -445,6 +449,10 @@ export default function MultiplicationTrainer1() {
                                     className="rounded-xl border border-gray-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
                                     value={maxExercises}
                                     onChange={(e) => {
+                                        const v = parseInt(e.target.value, 10);
+                                        setMaxExercises(v);
+                                    }}
+                                    onBlur={(e) => {
                                         const v = parseInt(e.target.value, 10);
                                         setMaxExercises(Number.isFinite(v) ? Math.max(0, v) : 0);
                                     }}
