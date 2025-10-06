@@ -43,12 +43,14 @@ import LanguageSelector, {
 
 import {
   canGenerate,
+  generateExercise,
+  prepareGenerator,
+} from "@/lib/compare-numbers/generator";
+import type {
   CompareNumberTypeKey,
   CompareRelation,
-  generateExercise,
   GeneratedExercise,
   GeneratedValue,
-  prepareGenerator,
   PreparedGenerator,
 } from "@/lib/compare-numbers/generator";
 
@@ -179,6 +181,46 @@ export default function CompareNumbersGame() {
 
   const audioCtxRef = React.useRef<AudioContext | null>(null);
 
+  const triggerFeedback = React.useCallback(
+    (isCorrect: boolean) => {
+      if (
+        enableVibration &&
+        typeof navigator !== "undefined" &&
+        navigator.vibrate
+      ) {
+        navigator.vibrate(isCorrect ? 25 : [10, 60, 10]);
+      }
+      if (!enableSound) return;
+      try {
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioContext();
+        }
+        const ctx = audioCtxRef.current;
+        if (ctx.state === "suspended") {
+          void ctx.resume();
+        }
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = isCorrect ? 880 : 220;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + 0.25);
+      } catch (error) {
+        console.error("Audio feedback error", error);
+      }
+    },
+    [enableSound, enableVibration],
+  );
+
+  const finishSession = React.useCallback((reason: EndReason) => {
+    setGameOver(true);
+    setEndReason(reason);
+  }, []);
+
   const equalRatioFraction = Math.min(equalRatio, 50) / 100;
 
   const generatorPreview = React.useMemo(
@@ -196,6 +238,62 @@ export default function CompareNumbersGame() {
       decimalConfig,
       fractionConfig,
       equalRatioFraction,
+    ],
+  );
+
+  const handleAnswer = React.useCallback(
+    (relation: CompareRelation) => {
+      if (!exercise || gameOver) return;
+      const isCorrect = relation === exercise.correctRelation;
+      setFeedback({
+        type: isCorrect ? "correct" : "wrong",
+        userRelation: relation,
+        correctRelation: exercise.correctRelation,
+      });
+      if (isCorrect) {
+        setCorrectCount((count) => count + 1);
+      } else {
+        setWrongCount((count) => count + 1);
+      }
+      historyIdRef.current += 1;
+      setHistory((prev) => [
+        ...prev,
+        {
+          id: historyIdRef.current,
+          left: exercise.left,
+          right: exercise.right,
+          correctRelation: exercise.correctRelation,
+          userRelation: relation,
+          isCorrect,
+          timestamp: Date.now(),
+        },
+      ]);
+      triggerFeedback(isCorrect);
+
+      const total = history.length + 1;
+      if (maxExercises > 0 && total >= maxExercises) {
+        finishSession("ex");
+        return;
+      }
+
+      const generator = activeGeneratorRef.current ?? generatorPreview;
+      const nextExercise = generateExercise(generator);
+      if (!nextExercise) {
+        finishSession("generator");
+        setExercise(null);
+      } else {
+        setExercise(nextExercise);
+        setTaskId((id) => id + 1);
+      }
+    },
+    [
+      exercise,
+      gameOver,
+      history.length,
+      maxExercises,
+      triggerFeedback,
+      finishSession,
+      generatorPreview,
     ],
   );
 
@@ -391,102 +489,6 @@ export default function CompareNumbersGame() {
     }
     setTaskId((id) => id + 1);
   }, [screen, startSession, resetTimer]);
-
-  const triggerFeedback = React.useCallback(
-    (isCorrect: boolean) => {
-      if (
-        enableVibration &&
-        typeof navigator !== "undefined" &&
-        navigator.vibrate
-      ) {
-        navigator.vibrate(isCorrect ? 25 : [10, 60, 10]);
-      }
-      if (!enableSound) return;
-      try {
-        if (!audioCtxRef.current) {
-          audioCtxRef.current = new AudioContext();
-        }
-        const ctx = audioCtxRef.current;
-        if (ctx.state === "suspended") {
-          void ctx.resume();
-        }
-        const oscillator = ctx.createOscillator();
-        const gain = ctx.createGain();
-        oscillator.type = "sine";
-        oscillator.frequency.value = isCorrect ? 880 : 220;
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
-        oscillator.connect(gain);
-        gain.connect(ctx.destination);
-        oscillator.start();
-        oscillator.stop(ctx.currentTime + 0.25);
-      } catch (error) {
-        console.error("Audio feedback error", error);
-      }
-    },
-    [enableSound, enableVibration],
-  );
-
-  const finishSession = React.useCallback((reason: EndReason) => {
-    setGameOver(true);
-    setEndReason(reason);
-  }, []);
-
-  const handleAnswer = React.useCallback(
-    (relation: CompareRelation) => {
-      if (!exercise || gameOver) return;
-      const isCorrect = relation === exercise.correctRelation;
-      setFeedback({
-        type: isCorrect ? "correct" : "wrong",
-        userRelation: relation,
-        correctRelation: exercise.correctRelation,
-      });
-      if (isCorrect) {
-        setCorrectCount((count) => count + 1);
-      } else {
-        setWrongCount((count) => count + 1);
-      }
-      historyIdRef.current += 1;
-      setHistory((prev) => [
-        ...prev,
-        {
-          id: historyIdRef.current,
-          left: exercise.left,
-          right: exercise.right,
-          correctRelation: exercise.correctRelation,
-          userRelation: relation,
-          isCorrect,
-          timestamp: Date.now(),
-        },
-      ]);
-      triggerFeedback(isCorrect);
-
-      const total = history.length + 1;
-      if (maxExercises > 0 && total >= maxExercises) {
-        finishSession("ex");
-        return;
-      }
-
-      const generator = activeGeneratorRef.current ?? generatorPreview;
-      const nextExercise = generateExercise(generator);
-      if (!nextExercise) {
-        finishSession("generator");
-        setExercise(null);
-      } else {
-        setExercise(nextExercise);
-        setTaskId((id) => id + 1);
-      }
-    },
-    [
-      exercise,
-      gameOver,
-      history.length,
-      maxExercises,
-      triggerFeedback,
-      finishSession,
-      generatorPreview,
-    ],
-  );
 
   const sessionEnded = screen === "play" && gameOver;
 
