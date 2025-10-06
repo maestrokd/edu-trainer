@@ -710,6 +710,10 @@ export default function RoundingGame() {
                                             value={timerMinutes}
                                             onChange={(e) => {
                                                 const v = parseInt(e.target.value, 10);
+                                                setTimerMinutes(v);
+                                            }}
+                                            onBlur={(e) => {
+                                                const v = parseInt(e.target.value, 10);
                                                 setTimerMinutes(Number.isFinite(v) ? Math.max(0, v) : 0);
                                             }}
                                             className="rounded-xl"
@@ -723,6 +727,10 @@ export default function RoundingGame() {
                                             min={0}
                                             value={maxExercises}
                                             onChange={(e) => {
+                                                const v = parseInt(e.target.value, 10);
+                                                setMaxExercises(v);
+                                            }}
+                                            onBlur={(e) => {
                                                 const v = parseInt(e.target.value, 10);
                                                 setMaxExercises(Number.isFinite(v) ? Math.max(0, v) : 0);
                                             }}
