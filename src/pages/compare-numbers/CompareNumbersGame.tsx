@@ -493,9 +493,9 @@ export default function CompareNumbersGame() {
   const sessionEnded = screen === "play" && gameOver;
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
+    <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
       <div className="mx-auto w-full max-w-6xl">
-        <header className="flex flex-col gap-3 rounded-2xl border bg-background/60 p-4 shadow-sm backdrop-blur">
+        <header className="flex flex-col gap-3 rounded-2xl border bg-muted/50 p-4 shadow-sm backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Button
@@ -565,7 +565,7 @@ export default function CompareNumbersGame() {
 
         {screen === "setup" ? (
           <section className="mt-6 grid gap-6">
-            <Card className="rounded-2xl border shadow-sm">
+            <Card className="rounded-2xl border bg-muted/50 shadow-sm backdrop-blur">
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">
                   {tr("setup.title")}
@@ -1192,7 +1192,7 @@ export default function CompareNumbersGame() {
         ) : (
           <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid gap-6">
-              <Card className="rounded-2xl border shadow-sm">
+              <Card className="rounded-2xl border bg-muted/50 shadow-sm backdrop-blur">
                 <CardContent className="flex flex-col gap-6 p-6">
                   <div className="flex flex-wrap items-center gap-3">
                     <StatCard
@@ -1300,7 +1300,7 @@ export default function CompareNumbersGame() {
               </Card>
             </div>
 
-            <aside className="grid gap-4 rounded-2xl border bg-background/70 p-4 shadow-sm">
+            <aside className="grid gap-4 rounded-2xl border bg-muted/50 p-4 shadow-sm backdrop-blur">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold">
                   {tr("history.title")}
@@ -1311,7 +1311,7 @@ export default function CompareNumbersGame() {
               </div>
               <ScrollArea className="h-[420px]">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 bg-muted/60 backdrop-blur">
                     <TableRow>
                       <TableHead className="w-10 text-center text-xs">
                         #
@@ -1638,7 +1638,7 @@ function StatCard({
   value: number | string;
 }) {
   return (
-    <Card className="min-w-20 rounded-xl border shadow-sm">
+    <Card className="min-w-20 rounded-xl border bg-muted/40 shadow-sm backdrop-blur">
       <CardContent className="px-4 py-3">
         <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
           {label}
