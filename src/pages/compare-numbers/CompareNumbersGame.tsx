@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -29,6 +28,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -172,9 +172,11 @@ export default function CompareNumbersGame() {
     correctRelation: CompareRelation;
   } | null>(null);
   const [taskId, setTaskId] = React.useState<number>(0);
+  const [sessionAnchor, setSessionAnchor] = React.useState<number>(0);
 
   const activeGeneratorRef = React.useRef<PreparedGenerator | null>(null);
   const historyIdRef = React.useRef<number>(0);
+  const focusRef = React.useRef<HTMLDivElement>(null);
 
   const timerActive = screen === "play" && !gameOver;
   const { elapsedSec, reset: resetTimer } = useAccurateTimer(timerActive);
@@ -428,6 +430,7 @@ export default function CompareNumbersGame() {
       return;
     }
     activeGeneratorRef.current = prepared;
+    setSessionAnchor((value) => value + 1);
     setScreen("play");
     setCorrectCount(0);
     setWrongCount(0);
@@ -435,6 +438,7 @@ export default function CompareNumbersGame() {
     setFeedback(null);
     setEndReason(null);
     setGameOver(false);
+    setSessionAnchor((value) => value + 1);
     resetTimer();
     const nextExercise = generateExercise(prepared);
     if (!nextExercise) {
@@ -492,709 +496,717 @@ export default function CompareNumbersGame() {
 
   const sessionEnded = screen === "play" && gameOver;
 
+  React.useEffect(() => {
+    if (screen !== "play") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const node = focusRef.current;
+    if (node) {
+      node.focus({ preventScroll: true });
+    }
+  }, [screen, sessionAnchor]);
+
   return (
-    <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
-      <div className="mx-auto w-full max-w-6xl">
-        <header className="flex flex-col gap-3 rounded-2xl border bg-muted/50 p-4 shadow-sm backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                asChild
-                size="sm"
-                className="rounded-full"
-              >
-                <Link to="/" aria-label={tr("aria.backToMenu") ?? undefined}>
-                  {tr("menu")}
-                </Link>
-              </Button>
-              <CardTitle className="text-lg sm:text-xl">
-                {tr("title")}
-              </CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <LanguageSelector mode={LanguageSelectorMode.ICON} />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={tr("aria.openMenu") ?? undefined}
-                    className="size-8"
-                  >
-                    <Settings className="size-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>{tr("menuLabel")}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {screen === "play" && (
-                    <>
-                      <DropdownMenuItem onSelect={() => newSession()}>
-                        {tr("actions.newSession")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => backToSetup()}>
-                        {tr("actions.changeSetup")}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link to="/">{tr("actions.toMenu")}</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+    <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
+      <div className="w-full flex flex-col h-full">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline text-xs text-muted-foreground">
+              {tr("title")}
+            </span>
           </div>
-          {screen === "play" && (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span>
+          <div className="flex items-center text-center">
+            {screen === "play" && (
+              <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
                 {tr("summary.enabledTypes", {
                   types: summarizeTypes(typeAvailableMap, tr),
                 })}
+                {" • "}
+                {tr("summary.equal", { ratio: equalRatio })}
               </span>
-              <Separator
-                orientation="vertical"
-                className="hidden h-4 sm:block"
-              />
-              <span>{tr("summary.equal", { ratio: equalRatio })}</span>
-            </div>
-          )}
-        </header>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={tr("aria.openMenu") ?? undefined}
+                className="size-8"
+              >
+                <Settings className="size-6" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center text-center">
+                    <span className="w-full">{tr("menuLabel")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ThemeToggle />
+                    <LanguageSelector mode={LanguageSelectorMode.ICON} />
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                {screen === "play" && (
+                  <>
+                    <DropdownMenuItem onSelect={() => newSession()}>
+                      {tr("actions.newSession")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => backToSetup()}>
+                      {tr("actions.changeSetup")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem asChild>
+                  <Link to="/">{tr("actions.toMenu")}</Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         {screen === "setup" ? (
-          <section className="mt-6 grid gap-6">
-            <Card className="rounded-2xl border bg-muted/50 shadow-sm backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">
-                  {tr("setup.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-6">
-                <p className="text-sm text-muted-foreground">
-                  {tr("setup.intro")}
-                </p>
+          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-6xl mx-auto w-full mt-6 overflow-auto">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg sm:text-xl font-semibold">
+                {tr("setup.title")}
+              </h2>
+              {!canStart && (
+                <span className="text-sm font-medium text-destructive">
+                  {tr("errors.unavailable")}
+                </span>
+              )}
+            </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <TypeCard
-                    id="non-negative"
-                    title={tr("types.nonNegative.title")}
-                    description={tr("types.nonNegative.desc")}
-                    enabled={nonNegativeConfig.enabled}
-                    onEnabledChange={(checked) =>
-                      sanitizeNonNegativeConfig({ enabled: checked })
-                    }
-                    showAvailabilityError={
-                      nonNegativeConfig.enabled &&
-                      !typeAvailableMap.nonNegativeInt
-                    }
-                    availabilityText={tr("types.messages.unavailable")}
+            <p className="mt-3 text-sm text-muted-foreground">
+              {tr("setup.intro")}
+            </p>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <TypeCard
+                id="non-negative"
+                title={tr("types.nonNegative.title")}
+                description={tr("types.nonNegative.desc")}
+                enabled={nonNegativeConfig.enabled}
+                onEnabledChange={(checked) =>
+                  sanitizeNonNegativeConfig({ enabled: checked })
+                }
+                showAvailabilityError={
+                  nonNegativeConfig.enabled && !typeAvailableMap.nonNegativeInt
+                }
+                availabilityText={tr("types.messages.unavailable")}
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <LabeledField
+                    label={tr("ranges.min")!}
+                    htmlFor="non-negative-min"
                   >
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <LabeledField
-                        label={tr("ranges.min")!}
-                        htmlFor="non-negative-min"
-                      >
-                        <Input
-                          id="non-negative-min"
-                          type="number"
-                          min={0}
-                          value={nonNegativeConfig.min}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const min = Number.isFinite(value)
-                              ? Math.max(0, value)
-                              : 0;
-                            sanitizeNonNegativeConfig({
-                              min,
-                              max: Math.max(min, nonNegativeConfig.max),
-                            });
-                          }}
-                        />
-                      </LabeledField>
-                      <LabeledField
-                        label={tr("ranges.max")!}
-                        htmlFor="non-negative-max"
-                      >
-                        <Input
-                          id="non-negative-max"
-                          type="number"
-                          min={0}
-                          value={nonNegativeConfig.max}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const max = Number.isFinite(value)
-                              ? Math.max(0, value)
-                              : nonNegativeConfig.min;
-                            sanitizeNonNegativeConfig({
-                              max: Math.max(nonNegativeConfig.min, max),
-                            });
-                          }}
-                        />
-                      </LabeledField>
-                    </div>
-                    <GapFields
-                      idPrefix="non-negative"
-                      minValue={nonNegativeConfig.gap.min}
-                      maxValue={nonNegativeConfig.gap.max}
-                      onMinChange={(value) =>
+                    <Input
+                      id="non-negative-min"
+                      type="number"
+                      min={0}
+                      value={nonNegativeConfig.min}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const min = Number.isFinite(value)
+                          ? Math.max(0, value)
+                          : 0;
                         sanitizeNonNegativeConfig({
-                          gap: { ...nonNegativeConfig.gap, min: value },
-                        })
-                      }
-                      onMaxChange={(value) =>
+                          min,
+                          max: Math.max(min, nonNegativeConfig.max),
+                        });
+                      }}
+                    />
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("ranges.max")!}
+                    htmlFor="non-negative-max"
+                  >
+                    <Input
+                      id="non-negative-max"
+                      type="number"
+                      min={0}
+                      value={nonNegativeConfig.max}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const max = Number.isFinite(value)
+                          ? Math.max(0, value)
+                          : nonNegativeConfig.min;
                         sanitizeNonNegativeConfig({
-                          gap: { ...nonNegativeConfig.gap, max: value },
-                        })
-                      }
-                      labelMin={tr("gap.min")!}
-                      labelMax={tr("gap.max")!}
+                          max: Math.max(nonNegativeConfig.min, max),
+                        });
+                      }}
                     />
-                    <WeightField
-                      value={nonNegativeConfig.weight}
-                      onChange={(value) =>
-                        sanitizeNonNegativeConfig({ weight: value })
-                      }
-                      label={tr("weights.label")!}
-                    />
-                  </TypeCard>
-
-                  <TypeCard
-                    id="signed"
-                    title={tr("types.signed.title")}
-                    description={tr("types.signed.desc")}
-                    enabled={signedConfig.enabled}
-                    onEnabledChange={(checked) =>
-                      sanitizeSignedConfig({ enabled: checked })
-                    }
-                    showAvailabilityError={
-                      signedConfig.enabled && !typeAvailableMap.signedInt
-                    }
-                    availabilityText={tr("types.messages.unavailable")}
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <LabeledField
-                        label={tr("ranges.min")!}
-                        htmlFor="signed-min"
-                      >
-                        <Input
-                          id="signed-min"
-                          type="number"
-                          value={signedConfig.min}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const min = Number.isFinite(value)
-                              ? value
-                              : signedConfig.min;
-                            sanitizeSignedConfig({
-                              min,
-                              max: Math.max(min, signedConfig.max),
-                            });
-                          }}
-                        />
-                      </LabeledField>
-                      <LabeledField
-                        label={tr("ranges.max")!}
-                        htmlFor="signed-max"
-                      >
-                        <Input
-                          id="signed-max"
-                          type="number"
-                          value={signedConfig.max}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const max = Number.isFinite(value)
-                              ? value
-                              : signedConfig.max;
-                            sanitizeSignedConfig({
-                              max: Math.max(signedConfig.min, max),
-                            });
-                          }}
-                        />
-                      </LabeledField>
-                    </div>
-                    <GapFields
-                      idPrefix="signed"
-                      minValue={signedConfig.gap.min}
-                      maxValue={signedConfig.gap.max}
-                      onMinChange={(value) =>
-                        sanitizeSignedConfig({
-                          gap: { ...signedConfig.gap, min: value },
-                        })
-                      }
-                      onMaxChange={(value) =>
-                        sanitizeSignedConfig({
-                          gap: { ...signedConfig.gap, max: value },
-                        })
-                      }
-                      labelMin={tr("gap.min")!}
-                      labelMax={tr("gap.max")!}
-                    />
-                    <WeightField
-                      value={signedConfig.weight}
-                      onChange={(value) =>
-                        sanitizeSignedConfig({ weight: value })
-                      }
-                      label={tr("weights.label")!}
-                    />
-                  </TypeCard>
-
-                  <TypeCard
-                    id="decimal"
-                    title={tr("types.decimal.title")}
-                    description={tr("types.decimal.desc")}
-                    enabled={decimalConfig.enabled}
-                    onEnabledChange={(checked) =>
-                      sanitizeDecimalConfig({ enabled: checked })
-                    }
-                    showAvailabilityError={
-                      decimalConfig.enabled && !typeAvailableMap.decimal
-                    }
-                    availabilityText={tr("types.messages.decimalRange")}
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <LabeledField
-                        label={tr("ranges.min")!}
-                        htmlFor="decimal-min"
-                      >
-                        <Input
-                          id="decimal-min"
-                          type="number"
-                          step="0.1"
-                          value={decimalConfig.min}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const min = Number.isFinite(value)
-                              ? value
-                              : decimalConfig.min;
-                            sanitizeDecimalConfig({
-                              min,
-                              max: Math.max(min, decimalConfig.max),
-                            });
-                          }}
-                        />
-                      </LabeledField>
-                      <LabeledField
-                        label={tr("ranges.max")!}
-                        htmlFor="decimal-max"
-                      >
-                        <Input
-                          id="decimal-max"
-                          type="number"
-                          step="0.1"
-                          value={decimalConfig.max}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const max = Number.isFinite(value)
-                              ? value
-                              : decimalConfig.max;
-                            sanitizeDecimalConfig({
-                              max: Math.max(decimalConfig.min, max),
-                            });
-                          }}
-                        />
-                      </LabeledField>
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <LabeledField
-                        label={tr("precision.mode")!}
-                        htmlFor="decimal-mode"
-                      >
-                        <Select
-                          value={decimalConfig.precisionMode}
-                          onValueChange={(val) =>
-                            sanitizeDecimalConfig({
-                              precisionMode:
-                                val as DecimalState["precisionMode"],
-                            })
-                          }
-                        >
-                          <SelectTrigger id="decimal-mode">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="exact">
-                              {tr("precision.exact")}
-                            </SelectItem>
-                            <SelectItem value="upTo">
-                              {tr("precision.upTo")}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </LabeledField>
-                      <LabeledField
-                        label={
-                          decimalConfig.precisionMode === "exact"
-                            ? tr("precision.exactValue")!
-                            : tr("precision.maxValue")!
-                        }
-                        htmlFor="decimal-precision"
-                      >
-                        <Select
-                          value={String(
-                            decimalConfig.precisionMode === "exact"
-                              ? decimalConfig.precision
-                              : decimalConfig.maxPrecision,
-                          )}
-                          onValueChange={(val) => {
-                            const num = Number(val);
-                            if (!Number.isFinite(num)) return;
-                            if (decimalConfig.precisionMode === "exact") {
-                              sanitizeDecimalConfig({ precision: num });
-                            } else {
-                              sanitizeDecimalConfig({ maxPrecision: num });
-                            }
-                          }}
-                        >
-                          <SelectTrigger id="decimal-precision">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {PRECISION_OPTIONS.map((value) => (
-                              <SelectItem key={value} value={String(value)}>
-                                {value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </LabeledField>
-                    </div>
-                    <GapFields
-                      idPrefix="decimal"
-                      minValue={decimalConfig.gap.min}
-                      maxValue={decimalConfig.gap.max}
-                      onMinChange={(value) =>
-                        sanitizeDecimalConfig({
-                          gap: { ...decimalConfig.gap, min: value },
-                        })
-                      }
-                      onMaxChange={(value) =>
-                        sanitizeDecimalConfig({
-                          gap: { ...decimalConfig.gap, max: value },
-                        })
-                      }
-                      labelMin={tr("gap.min")!}
-                      labelMax={tr("gap.max")!}
-                    />
-                    <WeightField
-                      value={decimalConfig.weight}
-                      onChange={(value) =>
-                        sanitizeDecimalConfig({ weight: value })
-                      }
-                      label={tr("weights.label")!}
-                    />
-                  </TypeCard>
-
-                  <TypeCard
-                    id="fraction"
-                    title={tr("types.fraction.title")}
-                    description={tr("types.fraction.desc")}
-                    enabled={fractionConfig.enabled}
-                    onEnabledChange={(checked) =>
-                      sanitizeFractionConfig({ enabled: checked })
-                    }
-                    showAvailabilityError={
-                      fractionConfig.enabled && !typeAvailableMap.fraction
-                    }
-                    availabilityText={tr("types.messages.fractionRange")}
-                  >
-                    <LabeledField
-                      label={tr("fractions.mode")!}
-                      htmlFor="fraction-mode"
-                    >
-                      <Select
-                        value={fractionConfig.preset}
-                        onValueChange={(val) =>
-                          sanitizeFractionConfig({
-                            preset: val as FractionState["preset"],
-                          })
-                        }
-                      >
-                        <SelectTrigger id="fraction-mode">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="preset12">
-                            {tr("fractions.preset12")}
-                          </SelectItem>
-                          <SelectItem value="preset20">
-                            {tr("fractions.preset20")}
-                          </SelectItem>
-                          <SelectItem value="custom">
-                            {tr("fractions.custom")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </LabeledField>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <LabeledField
-                        label={tr("fractions.numerator")!}
-                        htmlFor="fraction-num-min"
-                      >
-                        <Input
-                          id="fraction-num-min"
-                          type="number"
-                          min={1}
-                          value={fractionConfig.numeratorMin}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const min = Number.isFinite(value)
-                              ? Math.max(1, value)
-                              : fractionConfig.numeratorMin;
-                            sanitizeFractionConfig({
-                              numeratorMin: min,
-                              numeratorMax: Math.max(
-                                min,
-                                fractionConfig.numeratorMax,
-                              ),
-                            });
-                          }}
-                          disabled={fractionConfig.preset !== "custom"}
-                        />
-                      </LabeledField>
-                      <LabeledField
-                        label={tr("fractions.numeratorMax")!}
-                        htmlFor="fraction-num-max"
-                      >
-                        <Input
-                          id="fraction-num-max"
-                          type="number"
-                          min={1}
-                          value={fractionConfig.numeratorMax}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const max = Number.isFinite(value)
-                              ? Math.max(1, value)
-                              : fractionConfig.numeratorMax;
-                            sanitizeFractionConfig({
-                              numeratorMax: Math.max(
-                                fractionConfig.numeratorMin,
-                                max,
-                              ),
-                            });
-                          }}
-                          disabled={fractionConfig.preset !== "custom"}
-                        />
-                      </LabeledField>
-                      <LabeledField
-                        label={tr("fractions.denominator")!}
-                        htmlFor="fraction-den-min"
-                      >
-                        <Input
-                          id="fraction-den-min"
-                          type="number"
-                          min={1}
-                          value={fractionConfig.denominatorMin}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const min = Number.isFinite(value)
-                              ? Math.max(1, value)
-                              : fractionConfig.denominatorMin;
-                            sanitizeFractionConfig({
-                              denominatorMin: min,
-                              denominatorMax: Math.max(
-                                min,
-                                fractionConfig.denominatorMax,
-                              ),
-                            });
-                          }}
-                          disabled={fractionConfig.preset !== "custom"}
-                        />
-                      </LabeledField>
-                      <LabeledField
-                        label={tr("fractions.denominatorMax")!}
-                        htmlFor="fraction-den-max"
-                      >
-                        <Input
-                          id="fraction-den-max"
-                          type="number"
-                          min={1}
-                          value={fractionConfig.denominatorMax}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            const max = Number.isFinite(value)
-                              ? Math.max(1, value)
-                              : fractionConfig.denominatorMax;
-                            sanitizeFractionConfig({
-                              denominatorMax: Math.max(
-                                fractionConfig.denominatorMin,
-                                max,
-                              ),
-                            });
-                          }}
-                          disabled={fractionConfig.preset !== "custom"}
-                        />
-                      </LabeledField>
-                    </div>
-                    <GapFields
-                      idPrefix="fraction"
-                      minValue={fractionConfig.gap.min}
-                      maxValue={fractionConfig.gap.max}
-                      onMinChange={(value) =>
-                        sanitizeFractionConfig({
-                          gap: { ...fractionConfig.gap, min: value },
-                        })
-                      }
-                      onMaxChange={(value) =>
-                        sanitizeFractionConfig({
-                          gap: { ...fractionConfig.gap, max: value },
-                        })
-                      }
-                      labelMin={tr("gap.min")!}
-                      labelMax={tr("gap.max")!}
-                    />
-                    <WeightField
-                      value={fractionConfig.weight}
-                      onChange={(value) =>
-                        sanitizeFractionConfig({ weight: value })
-                      }
-                      label={tr("weights.label")!}
-                    />
-                  </TypeCard>
+                  </LabeledField>
                 </div>
+                <GapFields
+                  idPrefix="non-negative"
+                  minValue={nonNegativeConfig.gap.min}
+                  maxValue={nonNegativeConfig.gap.max}
+                  onMinChange={(value) =>
+                    sanitizeNonNegativeConfig({
+                      gap: { ...nonNegativeConfig.gap, min: value },
+                    })
+                  }
+                  onMaxChange={(value) =>
+                    sanitizeNonNegativeConfig({
+                      gap: { ...nonNegativeConfig.gap, max: value },
+                    })
+                  }
+                  labelMin={tr("gap.min")!}
+                  labelMax={tr("gap.max")!}
+                />
+                <WeightField
+                  value={nonNegativeConfig.weight}
+                  onChange={(value) =>
+                    sanitizeNonNegativeConfig({ weight: value })
+                  }
+                  label={tr("weights.label")!}
+                />
+              </TypeCard>
 
-                <Separator />
+              <TypeCard
+                id="signed"
+                title={tr("types.signed.title")}
+                description={tr("types.signed.desc")}
+                enabled={signedConfig.enabled}
+                onEnabledChange={(checked) =>
+                  sanitizeSignedConfig({ enabled: checked })
+                }
+                showAvailabilityError={
+                  signedConfig.enabled && !typeAvailableMap.signedInt
+                }
+                availabilityText={tr("types.messages.unavailable")}
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <LabeledField
+                    label={tr("ranges.min")!}
+                    htmlFor="signed-min"
+                  >
+                    <Input
+                      id="signed-min"
+                      type="number"
+                      value={signedConfig.min}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const min = Number.isFinite(value)
+                          ? value
+                          : signedConfig.min;
+                        sanitizeSignedConfig({
+                          min,
+                          max: Math.max(min, signedConfig.max),
+                        });
+                      }}
+                    />
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("ranges.max")!}
+                    htmlFor="signed-max"
+                  >
+                    <Input
+                      id="signed-max"
+                      type="number"
+                      value={signedConfig.max}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const max = Number.isFinite(value)
+                          ? value
+                          : signedConfig.max;
+                        sanitizeSignedConfig({
+                          max: Math.max(signedConfig.min, max),
+                        });
+                      }}
+                    />
+                  </LabeledField>
+                </div>
+                <GapFields
+                  idPrefix="signed"
+                  minValue={signedConfig.gap.min}
+                  maxValue={signedConfig.gap.max}
+                  onMinChange={(value) =>
+                    sanitizeSignedConfig({
+                      gap: { ...signedConfig.gap, min: value },
+                    })
+                  }
+                  onMaxChange={(value) =>
+                    sanitizeSignedConfig({
+                      gap: { ...signedConfig.gap, max: value },
+                    })
+                  }
+                  labelMin={tr("gap.min")!}
+                  labelMax={tr("gap.max")!}
+                />
+                <WeightField
+                  value={signedConfig.weight}
+                  onChange={(value) =>
+                    sanitizeSignedConfig({ weight: value })
+                  }
+                  label={tr("weights.label")!}
+                />
+              </TypeCard>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="grid gap-3">
-                    <Label htmlFor="equal-ratio">{tr("equal.label")}</Label>
-                    <div className="flex items-center gap-4">
-                      <input
-                        id="equal-ratio"
-                        type="range"
-                        min={0}
-                        max={50}
-                        value={equalRatio}
-                        onChange={(event) =>
-                          setEqualRatio(Number(event.target.value))
-                        }
-                        className="w-full"
-                      />
-                      <span className="w-14 text-right text-sm font-medium">
-                        {equalRatio}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {tr("equal.hint")}
-                    </p>
-                  </div>
-
-                  <div className="grid gap-3">
-                    <Label>{tr("history.order.label")}</Label>
+              <TypeCard
+                id="decimal"
+                title={tr("types.decimal.title")}
+                description={tr("types.decimal.desc")}
+                enabled={decimalConfig.enabled}
+                onEnabledChange={(checked) =>
+                  sanitizeDecimalConfig({ enabled: checked })
+                }
+                showAvailabilityError={
+                  decimalConfig.enabled && !typeAvailableMap.decimal
+                }
+                availabilityText={tr("types.messages.decimalRange")}
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <LabeledField
+                    label={tr("ranges.min")!}
+                    htmlFor="decimal-min"
+                  >
+                    <Input
+                      id="decimal-min"
+                      type="number"
+                      step="0.1"
+                      value={decimalConfig.min}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const min = Number.isFinite(value)
+                          ? value
+                          : decimalConfig.min;
+                        sanitizeDecimalConfig({
+                          min,
+                          max: Math.max(min, decimalConfig.max),
+                        });
+                      }}
+                    />
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("ranges.max")!}
+                    htmlFor="decimal-max"
+                  >
+                    <Input
+                      id="decimal-max"
+                      type="number"
+                      step="0.1"
+                      value={decimalConfig.max}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const max = Number.isFinite(value)
+                          ? value
+                          : decimalConfig.max;
+                        sanitizeDecimalConfig({
+                          max: Math.max(decimalConfig.min, max),
+                        });
+                      }}
+                    />
+                  </LabeledField>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <LabeledField
+                    label={tr("precision.mode")!}
+                    htmlFor="decimal-mode"
+                  >
                     <Select
-                      value={historyOrder}
-                      onValueChange={(value) =>
-                        setHistoryOrder(value as HistoryOrder)
+                      value={decimalConfig.precisionMode}
+                      onValueChange={(val) =>
+                        sanitizeDecimalConfig({
+                          precisionMode:
+                            val as DecimalState["precisionMode"],
+                        })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="decimal-mode">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="asc">
-                          {tr("history.order.oldest")}
+                        <SelectItem value="exact">
+                          {tr("precision.exact")}
                         </SelectItem>
-                        <SelectItem value="desc">
-                          {tr("history.order.newest")}
+                        <SelectItem value="upTo">
+                          {tr("precision.upTo")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground">
-                      {tr("history.order.hint")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <LabeledField
-                    label={tr("session.timer")!}
-                    htmlFor="timer-min"
-                  >
-                    <Input
-                      id="timer-min"
-                      type="number"
-                      min={0}
-                      value={timerMinutes}
-                      onChange={(event) => {
-                        const value = Number(event.target.value);
-                        setTimerMinutes(
-                          Number.isFinite(value) ? Math.max(0, value) : 0,
-                        );
-                      }}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {tr("session.timerHint")}
-                    </p>
                   </LabeledField>
                   <LabeledField
-                    label={tr("session.maxExercises")!}
-                    htmlFor="max-exercises"
+                    label={
+                      decimalConfig.precisionMode === "exact"
+                        ? tr("precision.exactValue")!
+                        : tr("precision.maxValue")!
+                    }
+                    htmlFor="decimal-precision"
                   >
-                    <Input
-                      id="max-exercises"
-                      type="number"
-                      min={0}
-                      value={maxExercises}
-                      onChange={(event) => {
-                        const value = Number(event.target.value);
-                        setMaxExercises(
-                          Number.isFinite(value) ? Math.max(0, value) : 0,
-                        );
+                    <Select
+                      value={String(
+                        decimalConfig.precisionMode === "exact"
+                          ? decimalConfig.precision
+                          : decimalConfig.maxPrecision,
+                      )}
+                      onValueChange={(val) => {
+                        const num = Number(val);
+                        if (!Number.isFinite(num)) return;
+                        if (decimalConfig.precisionMode === "exact") {
+                          sanitizeDecimalConfig({ precision: num });
+                        } else {
+                          sanitizeDecimalConfig({ maxPrecision: num });
+                        }
                       }}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {tr("session.maxExercisesHint")}
-                    </p>
-                  </LabeledField>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <ToggleRow
-                    id="feedback-sound"
-                    label={tr("feedback.sound")}
-                    description={tr("feedback.soundDesc")}
-                    checked={enableSound}
-                    onChange={setEnableSound}
-                  />
-                  <ToggleRow
-                    id="feedback-vibration"
-                    label={tr("feedback.vibration")}
-                    description={tr("feedback.vibrationDesc")}
-                    checked={enableVibration}
-                    onChange={setEnableVibration}
-                  />
-                </div>
-
-                <Alert>
-                  <AlertDescription>{tr("telemetry.note")}</AlertDescription>
-                </Alert>
-
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  {!canStart && (
-                    <span className="text-sm font-medium text-destructive">
-                      {tr("errors.unavailable")}
-                    </span>
-                  )}
-                  <div className="ml-auto flex items-center gap-3">
-                    <Button
-                      size="lg"
-                      disabled={!canStart}
-                      onClick={() => startSession()}
                     >
-                      {tr("setup.start")}
-                    </Button>
-                  </div>
+                      <SelectTrigger id="decimal-precision">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRECISION_OPTIONS.map((value) => (
+                          <SelectItem key={value} value={String(value)}>
+                            {tr("precision.option", { count: value })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </LabeledField>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
+                <GapFields
+                  idPrefix="decimal"
+                  minValue={decimalConfig.gap.min}
+                  maxValue={decimalConfig.gap.max}
+                  onMinChange={(value) =>
+                    sanitizeDecimalConfig({
+                      gap: { ...decimalConfig.gap, min: value },
+                    })
+                  }
+                  onMaxChange={(value) =>
+                    sanitizeDecimalConfig({
+                      gap: { ...decimalConfig.gap, max: value },
+                    })
+                  }
+                  labelMin={tr("gap.min")!}
+                  labelMax={tr("gap.max")!}
+                />
+                <WeightField
+                  value={decimalConfig.weight}
+                  onChange={(value) =>
+                    sanitizeDecimalConfig({ weight: value })
+                  }
+                  label={tr("weights.label")!}
+                />
+              </TypeCard>
+
+              <TypeCard
+                id="fraction"
+                title={tr("types.fraction.title")}
+                description={tr("types.fraction.desc")}
+                enabled={fractionConfig.enabled}
+                onEnabledChange={(checked) =>
+                  sanitizeFractionConfig({ enabled: checked })
+                }
+                showAvailabilityError={
+                  fractionConfig.enabled && !typeAvailableMap.fraction
+                }
+                availabilityText={tr("types.messages.unavailable")}
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <LabeledField
+                    label={tr("fractions.mode")!}
+                    htmlFor="fraction-mode"
+                  >
+                    <Select
+                      value={fractionConfig.preset}
+                      onValueChange={(val) =>
+                        sanitizeFractionConfig({
+                          preset: val as FractionState["preset"],
+                        })
+                      }
+                    >
+                      <SelectTrigger id="fraction-mode">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preset12">
+                          {tr("fractions.preset12")}
+                        </SelectItem>
+                        <SelectItem value="preset20">
+                          {tr("fractions.preset20")}
+                        </SelectItem>
+                        <SelectItem value="custom">
+                          {tr("fractions.custom")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("fractions.numerator")!}
+                    htmlFor="fraction-num-min"
+                  >
+                    <Input
+                      id="fraction-num-min"
+                      type="number"
+                      min={1}
+                      value={fractionConfig.numeratorMin}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const min = Number.isFinite(value)
+                          ? Math.max(1, value)
+                          : fractionConfig.numeratorMin;
+                        sanitizeFractionConfig({
+                          numeratorMin: min,
+                          numeratorMax: Math.max(min, fractionConfig.numeratorMax),
+                        });
+                      }}
+                      disabled={fractionConfig.preset !== "custom"}
+                    />
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("fractions.numeratorMax")!}
+                    htmlFor="fraction-num-max"
+                  >
+                    <Input
+                      id="fraction-num-max"
+                      type="number"
+                      min={1}
+                      value={fractionConfig.numeratorMax}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const max = Number.isFinite(value)
+                          ? Math.max(1, value)
+                          : fractionConfig.numeratorMax;
+                        sanitizeFractionConfig({
+                          numeratorMax: Math.max(
+                            fractionConfig.numeratorMin,
+                            max,
+                          ),
+                        });
+                      }}
+                      disabled={fractionConfig.preset !== "custom"}
+                    />
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("fractions.denominator")!}
+                    htmlFor="fraction-den-min"
+                  >
+                    <Input
+                      id="fraction-den-min"
+                      type="number"
+                      min={1}
+                      value={fractionConfig.denominatorMin}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const min = Number.isFinite(value)
+                          ? Math.max(1, value)
+                          : fractionConfig.denominatorMin;
+                        sanitizeFractionConfig({
+                          denominatorMin: min,
+                          denominatorMax: Math.max(min, fractionConfig.denominatorMax),
+                        });
+                      }}
+                      disabled={fractionConfig.preset !== "custom"}
+                    />
+                  </LabeledField>
+                  <LabeledField
+                    label={tr("fractions.denominatorMax")!}
+                    htmlFor="fraction-den-max"
+                  >
+                    <Input
+                      id="fraction-den-max"
+                      type="number"
+                      min={1}
+                      value={fractionConfig.denominatorMax}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        const max = Number.isFinite(value)
+                          ? Math.max(1, value)
+                          : fractionConfig.denominatorMax;
+                        sanitizeFractionConfig({
+                          denominatorMax: Math.max(
+                            fractionConfig.denominatorMin,
+                            max,
+                          ),
+                        });
+                      }}
+                      disabled={fractionConfig.preset !== "custom"}
+                    />
+                  </LabeledField>
+                </div>
+                <GapFields
+                  idPrefix="fraction"
+                  minValue={fractionConfig.gap.min}
+                  maxValue={fractionConfig.gap.max}
+                  onMinChange={(value) =>
+                    sanitizeFractionConfig({
+                      gap: { ...fractionConfig.gap, min: value },
+                    })
+                  }
+                  onMaxChange={(value) =>
+                    sanitizeFractionConfig({
+                      gap: { ...fractionConfig.gap, max: value },
+                    })
+                  }
+                  labelMin={tr("gap.min")!}
+                  labelMax={tr("gap.max")!}
+                />
+                <WeightField
+                  value={fractionConfig.weight}
+                  onChange={(value) =>
+                    sanitizeFractionConfig({ weight: value })
+                  }
+                  label={tr("weights.label")!}
+                />
+              </TypeCard>
+            </div>
+
+            <Separator className="my-6" />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3">
+                <Label htmlFor="equal-ratio">{tr("equal.label")}</Label>
+                <div className="flex items-center gap-4">
+                  <input
+                    id="equal-ratio"
+                    type="range"
+                    min={0}
+                    max={50}
+                    value={equalRatio}
+                    onChange={(event) =>
+                      setEqualRatio(Number(event.target.value))
+                    }
+                    className="w-full"
+                  />
+                  <span className="w-14 text-right text-sm font-medium">
+                    {equalRatio}%
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {tr("equal.hint")}
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                <Label>{tr("history.order.label")}</Label>
+                <Select
+                  value={historyOrder}
+                  onValueChange={(value) =>
+                    setHistoryOrder(value as HistoryOrder)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asc">
+                      {tr("history.order.oldest")}
+                    </SelectItem>
+                    <SelectItem value="desc">
+                      {tr("history.order.newest")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {tr("history.order.hint")}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <LabeledField
+                label={tr("session.timer")!}
+                htmlFor="timer-min"
+              >
+                <Input
+                  id="timer-min"
+                  type="number"
+                  min={0}
+                  value={timerMinutes}
+                  onChange={(event) => {
+                    const value = Number(event.target.value);
+                    setTimerMinutes(
+                      Number.isFinite(value) ? Math.max(0, value) : 0,
+                    );
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {tr("session.timerHint")}
+                </p>
+              </LabeledField>
+              <LabeledField
+                label={tr("session.maxExercises")!}
+                htmlFor="max-exercises"
+              >
+                <Input
+                  id="max-exercises"
+                  type="number"
+                  min={0}
+                  value={maxExercises}
+                  onChange={(event) => {
+                    const value = Number(event.target.value);
+                    setMaxExercises(
+                      Number.isFinite(value) ? Math.max(0, value) : 0,
+                    );
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {tr("session.maxExercisesHint")}
+                </p>
+              </LabeledField>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <ToggleRow
+                id="feedback-sound"
+                label={tr("feedback.sound")}
+                description={tr("feedback.soundDesc")}
+                checked={enableSound}
+                onChange={setEnableSound}
+              />
+              <ToggleRow
+                id="feedback-vibration"
+                label={tr("feedback.vibration")}
+                description={tr("feedback.vibrationDesc")}
+                checked={enableVibration}
+                onChange={setEnableVibration}
+              />
+            </div>
+
+            <Alert className="mt-6 bg-background/40">
+              <AlertDescription>{tr("telemetry.note")}</AlertDescription>
+            </Alert>
+
+            <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2">
+              <Button
+                onClick={() => startSession()}
+                disabled={!canStart}
+                className="w-full sm:w-auto"
+              >
+                {tr("setup.start")}
+              </Button>
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link to="/">{tr("actions.toMenu")}</Link>
+              </Button>
+            </div>
+          </div>
         ) : (
-          <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="grid gap-6">
-              <Card className="rounded-2xl border bg-muted/50 shadow-sm backdrop-blur">
-                <CardContent className="flex flex-col gap-6 p-6">
-                  <div className="flex flex-wrap items-center gap-3">
+          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 mt-6 flex-1 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-6 h-full min-h-0">
+              <div className="flex flex-col min-h-0">
+                {sessionEnded && (
+                  <Alert className="mb-4">
+                    <AlertDescription>
+                      {endReason === "time" && tr("finished.time")}
+                      {endReason === "ex" &&
+                        tr("finished.exercises", { count: maxExercises })}
+                      {endReason === "generator" && tr("finished.generator")}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div
+                  ref={focusRef}
+                  tabIndex={-1}
+                  className="flex flex-col gap-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
+                >
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
                     <StatCard
                       label={tr("stats.correct")}
                       value={correctCount}
@@ -1231,13 +1243,13 @@ export default function CompareNumbersGame() {
                     </div>
                   )}
 
-                  <div className="grid gap-4 rounded-xl border bg-muted/30 p-6 text-center">
+                  <div className="rounded-2xl border bg-background/40 p-6 text-center shadow-sm">
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">
                       {tr("play.compare")}
                     </div>
                     <div
                       key={taskId}
-                      className="grid grid-cols-3 items-center gap-4 text-3xl sm:text-5xl"
+                      className="mt-4 grid grid-cols-3 items-center gap-4 text-3xl sm:text-5xl"
                     >
                       <span className="truncate font-semibold">
                         {exercise?.left.display ?? ""}
@@ -1249,7 +1261,7 @@ export default function CompareNumbersGame() {
                         {exercise?.right.display ?? ""}
                       </span>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-3">
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Button
                         size="lg"
                         onClick={() => handleAnswer("<")}
@@ -1272,36 +1284,15 @@ export default function CompareNumbersGame() {
                         &gt;
                       </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="mt-3 text-xs text-muted-foreground">
                       {tr("play.hotkeys")}
                     </p>
                   </div>
+                </div>
+              </div>
 
-                  {sessionEnded && (
-                    <Alert>
-                      <AlertDescription>
-                        {endReason === "time" && tr("finished.time")}
-                        {endReason === "ex" &&
-                          tr("finished.exercises", { count: maxExercises })}
-                        {endReason === "generator" && tr("finished.generator")}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div className="flex flex-wrap gap-3">
-                    <Button variant="secondary" onClick={() => newSession()}>
-                      {tr("actions.newSession")}
-                    </Button>
-                    <Button variant="ghost" onClick={() => backToSetup()}>
-                      {tr("actions.changeSetup")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <aside className="grid gap-4 rounded-2xl border bg-muted/50 p-4 shadow-sm backdrop-blur">
-              <div className="flex items-center justify-between">
+              <aside className="h-full overflow-hidden rounded-xl border bg-muted/40">
+              <div className="flex items-center justify-between border-b bg-muted/60 px-4 py-3">
                 <CardTitle className="text-base font-semibold">
                   {tr("history.title")}
                 </CardTitle>
@@ -1309,9 +1300,9 @@ export default function CompareNumbersGame() {
                   {tr("history.total", { count: history.length })}
                 </span>
               </div>
-              <ScrollArea className="h-[420px]">
+              <div className="h-[420px] overflow-auto">
                 <Table>
-                  <TableHeader className="sticky top-0 bg-muted/60 backdrop-blur">
+                  <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur">
                     <TableRow>
                       <TableHead className="w-10 text-center text-xs">
                         #
@@ -1393,9 +1384,10 @@ export default function CompareNumbersGame() {
                     )}
                   </TableBody>
                 </Table>
-              </ScrollArea>
-            </aside>
-          </section>
+              </div>
+              </aside>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -1638,12 +1630,12 @@ function StatCard({
   value: number | string;
 }) {
   return (
-    <Card className="min-w-20 rounded-xl border bg-muted/40 shadow-sm backdrop-blur">
-      <CardContent className="px-4 py-3">
-        <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+    <Card className="rounded-xl border shadow-sm min-w-20 py-0">
+      <CardContent className="px-3 py-1.5">
+        <div className="text-[11px] text-muted-foreground leading-tight">
           {label}
         </div>
-        <div className="text-lg font-semibold">{value}</div>
+        <div className="text-base font-semibold leading-tight">{value}</div>
       </CardContent>
     </Card>
   );
