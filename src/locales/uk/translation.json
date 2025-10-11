@@ -328,7 +328,7 @@
         "fractionRange": "Змініть діапазони чисельників і знаменників."
       },
       "labels": {
-        "nonNegative": "Натуральні",
+        "nonNegative": "Невід'ємні цілі",
         "signed": "Цілі",
         "decimal": "Десяткові",
         "fraction": "Дроби",

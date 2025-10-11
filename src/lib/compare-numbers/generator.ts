@@ -340,6 +340,239 @@ function generateDecimalValue(type: PreparedDecimal): GeneratedValue | null {
   };
 }
 
+type DecimalBias = "random" | "low" | "high" | "near";
+
+function intersection<T>(left: readonly T[], right: readonly T[]): T[] {
+  const rightSet = new Set(right);
+  return left.filter((item) => rightSet.has(item));
+}
+
+function pickPrecision(
+  type: PreparedDecimal,
+  preferred?: readonly number[],
+): number {
+  const source =
+    preferred && preferred.length > 0
+      ? preferred.filter((value) => type.precisions.includes(value))
+      : null;
+  const pool = source && source.length > 0 ? source : type.precisions;
+  const index = Math.floor(Math.random() * pool.length);
+  return pool[index];
+}
+
+function integerPartRange(type: PreparedDecimal): { min: number; max: number } {
+  const minValue = Math.min(type.min, type.max);
+  const maxValue = Math.max(type.min, type.max);
+  return { min: Math.trunc(minValue), max: Math.trunc(maxValue) };
+}
+
+function selectBiasedInt(
+  start: number,
+  end: number,
+  bias: DecimalBias,
+  anchor?: number,
+): number {
+  if (start >= end) {
+    return start;
+  }
+  const span = end - start;
+  switch (bias) {
+    case "low": {
+      const window = Math.max(1, Math.floor(span * 0.2));
+      return randomInt(start, Math.min(end, start + window));
+    }
+    case "high": {
+      const window = Math.max(1, Math.floor(span * 0.2));
+      return randomInt(Math.max(start, end - window), end);
+    }
+    case "near": {
+      if (anchor == null) {
+        break;
+      }
+      const window = Math.max(1, Math.floor(span * 0.1));
+      const centered = Math.max(start, Math.min(end, anchor));
+      const windowStart = Math.max(start, centered - window);
+      const windowEnd = Math.min(end, centered + window);
+      return randomInt(windowStart, windowEnd);
+    }
+    default:
+      break;
+  }
+  return randomInt(start, end);
+}
+
+function decimalBoundsForInteger(
+  type: PreparedDecimal,
+  targetInt: number,
+  precision: number,
+): { start: number; end: number } | null {
+  const factor = 10 ** precision;
+  let start =
+    targetInt >= 0 ? targetInt * factor : (targetInt - 1) * factor + 1;
+  let end = targetInt >= 0 ? (targetInt + 1) * factor - 1 : targetInt * factor;
+  const minInt = Math.ceil(type.min * factor - EPS);
+  const maxInt = Math.floor(type.max * factor + EPS);
+  start = Math.max(start, minInt);
+  end = Math.min(end, maxInt);
+  if (start > end) {
+    return null;
+  }
+  return { start, end };
+}
+
+function generateDecimalWithIntegerPart(
+  type: PreparedDecimal,
+  targetInt: number,
+  precision: number,
+  bias: DecimalBias,
+  anchorValue?: number,
+): GeneratedValue | null {
+  const bounds = decimalBoundsForInteger(type, targetInt, precision);
+  if (!bounds) {
+    return null;
+  }
+  const factor = 10 ** precision;
+  const anchorInt =
+    anchorValue != null ? Math.round(anchorValue * factor) : undefined;
+  for (let attempt = 0; attempt < 25; attempt++) {
+    const candidateInt = selectBiasedInt(
+      bounds.start,
+      bounds.end,
+      bias,
+      anchorInt,
+    );
+    const value = candidateInt / factor;
+    if (Math.trunc(value) !== targetInt) {
+      continue;
+    }
+    return {
+      type: "decimal",
+      value,
+      display: value.toFixed(precision),
+      meta: { precision },
+    };
+  }
+  return null;
+}
+
+function tryGenerateSameIntegerDecimals(
+  leftType: PreparedDecimal,
+  rightType: PreparedDecimal,
+): { left: GeneratedValue; right: GeneratedValue } | null {
+  const leftRange = integerPartRange(leftType);
+  const rightRange = integerPartRange(rightType);
+  const sharedMin = Math.max(leftRange.min, rightRange.min);
+  const sharedMax = Math.min(leftRange.max, rightRange.max);
+  if (sharedMin > sharedMax) {
+    return null;
+  }
+  const sharedPrecisions = intersection(leftType.precisions, rightType.precisions);
+  const targetInt = randomInt(sharedMin, sharedMax);
+  const leftPrecision = pickPrecision(leftType, sharedPrecisions);
+  const rightPrecision = pickPrecision(rightType, sharedPrecisions);
+  const leftValue = generateDecimalWithIntegerPart(
+    leftType,
+    targetInt,
+    leftPrecision,
+    "random",
+  );
+  if (!leftValue) {
+    return null;
+  }
+  let rightValue = generateDecimalWithIntegerPart(
+    rightType,
+    targetInt,
+    rightPrecision,
+    "near",
+    leftValue.value,
+  );
+  if (!rightValue) {
+    return null;
+  }
+  if (Math.abs(leftValue.value - rightValue.value) < EPS) {
+    rightValue = generateDecimalWithIntegerPart(
+      rightType,
+      targetInt,
+      rightPrecision,
+      "high",
+      leftValue.value,
+    );
+    if (!rightValue || Math.abs(leftValue.value - rightValue.value) < EPS) {
+      return null;
+    }
+  }
+  return { left: leftValue, right: rightValue };
+}
+
+function tryGenerateNeighborIntegerDecimals(
+  leftType: PreparedDecimal,
+  rightType: PreparedDecimal,
+): { left: GeneratedValue; right: GeneratedValue } | null {
+  const leftRange = integerPartRange(leftType);
+  const rightRange = integerPartRange(rightType);
+  if (leftRange.min > leftRange.max || rightRange.min > rightRange.max) {
+    return null;
+  }
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const leftInt = randomInt(leftRange.min, leftRange.max);
+    const candidates: number[] = [];
+    if (leftInt - 1 >= rightRange.min && leftInt - 1 <= rightRange.max) {
+      candidates.push(leftInt - 1);
+    }
+    if (leftInt + 1 >= rightRange.min && leftInt + 1 <= rightRange.max) {
+      candidates.push(leftInt + 1);
+    }
+    if (candidates.length === 0) {
+      continue;
+    }
+    const rightInt = candidates[Math.floor(Math.random() * candidates.length)];
+    const leftPrecision = pickPrecision(leftType);
+    const rightPrecision = pickPrecision(rightType);
+    const leftBias: DecimalBias = rightInt > leftInt ? "high" : "low";
+    const rightBias: DecimalBias = rightInt > leftInt ? "low" : "high";
+    const leftValue = generateDecimalWithIntegerPart(
+      leftType,
+      leftInt,
+      leftPrecision,
+      leftBias,
+    );
+    const rightValue = generateDecimalWithIntegerPart(
+      rightType,
+      rightInt,
+      rightPrecision,
+      rightBias,
+    );
+    if (!leftValue || !rightValue) {
+      continue;
+    }
+    if (Math.abs(leftValue.value - rightValue.value) < EPS) {
+      continue;
+    }
+    return { left: leftValue, right: rightValue };
+  }
+  return null;
+}
+
+function generateDecimalPair(
+  leftType: PreparedDecimal,
+  rightType: PreparedDecimal,
+): { left: GeneratedValue; right: GeneratedValue } | null {
+  for (let attempt = 0; attempt < 120; attempt++) {
+    const preferSameInteger = Math.random() < 0.75;
+    const pair = preferSameInteger
+      ? tryGenerateSameIntegerDecimals(leftType, rightType)
+      : tryGenerateNeighborIntegerDecimals(leftType, rightType);
+    if (!pair) {
+      continue;
+    }
+    if (Math.abs(pair.left.value - pair.right.value) < EPS) {
+      continue;
+    }
+    return pair;
+  }
+  return null;
+}
+
 function gcd(a: number, b: number): number {
   let x = Math.abs(a);
   let y = Math.abs(b);
@@ -445,8 +678,19 @@ export function generateExercise(
     const leftType = pickType(prepared.types);
     const rightType = pickType(prepared.types);
     if (!leftType || !rightType) break;
-    const left = generateValue(leftType);
-    const right = generateValue(rightType);
+    let left: GeneratedValue | null = null;
+    let right: GeneratedValue | null = null;
+    if (leftType.kind === "decimal" && rightType.kind === "decimal") {
+      const pair = generateDecimalPair(leftType, rightType);
+      if (!pair) {
+        continue;
+      }
+      left = pair.left;
+      right = pair.right;
+    } else {
+      left = generateValue(leftType);
+      right = generateValue(rightType);
+    }
     if (!left || !right) continue;
     const diff = left.value - right.value;
     if (Math.abs(diff) < EPS) {
