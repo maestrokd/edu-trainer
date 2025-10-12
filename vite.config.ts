@@ -14,7 +14,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(root, "src"),
-      "@radix-ui/react-accordion": resolve(root, "src/stubs/radix-accordion.tsx"),
     },
   },
   test: {

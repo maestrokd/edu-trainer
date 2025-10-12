@@ -23,8 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@radix-ui/react-accordion": ["./src/stubs/radix-accordion"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

@@ -11,8 +11,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@radix-ui/react-accordion": ["src/stubs/radix-accordion"]
+      "@/*": ["src/*"]
     },
     "moduleResolution": "Bundler",
     "types": ["vitest/globals"]
