@@ -514,6 +514,19 @@ export default function CompareNumbersGame() {
 
   const sessionEnded = screen === "play" && gameOver;
 
+  const displaySizeClass = React.useMemo(() => {
+    const leftLength = exercise?.left.display.length ?? 0;
+    const rightLength = exercise?.right.display.length ?? 0;
+    const maxLength = Math.max(leftLength, rightLength);
+    if (maxLength > 20) {
+      return "text-xl sm:text-3xl";
+    }
+    if (maxLength > 14) {
+      return "text-2xl sm:text-4xl";
+    }
+    return "text-3xl sm:text-5xl";
+  }, [exercise]);
+
   React.useEffect(() => {
     if (screen !== "play") return;
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -588,7 +601,7 @@ export default function CompareNumbersGame() {
         </div>
 
         {screen === "setup" ? (
-          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-6xl mx-auto w-full mt-6 overflow-auto">
+          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-6xl mx-auto w-full sm:mt-6 overflow-auto">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg sm:text-xl font-semibold">
                 {tr("setup.title")}
@@ -1253,7 +1266,7 @@ export default function CompareNumbersGame() {
             </div>
           </div>
         ) : (
-          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 mt-6 flex-1 overflow-hidden">
+          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 sm:mt-6 flex-1 overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-6 h-full min-h-0">
               <div className="flex flex-col min-h-0">
                 {sessionEnded && (
@@ -1272,7 +1285,7 @@ export default function CompareNumbersGame() {
                   tabIndex={-1}
                   className="flex flex-col gap-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
                 >
-                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <div className="flex flex-wrap items-center gap-2">
                     <StatCard
                       label={tr("stats.correct")}
                       value={correctCount}
@@ -1315,15 +1328,18 @@ export default function CompareNumbersGame() {
                     </div>
                     <div
                       key={taskId}
-                      className="mt-4 grid grid-cols-3 items-center gap-4 text-3xl sm:text-5xl"
+                      className={cn(
+                        "mt-4 grid grid-cols-3 items-center gap-4",
+                        displaySizeClass,
+                      )}
                     >
-                      <span className="truncate font-semibold">
+                      <span className="font-semibold break-words text-center">
                         {exercise?.left.display ?? ""}
                       </span>
                       <span className="font-semibold text-muted-foreground">
                         ?
                       </span>
-                      <span className="truncate font-semibold">
+                      <span className="font-semibold break-words text-center">
                         {exercise?.right.display ?? ""}
                       </span>
                     </div>
