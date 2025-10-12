@@ -348,10 +348,13 @@
     },
     "precision": {
       "mode": "Precision mode",
-      "exact": "Exact decimals",
-      "upTo": "Up to max decimals",
-      "exactValue": "Exact decimals",
-      "maxValue": "Maximum decimals"
+      "exact": "Fixed number of decimal places",
+      "upTo": "Up to a maximum",
+      "exactValue": "Decimal places",
+      "maxValue": "Maximum decimal places",
+      "option_zero": "0 decimal places",
+      "option_one": "{{count}} decimal place",
+      "option_other": "{{count}} decimal places"
     },
     "fractions": {
       "mode": "Fraction presets",

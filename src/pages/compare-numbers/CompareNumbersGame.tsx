@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,12 +34,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 
 import ThemeToggle from "@/components/menu/ThemeToggle";
 import LanguageSelector, {
   LanguageSelectorMode,
 } from "@/components/lang/LanguageSelector";
+
+import { cn } from "@/lib/utils";
 
 import {
   canGenerate,
@@ -57,6 +59,8 @@ import type {
 type Screen = "setup" | "play";
 
 type HistoryOrder = "asc" | "desc";
+
+type ModeKey = "nonNegative" | "signed" | "decimal" | "fraction";
 
 interface IntegerState {
   enabled: boolean;
@@ -151,12 +155,27 @@ export default function CompareNumbersGame() {
     gap: { min: 0, max: null },
   });
 
+  const [modeOpen, setModeOpen] = React.useState<Record<ModeKey, boolean>>({
+    nonNegative: false,
+    signed: false,
+    decimal: false,
+    fraction: false,
+  });
+
   const [equalRatio, setEqualRatio] = React.useState<number>(10);
   const [timerMinutes, setTimerMinutes] = React.useState<number>(0);
   const [maxExercises, setMaxExercises] = React.useState<number>(0);
   const [historyOrder, setHistoryOrder] = React.useState<HistoryOrder>("asc");
   const [enableSound, setEnableSound] = React.useState<boolean>(false);
   const [enableVibration, setEnableVibration] = React.useState<boolean>(false);
+
+  const toggleModeSection = React.useCallback((key: ModeKey) => {
+    setModeOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  const openModeSection = React.useCallback((key: ModeKey) => {
+    setModeOpen((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+  }, []);
 
   const [correctCount, setCorrectCount] = React.useState<number>(0);
   const [wrongCount, setWrongCount] = React.useState<number>(0);
@@ -586,19 +605,22 @@ export default function CompareNumbersGame() {
               {tr("setup.intro")}
             </p>
 
-            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="mt-6 space-y-4">
               <TypeCard
                 id="non-negative"
                 title={tr("types.nonNegative.title")}
                 description={tr("types.nonNegative.desc")}
                 enabled={nonNegativeConfig.enabled}
-                onEnabledChange={(checked) =>
-                  sanitizeNonNegativeConfig({ enabled: checked })
-                }
+                onEnabledChange={(checked) => {
+                  sanitizeNonNegativeConfig({ enabled: checked });
+                  if (checked) openModeSection("nonNegative");
+                }}
                 showAvailabilityError={
                   nonNegativeConfig.enabled && !typeAvailableMap.nonNegativeInt
                 }
                 availabilityText={tr("types.messages.unavailable")}
+                open={modeOpen.nonNegative}
+                onToggle={() => toggleModeSection("nonNegative")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -610,6 +632,7 @@ export default function CompareNumbersGame() {
                       type="number"
                       min={0}
                       value={nonNegativeConfig.min}
+                      disabled={!nonNegativeConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const min = Number.isFinite(value)
@@ -631,6 +654,7 @@ export default function CompareNumbersGame() {
                       type="number"
                       min={0}
                       value={nonNegativeConfig.max}
+                      disabled={!nonNegativeConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const max = Number.isFinite(value)
@@ -659,6 +683,7 @@ export default function CompareNumbersGame() {
                   }
                   labelMin={tr("gap.min")!}
                   labelMax={tr("gap.max")!}
+                  disabled={!nonNegativeConfig.enabled}
                 />
                 <WeightField
                   value={nonNegativeConfig.weight}
@@ -666,6 +691,7 @@ export default function CompareNumbersGame() {
                     sanitizeNonNegativeConfig({ weight: value })
                   }
                   label={tr("weights.label")!}
+                  disabled={!nonNegativeConfig.enabled}
                 />
               </TypeCard>
 
@@ -674,13 +700,16 @@ export default function CompareNumbersGame() {
                 title={tr("types.signed.title")}
                 description={tr("types.signed.desc")}
                 enabled={signedConfig.enabled}
-                onEnabledChange={(checked) =>
-                  sanitizeSignedConfig({ enabled: checked })
-                }
+                onEnabledChange={(checked) => {
+                  sanitizeSignedConfig({ enabled: checked });
+                  if (checked) openModeSection("signed");
+                }}
                 showAvailabilityError={
                   signedConfig.enabled && !typeAvailableMap.signedInt
                 }
                 availabilityText={tr("types.messages.unavailable")}
+                open={modeOpen.signed}
+                onToggle={() => toggleModeSection("signed")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -691,6 +720,7 @@ export default function CompareNumbersGame() {
                       id="signed-min"
                       type="number"
                       value={signedConfig.min}
+                      disabled={!signedConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const min = Number.isFinite(value)
@@ -711,6 +741,7 @@ export default function CompareNumbersGame() {
                       id="signed-max"
                       type="number"
                       value={signedConfig.max}
+                      disabled={!signedConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const max = Number.isFinite(value)
@@ -739,6 +770,7 @@ export default function CompareNumbersGame() {
                   }
                   labelMin={tr("gap.min")!}
                   labelMax={tr("gap.max")!}
+                  disabled={!signedConfig.enabled}
                 />
                 <WeightField
                   value={signedConfig.weight}
@@ -746,6 +778,7 @@ export default function CompareNumbersGame() {
                     sanitizeSignedConfig({ weight: value })
                   }
                   label={tr("weights.label")!}
+                  disabled={!signedConfig.enabled}
                 />
               </TypeCard>
 
@@ -754,13 +787,16 @@ export default function CompareNumbersGame() {
                 title={tr("types.decimal.title")}
                 description={tr("types.decimal.desc")}
                 enabled={decimalConfig.enabled}
-                onEnabledChange={(checked) =>
-                  sanitizeDecimalConfig({ enabled: checked })
-                }
+                onEnabledChange={(checked) => {
+                  sanitizeDecimalConfig({ enabled: checked });
+                  if (checked) openModeSection("decimal");
+                }}
                 showAvailabilityError={
                   decimalConfig.enabled && !typeAvailableMap.decimal
                 }
                 availabilityText={tr("types.messages.decimalRange")}
+                open={modeOpen.decimal}
+                onToggle={() => toggleModeSection("decimal")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -772,6 +808,7 @@ export default function CompareNumbersGame() {
                       type="number"
                       step="0.1"
                       value={decimalConfig.min}
+                      disabled={!decimalConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const min = Number.isFinite(value)
@@ -793,6 +830,7 @@ export default function CompareNumbersGame() {
                       type="number"
                       step="0.1"
                       value={decimalConfig.max}
+                      disabled={!decimalConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const max = Number.isFinite(value)
@@ -818,8 +856,12 @@ export default function CompareNumbersGame() {
                             val as DecimalState["precisionMode"],
                         })
                       }
+                      disabled={!decimalConfig.enabled}
                     >
-                      <SelectTrigger id="decimal-mode">
+                      <SelectTrigger
+                        id="decimal-mode"
+                        disabled={!decimalConfig.enabled}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -855,8 +897,12 @@ export default function CompareNumbersGame() {
                           sanitizeDecimalConfig({ maxPrecision: num });
                         }
                       }}
+                      disabled={!decimalConfig.enabled}
                     >
-                      <SelectTrigger id="decimal-precision">
+                      <SelectTrigger
+                        id="decimal-precision"
+                        disabled={!decimalConfig.enabled}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -885,6 +931,7 @@ export default function CompareNumbersGame() {
                   }
                   labelMin={tr("gap.min")!}
                   labelMax={tr("gap.max")!}
+                  disabled={!decimalConfig.enabled}
                 />
                 <WeightField
                   value={decimalConfig.weight}
@@ -892,6 +939,7 @@ export default function CompareNumbersGame() {
                     sanitizeDecimalConfig({ weight: value })
                   }
                   label={tr("weights.label")!}
+                  disabled={!decimalConfig.enabled}
                 />
               </TypeCard>
 
@@ -900,13 +948,16 @@ export default function CompareNumbersGame() {
                 title={tr("types.fraction.title")}
                 description={tr("types.fraction.desc")}
                 enabled={fractionConfig.enabled}
-                onEnabledChange={(checked) =>
-                  sanitizeFractionConfig({ enabled: checked })
-                }
+                onEnabledChange={(checked) => {
+                  sanitizeFractionConfig({ enabled: checked });
+                  if (checked) openModeSection("fraction");
+                }}
                 showAvailabilityError={
                   fractionConfig.enabled && !typeAvailableMap.fraction
                 }
                 availabilityText={tr("types.messages.unavailable")}
+                open={modeOpen.fraction}
+                onToggle={() => toggleModeSection("fraction")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -920,8 +971,12 @@ export default function CompareNumbersGame() {
                           preset: val as FractionState["preset"],
                         })
                       }
+                      disabled={!fractionConfig.enabled}
                     >
-                      <SelectTrigger id="fraction-mode">
+                      <SelectTrigger
+                        id="fraction-mode"
+                        disabled={!fractionConfig.enabled}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -946,6 +1001,10 @@ export default function CompareNumbersGame() {
                       type="number"
                       min={1}
                       value={fractionConfig.numeratorMin}
+                      disabled={
+                        !fractionConfig.enabled ||
+                        fractionConfig.preset !== "custom"
+                      }
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const min = Number.isFinite(value)
@@ -956,7 +1015,6 @@ export default function CompareNumbersGame() {
                           numeratorMax: Math.max(min, fractionConfig.numeratorMax),
                         });
                       }}
-                      disabled={fractionConfig.preset !== "custom"}
                     />
                   </LabeledField>
                   <LabeledField
@@ -968,6 +1026,10 @@ export default function CompareNumbersGame() {
                       type="number"
                       min={1}
                       value={fractionConfig.numeratorMax}
+                      disabled={
+                        !fractionConfig.enabled ||
+                        fractionConfig.preset !== "custom"
+                      }
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const max = Number.isFinite(value)
@@ -980,7 +1042,6 @@ export default function CompareNumbersGame() {
                           ),
                         });
                       }}
-                      disabled={fractionConfig.preset !== "custom"}
                     />
                   </LabeledField>
                   <LabeledField
@@ -992,6 +1053,10 @@ export default function CompareNumbersGame() {
                       type="number"
                       min={1}
                       value={fractionConfig.denominatorMin}
+                      disabled={
+                        !fractionConfig.enabled ||
+                        fractionConfig.preset !== "custom"
+                      }
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const min = Number.isFinite(value)
@@ -1002,7 +1067,6 @@ export default function CompareNumbersGame() {
                           denominatorMax: Math.max(min, fractionConfig.denominatorMax),
                         });
                       }}
-                      disabled={fractionConfig.preset !== "custom"}
                     />
                   </LabeledField>
                   <LabeledField
@@ -1014,6 +1078,10 @@ export default function CompareNumbersGame() {
                       type="number"
                       min={1}
                       value={fractionConfig.denominatorMax}
+                      disabled={
+                        !fractionConfig.enabled ||
+                        fractionConfig.preset !== "custom"
+                      }
                       onChange={(event) => {
                         const value = Number(event.target.value);
                         const max = Number.isFinite(value)
@@ -1026,7 +1094,6 @@ export default function CompareNumbersGame() {
                           ),
                         });
                       }}
-                      disabled={fractionConfig.preset !== "custom"}
                     />
                   </LabeledField>
                 </div>
@@ -1046,6 +1113,7 @@ export default function CompareNumbersGame() {
                   }
                   labelMin={tr("gap.min")!}
                   labelMax={tr("gap.max")!}
+                  disabled={!fractionConfig.enabled}
                 />
                 <WeightField
                   value={fractionConfig.weight}
@@ -1053,6 +1121,7 @@ export default function CompareNumbersGame() {
                     sanitizeFractionConfig({ weight: value })
                   }
                   label={tr("weights.label")!}
+                  disabled={!fractionConfig.enabled}
                 />
               </TypeCard>
             </div>
@@ -1293,9 +1362,9 @@ export default function CompareNumbersGame() {
 
               <aside className="h-full overflow-hidden rounded-xl border bg-muted/40">
               <div className="flex items-center justify-between border-b bg-muted/60 px-4 py-3">
-                <CardTitle className="text-base font-semibold">
+                <div className="text-base font-semibold">
                   {tr("history.title")}
-                </CardTitle>
+                </div>
                 <span className="text-xs text-muted-foreground">
                   {tr("history.total", { count: history.length })}
                 </span>
@@ -1442,6 +1511,8 @@ function TypeCard({
   children,
   showAvailabilityError,
   availabilityText,
+  open,
+  onToggle,
 }: {
   id: string;
   title: string;
@@ -1451,31 +1522,61 @@ function TypeCard({
   children: React.ReactNode;
   showAvailabilityError: boolean;
   availabilityText: string | null;
+  open: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <Card
-      className={`rounded-2xl border shadow-sm ${enabled ? "" : "opacity-80"}`}
-    >
-      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
-        <div>
-          <CardTitle className="text-base font-semibold">{title}</CardTitle>
-          <p className="text-sm text-muted-foreground">{description}</p>
+    <Card className="rounded-2xl border shadow-sm bg-card/70 backdrop-blur">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+        aria-expanded={open}
+        aria-controls={`${id}-panel`}
+        onClick={onToggle}
+      >
+        <div className="flex-1">
+          <div className="text-base font-semibold leading-tight">{title}</div>
+          <p className="text-sm text-muted-foreground leading-snug">
+            {description}
+          </p>
         </div>
-        <Checkbox
-          id={`${id}-toggle`}
-          checked={enabled}
-          onCheckedChange={(checked) => onEnabledChange(Boolean(checked))}
-          aria-label={title}
-        />
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        {children}
+        <div className="flex items-center gap-3">
+          <Checkbox
+            id={`${id}-toggle`}
+            checked={enabled}
+            onCheckedChange={(checked) => onEnabledChange(Boolean(checked))}
+            aria-label={title}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          />
+          <ChevronDown
+            aria-hidden
+            className={cn(
+              "size-4 transition-transform duration-200",
+              open ? "rotate-180" : "rotate-0",
+            )}
+          />
+        </div>
+      </button>
+      <div
+        id={`${id}-panel`}
+        className={cn(
+          "border-t border-border/60 px-5 pb-5",
+          open ? "grid gap-4 pt-5" : "hidden",
+        )}
+      >
+        <fieldset
+          disabled={!enabled}
+          className={cn("space-y-4", !enabled && "opacity-60")}
+        >
+          {children}
+        </fieldset>
         {showAvailabilityError && availabilityText && (
           <p className="text-xs font-medium text-destructive">
             {availabilityText}
           </p>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }
@@ -1505,6 +1606,7 @@ function GapFields({
   onMaxChange,
   labelMin,
   labelMax,
+  disabled = false,
 }: {
   idPrefix: string;
   minValue: number;
@@ -1513,6 +1615,7 @@ function GapFields({
   onMaxChange: (value: number | null) => void;
   labelMin: string;
   labelMax: string;
+  disabled?: boolean;
 }) {
   const minId = `${idPrefix}-gap-min`;
   const maxId = `${idPrefix}-gap-max`;
@@ -1525,6 +1628,7 @@ function GapFields({
           min={0}
           step="0.1"
           value={minValue}
+          disabled={disabled}
           onChange={(event) => {
             const value = Number(event.target.value);
             onMinChange(Number.isFinite(value) ? Math.max(0, value) : 0);
@@ -1538,6 +1642,7 @@ function GapFields({
           min={0}
           step="0.1"
           value={maxValue ?? ""}
+          disabled={disabled}
           onChange={(event) => {
             if (event.target.value === "") {
               onMaxChange(null);
@@ -1557,10 +1662,12 @@ function WeightField({
   value,
   onChange,
   label,
+  disabled = false,
 }: {
   value: number;
   onChange: (value: number) => void;
   label: string;
+  disabled?: boolean;
 }) {
   return (
     <div className="grid gap-2">
@@ -1571,6 +1678,7 @@ function WeightField({
           min={0}
           max={100}
           value={value}
+          disabled={disabled}
           onChange={(event) => onChange(Number(event.target.value))}
           className="w-full"
         />
@@ -1579,6 +1687,7 @@ function WeightField({
           min={0}
           max={100}
           value={value}
+          disabled={disabled}
           onChange={(event) => {
             const val = Number(event.target.value);
             onChange(
