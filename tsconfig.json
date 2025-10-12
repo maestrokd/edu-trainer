@@ -10,7 +10,10 @@
     "strict": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] },
+    "paths": {
+      "@/*": ["src/*"],
+      "@radix-ui/react-accordion": ["src/stubs/radix-accordion"]
+    },
     "moduleResolution": "Bundler",
     "types": ["vitest/globals"]
   }
