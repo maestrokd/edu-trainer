@@ -34,7 +34,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Settings } from "lucide-react";
 
 import ThemeToggle from "@/components/menu/ThemeToggle";
 import LanguageSelector, {
@@ -155,12 +156,7 @@ export default function CompareNumbersGame() {
     gap: { min: 0, max: null },
   });
 
-  const [modeOpen, setModeOpen] = React.useState<Record<ModeKey, boolean>>({
-    nonNegative: false,
-    signed: false,
-    decimal: false,
-    fraction: false,
-  });
+  const [openMode, setOpenMode] = React.useState<ModeKey | undefined>(undefined);
 
   const [equalRatio, setEqualRatio] = React.useState<number>(10);
   const [timerMinutes, setTimerMinutes] = React.useState<number>(0);
@@ -169,12 +165,15 @@ export default function CompareNumbersGame() {
   const [enableSound, setEnableSound] = React.useState<boolean>(false);
   const [enableVibration, setEnableVibration] = React.useState<boolean>(false);
 
-  const toggleModeSection = React.useCallback((key: ModeKey) => {
-    setModeOpen((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  const handleAccordionChange = React.useCallback((value: string | undefined) => {
+    if (!value) {
+      setOpenMode(undefined);
+      return;
+    }
 
-  const openModeSection = React.useCallback((key: ModeKey) => {
-    setModeOpen((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+    if (value === "nonNegative" || value === "signed" || value === "decimal" || value === "fraction") {
+      setOpenMode(value);
+    }
   }, []);
 
   const [correctCount, setCorrectCount] = React.useState<number>(0);
@@ -605,22 +604,26 @@ export default function CompareNumbersGame() {
               {tr("setup.intro")}
             </p>
 
-            <div className="mt-6 space-y-4">
+            <Accordion
+              type="single"
+              collapsible
+              value={openMode}
+              onValueChange={handleAccordionChange}
+              className="mt-6 space-y-3"
+            >
               <TypeCard
                 id="non-negative"
+                value="nonNegative"
                 title={tr("types.nonNegative.title")}
                 description={tr("types.nonNegative.desc")}
                 enabled={nonNegativeConfig.enabled}
                 onEnabledChange={(checked) => {
                   sanitizeNonNegativeConfig({ enabled: checked });
-                  if (checked) openModeSection("nonNegative");
                 }}
                 showAvailabilityError={
                   nonNegativeConfig.enabled && !typeAvailableMap.nonNegativeInt
                 }
                 availabilityText={tr("types.messages.unavailable")}
-                open={modeOpen.nonNegative}
-                onToggle={() => toggleModeSection("nonNegative")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -697,19 +700,17 @@ export default function CompareNumbersGame() {
 
               <TypeCard
                 id="signed"
+                value="signed"
                 title={tr("types.signed.title")}
                 description={tr("types.signed.desc")}
                 enabled={signedConfig.enabled}
                 onEnabledChange={(checked) => {
                   sanitizeSignedConfig({ enabled: checked });
-                  if (checked) openModeSection("signed");
                 }}
                 showAvailabilityError={
                   signedConfig.enabled && !typeAvailableMap.signedInt
                 }
                 availabilityText={tr("types.messages.unavailable")}
-                open={modeOpen.signed}
-                onToggle={() => toggleModeSection("signed")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -784,19 +785,17 @@ export default function CompareNumbersGame() {
 
               <TypeCard
                 id="decimal"
+                value="decimal"
                 title={tr("types.decimal.title")}
                 description={tr("types.decimal.desc")}
                 enabled={decimalConfig.enabled}
                 onEnabledChange={(checked) => {
                   sanitizeDecimalConfig({ enabled: checked });
-                  if (checked) openModeSection("decimal");
                 }}
                 showAvailabilityError={
                   decimalConfig.enabled && !typeAvailableMap.decimal
                 }
                 availabilityText={tr("types.messages.decimalRange")}
-                open={modeOpen.decimal}
-                onToggle={() => toggleModeSection("decimal")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -945,19 +944,17 @@ export default function CompareNumbersGame() {
 
               <TypeCard
                 id="fraction"
+                value="fraction"
                 title={tr("types.fraction.title")}
                 description={tr("types.fraction.desc")}
                 enabled={fractionConfig.enabled}
                 onEnabledChange={(checked) => {
                   sanitizeFractionConfig({ enabled: checked });
-                  if (checked) openModeSection("fraction");
                 }}
                 showAvailabilityError={
                   fractionConfig.enabled && !typeAvailableMap.fraction
                 }
                 availabilityText={tr("types.messages.unavailable")}
-                open={modeOpen.fraction}
-                onToggle={() => toggleModeSection("fraction")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <LabeledField
@@ -1124,7 +1121,7 @@ export default function CompareNumbersGame() {
                   disabled={!fractionConfig.enabled}
                 />
               </TypeCard>
-            </div>
+            </Accordion>
 
             <Separator className="my-6" />
 
@@ -1504,6 +1501,7 @@ function useAccurateTimer(active: boolean) {
 
 function TypeCard({
   id,
+  value,
   title,
   description,
   enabled,
@@ -1511,10 +1509,9 @@ function TypeCard({
   children,
   showAvailabilityError,
   availabilityText,
-  open,
-  onToggle,
 }: {
   id: string;
+  value: ModeKey;
   title: string;
   description: string;
   enabled: boolean;
@@ -1522,25 +1519,22 @@ function TypeCard({
   children: React.ReactNode;
   showAvailabilityError: boolean;
   availabilityText: string | null;
-  open: boolean;
-  onToggle: () => void;
 }) {
   return (
-    <Card className="rounded-2xl border shadow-sm bg-card/70 backdrop-blur">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-        aria-expanded={open}
-        aria-controls={`${id}-panel`}
-        onClick={onToggle}
-      >
-        <div className="flex-1">
-          <div className="text-base font-semibold leading-tight">{title}</div>
-          <p className="text-sm text-muted-foreground leading-snug">
-            {description}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+    <AccordionItem
+      value={value}
+      className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm backdrop-blur"
+    >
+      <AccordionTrigger className="px-3 py-3 text-left text-sm font-medium hover:no-underline data-[state=open]:bg-muted/40 sm:px-5 sm:py-4 sm:text-base">
+        <div className="flex w-full items-center gap-3">
+          <div className="flex-1 text-left">
+            <div className="text-sm font-semibold leading-tight sm:text-base">
+              {title}
+            </div>
+            <p className="text-xs leading-snug text-muted-foreground sm:text-sm">
+              {description}
+            </p>
+          </div>
           <Checkbox
             id={`${id}-toggle`}
             checked={enabled}
@@ -1549,35 +1543,25 @@ function TypeCard({
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
           />
-          <ChevronDown
-            aria-hidden
-            className={cn(
-              "size-4 transition-transform duration-200",
-              open ? "rotate-180" : "rotate-0",
-            )}
-          />
         </div>
-      </button>
-      <div
-        id={`${id}-panel`}
-        className={cn(
-          "border-t border-border/60 px-5 pb-5",
-          open ? "grid gap-4 pt-5" : "hidden",
-        )}
-      >
+      </AccordionTrigger>
+      <AccordionContent className="px-3 pb-4 sm:px-5">
         <fieldset
           disabled={!enabled}
-          className={cn("space-y-4", !enabled && "opacity-60")}
+          className={cn(
+            "space-y-3 pt-3 sm:space-y-5 sm:pt-4",
+            !enabled && "opacity-60",
+          )}
         >
           {children}
         </fieldset>
         {showAvailabilityError && availabilityText && (
-          <p className="text-xs font-medium text-destructive">
+          <p className="pt-3 text-xs font-medium text-destructive">
             {availabilityText}
           </p>
         )}
-      </div>
-    </Card>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
 
