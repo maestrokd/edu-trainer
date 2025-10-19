@@ -518,6 +518,9 @@ export default function CompareNumbersGame() {
     const leftLength = exercise?.left.display.length ?? 0;
     const rightLength = exercise?.right.display.length ?? 0;
     const maxLength = Math.max(leftLength, rightLength);
+    if (maxLength > 26) {
+      return "text-lg sm:text-2xl";
+    }
     if (maxLength > 20) {
       return "text-xl sm:text-3xl";
     }
@@ -1329,17 +1332,17 @@ export default function CompareNumbersGame() {
                     <div
                       key={taskId}
                       className={cn(
-                        "mt-4 grid grid-cols-3 items-center gap-4",
+                        "mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center justify-items-center gap-2 sm:gap-4",
                         displaySizeClass,
                       )}
                     >
-                      <span className="font-semibold break-words text-center">
+                      <span className="font-semibold whitespace-nowrap text-center leading-tight">
                         {exercise?.left.display ?? ""}
                       </span>
                       <span className="font-semibold text-muted-foreground">
                         ?
                       </span>
-                      <span className="font-semibold break-words text-center">
+                      <span className="font-semibold whitespace-nowrap text-center leading-tight">
                         {exercise?.right.display ?? ""}
                       </span>
                     </div>
