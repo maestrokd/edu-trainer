@@ -124,7 +124,9 @@ const NOTIFICATION_STYLES: Record<NotificationVariant, string> = {
   muted: "border-muted-foreground/30 bg-muted/50 text-muted-foreground",
 };
 
-interface NotificationBannerProps extends React.ComponentProps<typeof Alert> {
+type AlertProps = React.ComponentProps<typeof Alert>;
+
+interface NotificationBannerProps extends Omit<AlertProps, "variant"> {
   variant?: NotificationVariant;
   children: React.ReactNode;
 }
@@ -441,6 +443,8 @@ export default function CompareNumbersGame() {
     return `${pad(minutes)}:${pad(remaining)}`;
   }, []);
 
+  const sessionEnded = screen === "play" && gameOver;
+
   const feedbackNotification = React.useMemo<NotificationPayload | null>(() => {
     if (!feedback) return null;
     if (feedback.type === "correct") {
@@ -629,8 +633,6 @@ export default function CompareNumbersGame() {
     }
     setTaskId((id) => id + 1);
   }, [screen, startSession, resetTimer]);
-
-  const sessionEnded = screen === "play" && gameOver;
 
   const displaySizeClass = React.useMemo(() => {
     const leftLength = exercise?.left.display.length ?? 0;
