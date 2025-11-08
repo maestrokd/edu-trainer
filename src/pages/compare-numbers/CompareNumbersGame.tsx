@@ -107,6 +107,57 @@ type EndReason = "time" | "ex" | "generator" | null;
 
 const PRECISION_OPTIONS = [0, 1, 2, 3, 4];
 
+type NotificationVariant =
+  | "success"
+  | "error"
+  | "info"
+  | "warning"
+  | "muted";
+
+const NOTIFICATION_STYLES: Record<NotificationVariant, string> = {
+  success:
+    "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
+  error: "border-destructive/40 bg-destructive/10 text-destructive",
+  info: "border-primary/30 bg-primary/10 text-primary",
+  warning:
+    "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200",
+  muted: "border-muted-foreground/30 bg-muted/50 text-muted-foreground",
+};
+
+type AlertProps = React.ComponentProps<typeof Alert>;
+
+interface NotificationBannerProps extends Omit<AlertProps, "variant"> {
+  variant?: NotificationVariant;
+  children: React.ReactNode;
+}
+
+function NotificationBanner({
+  variant = "info",
+  children,
+  className,
+  ...alertProps
+}: NotificationBannerProps) {
+  return (
+    <Alert
+      {...alertProps}
+      className={cn(
+        "flex flex-col items-center justify-center px-4 py-3 text-center",
+        NOTIFICATION_STYLES[variant],
+        className,
+      )}
+    >
+      <AlertDescription className="text-sm font-medium">
+        {children}
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+interface NotificationPayload {
+  message: React.ReactNode;
+  variant: NotificationVariant;
+}
+
 export default function CompareNumbersGame() {
   const { t } = useTranslation();
   const tr = React.useCallback(
@@ -392,6 +443,67 @@ export default function CompareNumbersGame() {
     return `${pad(minutes)}:${pad(remaining)}`;
   }, []);
 
+  const sessionEnded = screen === "play" && gameOver;
+
+  const feedbackNotification = React.useMemo<NotificationPayload | null>(() => {
+    if (!feedback) return null;
+    if (feedback.type === "correct") {
+      return {
+        variant: "success",
+        message: tr("feedback.correct"),
+      };
+    }
+    return {
+      variant: "error",
+      message: tr("feedback.wrong", {
+        user: symbolLabel(feedback.userRelation, tr),
+        correct: symbolLabel(feedback.correctRelation, tr),
+      }),
+    };
+  }, [feedback, tr]);
+
+  const sessionNotification = React.useMemo<NotificationPayload | null>(() => {
+    if (!sessionEnded || !endReason) {
+      return null;
+    }
+
+    if (endReason === "time") {
+      return {
+        variant: "warning",
+        message: tr("finished.time"),
+      };
+    }
+
+    if (endReason === "ex") {
+      return {
+        variant: "info",
+        message: tr("finished.exercises", {
+          count: maxExercises ?? totalExercises,
+        }),
+      };
+    }
+
+    if (endReason === "generator") {
+      return {
+        variant: "warning",
+        message: tr("finished.generator"),
+      };
+    }
+
+    return null;
+  }, [endReason, maxExercises, sessionEnded, totalExercises, tr]);
+
+  const activeNotifications = React.useMemo<NotificationPayload[]>(() => {
+    if (sessionNotification) {
+      return [sessionNotification];
+    }
+
+    return [feedbackNotification].filter(
+      (notification): notification is NotificationPayload =>
+        notification !== null,
+    );
+  }, [feedbackNotification, sessionNotification]);
+
   function sanitizeNonNegativeConfig(update: Partial<IntegerState>) {
     setNonNegativeConfig((prev) => {
       const next = { ...prev, ...update };
@@ -525,8 +637,6 @@ export default function CompareNumbersGame() {
     }
     setTaskId((id) => id + 1);
   }, [screen, startSession, resetTimer]);
-
-  const sessionEnded = screen === "play" && gameOver;
 
   const displaySizeClass = React.useMemo(() => {
     const leftLength = exercise?.left.display.length ?? 0;
@@ -1287,9 +1397,10 @@ export default function CompareNumbersGame() {
               />
             </div>
 
-            <Alert className="mt-6 bg-background/40">
-              <AlertDescription>{tr("telemetry.note")}</AlertDescription>
-            </Alert>
+            {/* Always visible so players know telemetry is collected before starting a session. */}
+            <NotificationBanner variant="muted" className="mt-6">
+              {tr("telemetry.note")}
+            </NotificationBanner>
 
             <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2">
               <Button
@@ -1308,17 +1419,6 @@ export default function CompareNumbersGame() {
           <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 sm:mt-6 flex-1 overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-6 h-full min-h-0">
               <div className="flex flex-col min-h-0">
-                {sessionEnded && (
-                  <Alert className="mb-4">
-                    <AlertDescription>
-                      {endReason === "time" && tr("finished.time")}
-                      {endReason === "ex" &&
-                        tr("finished.exercises", { count: maxExercises })}
-                      {endReason === "generator" && tr("finished.generator")}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
                 <div
                   ref={focusRef}
                   tabIndex={-1}
@@ -1348,16 +1448,16 @@ export default function CompareNumbersGame() {
                     />
                   </div>
 
-                  {feedback && (
-                    <div
-                      className={`rounded-xl border px-4 py-3 text-sm font-medium ${feedback.type === "correct" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200" : "border-destructive/40 bg-destructive/10 text-destructive"}`}
-                    >
-                      {feedback.type === "correct"
-                        ? tr("feedback.correct")
-                        : tr("feedback.wrong", {
-                            user: symbolLabel(feedback.userRelation, tr),
-                            correct: symbolLabel(feedback.correctRelation, tr),
-                          })}
+                  {activeNotifications.length > 0 && (
+                    <div className="space-y-3">
+                      {activeNotifications.map((notification, index) => (
+                        <NotificationBanner
+                          key={`${notification.variant}-${index}`}
+                          variant={notification.variant}
+                        >
+                          {notification.message}
+                        </NotificationBanner>
+                      ))}
                     </div>
                   )}
 
