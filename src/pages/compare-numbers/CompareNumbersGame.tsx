@@ -159,8 +159,8 @@ export default function CompareNumbersGame() {
   const [openMode, setOpenMode] = React.useState<ModeKey | undefined>(undefined);
 
   const [equalRatio, setEqualRatio] = React.useState<number>(10);
-  const [timerMinutes, setTimerMinutes] = React.useState<number>(0);
-  const [maxExercises, setMaxExercises] = React.useState<number>(0);
+  const [timerMinutes, setTimerMinutes] = React.useState<number | null>(null);
+  const [maxExercises, setMaxExercises] = React.useState<number | null>(null);
   const [historyOrder, setHistoryOrder] = React.useState<HistoryOrder>("asc");
   const [enableSound, setEnableSound] = React.useState<boolean>(false);
   const [enableVibration, setEnableVibration] = React.useState<boolean>(false);
@@ -261,6 +261,9 @@ export default function CompareNumbersGame() {
     ],
   );
 
+  const exercisesLimit =
+    maxExercises !== null && maxExercises > 0 ? maxExercises : null;
+
   const handleAnswer = React.useCallback(
     (relation: CompareRelation) => {
       if (!exercise || gameOver) return;
@@ -291,7 +294,7 @@ export default function CompareNumbersGame() {
       triggerFeedback(isCorrect);
 
       const total = history.length + 1;
-      if (maxExercises > 0 && total >= maxExercises) {
+      if (exercisesLimit !== null && total >= exercisesLimit) {
         finishSession("ex");
         return;
       }
@@ -310,7 +313,7 @@ export default function CompareNumbersGame() {
       exercise,
       gameOver,
       history.length,
-      maxExercises,
+      exercisesLimit,
       triggerFeedback,
       finishSession,
       generatorPreview,
@@ -336,13 +339,27 @@ export default function CompareNumbersGame() {
   const accuracy =
     totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
 
+  const timerLimitMinutes =
+    timerMinutes !== null && timerMinutes > 0 ? timerMinutes : null;
+  const hasTimer = timerLimitMinutes !== null;
+  const timeLeft =
+    timerLimitMinutes !== null
+      ? Math.max(0, timerLimitMinutes * 60 - elapsedSec)
+      : null;
+
   React.useEffect(() => {
     if (!timerActive) return;
-    if (timerMinutes <= 0) return;
-    if (elapsedSec >= timerMinutes * 60) {
+    if (!hasTimer) return;
+    if (elapsedSec >= timerLimitMinutes * 60) {
       finishSession("time");
     }
-  }, [elapsedSec, timerMinutes, timerActive, finishSession]);
+  }, [
+    elapsedSec,
+    hasTimer,
+    timerLimitMinutes,
+    timerActive,
+    finishSession,
+  ]);
 
   React.useEffect(() => {
     if (!timerActive) return;
@@ -374,9 +391,6 @@ export default function CompareNumbersGame() {
     const pad = (n: number) => n.toString().padStart(2, "0");
     return `${pad(minutes)}:${pad(remaining)}`;
   }, []);
-
-  const timeLeft =
-    timerMinutes > 0 ? Math.max(0, timerMinutes * 60 - elapsedSec) : 0;
 
   function sanitizeNonNegativeConfig(update: Partial<IntegerState>) {
     setNonNegativeConfig((prev) => {
@@ -1200,11 +1214,22 @@ export default function CompareNumbersGame() {
                   id="timer-min"
                   type="number"
                   min={0}
-                  value={timerMinutes}
+                  value={timerMinutes ?? ""}
+                  placeholder="∞"
                   onChange={(event) => {
-                    const value = Number(event.target.value);
+                    if (event.target.value === "") {
+                      setTimerMinutes(null);
+                      return;
+                    }
+                    const value = parseInt(event.target.value, 10);
                     setTimerMinutes(
-                      Number.isFinite(value) ? Math.max(0, value) : 0,
+                      Number.isFinite(value) ? Math.max(0, value) : null,
+                    );
+                  }}
+                  onBlur={(event) => {
+                    const value = parseInt(event.target.value, 10);
+                    setTimerMinutes(
+                      Number.isFinite(value) && value > 0 ? value : null,
                     );
                   }}
                 />
@@ -1220,11 +1245,22 @@ export default function CompareNumbersGame() {
                   id="max-exercises"
                   type="number"
                   min={0}
-                  value={maxExercises}
+                  value={maxExercises ?? ""}
+                  placeholder="∞"
                   onChange={(event) => {
-                    const value = Number(event.target.value);
+                    if (event.target.value === "") {
+                      setMaxExercises(null);
+                      return;
+                    }
+                    const value = parseInt(event.target.value, 10);
                     setMaxExercises(
-                      Number.isFinite(value) ? Math.max(0, value) : 0,
+                      Number.isFinite(value) ? Math.max(0, value) : null,
+                    );
+                  }}
+                  onBlur={(event) => {
+                    const value = parseInt(event.target.value, 10);
+                    setMaxExercises(
+                      Number.isFinite(value) && value > 0 ? value : null,
                     );
                   }}
                 />
@@ -1300,13 +1336,13 @@ export default function CompareNumbersGame() {
                     />
                     <StatCard
                       label={
-                        timerMinutes > 0
+                        hasTimer
                           ? tr("stats.timeLeft")
                           : tr("stats.time")
                       }
                       value={
-                        timerMinutes > 0
-                          ? formatTime(timeLeft)
+                        hasTimer
+                          ? formatTime(timeLeft ?? 0)
                           : formatTime(elapsedSec)
                       }
                     />
