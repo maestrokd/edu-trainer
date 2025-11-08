@@ -1202,7 +1202,11 @@ export default function CompareNumbersGame() {
                   min={0}
                   value={timerMinutes}
                   onChange={(event) => {
-                    const value = Number(event.target.value);
+                    const value = parseInt(event.target.value, 10);
+                    setTimerMinutes(value);
+                  }}
+                  onBlur={(event) => {
+                    const value = parseInt(event.target.value, 10);
                     setTimerMinutes(
                       Number.isFinite(value) ? Math.max(0, value) : 0,
                     );
@@ -1222,7 +1226,11 @@ export default function CompareNumbersGame() {
                   min={0}
                   value={maxExercises}
                   onChange={(event) => {
-                    const value = Number(event.target.value);
+                    const value = parseInt(event.target.value, 10);
+                    setMaxExercises(value);
+                  }}
+                  onBlur={(event) => {
+                    const value = parseInt(event.target.value, 10);
                     setMaxExercises(
                       Number.isFinite(value) ? Math.max(0, value) : 0,
                     );
