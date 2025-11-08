@@ -494,10 +494,11 @@ export default function CompareNumbersGame() {
   }, [endReason, maxExercises, sessionEnded, totalExercises, tr]);
 
   const activeNotifications = React.useMemo(() => {
-    return [feedbackNotification, sessionNotification].filter(
-      (notification): notification is NotificationPayload =>
-        notification !== null,
-    );
+    if (sessionNotification) {
+      return [sessionNotification];
+    }
+
+    return feedbackNotification ? [feedbackNotification] : [];
   }, [feedbackNotification, sessionNotification]);
 
   function sanitizeNonNegativeConfig(update: Partial<IntegerState>) {
