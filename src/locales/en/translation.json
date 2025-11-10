@@ -14,7 +14,13 @@
     "noResults": "No results",
     "allGames": "All games",
     "sidebarLabel": "Games",
-    "categories": { "title": "Categories", "all": "All", "math": "Math Trainers", "arcade": "Arcade", "info": "Info" },
+    "categories": {
+      "title": "Categories",
+      "all": "All",
+      "math": "Math Trainers",
+      "arcade": "Arcade",
+      "info": "Info"
+    },
     "play": "Play",
     "favorite": "Add to favorites",
     "unfavorite": "Remove from favorites",
@@ -25,11 +31,30 @@
     "futureSectionsHint": "Favorites and recent will appear here soon."
   },
   "games": {
-    "multiplication1": { "title": "Multiplication Trainer 1", "desc": "Practice multiplication facts." },
-    "multiplication2": { "title": "Multiplication Trainer 2", "desc": "Advanced practice & drills." },
-    "rounding1": { "title": "Rounding Trainer 1", "desc": "Round numbers to tens and hundreds." },
-    "rounding2": { "title": "Rounding Trainer 2", "desc": "More rounding challenges." },
-    "rabbit": { "title": "Jumping Rabbit", "desc": "Arcade jumping with math twists." }
+    "multiplication1": {
+      "title": "Multiplication Trainer 1",
+      "desc": "Practice multiplication facts."
+    },
+    "multiplication2": {
+      "title": "Multiplication Trainer 2",
+      "desc": "Advanced practice & drills."
+    },
+    "compareNumbers": {
+      "title": "Compare Numbers Trainer",
+      "desc": "Practice comparing integers, decimals, and fractions."
+    },
+    "rounding1": {
+      "title": "Rounding Trainer 1",
+      "desc": "Round numbers to tens and hundreds."
+    },
+    "rounding2": {
+      "title": "Rounding Trainer 2",
+      "desc": "More rounding challenges."
+    },
+    "rabbit": {
+      "title": "Jumping Rabbit",
+      "desc": "Arcade jumping with math twists."
+    }
   },
   "multiT": {
     "menu": "Menu",
@@ -244,7 +269,11 @@
     },
     "expl": {
       "template": "Round to {{target}}: look at {{lower}} ({{check}}) → {{direction}}",
-      "target": { "tens": "tens", "hundreds": "hundreds", "thousands": "thousands" },
+      "target": {
+        "tens": "tens",
+        "hundreds": "hundreds",
+        "thousands": "thousands"
+      },
       "lower": { "ones": "ones", "tens": "tens", "hundreds": "hundreds" },
       "dir": { "up": "up", "down": "down" }
     },
@@ -252,6 +281,154 @@
       "placeholder": "your answer",
       "submit": "Submit",
       "hint": "Press Enter to submit, Esc to clear."
+    }
+  },
+  "cmpNmbrGm": {
+    "menu": "Menu",
+    "title": "Compare Numbers Trainer",
+    "aria": {
+      "backToMenu": "Back to menu",
+      "openMenu": "Open quick menu"
+    },
+    "menuLabel": "Compare numbers menu",
+    "actions": {
+      "newSession": "New session",
+      "changeSetup": "Change setup",
+      "toMenu": "Main menu"
+    },
+    "summary": {
+      "enabledTypes": "Active types: {{types}}",
+      "equal": "Equal answers: {{ratio}}%"
+    },
+    "setup": {
+      "title": "Setup",
+      "intro": "Choose the number types, ranges, and practice settings you want to include.",
+      "start": "Start training"
+    },
+    "types": {
+      "nonNegative": {
+        "title": "Whole numbers (0 and above)",
+        "desc": "Practice with non-negative integers in your chosen range."
+      },
+      "signed": {
+        "title": "Integers with negatives",
+        "desc": "Include negative numbers together with positives."
+      },
+      "decimal": {
+        "title": "Decimals",
+        "desc": "Generate decimal numbers with configurable precision."
+      },
+      "fraction": {
+        "title": "Fractions",
+        "desc": "Compare simplified fractions in friendly ranges."
+      },
+      "messages": {
+        "unavailable": "Adjust the range to enable generation.",
+        "decimalRange": "Update the decimal range or precision to generate values.",
+        "fractionRange": "Update the fraction ranges to generate values."
+      },
+      "labels": {
+        "nonNegative": "Whole numbers",
+        "signed": "Integers",
+        "decimal": "Decimals",
+        "fraction": "Fractions",
+        "none": "None"
+      }
+    },
+    "ranges": {
+      "min": "Minimum",
+      "max": "Maximum"
+    },
+    "gap": {
+      "min": "Minimum gap",
+      "max": "Maximum gap"
+    },
+    "weights": {
+      "label": "Type weight (%)"
+    },
+    "precision": {
+      "mode": "Precision mode",
+      "exact": "Fixed number of decimal places",
+      "upTo": "Up to a maximum",
+      "exactValue": "Decimal places",
+      "maxValue": "Maximum decimal places",
+      "option_zero": "0 decimal places",
+      "option_one": "{{count}} decimal place",
+      "option_other": "{{count}} decimal places"
+    },
+    "fractions": {
+      "mode": "Fraction presets",
+      "preset12": "Friendly (1–12)",
+      "preset20": "Extended (1–20)",
+      "custom": "Custom range",
+      "numerator": "Numerator min",
+      "numeratorMax": "Numerator max",
+      "denominator": "Denominator min",
+      "denominatorMax": "Denominator max"
+    },
+    "equal": {
+      "label": "Equal answers ratio",
+      "hint": "Controls how often tasks use '=' (0–50%)."
+    },
+    "history": {
+      "title": "History",
+      "total": "Total: {{count}}",
+      "example": "Example",
+      "answer": "Result",
+      "empty": "Your history will appear here.",
+      "correct": "Correct: {{left}} {{relation}} {{right}}",
+      "result": {
+        "correct": "Correct ({{relation}})",
+        "user": "You chose {{relation}}",
+        "expected": "Correct was {{relation}}"
+      },
+      "order": {
+        "label": "History order",
+        "oldest": "Oldest first",
+        "newest": "Newest first",
+        "hint": "Choose whether new answers appear at the top or bottom."
+      }
+    },
+    "session": {
+      "timer": "Timer (minutes)",
+      "timerHint": "0 disables the timer.",
+      "maxExercises": "Max exercises (0 = unlimited)",
+      "maxExercisesHint": "Stop automatically after this many comparisons."
+    },
+    "feedback": {
+      "sound": "Sound feedback",
+      "soundDesc": "Play a short tone after each answer.",
+      "vibration": "Vibration feedback",
+      "vibrationDesc": "Vibrate on supported devices.",
+      "correct": "Great! That comparison is correct.",
+      "wrong": "You chose {{user}}, correct was {{correct}}."
+    },
+    "telemetry": {
+      "note": "Future telemetry could track streaks, average time per comparison, and most difficult number types."
+    },
+    "errors": {
+      "unavailable": "Enable at least one valid number type to start."
+    },
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy",
+      "timeLeft": "Time left",
+      "time": "Time"
+    },
+    "play": {
+      "compare": "Which relation is true?",
+      "hotkeys": "Hotkeys: ← (<), space (=), → (>)."
+    },
+    "finished": {
+      "time": "Time is up!",
+      "exercises": "Reached {{count}} comparisons.",
+      "generator": "Unable to generate new exercises with current settings."
+    },
+    "symbols": {
+      "less": "<",
+      "greater": ">",
+      "equal": "="
     }
   }
 }

@@ -1,5 +1,5 @@
 import type {LucideIcon} from "lucide-react";
-import {Calculator, Info, Rabbit, Ruler,} from "lucide-react";
+import {Calculator, Info, Rabbit, Ruler} from "lucide-react";
 
 export type CategoryKey = "math" | "arcade" | "info";
 
@@ -30,6 +30,16 @@ export const games: GameItem[] = [
         icon: Calculator,
         badge: "new",
         tags: ["multiplication", "множення", "умножение"],
+    },
+    {
+        id: "cmpNumbers",
+        path: "/compare-numbers",
+        titleKey: "games.compareNumbers.title",
+        descriptionKey: "games.compareNumbers.desc",
+        category: "math",
+        icon: Calculator,
+        badge: "new",
+        tags: ["compare", "numbers", "порівняння", "сравнение"],
     },
 /*    {
         id: "round1",
