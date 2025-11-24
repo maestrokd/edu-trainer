@@ -117,10 +117,10 @@ function useRoundT() {
             statsTime: t("roundT.stats.time", "Time"),
             statsTimeLeft: t("roundT.stats.timeLeft", "Time left"),
             finishedTime: t("roundT.finished.timeUp", "Time is up!"),
-            finishedCount: t(
+            finishedCount: (count: number) => t(
                 "roundT.finished.exLimit",
                 "Finished! You answered {{count}} tasks.",
-                {count: 0}
+                {count}
             ),
             // Table
             tableExample: t("roundT.table.example", "Exercise"),
@@ -946,7 +946,9 @@ export default function RoundingGame() {
                                     <Alert
                                         className="mb-4 bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-300">
                                         <AlertDescription>
-                                            {endReason === "time" ? RT.labels.finishedTime : RT.labels.finishedCount}
+                                            {endReason === "time"
+                                                ? RT.labels.finishedTime
+                                                : RT.labels.finishedCount(correctCount + wrongCount)}
                                         </AlertDescription>
                                     </Alert>
                                 )}
