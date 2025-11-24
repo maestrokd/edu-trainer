@@ -9,5 +9,5 @@ it("shows Home link", () => {
       <App />
     </MemoryRouter>,
   );
-  expect(screen.getByText("Home Page")).toBeInTheDocument();
+  expect(screen.getByText("menu.categories.all")).toBeInTheDocument();
 });
