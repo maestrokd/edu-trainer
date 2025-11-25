@@ -1679,6 +1679,15 @@ function TypeCard({
     >
       <AccordionTrigger className="px-3 py-3 text-left text-sm font-medium hover:no-underline data-[state=open]:bg-muted/40 sm:px-5 sm:py-4 sm:text-base">
         <div className="flex w-full items-center gap-3">
+          <Checkbox
+            id={`${id}-toggle`}
+            checked={enabled}
+            onCheckedChange={(checked) => onEnabledChange(Boolean(checked))}
+            aria-label={title}
+            className="mr-2 shrink-0"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          />
           <div className="flex-1 text-left">
             <div className="text-sm font-semibold leading-tight sm:text-base">
               {title}
@@ -1687,15 +1696,6 @@ function TypeCard({
               {description}
             </p>
           </div>
-          <Checkbox
-            id={`${id}-toggle`}
-            checked={enabled}
-            onCheckedChange={(checked) => onEnabledChange(Boolean(checked))}
-            aria-label={title}
-            className="mr-2"
-            onClick={(event) => event.stopPropagation()}
-            onKeyDown={(event) => event.stopPropagation()}
-          />
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-3 pb-4 sm:px-5">
