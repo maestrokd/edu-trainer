@@ -1692,6 +1692,7 @@ function TypeCard({
             checked={enabled}
             onCheckedChange={(checked) => onEnabledChange(Boolean(checked))}
             aria-label={title}
+            className="mr-2"
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
           />
