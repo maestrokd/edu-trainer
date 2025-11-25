@@ -340,6 +340,13 @@ export default function RoundingGame() {
     const [options, setOptions] = React.useState<number[]>([]);
     const [taskId, setTaskId] = React.useState<number>(0);
 
+    // Ensure the settings screen always starts at the top when opened
+    React.useEffect(() => {
+        if (screen === "setup") {
+            window.scrollTo({top: 0, left: 0, behavior: "auto"});
+        }
+    }, [screen]);
+
     // Input mode state
     const [answer, setAnswer] = React.useState<string>("");
     const inputRef = React.useRef<HTMLInputElement>(null);
