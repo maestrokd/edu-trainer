@@ -12,7 +12,8 @@ function useKeyboardShortcutSupport() {
     React.useEffect(() => {
         const userAgent = navigator.userAgent || "";
         const isMobileAgent = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
-        const isMobileDevice = navigator.userAgentData?.mobile ?? isMobileAgent;
+        const uaData = (navigator as Navigator & {userAgentData?: {mobile?: boolean}}).userAgentData;
+        const isMobileDevice = uaData?.mobile ?? isMobileAgent;
 
         setIsSupported(!isMobileDevice);
     }, []);
