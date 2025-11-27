@@ -703,8 +703,8 @@ export default function RoundingGame() {
                                                 <SelectValue/>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="input">{RT.labels.modeInput}</SelectItem>
                                                 <SelectItem value="quiz">{RT.labels.modeQuiz}</SelectItem>
+                                                <SelectItem value="input">{RT.labels.modeInput}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </LabeledField>

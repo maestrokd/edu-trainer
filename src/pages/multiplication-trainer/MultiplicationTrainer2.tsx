@@ -423,8 +423,8 @@ export default function MultiplicationTrainer2() {
                                                 <SelectValue/>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="input">{t("multiT.mode.input")}</SelectItem>
                                                 <SelectItem value="quiz">{t("multiT.mode.quiz")}</SelectItem>
+                                                <SelectItem value="input">{t("multiT.mode.input")}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </LabeledField>
