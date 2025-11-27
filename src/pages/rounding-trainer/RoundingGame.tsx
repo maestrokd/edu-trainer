@@ -332,7 +332,7 @@ export default function RoundingGame() {
 
   // UI state
   const [screen, setScreen] = React.useState<Screen>("setup");
-  const [mode, setMode] = React.useState<Mode>("input");
+  const [mode, setMode] = React.useState<Mode>("quiz");
 
   // Config: filters
   const [includeWhole, setIncludeWhole] = React.useState<boolean>(true);
@@ -747,11 +747,11 @@ export default function RoundingGame() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="input">
-                          {RT.labels.modeInput}
-                        </SelectItem>
                         <SelectItem value="quiz">
                           {RT.labels.modeQuiz}
+                        </SelectItem>
+                        <SelectItem value="input">
+                          {RT.labels.modeInput}
                         </SelectItem>
                       </SelectContent>
                     </Select>
