@@ -140,7 +140,7 @@ export default function MultiplicationTrainer() {
 
   // UI state
   const [screen, setScreen] = React.useState<Screen>("setup");
-  const [mode, setMode] = React.useState<Mode>("input");
+  const [mode, setMode] = React.useState<Mode>("quiz");
 
   // Config
   const [minVal, setMinVal] = React.useState<number>(4);
@@ -476,11 +476,11 @@ export default function MultiplicationTrainer() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="input">
-                          {t("multiT.mode.input")}
-                        </SelectItem>
                         <SelectItem value="quiz">
                           {t("multiT.mode.quiz")}
+                        </SelectItem>
+                        <SelectItem value="input">
+                          {t("multiT.mode.input")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
