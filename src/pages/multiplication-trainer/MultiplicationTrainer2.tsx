@@ -125,7 +125,7 @@ export default function MultiplicationTrainer2() {
 
     // UI state
     const [screen, setScreen] = React.useState<Screen>("setup");
-    const [mode, setMode] = React.useState<Mode>("input");
+    const [mode, setMode] = React.useState<Mode>("quiz");
 
     // Config
     const [minVal, setMinVal] = React.useState<number>(4);
