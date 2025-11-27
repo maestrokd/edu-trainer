@@ -9,7 +9,7 @@ const root = dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.VITE_UI_BASE_ENV_PATH || '/',
+  base: process.env.VITE_UI_BASE_ENV_PATH || "/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

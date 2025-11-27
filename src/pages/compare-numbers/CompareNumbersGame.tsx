@@ -34,7 +34,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Settings } from "lucide-react";
 
 import ThemeToggle from "@/components/menu/ThemeToggle";
@@ -107,12 +112,7 @@ type EndReason = "time" | "ex" | "generator" | null;
 
 const PRECISION_OPTIONS = [0, 1, 2, 3, 4];
 
-type NotificationVariant =
-  | "success"
-  | "error"
-  | "info"
-  | "warning"
-  | "muted";
+type NotificationVariant = "success" | "error" | "info" | "warning" | "muted";
 
 const NOTIFICATION_STYLES: Record<NotificationVariant, string> = {
   success:
@@ -207,7 +207,9 @@ export default function CompareNumbersGame() {
     gap: { min: 0, max: null },
   });
 
-  const [openMode, setOpenMode] = React.useState<ModeKey | undefined>(undefined);
+  const [openMode, setOpenMode] = React.useState<ModeKey | undefined>(
+    undefined,
+  );
 
   const [equalRatio, setEqualRatio] = React.useState<number>(10);
   const [timerMinutes, setTimerMinutes] = React.useState<number | null>(null);
@@ -216,16 +218,24 @@ export default function CompareNumbersGame() {
   const [enableSound, setEnableSound] = React.useState<boolean>(false);
   const [enableVibration, setEnableVibration] = React.useState<boolean>(false);
 
-  const handleAccordionChange = React.useCallback((value: string | undefined) => {
-    if (!value) {
-      setOpenMode(undefined);
-      return;
-    }
+  const handleAccordionChange = React.useCallback(
+    (value: string | undefined) => {
+      if (!value) {
+        setOpenMode(undefined);
+        return;
+      }
 
-    if (value === "nonNegative" || value === "signed" || value === "decimal" || value === "fraction") {
-      setOpenMode(value);
-    }
-  }, []);
+      if (
+        value === "nonNegative" ||
+        value === "signed" ||
+        value === "decimal" ||
+        value === "fraction"
+      ) {
+        setOpenMode(value);
+      }
+    },
+    [],
+  );
 
   const [correctCount, setCorrectCount] = React.useState<number>(0);
   const [wrongCount, setWrongCount] = React.useState<number>(0);
@@ -404,13 +414,7 @@ export default function CompareNumbersGame() {
     if (elapsedSec >= timerLimitMinutes * 60) {
       finishSession("time");
     }
-  }, [
-    elapsedSec,
-    hasTimer,
-    timerLimitMinutes,
-    timerActive,
-    finishSession,
-  ]);
+  }, [elapsedSec, hasTimer, timerLimitMinutes, timerActive, finishSession]);
 
   React.useEffect(() => {
     if (!timerActive) return;
@@ -850,10 +854,7 @@ export default function CompareNumbersGame() {
                 availabilityText={tr("types.messages.unavailable")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <LabeledField
-                    label={tr("ranges.min")!}
-                    htmlFor="signed-min"
-                  >
+                  <LabeledField label={tr("ranges.min")!} htmlFor="signed-min">
                     <Input
                       id="signed-min"
                       type="number"
@@ -871,10 +872,7 @@ export default function CompareNumbersGame() {
                       }}
                     />
                   </LabeledField>
-                  <LabeledField
-                    label={tr("ranges.max")!}
-                    htmlFor="signed-max"
-                  >
+                  <LabeledField label={tr("ranges.max")!} htmlFor="signed-max">
                     <Input
                       id="signed-max"
                       type="number"
@@ -912,9 +910,7 @@ export default function CompareNumbersGame() {
                 />
                 <WeightField
                   value={signedConfig.weight}
-                  onChange={(value) =>
-                    sanitizeSignedConfig({ weight: value })
-                  }
+                  onChange={(value) => sanitizeSignedConfig({ weight: value })}
                   label={tr("weights.label")!}
                   disabled={!signedConfig.enabled}
                 />
@@ -935,10 +931,7 @@ export default function CompareNumbersGame() {
                 availabilityText={tr("types.messages.decimalRange")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <LabeledField
-                    label={tr("ranges.min")!}
-                    htmlFor="decimal-min"
-                  >
+                  <LabeledField label={tr("ranges.min")!} htmlFor="decimal-min">
                     <Input
                       id="decimal-min"
                       type="number"
@@ -957,10 +950,7 @@ export default function CompareNumbersGame() {
                       }}
                     />
                   </LabeledField>
-                  <LabeledField
-                    label={tr("ranges.max")!}
-                    htmlFor="decimal-max"
-                  >
+                  <LabeledField label={tr("ranges.max")!} htmlFor="decimal-max">
                     <Input
                       id="decimal-max"
                       type="number"
@@ -988,8 +978,7 @@ export default function CompareNumbersGame() {
                       value={decimalConfig.precisionMode}
                       onValueChange={(val) =>
                         sanitizeDecimalConfig({
-                          precisionMode:
-                            val as DecimalState["precisionMode"],
+                          precisionMode: val as DecimalState["precisionMode"],
                         })
                       }
                       disabled={!decimalConfig.enabled}
@@ -1071,9 +1060,7 @@ export default function CompareNumbersGame() {
                 />
                 <WeightField
                   value={decimalConfig.weight}
-                  onChange={(value) =>
-                    sanitizeDecimalConfig({ weight: value })
-                  }
+                  onChange={(value) => sanitizeDecimalConfig({ weight: value })}
                   label={tr("weights.label")!}
                   disabled={!decimalConfig.enabled}
                 />
@@ -1146,7 +1133,10 @@ export default function CompareNumbersGame() {
                           : fractionConfig.numeratorMin;
                         sanitizeFractionConfig({
                           numeratorMin: min,
-                          numeratorMax: Math.max(min, fractionConfig.numeratorMax),
+                          numeratorMax: Math.max(
+                            min,
+                            fractionConfig.numeratorMax,
+                          ),
                         });
                       }}
                     />
@@ -1198,7 +1188,10 @@ export default function CompareNumbersGame() {
                           : fractionConfig.denominatorMin;
                         sanitizeFractionConfig({
                           denominatorMin: min,
-                          denominatorMax: Math.max(min, fractionConfig.denominatorMax),
+                          denominatorMax: Math.max(
+                            min,
+                            fractionConfig.denominatorMax,
+                          ),
                         });
                       }}
                     />
@@ -1313,10 +1306,7 @@ export default function CompareNumbersGame() {
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <LabeledField
-                label={tr("session.timer")!}
-                htmlFor="timer-min"
-              >
+              <LabeledField label={tr("session.timer")!} htmlFor="timer-min">
                 <Input
                   id="timer-min"
                   type="number"
@@ -1432,11 +1422,7 @@ export default function CompareNumbersGame() {
                       value={`${accuracy}%`}
                     />
                     <StatCard
-                      label={
-                        hasTimer
-                          ? tr("stats.timeLeft")
-                          : tr("stats.time")
-                      }
+                      label={hasTimer ? tr("stats.timeLeft") : tr("stats.time")}
                       value={
                         hasTimer
                           ? formatTime(timeLeft ?? 0)
@@ -1510,99 +1496,104 @@ export default function CompareNumbersGame() {
               </div>
 
               <aside className="h-full overflow-hidden rounded-xl border bg-muted/40">
-              <div className="flex items-center justify-between border-b bg-muted/60 px-4 py-3">
-                <div className="text-base font-semibold">
-                  {tr("history.title")}
+                <div className="flex items-center justify-between border-b bg-muted/60 px-4 py-3">
+                  <div className="text-base font-semibold">
+                    {tr("history.title")}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {tr("history.total", { count: history.length })}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {tr("history.total", { count: history.length })}
-                </span>
-              </div>
-              <div className="h-[420px] overflow-auto">
-                <Table>
-                  <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur">
-                    <TableRow>
-                      <TableHead className="w-10 text-center text-xs">
-                        #
-                      </TableHead>
-                      <TableHead className="text-xs">
-                        {tr("history.example")}
-                      </TableHead>
-                      <TableHead className="text-xs">
-                        {tr("history.answer")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {historyDisplay.length === 0 ? (
+                <div className="h-[420px] overflow-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur">
                       <TableRow>
-                        <TableCell
-                          colSpan={3}
-                          className="py-6 text-center text-sm text-muted-foreground"
-                        >
-                          {tr("history.empty")}
-                        </TableCell>
+                        <TableHead className="w-10 text-center text-xs">
+                          #
+                        </TableHead>
+                        <TableHead className="text-xs">
+                          {tr("history.example")}
+                        </TableHead>
+                        <TableHead className="text-xs">
+                          {tr("history.answer")}
+                        </TableHead>
                       </TableRow>
-                    ) : (
-                      historyDisplay.map((entry, index) => (
-                        <TableRow
-                          key={entry.id}
-                          className={entry.isCorrect ? "" : "bg-destructive/5"}
-                        >
-                          <TableCell className="text-center text-xs text-muted-foreground">
-                            {historyOrder === "asc"
-                              ? index + 1
-                              : history.length - index}
+                    </TableHeader>
+                    <TableBody>
+                      {historyDisplay.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="py-6 text-center text-sm text-muted-foreground"
+                          >
+                            {tr("history.empty")}
                           </TableCell>
-                          <TableCell>
-                            <div className="text-sm font-medium leading-tight">
-                              {entry.left.display} ? {entry.right.display}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {tr("history.correct", {
-                                relation: symbolLabel(
-                                  entry.correctRelation,
-                                  tr,
-                                ),
-                                left: entry.left.display,
-                                right: entry.right.display,
-                              })}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {entry.isCorrect ? (
-                              <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                                {tr("history.result.correct", {
-                                  relation: symbolLabel(entry.userRelation, tr),
+                        </TableRow>
+                      ) : (
+                        historyDisplay.map((entry, index) => (
+                          <TableRow
+                            key={entry.id}
+                            className={
+                              entry.isCorrect ? "" : "bg-destructive/5"
+                            }
+                          >
+                            <TableCell className="text-center text-xs text-muted-foreground">
+                              {historyOrder === "asc"
+                                ? index + 1
+                                : history.length - index}
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm font-medium leading-tight">
+                                {entry.left.display} ? {entry.right.display}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {tr("history.correct", {
+                                  relation: symbolLabel(
+                                    entry.correctRelation,
+                                    tr,
+                                  ),
+                                  left: entry.left.display,
+                                  right: entry.right.display,
                                 })}
                               </div>
-                            ) : (
-                              <div className="grid gap-1 text-sm text-destructive">
-                                <span>
-                                  {tr("history.result.user", {
+                            </TableCell>
+                            <TableCell>
+                              {entry.isCorrect ? (
+                                <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                                  {tr("history.result.correct", {
                                     relation: symbolLabel(
                                       entry.userRelation,
                                       tr,
                                     ),
                                   })}
-                                </span>
-                                <span>
-                                  {tr("history.result.expected", {
-                                    relation: symbolLabel(
-                                      entry.correctRelation,
-                                      tr,
-                                    ),
-                                  })}
-                                </span>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                                </div>
+                              ) : (
+                                <div className="grid gap-1 text-sm text-destructive">
+                                  <span>
+                                    {tr("history.result.user", {
+                                      relation: symbolLabel(
+                                        entry.userRelation,
+                                        tr,
+                                      ),
+                                    })}
+                                  </span>
+                                  <span>
+                                    {tr("history.result.expected", {
+                                      relation: symbolLabel(
+                                        entry.correctRelation,
+                                        tr,
+                                      ),
+                                    })}
+                                  </span>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </aside>
             </div>
           </div>
