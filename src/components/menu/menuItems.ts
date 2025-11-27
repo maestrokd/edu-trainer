@@ -23,7 +23,7 @@ export const categories: Record<CategoryKey, { labelKey: string; icon: LucideIco
 export const games: GameItem[] = [
     {
         id: "mt2",
-        path: "/multiplication-trainer2",
+        path: "/multiplication-trainer",
         titleKey: "games.multiplication2.title",
         descriptionKey: "games.multiplication2.desc",
         category: "math",
@@ -41,24 +41,15 @@ export const games: GameItem[] = [
         badge: "new",
         tags: ["compare", "numbers", "порівняння", "сравнение"],
     },
-/*    {
-        id: "round1",
-        path: "/rounding-trainer",
-        titleKey: "games.rounding1.title",
-        descriptionKey: "games.rounding1.desc",
-        category: "math",
-        icon: Ruler,
-        tags: ["rounding", "округлення", "округление"],
-    },*/
     {
         id: "round2",
-        path: "/rounding-trainer2",
+        path: "/rounding-trainer",
         titleKey: "games.rounding2.title",
         descriptionKey: "games.rounding2.desc",
         category: "math",
         icon: Ruler,
         badge: "new",
-        tags: ["rounding"],
+        tags: ["rounding", "округлення", "округление"],
     },
     {
         id: "rabbit",
@@ -70,16 +61,6 @@ export const games: GameItem[] = [
         badge: "beta",
         tags: ["rabbit", "jump", "arcade"],
     },
-    /*{
-        id: "mt1",
-        path: "/multiplication-trainer1",
-        titleKey: "games.multiplication1.title",
-        descriptionKey: "games.multiplication1.desc",
-        category: "math",
-        icon: Calculator,
-        badge: "End-of-Life",
-        tags: ["multiplication", "таблиця множення", "множення", "умножение", "таблица"],
-    },*/
 ];
 
 export const infoLinks: GameItem[] = [

@@ -120,7 +120,7 @@ function useAccurateTimer(active: boolean) {
 // ----------------------------
 // Main component
 // ----------------------------
-export default function MultiplicationTrainer2() {
+export default function MultiplicationTrainer() {
     const {t} = useTranslation();
 
     // UI state
