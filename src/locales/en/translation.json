@@ -31,24 +31,16 @@
     "futureSectionsHint": "Favorites and recent will appear here soon."
   },
   "games": {
-    "multiplication1": {
-      "title": "Multiplication Trainer 1",
-      "desc": "Practice multiplication facts."
-    },
     "multiplication2": {
-      "title": "Multiplication Trainer 2",
+      "title": "Multiplication Trainer",
       "desc": "Advanced practice & drills."
     },
     "compareNumbers": {
       "title": "Compare Numbers Trainer",
       "desc": "Practice comparing integers, decimals, and fractions."
     },
-    "rounding1": {
-      "title": "Rounding Trainer 1",
-      "desc": "Round numbers to tens and hundreds."
-    },
     "rounding2": {
-      "title": "Rounding Trainer 2",
+      "title": "Rounding Trainer",
       "desc": "More rounding challenges."
     },
     "rabbit": {
@@ -122,73 +114,6 @@
     },
     "table": {
       "example": "Example",
-      "answer": "Answer",
-      "result": "Result",
-      "empty": "Your answer history will appear here.",
-      "correct": "Correct",
-      "incorrect": "Incorrect (correct: {{correct}})"
-    }
-  },
-  "roundT1": {
-    "menu": "Menu",
-    "title": "Rounding Trainer",
-    "rangeAccuracy": "Range: {{min}}s–{{max}}s · Round to: {{unit}} · Accuracy: {{acc}}%",
-    "newSession": "New session",
-    "changeRange": "Change range",
-    "aria": {
-      "backToMenu": "Back to menu",
-      "newSession": "New session",
-      "changeRange": "Change range",
-      "startGame": "Start the game",
-      "answerField": "Answer input field",
-      "correct": "Correct",
-      "wrong": "Incorrect",
-      "timerMinutes": "Timer minutes",
-      "maxExercises": "Maximum exercises"
-    },
-    "setup": {
-      "label": "Settings",
-      "intro": "Choose the magnitude range (e.g., 10s…1000s) and rounding unit.",
-      "minMag": "Min magnitude",
-      "maxMag": "Max magnitude",
-      "roundTo": "Round to",
-      "mode": "Mode",
-      "timer": "Timer (minutes)",
-      "maxExercises": "Max exercises (0 = unlimited)",
-      "note": "Numbers will be generated within the selected magnitude (e.g., 10…99 for 10s)."
-    },
-    "mode": {
-      "input": "Keyboard input",
-      "quiz": "Quiz (4 options)"
-    },
-    "units": {
-      "tens": "tens (10)",
-      "hundreds": "hundreds (100)",
-      "thousands": "thousands (1000)"
-    },
-    "unitsLabel": "to nearest {{unit}}",
-    "start": "Start",
-    "stats": {
-      "correct": "Correct",
-      "wrong": "Wrong",
-      "accuracy": "Accuracy",
-      "time": "Time",
-      "timeLeft": "Time left"
-    },
-    "input": {
-      "placeholder": "Answer",
-      "submit": "Submit",
-      "hint": "Press Enter to submit your answer."
-    },
-    "quiz": {
-      "optionAria": "Answer option {{opt}}"
-    },
-    "finished": {
-      "timeUp": "Time is up!",
-      "exLimit": "Exercises complete ({{count}})."
-    },
-    "table": {
-      "example": "Number · Round",
       "answer": "Answer",
       "result": "Result",
       "empty": "Your answer history will appear here.",

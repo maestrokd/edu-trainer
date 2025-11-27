@@ -466,7 +466,10 @@ function tryGenerateSameIntegerDecimals(
   if (sharedMin > sharedMax) {
     return null;
   }
-  const sharedPrecisions = intersection(leftType.precisions, rightType.precisions);
+  const sharedPrecisions = intersection(
+    leftType.precisions,
+    rightType.precisions,
+  );
   const targetInt = randomInt(sharedMin, sharedMax);
   const leftPrecision = pickPrecision(leftType, sharedPrecisions);
   const rightPrecision = pickPrecision(rightType, sharedPrecisions);
