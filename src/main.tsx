@@ -6,6 +6,8 @@ import App from "./App";
 import "./index.css";
 import "./i18n";
 import WebApp from "@twa-dev/sdk";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 WebApp.ready();
 
@@ -17,9 +19,12 @@ const qc = new QueryClient();
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={qc}>
-      <BrowserRouter basename={basename}>
-        <App />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter basename={basename}>
+          <App />
+        </BrowserRouter>
+      </AuthProvider>
+      <Toaster />
     </QueryClientProvider>
   </React.StrictMode>,
 );
