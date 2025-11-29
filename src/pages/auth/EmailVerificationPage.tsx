@@ -1,11 +1,10 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { CheckCircle2, MailCheck, ShieldCheck } from "lucide-react";
 
 import AuthPageShell from "@/components/auth/AuthPageShell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
 import { toast } from "sonner";
@@ -13,7 +12,6 @@ import { toast } from "sonner";
 const EmailVerificationPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
   const location = useLocation();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [status, setStatus] = React.useState<"pending" | "success" | "error">(
     "pending",
@@ -61,19 +59,22 @@ const EmailVerificationPage: React.FC = () => {
     }
   }, [error, status, t]);
 
+  const headingTitle = t("auth.verificationTitle");
+  const headingDescription =
+    status === "success"
+      ? t("auth.verificationSuccessBody")
+      : status === "error"
+        ? t("auth.verificationErrorBody")
+        : t("auth.verificationWorkingBody");
+
   return (
     <AuthPageShell
-      title={t("auth.verificationSuccessTitle")}
-      description={t("auth.verificationSuccessBody")}
+      title={headingTitle}
+      description={headingDescription}
       footer={
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ShieldCheck className="size-4" aria-hidden />
-            <span>{t("auth.verificationSuccessNote")}</span>
-          </div>
-          <Button className="w-full" onClick={() => navigate("/auth/sign-in")}>
-            {t("auth.signInAction")}
-          </Button>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <ShieldCheck className="size-4" aria-hidden />
+          <span>{t("auth.verificationSuccessNote")}</span>
         </div>
       }
     >
@@ -102,9 +103,6 @@ const EmailVerificationPage: React.FC = () => {
           <AlertDescription className="space-y-2">
             <p>{t("auth.verificationErrorBody")}</p>
             {error && <p className="text-xs break-words">{error}</p>}
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/auth/sign-in">{t("auth.signInTitle")}</Link>
-            </Button>
           </AlertDescription>
         </Alert>
       )}
