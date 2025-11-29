@@ -7,6 +7,7 @@ import "./index.css";
 import "./i18n";
 import WebApp from "@twa-dev/sdk";
 import { AuthProvider } from "./components/auth/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 WebApp.ready();
 
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
           <App />
         </BrowserRouter>
       </AuthProvider>
+      <Toaster />
     </QueryClientProvider>
   </React.StrictMode>,
 );

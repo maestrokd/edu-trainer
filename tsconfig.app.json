@@ -24,7 +24,8 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@supabase/supabase-js": ["./src/stubs/supabase-js"]
+      "@supabase/supabase-js": ["./src/stubs/supabase-js"],
+      "sonner": ["./src/stubs/sonner"]
     }
   },
   "include": ["src"]
