@@ -83,14 +83,9 @@ const AuthStatus: React.FC<Props> = ({ variant = "sidebar" }) => {
           {t("auth.logoutAction")}
         </Button>
       ) : (
-        <div className="flex gap-2">
-          <Button asChild className="w-full" size="sm">
-            <Link to="/auth/sign-in">{t("auth.signInTitle")}</Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full" size="sm">
-            <Link to="/auth/sign-up">{t("auth.signUpTitle")}</Link>
-          </Button>
-        </div>
+        <Button asChild className="w-full" size="sm">
+          <Link to="/auth/sign-in">{t("auth.signInTitle")}</Link>
+        </Button>
       )}
 
       {error && (
