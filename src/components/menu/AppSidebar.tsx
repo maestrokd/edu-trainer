@@ -6,11 +6,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { categories, type CategoryKey, infoLinks } from "./menuItems";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import AuthStatus from "@/components/auth/AuthStatus";
 
 type Props = {
   activeCategory: CategoryKey | "all";
@@ -86,6 +88,9 @@ export default function AppSidebar({
           </p>
         </ScrollArea>
       </SidebarContent>
+      <SidebarFooter className="border-t px-3 py-4">
+        <AuthStatus variant="sidebar" />
+      </SidebarFooter>
     </Sidebar>
   );
 }
