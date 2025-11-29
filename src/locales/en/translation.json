@@ -6,6 +6,28 @@
       "ru": "Ру"
     }
   },
+  "auth": {
+    "subtitle": "Access your profile and save progress across sessions.",
+    "signInTitle": "Sign in",
+    "signUpTitle": "Create account",
+    "resetPasswordTitle": "Reset password",
+    "resetPasswordSubtitle": "Send a password reset link to your inbox.",
+    "email": "Email",
+    "password": "Password",
+    "signInAction": "Sign in",
+    "signUpAction": "Create account",
+    "resetAction": "Send reset link",
+    "loading": "Working...",
+    "noAccount": "Need an account?",
+    "haveAccount": "Already have an account?",
+    "forgotPassword": "Forgot password?",
+    "resetSent": "Check your email for the reset link.",
+    "checkInbox": "Check your email to confirm your account.",
+    "signedIn": "Welcome back!",
+    "signedInAs": "Signed in as",
+    "logoutAction": "Log out",
+    "remembered": "Remembered your password?"
+  },
   "menu": {
     "mainMenuLabel": "Main Menu",
     "title": "Edu Trainer",

@@ -6,6 +6,28 @@
       "ru": "Ру"
     }
   },
+  "auth": {
+    "subtitle": "Доступ до профілю та збереження прогресу між сесіями.",
+    "signInTitle": "Увійти",
+    "signUpTitle": "Створити акаунт",
+    "resetPasswordTitle": "Скинути пароль",
+    "resetPasswordSubtitle": "Надішлемо посилання для скидання на вашу пошту.",
+    "email": "Email",
+    "password": "Пароль",
+    "signInAction": "Увійти",
+    "signUpAction": "Створити акаунт",
+    "resetAction": "Надіслати посилання",
+    "loading": "Будь ласка, зачекайте...",
+    "noAccount": "Немає акаунта?",
+    "haveAccount": "Вже маєте акаунт?",
+    "forgotPassword": "Забули пароль?",
+    "resetSent": "Перевірте пошту: посилання на скидання надіслано.",
+    "checkInbox": "Перевірте пошту та підтвердьте акаунт.",
+    "signedIn": "Раді вас бачити!",
+    "signedInAs": "Ви ввійшли як",
+    "logoutAction": "Вийти",
+    "remembered": "Згадали пароль?"
+  },
   "menu": {
     "mainMenuLabel": "Головне меню",
     "title": "Edu Тренер",
