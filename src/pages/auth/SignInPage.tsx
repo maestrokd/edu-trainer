@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
 import { toast } from "sonner";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 const SignInPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
@@ -33,9 +34,14 @@ const SignInPage: React.FC = () => {
 
     if (signInError) {
       setError(signInError.message);
-      toast.error(signInError.message);
+      toast.error(t("auth.signInErrorTitle"), {
+        description: signInError.message,
+        icon: <AlertCircle className="h-4 w-4" />,
+      });
     } else {
-      toast.success(t("auth.signedIn"));
+      toast.success(t("auth.signedIn"), {
+        icon: <CheckCircle2 className="h-4 w-4" />,
+      });
       navigate("/", { replace: true });
     }
     setLoading(false);
