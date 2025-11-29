@@ -36,14 +36,19 @@ function notify(toast: ToastPayload) {
 }
 
 function dismiss(id: number) {
-  listeners.forEach((listener) => listener({
-    id,
-    title: null,
-    description: null,
-    duration: 0,
-    variant: "default",
-    icon: null,
-  }, "remove"));
+  listeners.forEach((listener) =>
+    listener(
+      {
+        id,
+        title: null,
+        description: null,
+        duration: 0,
+        variant: "default",
+        icon: null,
+      },
+      "remove",
+    ),
+  );
 }
 
 type ToastInvoker = {
@@ -102,9 +107,12 @@ export type ToasterProps = {
   richColors?: boolean;
   closeButton?: boolean;
   toastOptions?: (Partial<ToastOptions> & { className?: string }) | undefined;
+  icons?: Partial<Record<ToastVariant | "loading" | "info", React.ReactNode>>;
+  className?: string;
+  style?: React.CSSProperties;
 };
 
-export function Toaster({ position = "top-right", toastOptions }: ToasterProps) {
+export function Toaster({ position = "top-right", toastOptions, icons, className, style }: ToasterProps) {
   const [toasts, setToasts] = React.useState<ToastPayload[]>([]);
 
   React.useEffect(() => {
@@ -129,6 +137,7 @@ export function Toaster({ position = "top-right", toastOptions }: ToasterProps) 
         "pointer-events-none fixed z-[100] flex max-w-[420px] flex-col gap-3",
         positionClassNames[position],
       )}
+      style={style}
     >
       {toasts.map((toastItem) => (
         <div
@@ -143,10 +152,13 @@ export function Toaster({ position = "top-right", toastOptions }: ToasterProps) 
             toastItem.variant === "warning" &&
               "border-yellow-200 bg-yellow-50 text-yellow-950 dark:border-yellow-900/40 dark:bg-yellow-950/40 dark:text-yellow-50",
             toastOptions?.className,
+            className,
           )}
         >
-          {toastItem.icon && (
-            <div className="mt-0.5 text-foreground">{toastItem.icon}</div>
+          {(toastItem.icon || icons?.[toastItem.variant]) && (
+            <div className="mt-0.5 text-foreground">
+              {toastItem.icon ?? icons?.[toastItem.variant]}
+            </div>
           )}
           <div className="flex-1 space-y-1">
             {toastItem.title && (
