@@ -27,7 +27,8 @@ const EmailVerificationPage: React.FC = () => {
     const code = params.get("code");
 
     if (!code) {
-      setStatus("success");
+      setError(t("auth.verificationErrorBody"));
+      setStatus("error");
       return;
     }
 
@@ -45,7 +46,7 @@ const EmailVerificationPage: React.FC = () => {
         setError(String(unexpectedError));
         setStatus("error");
       });
-  }, [location.search, supabase.auth]);
+  }, [location.search, supabase.auth, t]);
 
   React.useEffect(() => {
     if (status === "success") {
@@ -62,13 +63,13 @@ const EmailVerificationPage: React.FC = () => {
 
   return (
     <AuthPageShell
-      title={t("auth.verificationTitle")}
-      description={t("auth.verificationSubtitle")}
+      title={t("auth.verificationSuccessTitle")}
+      description={t("auth.verificationSuccessBody")}
       footer={
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <ShieldCheck className="size-4" aria-hidden />
-            <span>{t("auth.verificationHint")}</span>
+            <span>{t("auth.verificationSuccessNote")}</span>
           </div>
           <Button className="w-full" onClick={() => navigate("/auth/sign-in")}>
             {t("auth.signInAction")}
@@ -90,12 +91,7 @@ const EmailVerificationPage: React.FC = () => {
         <Alert className="border-green-200 bg-green-50 text-green-900 dark:border-green-900/40 dark:bg-green-950 dark:text-green-100">
           <CheckCircle2 aria-hidden className="text-green-500" />
           <AlertTitle>{t("auth.verificationSuccessTitle")}</AlertTitle>
-          <AlertDescription className="space-y-2">
-            <p>{t("auth.verificationSuccessBody")}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("auth.verificationSuccessNote")}
-            </p>
-          </AlertDescription>
+          <AlertDescription>{t("auth.verificationSuccessBody")}</AlertDescription>
         </Alert>
       )}
 

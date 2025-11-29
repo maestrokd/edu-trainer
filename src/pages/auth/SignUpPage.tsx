@@ -49,7 +49,7 @@ const SignUpPage: React.FC = () => {
       toast.success(t("auth.signUpSuccessTitle"), {
         description: t("auth.signUpSuccess"),
       });
-      navigate("/auth/verify-email", { replace: true });
+      navigate("/auth/registration-success", { replace: true });
     }
     setLoading(false);
   };
