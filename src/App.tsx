@@ -5,6 +5,9 @@ import MultiplicationTrainer from "@/pages/multiplication-trainer/Multiplication
 import CompareNumbersGame from "@/pages/compare-numbers/CompareNumbersGame.tsx";
 import RoundingGame from "@/pages/rounding-trainer/RoundingGame.tsx";
 import CommonLayout from "@/layout/CommonLayout.tsx";
+import SignInPage from "@/pages/auth/SignInPage.tsx";
+import SignUpPage from "@/pages/auth/SignUpPage.tsx";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage.tsx";
 
 export default function App() {
   return (
@@ -22,6 +25,9 @@ export default function App() {
         <Route path="/multiplication-rabbit" element={<RabbitJumpX9 />} />
         <Route path="/compare-numbers" element={<CompareNumbersGame />} />
         <Route path="/rounding-trainer" element={<RoundingGame />} />
+        <Route path="/auth/sign-in" element={<SignInPage />} />
+        <Route path="/auth/sign-up" element={<SignUpPage />} />
+        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
       </Route>
     </Routes>
   );
