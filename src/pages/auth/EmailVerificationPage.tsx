@@ -31,8 +31,8 @@ const EmailVerificationPage: React.FC = () => {
     }
 
     supabase.auth
-      .exchangeCodeForSession({ code })
-      .then(({ error: exchangeError }) => {
+      .exchangeCodeForSession(code)
+      .then(({ error: exchangeError }: { error: Error | null }) => {
         if (exchangeError) {
           setError(exchangeError.message);
           setStatus("error");
@@ -40,7 +40,7 @@ const EmailVerificationPage: React.FC = () => {
         }
         setStatus("success");
       })
-      .catch((unexpectedError) => {
+      .catch((unexpectedError: unknown) => {
         setError(String(unexpectedError));
         setStatus("error");
       });
