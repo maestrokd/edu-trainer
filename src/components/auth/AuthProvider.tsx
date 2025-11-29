@@ -1,5 +1,5 @@
 import React from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 
 import { getSupabaseClient } from "@/services/supabaseClient";
 
@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     }
 
     const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
+      (_event: AuthChangeEvent, newSession: Session | null) => {
         setUser(newSession?.user ?? null);
         setSession(newSession ?? null);
         setError(null);
