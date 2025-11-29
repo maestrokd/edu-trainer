@@ -1,6 +1,8 @@
 import React from "react";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { AlertCircle, LogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { getSupabaseClient } from "@/services/supabaseClient";
 
@@ -20,6 +22,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
+  const { t } = useTranslation();
   const [user, setUser] = React.useState<User | null>(null);
   const [session, setSession] = React.useState<Session | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -65,12 +68,17 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) {
       setError(signOutError.message);
-      toast.error(signOutError.message);
+      toast.error(t("auth.signOutErrorTitle"), {
+        description: signOutError.message,
+        icon: <AlertCircle className="h-4 w-4" />,
+      });
     } else {
-      toast.success("Signed out");
+      toast.success(t("auth.signOutSuccess"), {
+        icon: <LogOut className="h-4 w-4" />,
+      });
     }
     setLoading(false);
-  }, [supabase]);
+  }, [supabase, t]);
 
   const value = React.useMemo(
     () => ({ user, session, loading, error, signOut }),

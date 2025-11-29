@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
 import { toast } from "sonner";
+import { AlertCircle, MailCheck } from "lucide-react";
 
 const ResetPasswordPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
@@ -33,9 +34,14 @@ const ResetPasswordPage: React.FC = () => {
 
     if (resetError) {
       setError(resetError.message);
-      toast.error(resetError.message);
+      toast.error(t("auth.resetErrorTitle"), {
+        description: resetError.message,
+        icon: <AlertCircle className="h-4 w-4" />,
+      });
     } else {
-      toast.success(t("auth.resetSent"));
+      toast.success(t("auth.resetSent"), {
+        icon: <MailCheck className="h-4 w-4" />,
+      });
     }
     setLoading(false);
   };

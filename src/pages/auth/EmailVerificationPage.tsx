@@ -50,11 +50,13 @@ const EmailVerificationPage: React.FC = () => {
     if (status === "success") {
       toast.success(t("auth.verificationSuccessTitle"), {
         description: t("auth.verificationSuccessBody"),
+        icon: <CheckCircle2 className="h-4 w-4" />,
       });
     }
     if (status === "error") {
       toast.error(t("auth.verificationErrorTitle"), {
         description: error ?? undefined,
+        icon: <ShieldCheck className="h-4 w-4" />,
       });
     }
   }, [error, status, t]);

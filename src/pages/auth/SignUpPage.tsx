@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
 import { toast } from "sonner";
+import { AlertCircle, MailCheck } from "lucide-react";
 
 const SignUpPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
@@ -29,7 +30,9 @@ const SignUpPage: React.FC = () => {
 
     if (password !== confirmPassword) {
       setError(t("auth.passwordMismatch"));
-      toast.error(t("auth.passwordMismatch"));
+      toast.error(t("auth.passwordMismatch"), {
+        icon: <AlertCircle className="h-4 w-4" />,
+      });
       setLoading(false);
       return;
     }
@@ -44,10 +47,14 @@ const SignUpPage: React.FC = () => {
 
     if (signUpError) {
       setError(signUpError.message);
-      toast.error(signUpError.message);
+      toast.error(t("auth.signUpErrorTitle"), {
+        description: signUpError.message,
+        icon: <AlertCircle className="h-4 w-4" />,
+      });
     } else {
       toast.success(t("auth.signUpSuccessTitle"), {
         description: t("auth.signUpSuccess"),
+        icon: <MailCheck className="h-4 w-4" />,
       });
       navigate("/auth/registration-success", { replace: true });
     }

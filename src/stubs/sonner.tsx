@@ -9,6 +9,7 @@ export type ToastOptions = {
   description?: React.ReactNode;
   duration?: number;
   variant?: ToastVariant;
+  icon?: React.ReactNode;
 };
 
 export type ToastPayload = {
@@ -17,6 +18,7 @@ export type ToastPayload = {
   description?: React.ReactNode | null;
   duration: number;
   variant: ToastVariant;
+  icon: React.ReactNode | null;
 };
 
 type ToastListener = (toast: ToastPayload, action: "add" | "remove") => void;
@@ -40,6 +42,7 @@ function dismiss(id: number) {
     description: null,
     duration: 0,
     variant: "default",
+    icon: null,
   }, "remove"));
 }
 
@@ -58,6 +61,7 @@ const baseToast = ((title: React.ReactNode, options?: ToastOptions) => {
     description: options?.description,
     duration: options?.duration ?? DEFAULT_DURATION,
     variant: options?.variant ?? "default",
+    icon: options?.icon ?? null,
   };
   notify(payload);
   return payload.id;
@@ -77,20 +81,30 @@ baseToast.dismiss = (id: number) => dismiss(id);
 export const toast = baseToast;
 
 const positionClassNames: Record<
-  "top-right" | "top-left" | "bottom-right" | "bottom-left",
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "top-center"
+  | "bottom-center",
   string
 > = {
   "top-right": "top-4 right-4 items-end",
   "top-left": "top-4 left-4 items-start",
   "bottom-right": "bottom-4 right-4 items-end",
   "bottom-left": "bottom-4 left-4 items-start",
+  "top-center": "top-4 left-1/2 -translate-x-1/2 items-center",
+  "bottom-center": "bottom-4 left-1/2 -translate-x-1/2 items-center",
 };
 
 export type ToasterProps = {
   position?: keyof typeof positionClassNames;
+  richColors?: boolean;
+  closeButton?: boolean;
+  toastOptions?: (Partial<ToastOptions> & { className?: string }) | undefined;
 };
 
-export function Toaster({ position = "top-right" }: ToasterProps) {
+export function Toaster({ position = "top-right", toastOptions }: ToasterProps) {
   const [toasts, setToasts] = React.useState<ToastPayload[]>([]);
 
   React.useEffect(() => {
@@ -128,8 +142,12 @@ export function Toaster({ position = "top-right" }: ToasterProps) {
               "border-destructive/40 bg-destructive/10 text-destructive",
             toastItem.variant === "warning" &&
               "border-yellow-200 bg-yellow-50 text-yellow-950 dark:border-yellow-900/40 dark:bg-yellow-950/40 dark:text-yellow-50",
+            toastOptions?.className,
           )}
         >
+          {toastItem.icon && (
+            <div className="mt-0.5 text-foreground">{toastItem.icon}</div>
+          )}
           <div className="flex-1 space-y-1">
             {toastItem.title && (
               <div className="text-sm font-semibold leading-none">
