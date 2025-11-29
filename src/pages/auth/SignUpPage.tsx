@@ -6,6 +6,7 @@ import AuthPageShell from "@/components/auth/AuthPageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
 
@@ -15,6 +16,7 @@ const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
@@ -27,19 +29,25 @@ const SignUpPage: React.FC = () => {
     setError(null);
     setMessage(null);
 
+    if (password !== confirmPassword) {
+      setError(t("auth.passwordMismatch"));
+      setLoading(false);
+      return;
+    }
+
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/sign-in`,
+        emailRedirectTo: `${window.location.origin}/auth/verify-email`,
       },
     });
 
     if (signUpError) {
       setError(signUpError.message);
     } else {
-      setMessage(t("auth.checkInbox"));
-      navigate("/auth/sign-in", { replace: true });
+      setMessage(t("auth.signUpSuccess"));
+      navigate("/auth/verify-email", { replace: true });
     }
     setLoading(false);
   };
@@ -84,8 +92,25 @@ const SignUpPage: React.FC = () => {
             placeholder="••••••••"
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            placeholder="••••••••"
+          />
+        </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {message && <p className="text-sm text-green-600">{message}</p>}
+        {message && (
+          <Alert className="bg-muted/70">
+            <AlertTitle>{t("auth.signUpSuccessTitle")}</AlertTitle>
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        )}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? t("auth.loading") : t("auth.signUpAction")}
         </Button>

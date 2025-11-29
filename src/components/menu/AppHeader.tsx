@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import LanguageSelector, {
   LanguageSelectorMode,
 } from "@/components/lang/LanguageSelector";
-import AuthStatus from "@/components/auth/AuthStatus";
 
 function useKeyboardShortcutSupport() {
   const [isSupported, setIsSupported] = React.useState(false);
@@ -69,7 +68,6 @@ export default function AppHeader() {
         <LanguageSelector mode={LanguageSelectorMode.FULL} />
         <ThemeToggle />
         {supportsShortcut && <CommandMenu />}
-        <AuthStatus />
       </div>
     </header>
   );
