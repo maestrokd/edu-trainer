@@ -9,6 +9,7 @@ import SignInPage from "@/pages/auth/SignInPage.tsx";
 import SignUpPage from "@/pages/auth/SignUpPage.tsx";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage.tsx";
 import EmailVerificationPage from "@/pages/auth/EmailVerificationPage.tsx";
+import RegistrationSuccessPage from "@/pages/auth/RegistrationSuccessPage.tsx";
 
 export default function App() {
   return (
@@ -29,6 +30,10 @@ export default function App() {
         <Route path="/auth/sign-in" element={<SignInPage />} />
         <Route path="/auth/sign-up" element={<SignUpPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+        <Route
+          path="/auth/registration-success"
+          element={<RegistrationSuccessPage />}
+        />
         <Route path="/auth/verify-email" element={<EmailVerificationPage />} />
       </Route>
     </Routes>
