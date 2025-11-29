@@ -10,11 +10,18 @@ const root = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
 let supabaseAlias: string | undefined;
+let sonnerAlias: string | undefined;
 
 try {
   require.resolve("@supabase/supabase-js");
 } catch {
   supabaseAlias = resolve(root, "src/stubs/supabase-js.ts");
+}
+
+try {
+  require.resolve("sonner");
+} catch {
+  sonnerAlias = resolve(root, "src/stubs/sonner.tsx");
 }
 
 // https://vite.dev/config/
@@ -25,6 +32,7 @@ export default defineConfig({
     alias: {
       "@": resolve(root, "src"),
       ...(supabaseAlias ? { "@supabase/supabase-js": supabaseAlias } : {}),
+      ...(sonnerAlias ? { sonner: sonnerAlias } : {}),
     },
   },
   test: {

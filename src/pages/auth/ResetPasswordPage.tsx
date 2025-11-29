@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
+import { toast } from "sonner";
 
 const ResetPasswordPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
@@ -15,7 +16,6 @@ const ResetPasswordPage: React.FC = () => {
   const [email, setEmail] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [message, setMessage] = React.useState<string | null>(null);
 
   useCustomHeader(null, { visible: false });
 
@@ -23,7 +23,6 @@ const ResetPasswordPage: React.FC = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setMessage(null);
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email,
@@ -34,8 +33,9 @@ const ResetPasswordPage: React.FC = () => {
 
     if (resetError) {
       setError(resetError.message);
+      toast.error(resetError.message);
     } else {
-      setMessage(t("auth.resetSent"));
+      toast.success(t("auth.resetSent"));
     }
     setLoading(false);
   };
@@ -69,7 +69,6 @@ const ResetPasswordPage: React.FC = () => {
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {message && <p className="text-sm text-green-600">{message}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? t("auth.loading") : t("auth.resetAction")}
         </Button>

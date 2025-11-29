@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
+import { toast } from "sonner";
 
 const EmailVerificationPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
@@ -45,6 +46,19 @@ const EmailVerificationPage: React.FC = () => {
         setStatus("error");
       });
   }, [location.search, supabase.auth]);
+
+  React.useEffect(() => {
+    if (status === "success") {
+      toast.success(t("auth.verificationSuccessTitle"), {
+        description: t("auth.verificationSuccessBody"),
+      });
+    }
+    if (status === "error") {
+      toast.error(t("auth.verificationErrorTitle"), {
+        description: error ?? undefined,
+      });
+    }
+  }, [error, status, t]);
 
   return (
     <AuthPageShell

@@ -1,5 +1,6 @@
 import React from "react";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 import { getSupabaseClient } from "@/services/supabaseClient";
 
@@ -64,6 +65,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) {
       setError(signOutError.message);
+      toast.error(signOutError.message);
+    } else {
+      toast.success("Signed out");
     }
     setLoading(false);
   }, [supabase]);

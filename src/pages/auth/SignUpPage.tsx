@@ -6,9 +6,9 @@ import AuthPageShell from "@/components/auth/AuthPageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCustomHeader } from "@/layout/CommonLayout";
 import { getSupabaseClient } from "@/services/supabaseClient";
+import { toast } from "sonner";
 
 const SignUpPage: React.FC = () => {
   const supabase = React.useMemo(() => getSupabaseClient(), []);
@@ -19,7 +19,6 @@ const SignUpPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [message, setMessage] = React.useState<string | null>(null);
 
   useCustomHeader(null, { visible: false });
 
@@ -27,10 +26,10 @@ const SignUpPage: React.FC = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setMessage(null);
 
     if (password !== confirmPassword) {
       setError(t("auth.passwordMismatch"));
+      toast.error(t("auth.passwordMismatch"));
       setLoading(false);
       return;
     }
@@ -45,8 +44,11 @@ const SignUpPage: React.FC = () => {
 
     if (signUpError) {
       setError(signUpError.message);
+      toast.error(signUpError.message);
     } else {
-      setMessage(t("auth.signUpSuccess"));
+      toast.success(t("auth.signUpSuccessTitle"), {
+        description: t("auth.signUpSuccess"),
+      });
       navigate("/auth/verify-email", { replace: true });
     }
     setLoading(false);
@@ -105,12 +107,6 @@ const SignUpPage: React.FC = () => {
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {message && (
-          <Alert className="bg-muted/70">
-            <AlertTitle>{t("auth.signUpSuccessTitle")}</AlertTitle>
-            <AlertDescription>{message}</AlertDescription>
-          </Alert>
-        )}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? t("auth.loading") : t("auth.signUpAction")}
         </Button>
