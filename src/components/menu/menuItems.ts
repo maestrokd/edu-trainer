@@ -35,6 +35,16 @@ export const games: GameItem[] = [
     tags: ["multiplication", "множення", "умножение"],
   },
   {
+    id: "addSub",
+    path: "/add-sub-trainer",
+    titleKey: "games.addSub.title",
+    descriptionKey: "games.addSub.desc",
+    category: "math",
+    icon: Calculator,
+    badge: "new",
+    tags: ["addition", "subtraction", "додавання", "віднімання", "сложение", "вычитание"],
+  },
+  {
     id: "cmpNumbers",
     path: "/compare-numbers",
     titleKey: "games.compareNumbers.title",
