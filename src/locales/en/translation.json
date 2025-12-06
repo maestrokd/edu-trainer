@@ -35,6 +35,10 @@
       "title": "Multiplication Trainer",
       "desc": "Advanced practice & drills."
     },
+    "addSub": {
+      "title": "Addition & Subtraction Trainer",
+      "desc": "Sharpen sums, differences, and missing parts."
+    },
     "compareNumbers": {
       "title": "Compare Numbers Trainer",
       "desc": "Practice comparing integers, decimals, and fractions."
@@ -206,6 +210,72 @@
       "placeholder": "your answer",
       "submit": "Submit",
       "hint": "Press Enter to submit, Esc to clear."
+    }
+  },
+  "addSubT": {
+    "title": "Addition & Subtraction Trainer",
+    "menu": "Menu",
+    "start": "Start",
+    "setup": {
+      "title": "Setup",
+      "intro": "Choose operations, number range, and practice mode. You can also limit time or the number of exercises.",
+      "operations": "Operations",
+      "addition": "Addition",
+      "subtraction": "Subtraction",
+      "oneRequired": "Select at least one operation.",
+      "range": "Number range",
+      "min": "Minimum",
+      "max": "Maximum",
+      "mode": "Mode",
+      "timer": "Timer (minutes, 0 = unlimited)",
+      "maxExercises": "Max exercises (0 = unlimited)",
+      "sounds": "Sounds",
+      "soundsHint": "Voice feedback for answers"
+    },
+    "mode": {
+      "result": "Type the result",
+      "missing": "Find the missing number"
+    },
+    "play": {
+      "title": "Play",
+      "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
+      "stats": "✔️ {{correct}} · ❌ {{wrong}} · 🔥 {{streak}} (best {{best}})",
+      "timeLeft": "Time left",
+      "timeElapsed": "Time elapsed",
+      "promptLabel": "Solve",
+      "placeholder": "Your answer",
+      "submit": "Submit",
+      "feedback": {
+        "correct": "Correct!",
+        "wrong": "Try again. Correct answer: {{correct}}"
+      },
+      "finished": {
+        "time": "Time is up!",
+        "limit": "Exercises complete ({{count}})."
+      },
+      "sr": {
+        "correct": "Correct answer",
+        "wrong": "Incorrect answer"
+      }
+    },
+    "table": {
+      "title": "History",
+      "summary": "Attempts: {{count}}",
+      "example": "Example",
+      "answer": "Your input",
+      "result": "Result",
+      "empty": "Your attempts will show here.",
+      "correct": "Correct",
+      "incorrect": "Incorrect (correct: {{correct}})"
+    },
+    "aria": {
+      "add": "Include addition",
+      "sub": "Include subtraction",
+      "mode": "Practice mode",
+      "timer": "Timer minutes",
+      "maxExercises": "Maximum exercises",
+      "sounds": "Enable sounds",
+      "answerField": "Answer input field"
     }
   },
   "cmpNmbrGm": {
