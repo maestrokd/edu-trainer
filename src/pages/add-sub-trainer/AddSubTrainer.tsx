@@ -1,17 +1,16 @@
 import React from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Calculator, Settings, Sparkles } from "lucide-react";
+import { Calculator, CheckCircle2, Settings, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +27,7 @@ import { cn } from "@/lib/utils";
 type Screen = "setup" | "play";
 type Op = "add" | "sub";
 type ProblemMode = "result" | "missing";
+type PlayMode = "quiz" | "input";
 type MissingPart = "result" | "a" | "b";
 
 type HistoryItem = {
@@ -121,6 +121,29 @@ function generateTask(ops: Op[], mode: ProblemMode, min: number, max: number): G
   };
 }
 
+function generateOptions(correct: number): number[] {
+  const opts = new Set<number>();
+  opts.add(correct);
+  const deltas = [1, 2, 3, 4, 5, -1, -2, -3, -4, -5];
+
+  let attempts = 0;
+  while (opts.size < 4 && attempts < 100) {
+    const delta = deltas[randInt(0, deltas.length - 1)];
+    const candidate = correct + delta;
+    if (candidate !== correct && candidate >= -1000 && candidate <= 1000) {
+      opts.add(candidate);
+    }
+    attempts++;
+  }
+
+  while (opts.size < 4) {
+    const candidate = correct + randInt(-9, 9);
+    if (candidate !== correct) opts.add(candidate);
+  }
+
+  return Array.from(opts).sort(() => Math.random() - 0.5);
+}
+
 export default function AddSubTrainer() {
   const { t } = useTranslation();
   const tr = React.useCallback(
@@ -129,18 +152,20 @@ export default function AddSubTrainer() {
   );
 
   const [screen, setScreen] = React.useState<Screen>("setup");
+  const [playMode, setPlayMode] = React.useState<PlayMode>("quiz");
   const [mode, setMode] = React.useState<ProblemMode>("result");
   const [includeAdd, setIncludeAdd] = React.useState(true);
   const [includeSub, setIncludeSub] = React.useState(true);
-  const [minVal, setMinVal] = React.useState(0);
-  const [maxVal, setMaxVal] = React.useState(20);
-  const [timerMinutes, setTimerMinutes] = React.useState(0);
-  const [maxExercises, setMaxExercises] = React.useState(0);
+  const [minValInput, setMinValInput] = React.useState("0");
+  const [maxValInput, setMaxValInput] = React.useState("20");
+  const [timerMinutesInput, setTimerMinutesInput] = React.useState("");
+  const [maxExercisesInput, setMaxExercisesInput] = React.useState("");
   const [enableSounds, setEnableSounds] = React.useState(false);
 
   const [task, setTask] = React.useState<GeneratedTask | null>(null);
   const [answer, setAnswer] = React.useState("");
   const [taskId, setTaskId] = React.useState(0);
+  const [options, setOptions] = React.useState<number[]>([]);
 
   const [correctCount, setCorrectCount] = React.useState(0);
   const [wrongCount, setWrongCount] = React.useState(0);
@@ -151,6 +176,26 @@ export default function AddSubTrainer() {
   const [lastWasCorrect, setLastWasCorrect] = React.useState<boolean | null>(null);
   const [gameOver, setGameOver] = React.useState(false);
   const [endReason, setEndReason] = React.useState<"time" | "limit" | null>(null);
+
+  const minVal = React.useMemo(() => {
+    const parsed = Number.parseInt(minValInput, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }, [minValInput]);
+
+  const maxVal = React.useMemo(() => {
+    const parsed = Number.parseInt(maxValInput, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }, [maxValInput]);
+
+  const timerMinutes = React.useMemo(() => {
+    const parsed = Number.parseInt(timerMinutesInput, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }, [timerMinutesInput]);
+
+  const maxExercises = React.useMemo(() => {
+    const parsed = Number.parseInt(maxExercisesInput, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }, [maxExercisesInput]);
 
   const timerActive = screen === "play" && !gameOver;
   const { elapsedSec, reset: resetTimer } = useAccurateTimer(timerActive);
@@ -175,7 +220,12 @@ export default function AddSubTrainer() {
     setTask(next);
     setTaskId((id) => id + 1);
     setAnswer("");
-  }, [availableOps, maxVal, minVal, mode]);
+    if (playMode === "quiz") {
+      setOptions(generateOptions(next.correctAnswer));
+    } else {
+      setOptions([]);
+    }
+  }, [availableOps, maxVal, minVal, mode, playMode]);
 
   const startGame = React.useCallback(() => {
     if (!canStart) return;
@@ -202,7 +252,7 @@ export default function AddSubTrainer() {
   );
 
   React.useEffect(() => {
-    if (!timerActive || timerMinutes <= 0) return;
+    if (!timerActive || !timerMinutes) return;
     const total = timerMinutes * 60;
     if (elapsedSec >= total) {
       finishGame("time");
@@ -211,60 +261,64 @@ export default function AddSubTrainer() {
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   React.useEffect(() => {
-    if (screen === "play" && !gameOver) {
+    if (screen === "play" && playMode === "input" && !gameOver) {
       const id = setTimeout(() => inputRef.current?.focus(), 0);
       return () => clearTimeout(id);
     }
-  }, [screen, gameOver, taskId]);
+  }, [screen, playMode, gameOver, taskId]);
 
-  const submitAnswer = React.useCallback(() => {
-    if (!task || gameOver) return;
-    const parsed = Number.parseInt(answer.trim(), 10);
-    const isCorrect = Number.isFinite(parsed) && parsed === task.correctAnswer;
+  const submitAnswer = React.useCallback(
+    (choice?: number) => {
+      if (!task || gameOver) return;
+      const parsedValue =
+        typeof choice === "number" ? choice : Number.parseInt(answer.trim(), 10);
+      const isCorrect = Number.isFinite(parsedValue) && parsedValue === task.correctAnswer;
 
-    setHistory((prev) => [
-      {
-        id: prev.length + 1,
-        prompt: task.prompt,
-        userAnswer: answer.trim(),
-        correctAnswer: task.correctAnswer,
-        isCorrect,
-      },
-      ...prev,
-    ]);
+      setHistory((prev) => [
+        {
+          id: prev.length + 1,
+          prompt: task.prompt,
+          userAnswer: typeof choice === "number" ? String(choice) : answer.trim(),
+          correctAnswer: task.correctAnswer,
+          isCorrect,
+        },
+        ...prev,
+      ]);
 
-    if (isCorrect) {
-      setCorrectCount((c) => c + 1);
-      setStreak((s) => {
-        const next = s + 1;
-        setBestStreak((b) => Math.max(b, next));
-        return next;
-      });
-      setLastFeedback(tr("play.feedback.correct"));
-      setLastWasCorrect(true);
-      if (enableSounds && "speechSynthesis" in window) {
-        const utter = new SpeechSynthesisUtterance(tr("play.sr.correct"));
-        window.speechSynthesis.speak(utter);
+      if (isCorrect) {
+        setCorrectCount((c) => c + 1);
+        setStreak((s) => {
+          const next = s + 1;
+          setBestStreak((b) => Math.max(b, next));
+          return next;
+        });
+        setLastFeedback(tr("play.feedback.correct"));
+        setLastWasCorrect(true);
+        if (enableSounds && "speechSynthesis" in window) {
+          const utter = new SpeechSynthesisUtterance(tr("play.sr.correct"));
+          window.speechSynthesis.speak(utter);
+        }
+      } else {
+        setWrongCount((c) => c + 1);
+        setStreak(0);
+        setLastFeedback(tr("play.feedback.wrong", { correct: task.correctAnswer }));
+        setLastWasCorrect(false);
+        if (enableSounds && "speechSynthesis" in window) {
+          const utter = new SpeechSynthesisUtterance(tr("play.sr.wrong"));
+          window.speechSynthesis.speak(utter);
+        }
       }
-    } else {
-      setWrongCount((c) => c + 1);
-      setStreak(0);
-      setLastFeedback(tr("play.feedback.wrong", { correct: task.correctAnswer }));
-      setLastWasCorrect(false);
-      if (enableSounds && "speechSynthesis" in window) {
-        const utter = new SpeechSynthesisUtterance(tr("play.sr.wrong"));
-        window.speechSynthesis.speak(utter);
+
+      const totalAnswered = correctCount + wrongCount + 1;
+      if (maxExercises && totalAnswered >= maxExercises) {
+        finishGame("limit");
+        return;
       }
-    }
 
-    const totalAnswered = correctCount + wrongCount + 1;
-    if (maxExercises > 0 && totalAnswered >= maxExercises) {
-      finishGame("limit");
-      return;
-    }
-
-    prepareTask();
-  }, [answer, correctCount, enableSounds, finishGame, gameOver, maxExercises, prepareTask, task, tr, wrongCount]);
+      prepareTask();
+    },
+    [answer, correctCount, enableSounds, finishGame, gameOver, maxExercises, prepareTask, task, tr, wrongCount],
+  );
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -283,284 +337,379 @@ export default function AddSubTrainer() {
   }, [endReason, gameOver, lastFeedback, maxExercises, tr]);
 
   return (
-    <div className="max-w-6xl mx-auto w-full px-4 pb-10">
-      <header className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm font-medium hover:bg-muted/80"
-          >
-            ← {t("multiT.menu")}
-          </Link>
-          <div className="flex items-center gap-2 text-primary">
-            <Calculator className="h-5 w-5" />
-            <span className="text-lg font-semibold">{tr("title")}</span>
+    <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
+      <div className="w-full flex flex-col h-full">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Calculator className="size-5 text-primary" aria-hidden />
+            <span className="hidden sm:inline text-xs text-muted-foreground">{tr("title")}</span>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
+
+          <div className="flex items-center text-center">
+            {screen === "play" && task && (
+              <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
+                {tr("play.rangeAccuracy", {
+                  min: Math.min(minVal, maxVal),
+                  max: Math.max(minVal, maxVal),
+                  acc: accuracy,
+                })}
+              </span>
+            )}
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Settings className="h-4 w-4" />
-                {tr("menu")}
+              <Button variant="ghost" size="icon" aria-label={tr("menu") || "Menu"} className="size-8">
+                <Settings className="size-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>{tr("menu")}</DropdownMenuLabel>
+
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center text-center">
+                    <span className="w-full">{tr("menu")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ThemeToggle />
+                    <LanguageSelector mode={LanguageSelectorMode.ICON} />
+                  </div>
+                </div>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
+
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                  <Link to="/">{t("menu.mainMenuLabel")}</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/multiplication-trainer">{t("games.multiplication2.title")}</Link>
-                </DropdownMenuItem>
+                {screen === "play" && (
+                  <>
+                    <DropdownMenuItem onSelect={() => startGame()}>{tr("actions.newSession")}</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setScreen("setup")}>{tr("actions.changeSetup")}</DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+                  </>
+                )}
               </DropdownMenuGroup>
+
+              <DropdownMenuItem asChild>
+                <Link to="/">{t("menu.mainMenuLabel")}</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <LanguageSelector mode={LanguageSelectorMode.FULL} />
-          <ThemeToggle />
         </div>
-      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <Card className="lg:col-span-2 border-primary/20 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              {tr("setup.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Label className="text-sm font-semibold">{tr("setup.operations")}</Label>
-              <div className="flex flex-col gap-2">
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={includeAdd}
-                    onCheckedChange={(v) => setIncludeAdd(Boolean(v))}
-                    aria-label={tr("aria.add")}
-                  />
-                  {tr("setup.addition")}
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={includeSub}
-                    onCheckedChange={(v) => setIncludeSub(Boolean(v))}
-                    aria-label={tr("aria.sub")}
-                  />
-                  {tr("setup.subtraction")}
-                </label>
-                {!canStart && (
-                  <p className="text-xs text-destructive">{tr("setup.oneRequired")}</p>
+        {screen === "setup" ? (
+          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-5xl mx-auto w-full mt-4 space-y-6">
+            <p className="text-muted-foreground">{tr("setup.intro")}</p>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardContent className="p-4 sm:p-6 grid gap-4">
+                  <LabeledField label={tr("setup.operations")!} htmlFor="op-add">
+                    <div className="flex flex-col gap-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          id="op-add"
+                          checked={includeAdd}
+                          onCheckedChange={(v) => setIncludeAdd(Boolean(v))}
+                          aria-label={tr("aria.add")}
+                        />
+                        {tr("setup.addition")}
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          id="op-sub"
+                          checked={includeSub}
+                          onCheckedChange={(v) => setIncludeSub(Boolean(v))}
+                          aria-label={tr("aria.sub")}
+                        />
+                        {tr("setup.subtraction")}
+                      </label>
+                      {!canStart && <p className="text-xs text-destructive">{tr("setup.oneRequired")}</p>}
+                    </div>
+                  </LabeledField>
+
+                  <LabeledField label={tr("setup.range")!} htmlFor="min-input">
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        id="min-input"
+                        type="number"
+                        value={minValInput}
+                        inputMode="numeric"
+                        onChange={(e) => setMinValInput(e.target.value)}
+                        onBlur={(e) => {
+                          const parsed = Number.parseInt(e.target.value, 10);
+                          setMinValInput(Number.isFinite(parsed) ? String(parsed) : "0");
+                        }}
+                        aria-label={tr("setup.min") || undefined}
+                        placeholder={tr("setup.min") || undefined}
+                        className="rounded-xl"
+                      />
+                      <Input
+                        id="max-input"
+                        type="number"
+                        value={maxValInput}
+                        inputMode="numeric"
+                        onChange={(e) => setMaxValInput(e.target.value)}
+                        onBlur={(e) => {
+                          const parsed = Number.parseInt(e.target.value, 10);
+                          setMaxValInput(Number.isFinite(parsed) ? String(parsed) : "0");
+                        }}
+                        aria-label={tr("setup.max") || undefined}
+                        placeholder={tr("setup.max") || undefined}
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </LabeledField>
+
+                  <LabeledField label={tr("setup.answerMode")!} htmlFor="play-mode">
+                    <Select value={playMode} onValueChange={(v) => setPlayMode(v as PlayMode)}>
+                      <SelectTrigger id="play-mode" className="rounded-xl w-full h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="quiz">{tr("mode.quiz")}</SelectItem>
+                        <SelectItem value="input">{tr("mode.input")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </LabeledField>
+
+                  <LabeledField label={tr("setup.mode")!} htmlFor="problem-mode">
+                    <Select value={mode} onValueChange={(v: ProblemMode) => setMode(v)}>
+                      <SelectTrigger id="problem-mode" className="rounded-xl w-full h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="result">{tr("mode.result")}</SelectItem>
+                        <SelectItem value="missing">{tr("mode.missing")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </LabeledField>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 sm:p-6 grid gap-4">
+                  <LabeledField label={tr("setup.timer")!} htmlFor="timer-min">
+                    <Input
+                      id="timer-min"
+                      type="number"
+                      min={0}
+                      value={timerMinutesInput}
+                      placeholder="∞"
+                      inputMode="numeric"
+                      onChange={(e) => setTimerMinutesInput(e.target.value)}
+                      onBlur={(e) => {
+                        const parsed = Number.parseInt(e.target.value, 10);
+                        setTimerMinutesInput(Number.isFinite(parsed) && parsed > 0 ? String(parsed) : "");
+                      }}
+                      aria-label={tr("aria.timer") || undefined}
+                      className="rounded-xl"
+                    />
+                    <p className="text-xs text-muted-foreground">{tr("setup.timerHint")}</p>
+                  </LabeledField>
+
+                  <LabeledField label={tr("setup.maxExercises")!} htmlFor="max-ex">
+                    <Input
+                      id="max-ex"
+                      type="number"
+                      min={0}
+                      value={maxExercisesInput}
+                      placeholder="∞"
+                      inputMode="numeric"
+                      onChange={(e) => setMaxExercisesInput(e.target.value)}
+                      onBlur={(e) => {
+                        const parsed = Number.parseInt(e.target.value, 10);
+                        setMaxExercisesInput(Number.isFinite(parsed) && parsed > 0 ? String(parsed) : "");
+                      }}
+                      aria-label={tr("aria.maxExercises") || undefined}
+                      className="rounded-xl"
+                    />
+                    <p className="text-xs text-muted-foreground">{tr("setup.maxExercisesHint")}</p>
+                  </LabeledField>
+
+                  <LabeledField label={tr("setup.sounds")!} htmlFor="sounds-toggle">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        id="sounds-toggle"
+                        checked={enableSounds}
+                        onCheckedChange={(v) => setEnableSounds(Boolean(v))}
+                        aria-label={tr("aria.sounds")}
+                      />
+                      {tr("setup.soundsHint")}
+                    </label>
+                  </LabeledField>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+              <Button onClick={startGame} className="w-full sm:w-auto" disabled={!canStart}>
+                {tr("start")}
+              </Button>
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link to="/" aria-label={t("multiT.menu") || undefined}>
+                  {t("multiT.menu")}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
+              <div className="flex flex-col min-h-0">
+                {gameOver && (
+                  <Alert className="mb-4">
+                    <AlertDescription>
+                      {endReason === "time"
+                        ? tr("play.finished.time")
+                        : tr("play.finished.limit", { count: maxExercises || 0 })}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <StatCard label={tr("stats.correct")!} value={correctCount} />
+                  <StatCard label={tr("stats.wrong")!} value={wrongCount} />
+                  <StatCard label={tr("stats.accuracy")!} value={`${accuracy}%`} />
+                  <StatCard label={tr("stats.time")!} value={formatTime(elapsedSec)} />
+                  {timerMinutes && (
+                    <StatCard
+                      label={tr("stats.timeLeft")!}
+                      value={formatTime(timerMinutes * 60 - elapsedSec)}
+                    />
+                  )}
+                  <StatCard label={tr("stats.streak")!} value={`${streak} / ${bestStreak}`} />
+                </div>
+
+                {task && !gameOver && (
+                  <div className="text-center mb-6">
+                    <div className="text-4xl sm:text-6xl font-semibold tracking-wide select-none">
+                      {task.prompt.replace("?", "_")}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+                      {playMode === "input" ? (
+                        <>
+                          <Input
+                            ref={inputRef}
+                            type="number"
+                            inputMode="numeric"
+                            value={answer}
+                            onChange={(e) => setAnswer(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder={tr("play.placeholder") || ""}
+                            aria-label={tr("aria.answerField")}
+                            className="text-lg w-40"
+                          />
+                          <Button onClick={() => submitAnswer()}>{tr("play.submit")}</Button>
+                        </>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
+                          {options.map((opt) => (
+                            <Button
+                              key={opt}
+                              variant="secondary"
+                              className="min-w-20"
+                              onClick={() => submitAnswer(opt)}
+                            >
+                              {opt}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {displayStatus && (
+                      <p
+                        className={cn(
+                          "mt-3 text-sm font-medium",
+                          gameOver
+                            ? "text-primary"
+                            : lastWasCorrect
+                              ? "text-emerald-600"
+                              : "text-destructive",
+                        )}
+                      >
+                        {displayStatus}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
 
-            <Separator />
-
-            <div className="grid grid-cols-2 gap-3">
-              <Label className="text-sm font-semibold">{tr("setup.range")}</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label htmlFor="min" className="text-xs text-muted-foreground">
-                    {tr("setup.min")}
-                  </Label>
-                  <Input
-                    id="min"
-                    type="number"
-                    min={-99}
-                    max={999}
-                    value={minVal}
-                    onChange={(e) => setMinVal(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="max" className="text-xs text-muted-foreground">
-                    {tr("setup.max")}
-                  </Label>
-                  <Input
-                    id="max"
-                    type="number"
-                    min={-99}
-                    max={999}
-                    value={maxVal}
-                    onChange={(e) => setMaxVal(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="grid grid-cols-2 gap-3">
-              <Label className="text-sm font-semibold">{tr("setup.mode")}</Label>
-              <Select value={mode} onValueChange={(v: ProblemMode) => setMode(v)}>
-                <SelectTrigger aria-label={tr("aria.mode")}>
-                  <SelectValue placeholder={tr("setup.mode")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="result">{tr("mode.result")}</SelectItem>
-                  <SelectItem value="missing">{tr("mode.missing")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Label className="text-sm font-semibold">{tr("setup.timer")}</Label>
-              <Input
-                type="number"
-                min={0}
-                max={60}
-                value={timerMinutes}
-                onChange={(e) => setTimerMinutes(Number(e.target.value))}
-                aria-label={tr("aria.timer")}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Label className="text-sm font-semibold">{tr("setup.maxExercises")}</Label>
-              <Input
-                type="number"
-                min={0}
-                max={200}
-                value={maxExercises}
-                onChange={(e) => setMaxExercises(Number(e.target.value))}
-                aria-label={tr("aria.maxExercises")}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Label className="text-sm font-semibold">{tr("setup.sounds")}</Label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={enableSounds}
-                  onCheckedChange={(v) => setEnableSounds(Boolean(v))}
-                  aria-label={tr("aria.sounds")}
-                />
-                {tr("setup.soundsHint")}
-              </label>
-            </div>
-
-            <Button onClick={startGame} className="w-full" disabled={!canStart}>
-              {tr("start")}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3 border-primary/20 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>{tr("play.title")}</span>
-              <span className="text-sm text-muted-foreground">
-                {tr("play.rangeAccuracy", { min: Math.min(minVal, maxVal), max: Math.max(minVal, maxVal), acc: accuracy })}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {screen === "setup" && (
-              <Alert className="bg-primary/5 border-primary/30">
-                <AlertDescription className="text-sm">
-                  {tr("setup.intro")}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {screen === "play" && task && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {tr("play.stats", {
-                      correct: correctCount,
-                      wrong: wrongCount,
-                      streak,
-                      best: bestStreak,
-                    })}
-                  </div>
-                  <div className="text-sm font-semibold">
-                    {timerMinutes > 0
-                      ? `${tr("play.timeLeft")}: ${formatTime(timerMinutes * 60 - elapsedSec)}`
-                      : `${tr("play.timeElapsed")}: ${formatTime(elapsedSec)}`}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3 rounded-xl bg-gradient-to-r from-indigo-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border p-4">
-                  <p className="text-sm text-muted-foreground">{tr("play.promptLabel")}</p>
-                  <p className="text-3xl font-semibold tracking-tight">{task.prompt}</p>
-                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                    <Input
-                      ref={inputRef}
-                      key={taskId}
-                      type="number"
-                      value={answer}
-                      onChange={(e) => setAnswer(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder={tr("play.placeholder")}
-                      aria-label={tr("aria.answerField")}
-                      className="text-lg"
-                    />
-                    <Button onClick={submitAnswer}>{tr("play.submit")}</Button>
-                  </div>
-                  {displayStatus && (
-                    <p
-                      className={cn(
-                        "text-sm font-medium",
-                        gameOver
-                          ? "text-primary"
-                          : lastWasCorrect
-                            ? "text-emerald-600"
-                            : "text-destructive",
-                      )}
-                    >
-                      {displayStatus}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <Separator />
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold">{tr("table.title")}</h3>
-                <span className="text-xs text-muted-foreground">
-                  {tr("table.summary", { count: history.length })}
-                </span>
-              </div>
-              <div className="rounded-lg border bg-background overflow-hidden">
+              <div className="h-full overflow-auto rounded-xl border">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 bg-muted">
                     <TableRow>
-                      <TableHead>{tr("table.example")}</TableHead>
-                      <TableHead>{tr("table.answer")}</TableHead>
-                      <TableHead>{tr("table.result")}</TableHead>
+                      <TableHead className="px-4 text-center">{tr("table.example")}</TableHead>
+                      <TableHead className="px-4 text-center">{tr("table.answer")}</TableHead>
+                      <TableHead className="px-4 text-center">{tr("table.result")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {history.length === 0 && (
+                    {history.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center text-sm text-muted-foreground">
+                        <TableCell colSpan={3} className="px-4 py-3 text-muted-foreground text-center">
                           {tr("table.empty")}
                         </TableCell>
                       </TableRow>
+                    ) : (
+                      history.map((row) => (
+                        <TableRow key={row.id} className="border-t">
+                          <TableCell className="px-4 py-2 text-center whitespace-nowrap">{row.prompt}</TableCell>
+                          <TableCell className="px-4 py-2 text-center">{row.userAnswer || "—"}</TableCell>
+                          <TableCell className="px-4 py-2 align-top">
+                            {row.isCorrect ? (
+                              <span className="inline-flex items-center gap-1 text-green-700">
+                                <CheckCircle2 className="size-4" aria-hidden />
+                                {tr("table.correct")}
+                              </span>
+                            ) : (
+                              <div className="text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
+                                <span className="inline-flex items-center gap-1">
+                                  <XCircle className="size-4" aria-hidden />
+                                  {tr("table.incorrect", { correct: row.correctAnswer })}
+                                </span>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
                     )}
-                    {history.map((row) => (
-                      <TableRow key={row.id} className={row.isCorrect ? "" : "bg-destructive/5"}>
-                        <TableCell className="font-mono">{row.prompt}</TableCell>
-                        <TableCell>{row.userAnswer || "—"}</TableCell>
-                        <TableCell className={row.isCorrect ? "text-emerald-600" : "text-destructive"}>
-                          {row.isCorrect ? tr("table.correct") : tr("table.incorrect", { correct: row.correctAnswer })}
-                        </TableCell>
-                      </TableRow>
-                    ))}
                   </TableBody>
                 </Table>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function LabeledField({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor={htmlFor}>{label}:</Label>
+      {children}
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <Card className="rounded-xl border shadow-sm min-w-20 py-0">
+      <CardContent className="px-3 py-1.5">
+        <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
+        <div className="text-base font-semibold leading-tight">{value}</div>
+      </CardContent>
+    </Card>
   );
 }

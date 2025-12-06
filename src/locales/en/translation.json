@@ -226,21 +226,36 @@
       "range": "Number range",
       "min": "Minimum",
       "max": "Maximum",
-      "mode": "Mode",
-      "timer": "Timer (minutes, 0 = unlimited)",
-      "maxExercises": "Max exercises (0 = unlimited)",
+      "answerMode": "Answer mode",
+      "mode": "Problem mode",
+      "timer": "Timer (minutes)",
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited number of questions.",
       "sounds": "Sounds",
       "soundsHint": "Voice feedback for answers"
     },
     "mode": {
+      "quiz": "Multiple choice",
+      "input": "Manual input",
       "result": "Type the result",
       "missing": "Find the missing number"
+    },
+    "actions": {
+      "newSession": "New session",
+      "changeSetup": "Change setup"
+    },
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "timeLeft": "Time left",
+      "streak": "Streak"
     },
     "play": {
       "title": "Play",
       "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
-      "stats": "✔️ {{correct}} · ❌ {{wrong}} · 🔥 {{streak}} (best {{best}})",
-      "timeLeft": "Time left",
       "timeElapsed": "Time elapsed",
       "promptLabel": "Solve",
       "placeholder": "Your answer",
