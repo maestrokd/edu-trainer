@@ -583,7 +583,7 @@ export default function AddSubTrainer() {
                 {task && !gameOver && (
                   <div className="text-center mb-6">
                     <div className="text-4xl sm:text-6xl font-semibold tracking-wide select-none">
-                      {task.prompt.replace("?", "_")}
+                      {task.prompt.replace(/\?/g, "☐")}
                     </div>
 
                     <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
