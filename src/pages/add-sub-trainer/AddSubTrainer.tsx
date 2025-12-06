@@ -318,7 +318,7 @@ export default function AddSubTrainer() {
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <LanguageSelector mode={LanguageSelectorMode.Both} />
+          <LanguageSelector mode={LanguageSelectorMode.FULL} />
           <ThemeToggle />
         </div>
       </header>
