@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Obstacle {
   x: number;
@@ -10,6 +10,7 @@ interface Obstacle {
 interface QuizQ {
   a: number;
   b: number;
+  options: number[];
   answer?: number;
   correct?: boolean;
 }
@@ -41,6 +42,16 @@ const randRange = (min: number, max: number) =>
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v));
 
+const shuffleArray = <T,>(arr: T[]) => {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const supportsVibration = () => typeof navigator !== "undefined" && !!navigator.vibrate;
+
 export default function RabbitJumpX9({
   numQuestions = 3,
 }: {
@@ -49,8 +60,9 @@ export default function RabbitJumpX9({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fxCanvasRef = useRef<HTMLCanvasElement | null>(null); // top fireworks canvas
   const loopRef = useRef<number | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const gameAreaRef = useRef<HTMLDivElement | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const askOnHitRef = useRef(true);
 
   // UI state
   const [score, setScore] = useState(0);
@@ -61,6 +73,88 @@ export default function RabbitJumpX9({
   const [quizCount, setQuizCount] = useState<number>(numQuestions);
   const [message, setMessage] = useState<string | null>(null);
   const [won, setWon] = useState(false);
+  const [askOnHit, setAskOnHit] = useState(true);
+  const [effectsEnabled, setEffectsEnabled] = useState(true);
+
+  useEffect(() => {
+    askOnHitRef.current = askOnHit;
+  }, [askOnHit]);
+
+  const ensureAudioCtx = () => {
+    if (!effectsEnabled) return null;
+    let ctx = audioCtxRef.current;
+    const Ctx = (window.AudioContext || (window as any).webkitAudioContext) as
+      | typeof AudioContext
+      | undefined;
+    if (!ctx && Ctx) {
+      try {
+        ctx = new Ctx();
+        audioCtxRef.current = ctx;
+      } catch {
+        return null;
+      }
+    }
+    if (ctx && ctx.state === "suspended") ctx.resume();
+    return ctx ?? null;
+  };
+
+  const playTone = (
+    freq: number,
+    duration: number,
+    volume = 0.12,
+    type: OscillatorType = "sine",
+  ) => {
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  };
+
+  const playSound = (
+    kind: "jump" | "hit" | "correct" | "wrong" | "finish" | "firework",
+  ) => {
+    if (!effectsEnabled) return;
+    if (kind === "jump") {
+      playTone(620, 0.08, 0.06, "triangle");
+    } else if (kind === "hit") {
+      playTone(180, 0.12, 0.12, "sawtooth");
+      playTone(90, 0.14, 0.08, "square");
+    } else if (kind === "correct") {
+      playTone(720, 0.08, 0.08, "triangle");
+      setTimeout(() => playTone(860, 0.1, 0.06, "triangle"), 50);
+    } else if (kind === "wrong") {
+      playTone(260, 0.1, 0.12, "sawtooth");
+      setTimeout(() => playTone(200, 0.1, 0.08, "sawtooth"), 60);
+    } else if (kind === "finish") {
+      playTone(760, 0.14, 0.1, "triangle");
+      setTimeout(() => playTone(920, 0.16, 0.08, "triangle"), 70);
+      setTimeout(() => playTone(1080, 0.18, 0.06, "triangle"), 140);
+    } else if (kind === "firework") {
+      // Two low booms followed by a bright crackle
+      playTone(220, 0.18, 0.16, "sine");
+      setTimeout(() => playTone(180, 0.2, 0.14, "sine"), 90);
+      setTimeout(() => playTone(840, 0.14, 0.08, "triangle"), 180);
+      setTimeout(() => playTone(960, 0.18, 0.06, "triangle"), 260);
+    }
+  };
+
+  const vibrate = (pattern: number | number[]) => {
+    if (!effectsEnabled) return;
+    if (supportsVibration()) navigator.vibrate(pattern);
+  };
+
+  const primeEffects = () => {
+    if (!effectsEnabled) return;
+    ensureAudioCtx();
+  };
 
   // Game state (mutable ref, avoids per-frame React re-renders)
   const gameRef = useRef({
@@ -74,6 +168,7 @@ export default function RabbitJumpX9({
     speed: 260,
     flowers: [] as Obstacle[],
     nextSpawn: 0,
+    jumpsAvailable: 2,
     // finish/threshold flags
     speedBoosted: false,
     spawnedFinish: false,
@@ -83,6 +178,7 @@ export default function RabbitJumpX9({
     fireworks: [] as Particle[],
     fireworkTimer: 0,
     fireworkNext: 0,
+    hitCooldown: 0,
   });
 
   // Resize canvases to the game area container size (responsive)
@@ -146,13 +242,6 @@ export default function RabbitJumpX9({
     };
   }, []);
 
-  // Ensure input is focused when quiz is shown or layout changes
-  useEffect(() => {
-    if (paused && quiz) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [paused, quizIndex, isDesktop, quiz]);
-
   const focusCanvas = () => {
     const el = canvasRef.current;
     if (el) {
@@ -188,10 +277,12 @@ export default function RabbitJumpX9({
   }, [paused, started]);
 
   const jump = () => {
+    primeEffects();
     const g = gameRef.current;
-    if (g.rabbit.y >= g.groundY - g.rabbit.h - 4) {
-      g.rabbit.vy = g.jumpV;
-    }
+    if (g.jumpsAvailable <= 0) return;
+    g.rabbit.vy = g.jumpV;
+    g.jumpsAvailable -= 1;
+    playSound("jump");
   };
 
   // Helpers to apply thresholds based on new score value
@@ -223,6 +314,10 @@ export default function RabbitJumpX9({
       const dt = Math.min(0.033, (now - last) / 1000);
       last = now;
 
+      if (started && g.hitCooldown > 0) {
+        g.hitCooldown = Math.max(0, g.hitCooldown - dt);
+      }
+
       if (!paused && started && !g.finished) {
         g.time += dt;
 
@@ -243,11 +338,12 @@ export default function RabbitJumpX9({
 
         // Physics
         g.rabbit.vy += g.gravity * dt;
-        g.rabbit.y += g.rabbit.vy * dt;
-        if (g.rabbit.y > g.groundY - g.rabbit.h) {
-          g.rabbit.y = g.groundY - g.rabbit.h;
-          g.rabbit.vy = 0;
-        }
+      g.rabbit.y += g.rabbit.vy * dt;
+      if (g.rabbit.y > g.groundY - g.rabbit.h) {
+        g.rabbit.y = g.groundY - g.rabbit.h;
+        g.rabbit.vy = 0;
+        g.jumpsAvailable = 2;
+      }
 
         // Move flowers
         for (const f of g.flowers) f.x -= g.speed * dt;
@@ -258,6 +354,8 @@ export default function RabbitJumpX9({
           if (g.finishX <= g.rabbit.x + g.rabbit.w) {
             if (!g.finished) {
               g.finished = true;
+              playSound("finish");
+              vibrate([80, 40, 120]);
               startFireworks();
               setWon(true);
               setMessage(null);
@@ -278,16 +376,16 @@ export default function RabbitJumpX9({
         }
 
         // collision (only before finish)
-        if (!g.spawnedFinish) {
+        if (!g.spawnedFinish && g.hitCooldown <= 0) {
           const r = {
             x: g.rabbit.x,
             y: g.rabbit.y,
             w: g.rabbit.w,
             h: g.rabbit.h,
           };
-          for (const f of g.flowers) {
-            if (aabb(r, f)) {
-              triggerQuiz();
+          for (let i = 0; i < g.flowers.length; i++) {
+            if (aabb(r, g.flowers[i])) {
+              handleCollision(i);
               break;
             }
           }
@@ -453,6 +551,7 @@ export default function RabbitJumpX9({
     for (let i = 0; i < 5; i++) {
       spawnBurst(randRange(W * 0.2, W * 0.8), randRange(H * 0.22, H * 0.55));
     }
+    playSound("firework");
   };
 
   const spawnBurst = (cx: number, cy: number) => {
@@ -487,6 +586,7 @@ export default function RabbitJumpX9({
         const W = g.width,
           H = g.height;
         spawnBurst(randRange(W * 0.15, W * 0.85), randRange(H * 0.2, H * 0.5));
+        playSound("firework");
         g.fireworkNext = randRange(0.2, 0.4);
       }
     }
@@ -554,6 +654,16 @@ export default function RabbitJumpX9({
   }
 
   // ----- QUIZ -----
+  const buildOptions = (correct: number) => {
+    const options = new Set<number>([correct]);
+    while (options.size < 4) {
+      const delta = Math.round(randRange(-6, 7));
+      const candidate = Math.max(2, correct + delta);
+      options.add(candidate === correct ? candidate + 3 : candidate);
+    }
+    return shuffleArray([...options]).slice(0, 4);
+  };
+
   const makeQuiz = (): QuizQ[] => {
     const qs: QuizQ[] = [];
     const used = new Set<number>();
@@ -561,9 +671,26 @@ export default function RabbitJumpX9({
       const b = Math.floor(randRange(2, 13)); // 2..12
       if (used.has(b)) continue;
       used.add(b);
-      qs.push({ a: 9, b });
+      const answer = 9 * b;
+      qs.push({ a: 9, b, options: buildOptions(answer) });
     }
     return qs;
+  };
+
+  const prepareLandingSpace = (collidedX?: number) => {
+    const g = gameRef.current;
+    const safeGap = g.width * 0.18;
+    g.flowers = g.flowers.filter((f) => {
+      if (typeof collidedX === "number" && f.x <= collidedX + f.w) {
+        return false;
+      }
+      return f.x - (g.rabbit.x + g.rabbit.w) > safeGap;
+    });
+    g.rabbit.y = Math.min(g.rabbit.y, g.groundY - g.rabbit.h);
+    g.rabbit.vy = 0;
+    g.jumpsAvailable = 2;
+    g.hitCooldown = 0.8;
+    g.nextSpawn = Math.max(g.nextSpawn, 0.5);
   };
 
   const triggerQuiz = () => {
@@ -572,53 +699,55 @@ export default function RabbitJumpX9({
     setPaused(true);
     setQuiz(makeQuiz());
     setQuizIndex(0);
-    setTimeout(() => inputRef.current?.focus(), 50);
+    setMessage("Answer to keep hopping! ✏️");
+    vibrate(140);
   };
 
-  const submitAnswer = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCollision = (hitIndex: number) => {
+    const g = gameRef.current;
+    const hitFlower = g.flowers[hitIndex];
+    const collidedX = hitFlower ? hitFlower.x : undefined;
+    g.flowers = g.flowers.filter((_, i) => i !== hitIndex);
+    prepareLandingSpace(collidedX);
+    playSound("hit");
+    vibrate(180);
+
+    if (!askOnHitRef.current) {
+      setMessage("Ouch! Keep hopping.");
+      setTimeout(() => setMessage(null), 1100);
+      return;
+    }
+
+    triggerQuiz();
+  };
+
+  const handleOptionSelect = (value: number) => {
     if (!quiz) return;
     const idx = quizIndex;
     const q = quiz[idx];
-    const value = Number(inputRef.current?.value || NaN);
     const correct = value === q.a * q.b;
     const next = [...quiz];
     next[idx] = { ...q, answer: value, correct };
     setQuiz(next);
 
     if (correct) {
+      playSound("correct");
+      vibrate(80);
       const lastIndex = quizCount - 1;
       if (idx >= lastIndex) {
-        // Clear nearby flowers to avoid instant re-hit
-        const g = gameRef.current;
-        g.flowers = g.flowers.filter(
-          (f) => f.x - (g.rabbit.x + g.rabbit.w) > g.width * 0.2,
-        );
+        prepareLandingSpace();
         setPaused(false);
         setQuiz(null); // hide quiz entirely
         setMessage(null);
-        try {
-          inputRef.current?.blur();
-        } catch {}
         focusCanvas();
       } else {
-        setQuizIndex(idx + 1);
-        setTimeout(() => {
-          if (inputRef.current) {
-            inputRef.current.value = "";
-            inputRef.current.focus();
-          }
-        }, 30);
+        setTimeout(() => setQuizIndex(idx + 1), 200);
       }
     } else {
       setMessage("Try again! ✏️");
+      playSound("wrong");
+      vibrate([60, 30, 60]);
       setTimeout(() => setMessage(null), 900);
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.select();
-          inputRef.current.focus();
-        }
-      }, 30);
     }
   };
 
@@ -679,18 +808,19 @@ export default function RabbitJumpX9({
                     g.finishX = null;
                     g.finished = false;
                     g.fireworks = [];
-                    g.fireworkTimer = 0;
-                    g.fireworkNext = 0;
-                    g.rabbit = {
-                      ...g.rabbit,
-                      y: g.groundY - g.rabbit.h,
-                      vy: 0,
-                    };
-                    g.time = 0;
-                    // clear top canvas
-                    const fx = fxCanvasRef.current;
-                    if (fx)
-                      fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
+                  g.fireworkTimer = 0;
+                  g.fireworkNext = 0;
+                  g.rabbit = {
+                    ...g.rabbit,
+                    y: g.groundY - g.rabbit.h,
+                    vy: 0,
+                  };
+                  g.jumpsAvailable = 2;
+                  g.time = 0;
+                  // clear top canvas
+                  const fx = fxCanvasRef.current;
+                  if (fx)
+                    fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
                     setScore(0);
                     setWon(false);
                     setStarted(false); // show start overlay again
@@ -733,6 +863,26 @@ export default function RabbitJumpX9({
                 </select>
               </label>
 
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4"
+                  checked={askOnHit}
+                  onChange={(e) => setAskOnHit(e.target.checked)}
+                />
+                Ask multiplication quiz after a hit
+              </label>
+
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4"
+                  checked={effectsEnabled}
+                  onChange={(e) => setEffectsEnabled(e.target.checked)}
+                />
+                Sound & vibration effects
+              </label>
+
               <button
                 className="w-full px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
                 onClick={() => {
@@ -748,6 +898,7 @@ export default function RabbitJumpX9({
                   g.fireworkTimer = 0;
                   g.fireworkNext = 0;
                   g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
+                  g.jumpsAvailable = 2;
                   g.time = 0;
                   // clear top canvas
                   const fx = fxCanvasRef.current;
@@ -756,6 +907,7 @@ export default function RabbitJumpX9({
                   setScore(0);
                   setStarted(true);
                   setMessage(null);
+                  primeEffects();
                   focusCanvas();
                 }}
               >
@@ -786,40 +938,46 @@ export default function RabbitJumpX9({
                           ? "bg-green-500"
                           : "bg-red-500"
                         : i === quizIndex
-                          ? "bg-blue-500"
+                          ? q.correct === false
+                            ? "bg-red-500"
+                            : "bg-blue-500"
                           : "bg-slate-300"
                     }`}
                   />
                 ))}
               </div>
 
-              <form
-                onSubmit={submitAnswer}
-                className="grid grid-cols-1 sm:grid-cols-[auto,1fr,auto] gap-3 items-center"
-              >
-                <label
-                  className="text-lg font-medium sm:text-right"
-                  htmlFor="answer"
-                >
-                  {quiz[quizIndex].a} × {quiz[quizIndex].b} =
-                </label>
-                <input
-                  id="answer"
-                  ref={!isDesktop ? inputRef : null}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="?"
-                  aria-label="Type your answer"
-                  autoComplete="off"
-                />
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
-                >
-                  OK
-                </button>
-              </form>
+              <div className="grid gap-2 mt-1">
+                <div className="text-lg font-medium">
+                  {quiz[quizIndex].a} × {quiz[quizIndex].b} = ?
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {quiz[quizIndex].options.map((opt) => {
+                    const correctAnswer = quiz[quizIndex].a * quiz[quizIndex].b;
+                    const selected = quiz[quizIndex].answer === opt;
+                    const isCorrect = selected && quiz[quizIndex].correct;
+                    const isWrong = selected && quiz[quizIndex].correct === false;
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => handleOptionSelect(opt)}
+                        className={`w-full rounded-xl px-3 py-2 text-lg border font-semibold transition-colors ${
+                          isCorrect
+                            ? "bg-green-100 border-green-400 text-green-700"
+                            : isWrong
+                              ? "bg-red-100 border-red-400 text-red-700"
+                              : "bg-white border-slate-300 hover:border-blue-400"
+                        }`}
+                        aria-label={`Answer ${opt}`}
+                      >
+                        {opt}
+                        {opt === correctAnswer && isCorrect ? " ✅" : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               <p className="mt-3 text-slate-600 text-sm">
                 Tip: press{" "}
@@ -868,6 +1026,24 @@ export default function RabbitJumpX9({
                 ))}
               </select>
             </label>
+            <label className="flex items-center gap-2 text-sm font-medium mt-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                checked={askOnHit}
+                onChange={(e) => setAskOnHit(e.target.checked)}
+              />
+              Ask multiplication quiz after a hit
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium mt-1">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                checked={effectsEnabled}
+                onChange={(e) => setEffectsEnabled(e.target.checked)}
+              />
+              Sound & vibration effects
+            </label>
             <button
               className="mt-4 w-full px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
               onClick={() => {
@@ -883,6 +1059,7 @@ export default function RabbitJumpX9({
                 g.fireworkTimer = 0;
                 g.fireworkNext = 0;
                 g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
+                g.jumpsAvailable = 2;
                 g.time = 0;
                 // clear top canvas
                 const fx = fxCanvasRef.current;
@@ -890,6 +1067,7 @@ export default function RabbitJumpX9({
                 setScore(0);
                 setStarted(true);
                 setMessage(null);
+                primeEffects();
                 focusCanvas();
               }}
             >
@@ -914,39 +1092,45 @@ export default function RabbitJumpX9({
                         ? "bg-green-500"
                         : "bg-red-500"
                       : i === quizIndex
-                        ? "bg-blue-500"
+                        ? q.correct === false
+                          ? "bg-red-500"
+                          : "bg-blue-500"
                         : "bg-slate-300"
                   }`}
                 />
               ))}
             </div>
-            <form
-              onSubmit={submitAnswer}
-              className="grid grid-cols-1 sm:grid-cols-[auto,1fr,auto] gap-3 items-center"
-            >
-              <label
-                className="text-lg font-medium sm:text-right"
-                htmlFor="answer-desktop"
-              >
-                {quiz[quizIndex].a} × {quiz[quizIndex].b} =
-              </label>
-              <input
-                id="answer-desktop"
-                ref={isDesktop ? inputRef : null}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                className="w-full border border-slate-300 rounded-xl px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="?"
-                aria-label="Type your answer"
-                autoComplete="off"
-              />
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
-              >
-                OK
-              </button>
-            </form>
+            <div className="grid gap-2 mt-1">
+              <div className="text-lg font-medium">
+                {quiz[quizIndex].a} × {quiz[quizIndex].b} = ?
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {quiz[quizIndex].options.map((opt) => {
+                  const correctAnswer = quiz[quizIndex].a * quiz[quizIndex].b;
+                  const selected = quiz[quizIndex].answer === opt;
+                  const isCorrect = selected && quiz[quizIndex].correct;
+                  const isWrong = selected && quiz[quizIndex].correct === false;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => handleOptionSelect(opt)}
+                      className={`w-full rounded-xl px-3 py-2 text-lg border font-semibold transition-colors ${
+                        isCorrect
+                          ? "bg-green-100 border-green-400 text-green-700"
+                          : isWrong
+                            ? "bg-red-100 border-red-400 text-red-700"
+                            : "bg-white border-slate-300 hover:border-blue-400"
+                      }`}
+                      aria-label={`Answer ${opt}`}
+                    >
+                      {opt}
+                      {opt === correctAnswer && isCorrect ? " ✅" : ""}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <p className="mt-3 text-slate-600 text-sm">
               Tip: press <kbd className="px-1 py-0.5 border rounded">Space</kbd>{" "}
               / click to jump.
@@ -975,6 +1159,7 @@ export default function RabbitJumpX9({
                   g.fireworkTimer = 0;
                   g.fireworkNext = 0;
                   g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
+                  g.jumpsAvailable = 2;
                   g.time = 0;
                   // clear top canvas
                   const fx = fxCanvasRef.current;
