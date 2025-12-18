@@ -118,7 +118,9 @@ export default function RabbitJumpX9({
     osc.stop(now + duration);
   };
 
-  const playSound = (kind: "jump" | "hit" | "correct" | "wrong" | "finish") => {
+  const playSound = (
+    kind: "jump" | "hit" | "correct" | "wrong" | "finish" | "firework",
+  ) => {
     if (!effectsEnabled) return;
     if (kind === "jump") {
       playTone(620, 0.08, 0.06, "triangle");
@@ -135,6 +137,10 @@ export default function RabbitJumpX9({
       playTone(760, 0.14, 0.1, "triangle");
       setTimeout(() => playTone(920, 0.16, 0.08, "triangle"), 70);
       setTimeout(() => playTone(1080, 0.18, 0.06, "triangle"), 140);
+    } else if (kind === "firework") {
+      playTone(840, 0.14, 0.08, "triangle");
+      setTimeout(() => playTone(720, 0.12, 0.07, "sine"), 60);
+      setTimeout(() => playTone(960, 0.18, 0.06, "triangle"), 120);
     }
   };
 
@@ -160,6 +166,7 @@ export default function RabbitJumpX9({
     speed: 260,
     flowers: [] as Obstacle[],
     nextSpawn: 0,
+    jumpsAvailable: 2,
     // finish/threshold flags
     speedBoosted: false,
     spawnedFinish: false,
@@ -270,10 +277,10 @@ export default function RabbitJumpX9({
   const jump = () => {
     primeEffects();
     const g = gameRef.current;
-    if (g.rabbit.y >= g.groundY - g.rabbit.h - 4) {
-      g.rabbit.vy = g.jumpV;
-      playSound("jump");
-    }
+    if (g.jumpsAvailable <= 0) return;
+    g.rabbit.vy = g.jumpV;
+    g.jumpsAvailable -= 1;
+    playSound("jump");
   };
 
   // Helpers to apply thresholds based on new score value
@@ -329,11 +336,12 @@ export default function RabbitJumpX9({
 
         // Physics
         g.rabbit.vy += g.gravity * dt;
-        g.rabbit.y += g.rabbit.vy * dt;
-        if (g.rabbit.y > g.groundY - g.rabbit.h) {
-          g.rabbit.y = g.groundY - g.rabbit.h;
-          g.rabbit.vy = 0;
-        }
+      g.rabbit.y += g.rabbit.vy * dt;
+      if (g.rabbit.y > g.groundY - g.rabbit.h) {
+        g.rabbit.y = g.groundY - g.rabbit.h;
+        g.rabbit.vy = 0;
+        g.jumpsAvailable = 2;
+      }
 
         // Move flowers
         for (const f of g.flowers) f.x -= g.speed * dt;
@@ -541,6 +549,7 @@ export default function RabbitJumpX9({
     for (let i = 0; i < 5; i++) {
       spawnBurst(randRange(W * 0.2, W * 0.8), randRange(H * 0.22, H * 0.55));
     }
+    playSound("firework");
   };
 
   const spawnBurst = (cx: number, cy: number) => {
@@ -575,6 +584,7 @@ export default function RabbitJumpX9({
         const W = g.width,
           H = g.height;
         spawnBurst(randRange(W * 0.15, W * 0.85), randRange(H * 0.2, H * 0.5));
+        playSound("firework");
         g.fireworkNext = randRange(0.2, 0.4);
       }
     }
@@ -676,6 +686,7 @@ export default function RabbitJumpX9({
     });
     g.rabbit.y = Math.min(g.rabbit.y, g.groundY - g.rabbit.h);
     g.rabbit.vy = 0;
+    g.jumpsAvailable = 2;
     g.hitCooldown = 0.8;
     g.nextSpawn = Math.max(g.nextSpawn, 0.5);
   };
@@ -795,18 +806,19 @@ export default function RabbitJumpX9({
                     g.finishX = null;
                     g.finished = false;
                     g.fireworks = [];
-                    g.fireworkTimer = 0;
-                    g.fireworkNext = 0;
-                    g.rabbit = {
-                      ...g.rabbit,
-                      y: g.groundY - g.rabbit.h,
-                      vy: 0,
-                    };
-                    g.time = 0;
-                    // clear top canvas
-                    const fx = fxCanvasRef.current;
-                    if (fx)
-                      fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
+                  g.fireworkTimer = 0;
+                  g.fireworkNext = 0;
+                  g.rabbit = {
+                    ...g.rabbit,
+                    y: g.groundY - g.rabbit.h,
+                    vy: 0,
+                  };
+                  g.jumpsAvailable = 2;
+                  g.time = 0;
+                  // clear top canvas
+                  const fx = fxCanvasRef.current;
+                  if (fx)
+                    fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
                     setScore(0);
                     setWon(false);
                     setStarted(false); // show start overlay again
@@ -884,6 +896,7 @@ export default function RabbitJumpX9({
                   g.fireworkTimer = 0;
                   g.fireworkNext = 0;
                   g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
+                  g.jumpsAvailable = 2;
                   g.time = 0;
                   // clear top canvas
                   const fx = fxCanvasRef.current;
@@ -1044,6 +1057,7 @@ export default function RabbitJumpX9({
                 g.fireworkTimer = 0;
                 g.fireworkNext = 0;
                 g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
+                g.jumpsAvailable = 2;
                 g.time = 0;
                 // clear top canvas
                 const fx = fxCanvasRef.current;
@@ -1143,6 +1157,7 @@ export default function RabbitJumpX9({
                   g.fireworkTimer = 0;
                   g.fireworkNext = 0;
                   g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
+                  g.jumpsAvailable = 2;
                   g.time = 0;
                   // clear top canvas
                   const fx = fxCanvasRef.current;
