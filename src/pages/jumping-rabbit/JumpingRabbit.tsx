@@ -138,9 +138,11 @@ export default function RabbitJumpX9({
       setTimeout(() => playTone(920, 0.16, 0.08, "triangle"), 70);
       setTimeout(() => playTone(1080, 0.18, 0.06, "triangle"), 140);
     } else if (kind === "firework") {
-      playTone(840, 0.14, 0.08, "triangle");
-      setTimeout(() => playTone(720, 0.12, 0.07, "sine"), 60);
-      setTimeout(() => playTone(960, 0.18, 0.06, "triangle"), 120);
+      // Two low booms followed by a bright crackle
+      playTone(220, 0.18, 0.16, "sine");
+      setTimeout(() => playTone(180, 0.2, 0.14, "sine"), 90);
+      setTimeout(() => playTone(840, 0.14, 0.08, "triangle"), 180);
+      setTimeout(() => playTone(960, 0.18, 0.06, "triangle"), 260);
     }
   };
 
