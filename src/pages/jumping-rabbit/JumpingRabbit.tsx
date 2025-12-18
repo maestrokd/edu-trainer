@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Obstacle {
   x: number;
@@ -722,7 +722,6 @@ export default function RabbitJumpX9({
       vibrate(80);
       const lastIndex = quizCount - 1;
       if (idx >= lastIndex) {
-        const g = gameRef.current;
         prepareLandingSpace();
         setPaused(false);
         setQuiz(null); // hide quiz entirely
