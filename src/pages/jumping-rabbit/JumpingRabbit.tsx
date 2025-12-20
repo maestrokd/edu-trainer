@@ -15,28 +15,6 @@ interface QuizQ {
   correct?: boolean;
 }
 
-// Fireworks particles
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number; // seconds lived
-  ttl: number; // total lifetime
-  color: string; // hex color
-  size: number; // radius in px
-}
-
-const FIREWORK_COLORS = [
-  "#ff3b30",
-  "#ffcc00",
-  "#34c759",
-  "#5ac8fa",
-  "#007aff",
-  "#af52de",
-  "#ff2d55",
-];
-
 const randRange = (min: number, max: number) =>
   Math.random() * (max - min) + min;
 const clamp = (v: number, lo: number, hi: number) =>
@@ -58,7 +36,6 @@ export default function RabbitJumpX9({
   numQuestions?: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const fxCanvasRef = useRef<HTMLCanvasElement | null>(null); // top fireworks canvas
   const loopRef = useRef<number | null>(null);
   const gameAreaRef = useRef<HTMLDivElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -118,9 +95,7 @@ export default function RabbitJumpX9({
     osc.stop(now + duration);
   };
 
-  const playSound = (
-    kind: "jump" | "hit" | "correct" | "wrong" | "finish" | "firework",
-  ) => {
+  const playSound = (kind: "jump" | "hit" | "correct" | "wrong" | "finish") => {
     if (!effectsEnabled) return;
     if (kind === "jump") {
       playTone(620, 0.08, 0.06, "triangle");
@@ -137,12 +112,6 @@ export default function RabbitJumpX9({
       playTone(760, 0.14, 0.1, "triangle");
       setTimeout(() => playTone(920, 0.16, 0.08, "triangle"), 70);
       setTimeout(() => playTone(1080, 0.18, 0.06, "triangle"), 140);
-    } else if (kind === "firework") {
-      // Two low booms followed by a bright crackle
-      playTone(220, 0.18, 0.16, "sine");
-      setTimeout(() => playTone(180, 0.2, 0.14, "sine"), 90);
-      setTimeout(() => playTone(840, 0.14, 0.08, "triangle"), 180);
-      setTimeout(() => playTone(960, 0.18, 0.06, "triangle"), 260);
     }
   };
 
@@ -174,19 +143,17 @@ export default function RabbitJumpX9({
     spawnedFinish: false,
     finishX: null as number | null,
     finished: false,
-    // fireworks
-    fireworks: [] as Particle[],
-    fireworkTimer: 0,
-    fireworkNext: 0,
+    // finish celebration (lightweight)
+    celebrationTimer: 0,
+    celebrationPhase: 0,
     hitCooldown: 0,
   });
 
   // Resize canvases to the game area container size (responsive)
   useEffect(() => {
     const base = canvasRef.current;
-    const fx = fxCanvasRef.current;
     const container = gameAreaRef.current;
-    if (!base || !fx || !container) return;
+    if (!base || !container) return;
 
     const resizeToContainer = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -196,20 +163,13 @@ export default function RabbitJumpX9({
       // style sizes
       base.style.width = `${targetW}px`;
       base.style.height = `${targetH}px`;
-      fx.style.width = `${targetW}px`;
-      fx.style.height = `${targetH}px`;
       // backing sizes
       const g = gameRef.current;
       g.width = Math.floor(targetW * dpr);
       g.height = Math.floor(targetH * dpr);
       base.width = g.width;
       base.height = g.height;
-      fx.width = g.width;
-      fx.height = g.height;
       g.groundY = Math.floor(g.height * 0.84);
-      // clear fx canvas when resizing
-      const ctxFx = fx.getContext("2d");
-      ctxFx?.clearRect(0, 0, g.width, g.height);
     };
 
     resizeToContainer();
@@ -309,8 +269,6 @@ export default function RabbitJumpX9({
       const g = gameRef.current;
       const base = canvasRef.current!;
       const ctx = base.getContext("2d")!;
-      const fx = fxCanvasRef.current!;
-      const fxCtx = fx.getContext("2d")!;
       const dt = Math.min(0.033, (now - last) / 1000);
       last = now;
 
@@ -356,7 +314,7 @@ export default function RabbitJumpX9({
               g.finished = true;
               playSound("finish");
               vibrate([80, 40, 120]);
-              startFireworks();
+              startCelebration();
               setWon(true);
               setMessage(null);
               setPaused(false);
@@ -392,11 +350,10 @@ export default function RabbitJumpX9({
         }
       }
 
-      // Fireworks update runs always (even when finished)
-      updateFireworks(dt);
+      // Finish celebration update runs always (even when finished)
+      updateCelebration(dt);
 
       draw(ctx);
-      drawFireworksTop(fxCtx); // draw on top canvas so it's never covered
 
       loopRef.current = requestAnimationFrame(tick);
     };
@@ -430,6 +387,15 @@ export default function RabbitJumpX9({
     // Finish line
     if (g.spawnedFinish && g.finishX != null) {
       drawFinishLine(ctx, g.finishX, g.groundY, H);
+    }
+
+    // Celebration glow after finishing
+    if (g.finished) {
+      drawCelebration(
+        ctx,
+        g.rabbit.x + g.rabbit.w * 0.5,
+        g.rabbit.y + g.rabbit.h * 0.5,
+      );
     }
   };
 
@@ -540,118 +506,83 @@ export default function RabbitJumpX9({
     ctx.closePath();
   }
 
-  // ----- FIREWORKS (BRIGHT, TOP-LAYER) -----
-  const startFireworks = () => {
+  // ----- LIGHT CELEBRATION EFFECT (no extra canvas) -----
+  const startCelebration = () => {
     const g = gameRef.current;
-    g.fireworks = [];
-    g.fireworkTimer = 3.0; // a bit longer
-    g.fireworkNext = 0; // spawn immediately
-    const W = g.width,
-      H = g.height;
-    for (let i = 0; i < 5; i++) {
-      spawnBurst(randRange(W * 0.2, W * 0.8), randRange(H * 0.22, H * 0.55));
-    }
-    playSound("firework");
+    g.celebrationTimer = 2.6;
+    g.celebrationPhase = 0;
   };
 
-  const spawnBurst = (cx: number, cy: number) => {
-    const g = gameRef.current;
-    const count = 80; // denser
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = randRange(150, 420);
-      const color =
-        FIREWORK_COLORS[(Math.random() * FIREWORK_COLORS.length) | 0];
-      g.fireworks.push({
-        x: cx,
-        y: cy,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        life: 0,
-        ttl: randRange(1.1, 1.8),
-        color,
-        size: randRange(2.2, 4.4),
-      });
-    }
-  };
-
-  const updateFireworks = (dt: number) => {
+  const updateCelebration = (dt: number) => {
     const g = gameRef.current;
     if (!started) return;
-
-    if (g.fireworkTimer > 0) {
-      g.fireworkTimer -= dt;
-      g.fireworkNext -= dt;
-      if (g.fireworkNext <= 0) {
-        const W = g.width,
-          H = g.height;
-        spawnBurst(randRange(W * 0.15, W * 0.85), randRange(H * 0.2, H * 0.5));
-        playSound("firework");
-        g.fireworkNext = randRange(0.2, 0.4);
-      }
-    }
-
-    if (!g.fireworks.length) return;
-
-    const gravity = 420; // px/s^2
-    const drag = 0.985;
-    for (let i = g.fireworks.length - 1; i >= 0; i--) {
-      const p = g.fireworks[i];
-      p.life += dt;
-      if (p.life > p.ttl) {
-        g.fireworks.splice(i, 1);
-        continue;
-      }
-      p.vx *= drag;
-      p.vy = p.vy * drag + gravity * dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
+    if (g.celebrationTimer > 0) {
+      g.celebrationTimer = Math.max(0, g.celebrationTimer - dt);
+      g.celebrationPhase += dt;
     }
   };
 
-  const drawFireworksTop = (ctx: CanvasRenderingContext2D) => {
+  const drawCelebration = (
+    ctx: CanvasRenderingContext2D,
+    cx: number,
+    cy: number,
+  ) => {
     const g = gameRef.current;
-    const W = g.width,
-      H = g.height;
-    // Always clear the top canvas first
-    ctx.clearRect(0, 0, W, H);
-    if (!g.fireworks.length) return;
-
+    if (g.celebrationTimer <= 0) return;
+    const remaining = g.celebrationTimer / 2.6;
+    const pulse = Math.sin(g.celebrationPhase * 4);
+    const baseRadius = Math.min(g.width, g.height) * 0.18;
     ctx.save();
-    ctx.globalCompositeOperation = "lighter"; // additive
-    ctx.shadowBlur = 24; // strong glow
+    // soft glow ring
+    ctx.globalAlpha = 0.6 * remaining;
+    const glow = ctx.createRadialGradient(
+      cx,
+      cy,
+      baseRadius * 0.25,
+      cx,
+      cy,
+      baseRadius,
+    );
+    glow.addColorStop(0, "rgba(255,255,255,0.95)");
+    glow.addColorStop(1, "rgba(255,215,130,0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, baseRadius * (0.9 + 0.08 * pulse), 0, Math.PI * 2);
+    ctx.fill();
 
-    for (const p of g.fireworks) {
-      const t = p.life / p.ttl; // 0..1
-      const alpha = Math.min(1, Math.pow(1 - t, 0.6) * 1.2); // brighter falloff
-      const [r, gg, b] = hexToRgb(p.color);
-
-      // White hot core
-      ctx.shadowColor = "#ffffff";
-      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    // gentle rays
+    ctx.globalAlpha = 0.75 * remaining;
+    ctx.strokeStyle = "rgba(255,184,66,0.9)";
+    ctx.lineWidth = 5;
+    const rays = 10;
+    for (let i = 0; i < rays; i++) {
+      const angle = (i / rays) * Math.PI * 2 + g.celebrationPhase * 1.3;
+      const innerR = baseRadius * 0.35;
+      const outerR = baseRadius * (0.85 + 0.15 * Math.sin(g.celebrationPhase * 3 + i));
       ctx.beginPath();
-      ctx.arc(p.x, p.y, Math.max(0.6, p.size * 0.6), 0, Math.PI * 2);
-      ctx.fill();
-
-      // Colored glow
-      ctx.shadowColor = p.color;
-      ctx.fillStyle = `rgba(${r},${gg},${b},${alpha})`;
-      ctx.beginPath();
-      const rad = Math.max(0.8, p.size * (1.4 - 0.8 * t));
-      ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
+      ctx.lineTo(cx + Math.cos(angle) * outerR, cy + Math.sin(angle) * outerR);
+      ctx.stroke();
     }
+
+    // badge
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#ffe8b3";
+    ctx.strokeStyle = "#f59e0b";
+    ctx.lineWidth = 3;
+    const badgeR = Math.min(26, baseRadius * 0.3);
+    ctx.beginPath();
+    ctx.arc(cx, cy, badgeR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#b45309";
+    ctx.font = `${badgeR * 0.9}px "Inter", system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("★", cx, cy + badgeR * 0.05);
 
     ctx.restore();
   };
-
-  function hexToRgb(hex: string): [number, number, number] {
-    const s = hex.startsWith("#") ? hex.slice(1) : hex;
-    const r = parseInt(s.slice(0, 2), 16);
-    const g = parseInt(s.slice(2, 4), 16);
-    const b = parseInt(s.slice(4, 6), 16);
-    return [r, g, b];
-  }
 
   // ----- QUIZ -----
   const buildOptions = (correct: number) => {
@@ -762,13 +693,6 @@ export default function RabbitJumpX9({
           tabIndex={0}
         />
 
-        {/* Top fireworks canvas (always above overlays) */}
-        <canvas
-          ref={fxCanvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none z-50"
-          aria-hidden
-        />
-
         {/* HUD (score only) - mobile/tablet only */}
         {!isDesktop && (
           <div className="absolute left-2 top-2 select-none z-20">
@@ -785,7 +709,7 @@ export default function RabbitJumpX9({
           </div>
         )}
 
-        {/* Win overlay (below fireworks) - mobile/tablet only */}
+        {/* Win overlay - mobile/tablet only */}
         {won && !isDesktop && (
           <div
             className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-40"
@@ -807,20 +731,15 @@ export default function RabbitJumpX9({
                     g.spawnedFinish = false;
                     g.finishX = null;
                     g.finished = false;
-                    g.fireworks = [];
-                  g.fireworkTimer = 0;
-                  g.fireworkNext = 0;
-                  g.rabbit = {
-                    ...g.rabbit,
-                    y: g.groundY - g.rabbit.h,
-                    vy: 0,
-                  };
-                  g.jumpsAvailable = 2;
-                  g.time = 0;
-                  // clear top canvas
-                  const fx = fxCanvasRef.current;
-                  if (fx)
-                    fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
+                    g.celebrationTimer = 0;
+                    g.celebrationPhase = 0;
+                    g.rabbit = {
+                      ...g.rabbit,
+                      y: g.groundY - g.rabbit.h,
+                      vy: 0,
+                    };
+                    g.jumpsAvailable = 2;
+                    g.time = 0;
                     setScore(0);
                     setWon(false);
                     setStarted(false); // show start overlay again
@@ -894,16 +813,11 @@ export default function RabbitJumpX9({
                   g.spawnedFinish = false;
                   g.finishX = null;
                   g.finished = false;
-                  g.fireworks = [];
-                  g.fireworkTimer = 0;
-                  g.fireworkNext = 0;
+                  g.celebrationTimer = 0;
+                  g.celebrationPhase = 0;
                   g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
                   g.jumpsAvailable = 2;
                   g.time = 0;
-                  // clear top canvas
-                  const fx = fxCanvasRef.current;
-                  if (fx)
-                    fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
                   setScore(0);
                   setStarted(true);
                   setMessage(null);
@@ -1055,15 +969,11 @@ export default function RabbitJumpX9({
                 g.spawnedFinish = false;
                 g.finishX = null;
                 g.finished = false;
-                g.fireworks = [];
-                g.fireworkTimer = 0;
-                g.fireworkNext = 0;
+                g.celebrationTimer = 0;
+                g.celebrationPhase = 0;
                 g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
                 g.jumpsAvailable = 2;
                 g.time = 0;
-                // clear top canvas
-                const fx = fxCanvasRef.current;
-                if (fx) fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
                 setScore(0);
                 setStarted(true);
                 setMessage(null);
@@ -1155,16 +1065,11 @@ export default function RabbitJumpX9({
                   g.spawnedFinish = false;
                   g.finishX = null;
                   g.finished = false;
-                  g.fireworks = [];
-                  g.fireworkTimer = 0;
-                  g.fireworkNext = 0;
+                  g.celebrationTimer = 0;
+                  g.celebrationPhase = 0;
                   g.rabbit = { ...g.rabbit, y: g.groundY - g.rabbit.h, vy: 0 };
                   g.jumpsAvailable = 2;
                   g.time = 0;
-                  // clear top canvas
-                  const fx = fxCanvasRef.current;
-                  if (fx)
-                    fx.getContext("2d")?.clearRect(0, 0, g.width, g.height);
                   setScore(0);
                   setWon(false);
                   setStarted(false); // show start overlay again
