@@ -84,4 +84,11 @@ export const infoLinks: GameItem[] = [
     category: "info",
     icon: Info,
   },
+  {
+    id: "privateMenu",
+    path: "/private-menu",
+    titleKey: "menu.mainMenuLabel",
+    category: "info",
+    icon: Info,
+  },
 ];
