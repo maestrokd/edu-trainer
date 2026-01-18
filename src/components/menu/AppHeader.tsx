@@ -25,10 +25,15 @@ function useKeyboardShortcutSupport() {
   return isSupported;
 }
 
-export default function AppHeader() {
+type AppHeaderProps = {
+  title?: string;
+};
+
+export default function AppHeader({ title }: AppHeaderProps) {
   const { t } = useTranslation();
   const [isMac, setIsMac] = React.useState(false);
   const supportsShortcut = useKeyboardShortcutSupport();
+  const resolvedTitle = title ?? t("menu.title");
 
   React.useEffect(() => {
     const platform = navigator.platform || "";
@@ -42,7 +47,7 @@ export default function AppHeader() {
         <div className="flex items-center gap-2">
           <div className="size-8 rounded bg-primary/10" aria-hidden />
           <span className="text-lg font-semibold leading-none">
-            {t("menu.title")}
+            {resolvedTitle}
           </span>
         </div>
       </div>

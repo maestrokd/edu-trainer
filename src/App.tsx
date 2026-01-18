@@ -15,6 +15,7 @@ import WebLayout from "./layout/WebLayout.tsx";
 import {Navigate} from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage.tsx";
 import SubscriptionPage from "@/pages/subscriptions/SubscriptionPage.tsx";
+import PrivateMenuPage from "@/pages/PrivateMenuPage.tsx";
 
 export default function App() {
   return (
@@ -25,7 +26,7 @@ export default function App() {
       <Route path="telegram/login" element={<DefaultLayout><LoginPage/></DefaultLayout>}/>
       <Route element={<PrivateRoute/>}>
           <Route element={<WebLayout><Outlet/></WebLayout>}>
-              <Route path="private-menu" element={<h1 className="text-2xl">Private Menu Page</h1>}/>
+              <Route path="private-menu" element={<PrivateMenuPage/>}/>
               <Route path="settings" element={<SettingsPage/>}/>
               <Route path="subscriptions" element={<SubscriptionPage/>}/>
           </Route>
