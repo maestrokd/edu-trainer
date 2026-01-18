@@ -136,6 +136,7 @@
       "wrong": "wrong"
     },
     "setup": {
+      "label": "Settings",
       "intro": "Choose what kind of numbers and places to practice.",
       "mode": "Mode",
       "timer": "Timer (minutes, 0 = unlimited)",
@@ -364,6 +365,8 @@
       "maxValue": "Maximum decimal places",
       "option_zero": "0 decimal places",
       "option_one": "{{count}} decimal place",
+      "option_few": "{{count}} decimal places",
+      "option_many": "{{count}} decimal places",
       "option_other": "{{count}} decimal places"
     },
     "fractions": {
@@ -439,6 +442,179 @@
       "less": "<",
       "greater": ">",
       "equal": "="
+    }
+  },
+  "pages": {
+    "settings": {
+      "title": "Settings",
+      "telegramLanguage": {
+        "label": "Telegram Bot Language"
+      },
+      "webLanguage": {
+        "label": "Website Language"
+      },
+      "themeMode": {
+        "label": "Theme Mode"
+      },
+      "notifications": {
+        "updateFail": "Failed to update settings.",
+        "fetchFail": "Failed to fetch settings from server.",
+        "saveSuccess": "Settings saved successfully."
+      }
+    },
+    "loginPage": {
+      "titlePrompt": "Sign in to your account",
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password",
+        "forgotPasswordLinkText": "Forgot password?"
+      },
+      "submitButton": "Sign in",
+      "submitButtonLoading": "Signing in...",
+      "registrationPrompt": "Don't have an account?",
+      "registrationLinkText": "Sign up",
+      "notifications": {
+        "submitError": "We can't find that email or password. Try again."
+      }
+    },
+    "registrationPage": {
+      "titlePrompt": "Create your account",
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "confirmationCode": {
+        "label": "Confirmation Code",
+        "placeholder": "Enter the confirmation code",
+        "sendCodeButton": "Send confirmation code",
+        "sendCodeButtonRe": "Resend in {{secondsLeft}} s",
+        "sendCodeButtonLoading": "Sending code..."
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Confirm your password"
+      },
+      "submitButton": "Sign up",
+      "submitButtonLoading": "Creating account...",
+      "loginPrompt": "Already have an account?",
+      "loginLinkText": "Sign in",
+      "validation": {
+        "invalidEmail": "Invalid email address",
+        "passwordsMismatch": "Passwords do not match"
+      },
+      "notifications": {
+        "submitSuccess": "New account created successfully.",
+        "submitError": "Registration failed. Please try again.",
+        "codeSentSuccess": "Code sent to your email.",
+        "codeSentError": "Failed to send code."
+      }
+    },
+    "resetPasswordPage": {
+      "titlePrompt": "Reset your password",
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "confirmationCode": {
+        "label": "Confirmation Code",
+        "placeholder": "Enter the reset code",
+        "sendCodeButton": "Send reset code",
+        "sendCodeButtonLoading": "Sending code..."
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Confirm your password"
+      },
+      "submitButton": "Reset Password",
+      "submitButtonLoading": "Resetting...",
+      "loginPrompt": "Remembered your password?",
+      "loginLinkText": "Sign in",
+      "notifications": {
+        "submitSuccess": "Password reset successfully.",
+        "submitError": "Reset password failed. Please try again.",
+        "codeSentSuccess": "Code sent to your email.",
+        "codeSentError": "Failed to send code."
+      }
+    },
+    "subscriptionPage": {
+      "title": "Subscription",
+      "plan": {
+        "names": {
+          "FREE_TIER": "Free",
+          "BETA_TEST_TIER": "Beta Test",
+          "TIER_1": "Plus"
+        }
+      },
+      "info": {
+        "loading": "Loading subscription…",
+        "currentPlan": "Current plan",
+        "activeUntilLocal": "Active until",
+        "activeUntilUTC": "Active until (UTC)",
+        "inactiveHint": "You don’t have an active Beta Access. Use a promo code to activate.",
+        "none": "None",
+        "noDate": "—"
+      },
+      "inputs": {
+        "promoCode": {
+          "label": "Promo code",
+          "placeholder": "Enter Promo Code from email"
+        }
+      },
+      "buttons": {
+        "generate": {
+          "default": "Request Promo Code",
+          "loading": "Requesting…"
+        },
+        "redeem": {
+          "default": "Redeem",
+          "loading": "Redeeming…"
+        }
+      },
+      "notifications": {
+        "generate": {
+          "success": "Promo code requested.",
+          "infoEmail": "Check your email for the promo code.",
+          "error": "Could not request a promo code."
+        },
+        "redeem": {
+          "success": "Promo code applied. Your access is active until {{until}}.",
+          "activated": "Beta Access activated.",
+          "error": "Promo code invalid or expired."
+        }
+      }
+    }
+  },
+  "errors": {
+    "codes": {
+      "TECHNICAL_ERROR": "A technical error occurred. Please try again.",
+      "UNKNOWN": "Oops, something went wrong. Please try again.",
+      "INTERNAL_SERVER_ERROR": "Oops, something went wrong. Please try again.",
+      "INVALID_CREDENTIALS": "We can't find that email or password. Try again.",
+      "INVALID_VERIFICATION_CODE": "Invalid verification code. Please try again.",
+      "PROFILE_NOT_FOUND": "We can't find that profile.",
+      "EMAIL_ALREADY_EXISTS": "Email already exists.",
+      "RATE_LIMIT_EXCEEDED": "Too many attempts. Try again later.",
+      "USER_BLOCKED": "User blocked.",
+      "AUTHENTICATION_FAILED": "Authentication failed.",
+      "TOKEN_NOT_VALID": "Token not valid.",
+      "MISSING_COOKIE": "Invalid or absent cookie.",
+      "SPREADSHEET_ID_EXISTS": "Spreadsheet ID already registered.",
+      "SPREADSHEET_NAME_EXISTS": "Sheet Profile name already exists.",
+      "SPREADSHEET_ACCESS_DENIED": "Access to the spreadsheet was not provided.",
+      "INVALID_PROMO_CODE": "Invalid or expired promo code.",
+      "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window."
     }
   }
 }
