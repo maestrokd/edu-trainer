@@ -6,6 +6,8 @@ import App from "./App";
 import "./index.css";
 import "./i18n";
 import WebApp from "@twa-dev/sdk";
+import {AuthProvider} from "@/contexts/AuthContext.tsx";
+import {ThemeProvider} from "@/components/theme/theme-provider.tsx";
 
 WebApp.ready();
 
@@ -18,7 +20,11 @@ createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={qc}>
       <BrowserRouter basename={basename}>
-        <App />
+        <AuthProvider>
+          <ThemeProvider defaultTheme="system" storageKey="et-ui-theme">
+            <App />
+          </ThemeProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,

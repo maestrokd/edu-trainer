@@ -443,5 +443,178 @@
       "greater": ">",
       "equal": "="
     }
+  },
+  "pages": {
+    "settings": {
+      "title": "Настройки",
+      "telegramLanguage": {
+        "label": "Язык Telegram-бота"
+      },
+      "webLanguage": {
+        "label": "Язык веб-сайта"
+      },
+      "themeMode": {
+        "label": "Тема"
+      },
+      "notifications": {
+        "updateFail": "Не удалось обновить настройки.",
+        "fetchFail": "Не удалось загрузить настройки.",
+        "saveSuccess": "Настройки успешно сохранены."
+      }
+    },
+    "loginPage": {
+      "titlePrompt": "Войдите в свой аккаунт",
+      "email": {
+        "label": "Email",
+        "placeholder": "Введите вашу электронную почту"
+      },
+      "password": {
+        "label": "Пароль",
+        "placeholder": "Введите ваш пароль",
+        "forgotPasswordLinkText": "Забыли пароль?"
+      },
+      "submitButton": "Войти",
+      "submitButtonLoading": "Выполняется вход...",
+      "registrationPrompt": "Нет аккаунта?",
+      "registrationLinkText": "Зарегистрироваться",
+      "notifications": {
+        "submitError": "Не удаётся найти этот email или пароль. Попробуйте снова."
+      }
+    },
+    "registrationPage": {
+      "titlePrompt": "Регистрация",
+      "email": {
+        "label": "Email",
+        "placeholder": "Введите вашу электронную почту"
+      },
+      "confirmationCode": {
+        "label": "Код подтверждения",
+        "placeholder": "Введите код подтверждения",
+        "sendCodeButton": "Отправить код подтверждения",
+        "sendCodeButtonRe": "Повторно через {{secondsLeft}} с",
+        "sendCodeButtonLoading": "Отправляем код..."
+      },
+      "password": {
+        "label": "Пароль",
+        "placeholder": "Введите ваш пароль"
+      },
+      "confirmPassword": {
+        "label": "Подтвердите пароль",
+        "placeholder": "Подтвердите ваш пароль"
+      },
+      "submitButton": "Зарегистрироваться",
+      "submitButtonLoading": "Создание аккаунта...",
+      "loginPrompt": "Уже есть аккаунт?",
+      "loginLinkText": "Войти",
+      "validation": {
+        "invalidEmail": "Неверный адрес электронной почты",
+        "passwordsMismatch": "Пароли не совпадают"
+      },
+      "notifications": {
+        "submitSuccess": "Новый аккаунт успешно создан.",
+        "submitError": "Не удалось зарегистрироваться. Пожалуйста, попробуйте снова.",
+        "codeSentSuccess": "Код отправлен на вашу электронную почту.",
+        "codeSentError": "Не удалось отправить код."
+      }
+    },
+    "resetPasswordPage": {
+      "titlePrompt": "Сбросьте пароль",
+      "email": {
+        "label": "Электронная почта",
+        "placeholder": "Введите вашу электронную почту"
+      },
+      "confirmationCode": {
+        "label": "Код сброса",
+        "placeholder": "Введите код сброса",
+        "sendCodeButton": "Отправить код сброса пароля",
+        "sendCodeButtonLoading": "Отправляем код..."
+      },
+      "password": {
+        "label": "Пароль",
+        "placeholder": "Введите ваш пароль"
+      },
+      "confirmPassword": {
+        "label": "Подтвердите пароль",
+        "placeholder": "Подтвердите ваш пароль"
+      },
+      "submitButton": "Сбросить пароль",
+      "submitButtonLoading": "Сброс...",
+      "loginPrompt": "Вспомнили пароль?",
+      "loginLinkText": "Войти",
+      "notifications": {
+        "submitSuccess": "Пароль успешно сброшен.",
+        "submitError": "Не удалось сбросить пароль. Пожалуйста, попробуйте снова.",
+        "codeSentSuccess": "Код отправлен на вашу электронную почту.",
+        "codeSentError": "Не удалось отправить код."
+      }
+    },
+    "subscriptionPage": {
+      "title": "Подписка",
+      "plan": {
+        "names": {
+          "FREE_TIER": "Free",
+          "BETA_TEST_TIER": "Beta Test",
+          "TIER_1": "Plus"
+        }
+      },
+      "info": {
+        "loading": "Загрузка деталей…",
+        "currentPlan": "Текущий план",
+        "activeUntilLocal": "Активный до",
+        "activeUntilUTC": "Активный до (UTC)",
+        "inactiveHint": "Нет активной подписки. Используйте промокод для активации.",
+        "none": "None",
+        "noDate": "—"
+      },
+      "inputs": {
+        "promoCode": {
+          "label": "Промокод",
+          "placeholder": "Введите промокод из email"
+        }
+      },
+      "buttons": {
+        "generate": {
+          "default": "Запросить промокод",
+          "loading": "Отправка…"
+        },
+        "redeem": {
+          "default": "Активировать",
+          "loading": "Активация…"
+        }
+      },
+      "notifications": {
+        "generate": {
+          "success": "Промокод отправлен.",
+          "infoEmail": "Проверьте email с промокодом.",
+          "error": "Произошла ошибка при отправке промокода."
+        },
+        "redeem": {
+          "success": "Промокод активирован. Ваш доступ активен до {{until}}.",
+          "activated": "Доступ активирован.",
+          "error": "Неверный, использованный или устаревший промокод."
+        }
+      }
+    }
+  },
+  "errors": {
+    "codes": {
+      "TECHNICAL_ERROR": "Случилась техническая ошибка. Пожалуйста, попробуйте ещё раз.",
+      "UNKNOWN": "Увы, что-то пошло не так. Пожалуйста, попробуйте ещё раз.",
+      "INTERNAL_SERVER_ERROR": "Увы, что-то пошло не так. Пожалуйста, попробуйте ещё раз.",
+      "INVALID_CREDENTIALS": "Не удаётся найти этот email или пароль. Попробуйте снова.",
+      "INVALID_VERIFICATION_CODE": "Неверный код подтверждения. Пожалуйста, попробуйте ещё раз.",
+      "PROFILE_NOT_FOUND": "Не удаётся найти этот аккаунт.",
+      "EMAIL_ALREADY_EXISTS": "Email уже зарегистрирован.",
+      "RATE_LIMIT_EXCEEDED": "Слишком много попыток. Попробуйте позже.",
+      "USER_BLOCKED": "Пользователь заблокирован.",
+      "AUTHENTICATION_FAILED": "Ошибка аутентификации.",
+      "TOKEN_NOT_VALID": "Недействительный токен.",
+      "MISSING_COOKIE": "Недействительный или отсутствующий файл cookie.",
+      "SPREADSHEET_ID_EXISTS": "ID Google таблицы уже зарегистрирован.",
+      "SPREADSHEET_NAME_EXISTS": "Название профиля таблицы уже используется.",
+      "SPREADSHEET_ACCESS_DENIED": "Доступ к Google таблице не предоставлен.",
+      "INVALID_PROMO_CODE": "Неверный, использованный или устаревший промокод.",
+      "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активный период продления подписки."
+    }
   }
 }
