@@ -443,5 +443,178 @@
       "greater": ">",
       "equal": "="
     }
+  },
+  "pages": {
+    "settings": {
+      "title": "Налаштування",
+      "telegramLanguage": {
+        "label": "Мова Telegram-бота"
+      },
+      "webLanguage": {
+        "label": "Мова веб-сайту"
+      },
+      "themeMode": {
+        "label": "Тема"
+      },
+      "notifications": {
+        "updateFail": "Не вдалося оновити налаштування.",
+        "fetchFail": "Не вдалося завантажити налаштування.",
+        "saveSuccess": "Налаштування збережено."
+      }
+    },
+    "loginPage": {
+      "titlePrompt": "Вхід до акаунту",
+      "email": {
+        "label": "Email",
+        "placeholder": "Введіть вашу електронну пошту"
+      },
+      "password": {
+        "label": "Пароль",
+        "placeholder": "Введіть ваш пароль",
+        "forgotPasswordLinkText": "Забули пароль?"
+      },
+      "submitButton": "Увійти",
+      "submitButtonLoading": "Вхід до облікового запису в процесі...",
+      "registrationPrompt": "Не маєте облікового запису?",
+      "registrationLinkText": "Зареєструватися",
+      "notifications": {
+        "submitError": "Ми не можемо знайти цей емейл або пароль. Спробуйте ще раз."
+      }
+    },
+    "registrationPage": {
+      "titlePrompt": "Реєстрація",
+      "email": {
+        "label": "Email",
+        "placeholder": "Введіть вашу електронну пошту"
+      },
+      "confirmationCode": {
+        "label": "Код підтвердження",
+        "placeholder": "Введіть код підтвердження",
+        "sendCodeButton": "Надіслати код підтвердження",
+        "sendCodeButtonRe": "Повторно через {{secondsLeft}} с",
+        "sendCodeButtonLoading": "Надсилаємо код..."
+      },
+      "password": {
+        "label": "Пароль",
+        "placeholder": "Введіть ваш пароль"
+      },
+      "confirmPassword": {
+        "label": "Підтвердьте пароль",
+        "placeholder": "Підтвердіть ваш пароль"
+      },
+      "submitButton": "Зареєструватися",
+      "submitButtonLoading": "Створення облікового запису...",
+      "loginPrompt": "Вже є обліковий запис?",
+      "loginLinkText": "Увійти",
+      "validation": {
+        "invalidEmail": "Невірна електронна адреса",
+        "passwordsMismatch": "Паролі не співпадають"
+      },
+      "notifications": {
+        "submitSuccess": "Новий обліковий запис успішно створено.",
+        "submitError": "Не вдалося зареєструватися. Будь ласка, спробуйте ще раз.",
+        "codeSentSuccess": "Код надіслано на вашу електронну пошту.",
+        "codeSentError": "Не вдалося надіслати код."
+      }
+    },
+    "resetPasswordPage": {
+      "titlePrompt": "Відновіть пароль",
+      "email": {
+        "label": "Електронна пошта",
+        "placeholder": "Введіть вашу електронну пошту"
+      },
+      "confirmationCode": {
+        "label": "Код оновлення",
+        "placeholder": "Введіть код оновлення",
+        "sendCodeButton": "Надіслати код оновлення паролю",
+        "sendCodeButtonLoading": "Надсилаємо код..."
+      },
+      "password": {
+        "label": "Пароль",
+        "placeholder": "Введіть ваш пароль"
+      },
+      "confirmPassword": {
+        "label": "Підтвердьте пароль",
+        "placeholder": "Підтвердіть ваш пароль"
+      },
+      "submitButton": "Оновити пароль",
+      "submitButtonLoading": "Оновлення...",
+      "loginPrompt": "Згадали пароль?",
+      "loginLinkText": "Увійти",
+      "notifications": {
+        "submitSuccess": "Пароль успішно оновлено.",
+        "submitError": "Не вдалося оновити пароль. Будь ласка, спробуйте ще раз.",
+        "codeSentSuccess": "Код надіслано на вашу електронну пошту.",
+        "codeSentError": "Не вдалося надіслати код."
+      }
+    },
+    "subscriptionPage": {
+      "title": "Підписка",
+      "plan": {
+        "names": {
+          "FREE_TIER": "Free",
+          "BETA_TEST_TIER": "Beta Test",
+          "TIER_1": "Plus"
+        }
+      },
+      "info": {
+        "loading": "Завантаження деталей підписки...",
+        "currentPlan": "Поточний план",
+        "activeUntilLocal": "Активний до",
+        "activeUntilUTC": "Активний до (UTC)",
+        "inactiveHint": "Немає активної підписки. Застосуйте промокод для активації.",
+        "none": "None",
+        "noDate": "—"
+      },
+      "inputs": {
+        "promoCode": {
+          "label": "Промокод",
+          "placeholder": "Введіть промокод з email"
+        }
+      },
+      "buttons": {
+        "generate": {
+          "default": "Знайти промокод",
+          "loading": "Пошук…"
+        },
+        "redeem": {
+          "default": "Активувати",
+          "loading": "Активація…"
+        }
+      },
+      "notifications": {
+        "generate": {
+          "success": "Промокод надіслано.",
+          "infoEmail": "Перевірте email з промокодом.",
+          "error": "Виникла помилка з надсиланням промокоду."
+        },
+        "redeem": {
+          "success": "Промокод активовано. Ваш доступ активний до {{until}}.",
+          "activated": "Доступ активовано.",
+          "error": "Невірний, використаний або застарілий промокод."
+        }
+      }
+    }
+  },
+  "errors": {
+    "codes": {
+      "TECHNICAL_ERROR": "Сталася технічна помилка. Будь ласка, спробуйте ще раз.",
+      "UNKNOWN": "На жаль, щось пішло не так. Будь ласка, спробуйте ще раз.",
+      "INTERNAL_SERVER_ERROR": "На жаль, щось пішло не так. Будь ласка, спробуйте ще раз.",
+      "INVALID_CREDENTIALS": "Ми не можемо знайти цей емейл або пароль. Спробуйте ще раз.",
+      "INVALID_VERIFICATION_CODE": "Невірний код перевірки. Будь ласка, спробуйте ще раз.",
+      "PROFILE_NOT_FOUND": "Ми не можемо знайти цей аккаунт.",
+      "EMAIL_ALREADY_EXISTS": "Email вже існує.",
+      "RATE_LIMIT_EXCEEDED": "Забагато спроб. Спробуйте пізніше.",
+      "USER_BLOCKED": "Користувача заблоковано.",
+      "AUTHENTICATION_FAILED": "Помилка автентифікації.",
+      "TOKEN_NOT_VALID": "Недійсний токен.",
+      "MISSING_COOKIE": "Недійсний або відсутній cookie.",
+      "SPREADSHEET_ID_EXISTS": "ID Google таблиці вже зареєстровано.",
+      "SPREADSHEET_NAME_EXISTS": "Назва профілю таблиці вже використовується.",
+      "SPREADSHEET_ACCESS_DENIED": "Доступ до Google таблиці не надано.",
+      "INVALID_PROMO_CODE": "Невірний, використаний або застарілий промокод.",
+      "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активний період продовження підписки."
+    }
   }
 }
