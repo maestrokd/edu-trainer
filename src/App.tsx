@@ -15,6 +15,7 @@ import WebLayout from "./layout/WebLayout.tsx";
 import { Navigate } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage.tsx";
 import SubscriptionPage from "@/pages/subscriptions/SubscriptionPage.tsx";
+import PrivateMenuPage from "@/pages/PrivateMenuPage";
 
 export default function App() {
   return (
@@ -59,7 +60,7 @@ export default function App() {
             </WebLayout>
           }
         >
-          <Route path="private-menu" element={<h1 className="text-2xl">Private Menu Page</h1>} />
+          <Route path="private-menu" element={<PrivateMenuPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="subscriptions" element={<SubscriptionPage />} />
         </Route>
