@@ -17,10 +17,7 @@ type Props = {
   onSelectCategory: (c: CategoryKey | "all") => void;
 };
 
-export default function AppSidebar({
-  activeCategory,
-  onSelectCategory,
-}: Props) {
+export default function AppSidebar({ activeCategory, onSelectCategory }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -29,11 +26,7 @@ export default function AppSidebar({
         <SidebarGroup>
           <SidebarGroupLabel>{t("menu.categories.title")}</SidebarGroupLabel>
           <div className="flex gap-2 px-2">
-            <SidebarMenuButton
-              asChild
-              data-active={activeCategory === "all"}
-              onClick={() => onSelectCategory("all")}
-            >
+            <SidebarMenuButton asChild data-active={activeCategory === "all"} onClick={() => onSelectCategory("all")}>
               <button className="w-full data-[active=true]:bg-primary/10 rounded-md px-2 py-1 text-sm">
                 {t("menu.categories.all")}
               </button>
@@ -45,16 +38,10 @@ export default function AppSidebar({
               const active = activeCategory === key;
               return (
                 <SidebarMenuItem key={key}>
-                  <SidebarMenuButton
-                    asChild
-                    data-active={active}
-                    onClick={() => onSelectCategory(key)}
-                  >
+                  <SidebarMenuButton asChild data-active={active} onClick={() => onSelectCategory(key)}>
                     <button className="w-full flex items-center gap-2 data-[active=true]:bg-primary/10 rounded-md px-2 py-1">
                       <CatIcon className="size-4" aria-hidden />
-                      <span className="text-sm">
-                        {t(categories[key].labelKey)}
-                      </span>
+                      <span className="text-sm">{t(categories[key].labelKey)}</span>
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -81,9 +68,7 @@ export default function AppSidebar({
 
         <ScrollArea className="mt-2 h-[30dvh] px-2">
           {/* future: Favorites / Recent lists go here */}
-          <p className="text-xs text-muted-foreground px-2 pb-4">
-            {t("menu.futureSectionsHint")}
-          </p>
+          <p className="text-xs text-muted-foreground px-2 pb-4">{t("menu.futureSectionsHint")}</p>
         </ScrollArea>
       </SidebarContent>
     </Sidebar>

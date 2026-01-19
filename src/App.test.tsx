@@ -7,7 +7,7 @@ it("shows Home link", () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <App />
-    </MemoryRouter>,
+    </MemoryRouter>
   );
   expect(screen.getByText("menu.categories.all")).toBeInTheDocument();
 });
