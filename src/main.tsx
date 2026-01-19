@@ -6,8 +6,8 @@ import App from "./App";
 import "./index.css";
 import "./i18n";
 import WebApp from "@twa-dev/sdk";
-import {AuthProvider} from "@/contexts/AuthContext.tsx";
-import {ThemeProvider} from "@/components/theme/theme-provider.tsx";
+import { AuthProvider } from "@/contexts/AuthContext.tsx";
+import { ThemeProvider } from "@/components/theme/theme-provider.tsx";
 
 WebApp.ready();
 
@@ -27,5 +27,5 @@ createRoot(document.getElementById("root")!).render(
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
