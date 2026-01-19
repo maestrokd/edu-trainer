@@ -4,7 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import { globalIgnores } from "eslint/config";
-import prettier from "eslint-plugin-prettier";
+import prettier from "eslint-config-prettier";
 
 export default tseslint.config([
   globalIgnores(["dist"]),
@@ -15,6 +15,7 @@ export default tseslint.config([
       tseslint.configs.recommended,
       reactHooks.configs["recommended-latest"],
       reactRefresh.configs.vite,
+      // eslint-config-prettier disables conflict-prone rules
     ],
     languageOptions: {
       ecmaVersion: "latest",
@@ -22,12 +23,13 @@ export default tseslint.config([
       parserOptions: { projectService: true },
       globals: globals.browser,
     },
-    plugins: {
-      prettier,
-    },
+    // Plugins removed (prettier no longer runs in eslint)
+    plugins: {},
     rules: {
-      "prettier/prettier": "warn",
+      // Prettier rule removed
     },
     ignores: ["dist", "node_modules"],
   },
+  // Add prettier config at the end to override other configs
+  prettier,
 ]);

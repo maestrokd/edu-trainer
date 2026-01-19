@@ -20,10 +20,7 @@ export default function CommandMenu() {
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().includes("MAC");
-      if (
-        (isMac && e.metaKey && e.key.toLowerCase() === "k") ||
-        (!isMac && e.ctrlKey && e.key.toLowerCase() === "k")
-      ) {
+      if ((isMac && e.metaKey && e.key.toLowerCase() === "k") || (!isMac && e.ctrlKey && e.key.toLowerCase() === "k")) {
         e.preventDefault();
         setOpen((v) => !v);
       }
@@ -37,9 +34,7 @@ export default function CommandMenu() {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <DialogTitle className="sr-only">{t("menu.search")}</DialogTitle>
-      <CommandInput
-        placeholder={t("menu.searchPlaceholder") ?? "Search games…"}
-      />
+      <CommandInput placeholder={t("menu.searchPlaceholder") ?? "Search games…"} />
       <CommandList>
         <CommandEmpty>{t("menu.noResults")}</CommandEmpty>
 
