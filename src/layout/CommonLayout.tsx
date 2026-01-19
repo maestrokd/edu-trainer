@@ -7,9 +7,7 @@ type HeaderContextType = {
   setHeaderVisible: (visible: boolean) => void;
 };
 
-const HeaderContext = React.createContext<HeaderContextType | undefined>(
-  undefined,
-);
+const HeaderContext = React.createContext<HeaderContextType | undefined>(undefined);
 
 /**
  * Hook for child pages to set custom header content and control visibility of the common header.
@@ -19,7 +17,7 @@ const HeaderContext = React.createContext<HeaderContextType | undefined>(
  */
 export function useCustomHeader(
   content?: React.ReactNode,
-  options?: { visible?: boolean; deps?: React.DependencyList },
+  options?: { visible?: boolean; deps?: React.DependencyList }
 ) {
   const ctx = React.useContext(HeaderContext);
   // If used outside of CommonLayout, do nothing to avoid runtime errors
@@ -47,17 +45,13 @@ export function useCustomHeader(
 
 const CommonLayout: React.FC = () => {
   const [header, setHeader] = React.useState<React.ReactNode | null>(null);
-  const [renderHeaderBlock, setRenderHeaderBlock] =
-    React.useState<boolean>(false);
+  const [renderHeaderBlock, setRenderHeaderBlock] = React.useState<boolean>(false);
   const [headerVisible, setHeaderVisible] = React.useState<boolean>(false);
 
   useEffect(() => {
     if (WebApp) {
       WebApp.ready();
-      if (
-        WebApp.initDataUnsafe &&
-        Object.keys(WebApp.initDataUnsafe).length > 0
-      ) {
+      if (WebApp.initDataUnsafe && Object.keys(WebApp.initDataUnsafe).length > 0) {
         setRenderHeaderBlock(WebApp.isFullscreen);
         console.log("Telegram WebApp is available: ", WebApp);
         console.log("Telegram WebApp initDataUnsafe: ", WebApp.initDataUnsafe);
@@ -67,10 +61,7 @@ const CommonLayout: React.FC = () => {
     }
   }, []);
 
-  const ctxValue = React.useMemo(
-    () => ({ setHeader, setHeaderVisible }),
-    [setHeader, setHeaderVisible],
-  );
+  const ctxValue = React.useMemo(() => ({ setHeader, setHeaderVisible }), [setHeader, setHeaderVisible]);
 
   return (
     <HeaderContext.Provider value={ctxValue}>
@@ -79,9 +70,7 @@ const CommonLayout: React.FC = () => {
           style={{ height: 60 }}
           className="w-full flex items-center border-b bg-white/80 dark:bg-slate-900/60 backdrop-blur"
         >
-          {headerVisible && (
-            <div className="w-full max-w-7xl mx-auto px-4">{header}</div>
-          )}
+          {headerVisible && <div className="w-full max-w-7xl mx-auto px-4">{header}</div>}
         </div>
       )}
       <Outlet />
