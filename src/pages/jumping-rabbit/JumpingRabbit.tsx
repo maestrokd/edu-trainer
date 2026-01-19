@@ -15,10 +15,8 @@ interface QuizQ {
   correct?: boolean;
 }
 
-const randRange = (min: number, max: number) =>
-  Math.random() * (max - min) + min;
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.max(lo, Math.min(hi, v));
+const randRange = (min: number, max: number) => Math.random() * (max - min) + min;
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 const shuffleArray = <T,>(arr: T[]) => {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -30,11 +28,7 @@ const shuffleArray = <T,>(arr: T[]) => {
 
 const supportsVibration = () => typeof navigator !== "undefined" && !!navigator.vibrate;
 
-export default function RabbitJumpX9({
-  numQuestions = 3,
-}: {
-  numQuestions?: number;
-}) {
+export default function RabbitJumpX9({ numQuestions = 3 }: { numQuestions?: number }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const loopRef = useRef<number | null>(null);
   const gameAreaRef = useRef<HTMLDivElement | null>(null);
@@ -60,9 +54,7 @@ export default function RabbitJumpX9({
   const ensureAudioCtx = () => {
     if (!effectsEnabled) return null;
     let ctx = audioCtxRef.current;
-    const Ctx = (window.AudioContext || (window as any).webkitAudioContext) as
-      | typeof AudioContext
-      | undefined;
+    const Ctx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext | undefined;
     if (!ctx && Ctx) {
       try {
         ctx = new Ctx();
@@ -75,12 +67,7 @@ export default function RabbitJumpX9({
     return ctx ?? null;
   };
 
-  const playTone = (
-    freq: number,
-    duration: number,
-    volume = 0.12,
-    type: OscillatorType = "sine",
-  ) => {
+  const playTone = (freq: number, duration: number, volume = 0.12, type: OscillatorType = "sine") => {
     const ctx = ensureAudioCtx();
     if (!ctx) return;
     const now = ctx.currentTime;
@@ -296,12 +283,12 @@ export default function RabbitJumpX9({
 
         // Physics
         g.rabbit.vy += g.gravity * dt;
-      g.rabbit.y += g.rabbit.vy * dt;
-      if (g.rabbit.y > g.groundY - g.rabbit.h) {
-        g.rabbit.y = g.groundY - g.rabbit.h;
-        g.rabbit.vy = 0;
-        g.jumpsAvailable = 2;
-      }
+        g.rabbit.y += g.rabbit.vy * dt;
+        if (g.rabbit.y > g.groundY - g.rabbit.h) {
+          g.rabbit.y = g.groundY - g.rabbit.h;
+          g.rabbit.vy = 0;
+          g.jumpsAvailable = 2;
+        }
 
         // Move flowers
         for (const f of g.flowers) f.x -= g.speed * dt;
@@ -363,10 +350,8 @@ export default function RabbitJumpX9({
     };
   }, [paused, started]);
 
-  const aabb = (
-    a: { x: number; y: number; w: number; h: number },
-    b: Obstacle,
-  ) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  const aabb = (a: { x: number; y: number; w: number; h: number }, b: Obstacle) =>
+    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 
   const draw = (ctx: CanvasRenderingContext2D) => {
     const g = gameRef.current;
@@ -391,21 +376,11 @@ export default function RabbitJumpX9({
 
     // Celebration glow after finishing
     if (g.finished) {
-      drawCelebration(
-        ctx,
-        g.rabbit.x + g.rabbit.w * 0.5,
-        g.rabbit.y + g.rabbit.h * 0.5,
-      );
+      drawCelebration(ctx, g.rabbit.x + g.rabbit.w * 0.5, g.rabbit.y + g.rabbit.h * 0.5);
     }
   };
 
-  function drawRabbit(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-  ) {
+  function drawRabbit(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
     const r = Math.min(w, h) * 0.25;
     ctx.fillStyle = "#ffffff";
     roundRect(ctx, x, y, w, h, r);
@@ -439,14 +414,7 @@ export default function RabbitJumpX9({
       const angle = (i / petals) * Math.PI * 2;
       const px = f.x + f.w * 0.5 + Math.cos(angle) * f.w * 0.3;
       const py = f.y + f.h * 0.3 + Math.sin(angle) * f.h * 0.3;
-      roundRect(
-        ctx,
-        px - f.w * 0.18,
-        py - f.h * 0.18,
-        f.w * 0.36,
-        f.h * 0.36,
-        f.w * 0.12,
-      );
+      roundRect(ctx, px - f.w * 0.18, py - f.h * 0.18, f.w * 0.36, f.h * 0.36, f.w * 0.12);
       ctx.fill();
     }
     ctx.fillStyle = "#ff8a00"; // center
@@ -455,12 +423,7 @@ export default function RabbitJumpX9({
     ctx.fill();
   }
 
-  function drawFinishLine(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    groundY: number,
-    H: number,
-  ) {
+  function drawFinishLine(ctx: CanvasRenderingContext2D, x: number, groundY: number, H: number) {
     const poleW = 10;
     const bannerW = 22;
     const height = Math.min(160, H - groundY + 120);
@@ -474,28 +437,13 @@ export default function RabbitJumpX9({
     const cell = 10;
     for (let ry = 0; ry < h; ry += cell) {
       for (let rx = 0; rx < w; rx += cell) {
-        ctx.fillStyle =
-          (Math.floor(rx / cell) + Math.floor(ry / cell)) % 2 === 0
-            ? "#fff"
-            : "#000";
-        ctx.fillRect(
-          x,
-          top + ry,
-          Math.min(cell, w - rx),
-          Math.min(cell, h - ry),
-        );
+        ctx.fillStyle = (Math.floor(rx / cell) + Math.floor(ry / cell)) % 2 === 0 ? "#fff" : "#000";
+        ctx.fillRect(x, top + ry, Math.min(cell, w - rx), Math.min(cell, h - ry));
       }
     }
   }
 
-  function roundRect(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    r: number,
-  ) {
+  function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
     r = clamp(r, 0, Math.min(w, h) / 2);
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -522,11 +470,7 @@ export default function RabbitJumpX9({
     }
   };
 
-  const drawCelebration = (
-    ctx: CanvasRenderingContext2D,
-    cx: number,
-    cy: number,
-  ) => {
+  const drawCelebration = (ctx: CanvasRenderingContext2D, cx: number, cy: number) => {
     const g = gameRef.current;
     if (g.celebrationTimer <= 0) return;
     const remaining = g.celebrationTimer / 2.6;
@@ -535,14 +479,7 @@ export default function RabbitJumpX9({
     ctx.save();
     // soft glow ring
     ctx.globalAlpha = 0.6 * remaining;
-    const glow = ctx.createRadialGradient(
-      cx,
-      cy,
-      baseRadius * 0.25,
-      cx,
-      cy,
-      baseRadius,
-    );
+    const glow = ctx.createRadialGradient(cx, cy, baseRadius * 0.25, cx, cy, baseRadius);
     glow.addColorStop(0, "rgba(255,255,255,0.95)");
     glow.addColorStop(1, "rgba(255,215,130,0)");
     ctx.fillStyle = glow;
@@ -763,8 +700,7 @@ export default function RabbitJumpX9({
             <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl space-y-4">
               <h2 className="text-xl font-bold">Rabbit Jump ×9</h2>
               <p className="text-slate-600">
-                Tap/click or press Space to jump over flowers. If you hit a
-                flower, answer ×9 questions to continue.
+                Tap/click or press Space to jump over flowers. If you hit a flower, answer ×9 questions to continue.
               </p>
 
               <label className="text-sm font-medium block">
@@ -839,9 +775,7 @@ export default function RabbitJumpX9({
             aria-modal="true"
           >
             <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
-              <h2 className="text-xl font-bold mb-3">
-                Answer ×9 to continue ({quizCount} total)
-              </h2>
+              <h2 className="text-xl font-bold mb-3">Answer ×9 to continue ({quizCount} total)</h2>
               <div className="flex gap-1 mb-3" aria-hidden>
                 {quiz.map((q, i) => (
                   <div
@@ -894,9 +828,7 @@ export default function RabbitJumpX9({
               </div>
 
               <p className="mt-3 text-slate-600 text-sm">
-                Tip: press{" "}
-                <kbd className="px-1 py-0.5 border rounded">Space</kbd> / tap to
-                jump.
+                Tip: press <kbd className="px-1 py-0.5 border rounded">Space</kbd> / tap to jump.
               </p>
             </div>
           </div>
@@ -913,9 +845,7 @@ export default function RabbitJumpX9({
 
         {/* Message */}
         {message && (
-          <div className="px-3 py-1.5 rounded-full bg-black/70 text-white text-sm shadow self-start">
-            {message}
-          </div>
+          <div className="px-3 py-1.5 rounded-full bg-black/70 text-white text-sm shadow self-start">{message}</div>
         )}
 
         {/* Start Panel */}
@@ -923,8 +853,7 @@ export default function RabbitJumpX9({
           <div className="rounded-2xl bg-white p-5 shadow border">
             <h2 className="text-xl font-bold mb-2">Rabbit Jump ×9</h2>
             <p className="text-slate-600 mb-3">
-              Press Space to jump. If you hit a flower, answer ×9 questions to
-              continue.
+              Press Space to jump. If you hit a flower, answer ×9 questions to continue.
             </p>
             <label className="text-sm font-medium block">
               Number of questions on hit
@@ -989,9 +918,7 @@ export default function RabbitJumpX9({
         {/* Quiz Panel */}
         {isDesktop && paused && quiz && (
           <div className="rounded-2xl bg-white p-5 shadow border">
-            <h2 className="text-xl font-bold mb-3">
-              Answer ×9 to continue ({quizCount} total)
-            </h2>
+            <h2 className="text-xl font-bold mb-3">Answer ×9 to continue ({quizCount} total)</h2>
             <div className="flex gap-1 mb-3" aria-hidden>
               {quiz.map((q, i) => (
                 <div
@@ -1042,8 +969,7 @@ export default function RabbitJumpX9({
               </div>
             </div>
             <p className="mt-3 text-slate-600 text-sm">
-              Tip: press <kbd className="px-1 py-0.5 border rounded">Space</kbd>{" "}
-              / click to jump.
+              Tip: press <kbd className="px-1 py-0.5 border rounded">Space</kbd> / click to jump.
             </p>
           </div>
         )}

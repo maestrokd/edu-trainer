@@ -14,10 +14,7 @@ export type GameItem = {
   tags?: string[]; // used by Command palette search
 };
 
-export const categories: Record<
-  CategoryKey,
-  { labelKey: string; icon: LucideIcon }
-> = {
+export const categories: Record<CategoryKey, { labelKey: string; icon: LucideIcon }> = {
   math: { labelKey: "menu.categories.math", icon: Calculator },
   arcade: { labelKey: "menu.categories.arcade", icon: Rabbit },
   info: { labelKey: "menu.categories.info", icon: Info },

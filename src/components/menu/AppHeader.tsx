@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import ThemeToggle from "./ThemeToggle";
 import CommandMenu from "./CommandMenu";
 import { useTranslation } from "react-i18next";
-import LanguageSelector, {
-  LanguageSelectorMode,
-} from "@/components/lang/LanguageSelector";
+import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector";
 
 function useKeyboardShortcutSupport() {
   const [isSupported, setIsSupported] = React.useState(false);
@@ -14,9 +12,7 @@ function useKeyboardShortcutSupport() {
   React.useEffect(() => {
     const userAgent = navigator.userAgent || "";
     const isMobileAgent = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
-    const uaData = (
-      navigator as Navigator & { userAgentData?: { mobile?: boolean } }
-    ).userAgentData;
+    const uaData = (navigator as Navigator & { userAgentData?: { mobile?: boolean } }).userAgentData;
     const isMobileDevice = uaData?.mobile ?? isMobileAgent;
 
     setIsSupported(!isMobileDevice);
@@ -41,9 +37,7 @@ export default function AppHeader() {
         <SidebarTrigger className="md:hidden" />
         <div className="flex items-center gap-2">
           <div className="size-8 rounded bg-primary/10" aria-hidden />
-          <span className="text-lg font-semibold leading-none">
-            {t("menu.title")}
-          </span>
+          <span className="text-lg font-semibold leading-none">{t("menu.title")}</span>
         </div>
       </div>
 
@@ -57,7 +51,7 @@ export default function AppHeader() {
                   key: "k",
                   ctrlKey: !isMac,
                   metaKey: isMac,
-                }),
+                })
               )
             }
           >
