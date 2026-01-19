@@ -2,11 +2,7 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type GameItem, games as allGames } from "./menuItems";
 import { isFavorite, toggleFavorite } from "@/services/favoritesService";
 import { pushRecent } from "@/services/recentsService";
@@ -27,9 +23,7 @@ export default function GameCard({ game }: Props) {
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Icon className="size-5 shrink-0" aria-hidden />
-          <CardTitle className="text-base font-semibold">
-            {t(game.titleKey)}
-          </CardTitle>
+          <CardTitle className="text-base font-semibold">{t(game.titleKey)}</CardTitle>
           {game.badge && (
             <Badge variant="secondary" className="ml-auto">
               {game.badge.toUpperCase()}
@@ -38,11 +32,7 @@ export default function GameCard({ game }: Props) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {game.descriptionKey && (
-          <p className="text-sm text-muted-foreground">
-            {t(game.descriptionKey)}
-          </p>
-        )}
+        {game.descriptionKey && <p className="text-sm text-muted-foreground">{t(game.descriptionKey)}</p>}
         <div className="flex gap-2">
           <Button
             onClick={() => {
@@ -58,27 +48,13 @@ export default function GameCard({ game }: Props) {
               <Button
                 variant="ghost"
                 aria-pressed={fav}
-                onClick={() =>
-                  setFav(
-                    isFavorite(
-                      toggleFavorite(game.id).has(game.id) ? game.id : game.id,
-                    ),
-                  )
-                }
+                onClick={() => setFav(isFavorite(toggleFavorite(game.id).has(game.id) ? game.id : game.id))}
               >
-                {fav ? (
-                  <Star className="size-5" />
-                ) : (
-                  <StarOff className="size-5" />
-                )}
-                <span className="sr-only">
-                  {fav ? t("menu.unfavorite") : t("menu.favorite")}
-                </span>
+                {fav ? <Star className="size-5" /> : <StarOff className="size-5" />}
+                <span className="sr-only">{fav ? t("menu.unfavorite") : t("menu.favorite")}</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              {fav ? t("menu.unfavorite") : t("menu.favorite")}
-            </TooltipContent>
+            <TooltipContent>{fav ? t("menu.unfavorite") : t("menu.favorite")}</TooltipContent>
           </Tooltip>
         </div>
       </CardContent>
