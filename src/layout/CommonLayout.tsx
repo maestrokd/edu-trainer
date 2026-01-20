@@ -1,7 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router";
 
-
 import { HeaderContext } from "@/contexts/HeaderContext";
 export { useCustomHeader } from "@/contexts/HeaderContext";
 
@@ -12,10 +11,7 @@ const CommonLayout: React.FC = () => {
   const { renderHeaderBlock } = useTelegramHeader();
   const [headerVisible, setHeaderVisible] = React.useState<boolean>(false);
 
-  const ctxValue = React.useMemo(
-    () => ({ setHeader, setHeaderVisible }),
-    [setHeader, setHeaderVisible],
-  );
+  const ctxValue = React.useMemo(() => ({ setHeader, setHeaderVisible }), [setHeader, setHeaderVisible]);
 
   return (
     <HeaderContext.Provider value={ctxValue}>
@@ -33,4 +29,3 @@ const CommonLayout: React.FC = () => {
 };
 
 export default CommonLayout;
-

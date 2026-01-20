@@ -16,6 +16,10 @@ import { Navigate } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage.tsx";
 import SubscriptionPage from "@/pages/subscriptions/SubscriptionPage.tsx";
 import PrivateMenuPage from "@/pages/PrivateMenuPage";
+import AuthorityRoute from "@/components/AuthorityRoute.tsx";
+import SecondaryProfilesPage from "@/pages/profiles/SecondaryProfilesPage.tsx";
+import CreateSecondaryProfilePage from "@/pages/profiles/CreateSecondaryProfilePage.tsx";
+import EditSecondaryProfilePage from "@/pages/profiles/EditSecondaryProfilePage.tsx";
 
 export default function App() {
   return (
@@ -63,6 +67,12 @@ export default function App() {
           <Route path="private-menu" element={<PrivateMenuPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="subscriptions" element={<SubscriptionPage />} />
+
+          <Route element={<AuthorityRoute authority="MANAGE_PROFILES" />}>
+            <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
+            <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
+            <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

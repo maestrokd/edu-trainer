@@ -69,7 +69,7 @@ export const LoginPage: React.FC = () => {
                 id="email"
                 placeholder="name@example.com"
                 required
-                type="email"
+                // type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}

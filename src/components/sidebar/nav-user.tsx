@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import {
@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar.tsx";
+import { useAuth } from "@/contexts/AuthContext.tsx";
+import { useNavigate } from "react-router-dom";
 
 export function NavUser({
   user,
@@ -21,9 +23,14 @@ export function NavUser({
     name: string;
     email: string;
     avatar: string;
+    authorities: string[];
   };
 }) {
   const { isMobile } = useSidebar();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const canManageProfiles = user.authorities?.includes("MANAGE_PROFILES");
 
   return (
     <SidebarMenu>
@@ -84,9 +91,15 @@ export function NavUser({
                 <Bell />
                 Notifications
               </DropdownMenuItem>
+              {canManageProfiles && (
+                <DropdownMenuItem onClick={() => navigate("/settings/profiles")}>
+                  <Users />
+                  Profiles
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
