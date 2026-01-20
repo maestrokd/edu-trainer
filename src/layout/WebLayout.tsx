@@ -10,57 +10,49 @@ import { HeaderContext } from "@/contexts/HeaderContext";
 import { useTelegramHeader } from "@/hooks/useTelegramHeader";
 
 interface LayoutProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 const WebLayout: React.FC<LayoutProps> = ({ children }) => {
-    const [header, setHeader] = React.useState<React.ReactNode | null>(null);
-    const { renderHeaderBlock } = useTelegramHeader();
-    const [headerVisible, setHeaderVisible] = React.useState<boolean>(false);
+  const [header, setHeader] = React.useState<React.ReactNode | null>(null);
+  const { renderHeaderBlock } = useTelegramHeader();
+  const [headerVisible, setHeaderVisible] = React.useState<boolean>(false);
 
-    const ctxValue = React.useMemo(
-        () => ({ setHeader, setHeaderVisible }),
-        [setHeader, setHeaderVisible],
-    );
+  const ctxValue = React.useMemo(() => ({ setHeader, setHeaderVisible }), [setHeader, setHeaderVisible]);
 
-    return (
-        <HeaderContext.Provider value={ctxValue}>
-            {renderHeaderBlock && (
-                <div
-                    style={{ height: 60 }}
-                    className="w-full flex items-center border-b bg-white/80 dark:bg-slate-900/60 backdrop-blur"
-                >
-                    {headerVisible && (
-                        <div className="w-full max-w-7xl mx-auto px-4">{header}</div>
-                    )}
-                </div>
-            )}
-            <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
-                    <header className="flex h-16 shrink-0 items-center justify-between px-4">
-                        {/* Left: Sidebar trigger + breadcrumb */}
-                        <div className="flex items-center gap-2">
-                            <SidebarTrigger className="-ml-1" />
-                            <Separator
-                                orientation="vertical"
-                                className="mr-2 data-[orientation=vertical]:h-4"
-                            />
-                            <BreadcrumbComponent />
-                        </div>
+  return (
+    <HeaderContext.Provider value={ctxValue}>
+      {renderHeaderBlock && (
+        <div
+          style={{ height: 60 }}
+          className="w-full flex items-center border-b bg-white/80 dark:bg-slate-900/60 backdrop-blur"
+        >
+          {headerVisible && <div className="w-full max-w-7xl mx-auto px-4">{header}</div>}
+        </div>
+      )}
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center justify-between px-4">
+            {/* Left: Sidebar trigger + breadcrumb */}
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+              <BreadcrumbComponent />
+            </div>
 
-                        {/* Right: Language marker + dropdown */}
-                        <div className="flex items-center gap-2">
-                            <LanguageSelector mode={LanguageSelectorMode.FULL} />
-                            <ModeToggle />
-                        </div>
-                    </header>
-                    <main>{children}</main>
-                    <Toaster position="top-center" />
-                </SidebarInset>
-            </SidebarProvider>
-        </HeaderContext.Provider>
-    );
+            {/* Right: Language marker + dropdown */}
+            <div className="flex items-center gap-2">
+              <LanguageSelector mode={LanguageSelectorMode.FULL} />
+              <ModeToggle />
+            </div>
+          </header>
+          <main>{children}</main>
+          <Toaster position="top-center" />
+        </SidebarInset>
+      </SidebarProvider>
+    </HeaderContext.Provider>
+  );
 };
 
 export default WebLayout;

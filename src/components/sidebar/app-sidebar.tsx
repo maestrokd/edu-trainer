@@ -14,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import { useAuth } from "@/contexts/AuthContext.tsx";
 
 const data = {
   user: {
@@ -144,6 +145,26 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { principal } = useAuth();
+
+  const user = React.useMemo(() => {
+    if (!principal) {
+      return {
+        name: "Guest",
+        email: "",
+        avatar: "",
+        authorities: [],
+      };
+    }
+    return {
+      name:
+        principal.firstName && principal.lastName ? `${principal.firstName} ${principal.lastName}` : principal.username,
+      email: principal.email || principal.username,
+      avatar: "", // TODO: Add avatar to principal or profile
+      authorities: principal.authorities,
+    };
+  }, [principal]);
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -169,7 +190,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );
