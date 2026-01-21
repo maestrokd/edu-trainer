@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, Users } from "lucide-react";
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Settings2, Sparkles, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import {
@@ -31,6 +31,7 @@ export function NavUser({
   const navigate = useNavigate();
 
   const canManageProfiles = user.authorities?.includes("MANAGE_PROFILES");
+  const canManageSubscriptions = user.authorities?.includes("MANAGE_SUBSCRIPTIONS");
 
   return (
     <SidebarMenu>
@@ -76,6 +77,12 @@ export function NavUser({
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
+              {canManageSubscriptions && (
+                <DropdownMenuItem onClick={() => navigate("/subscriptions")}>
+                  <CreditCard />
+                  Subscriptions
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -83,6 +90,12 @@ export function NavUser({
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
+              {canManageProfiles && (
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <Settings2 />
+                  Settings
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem>
                 <CreditCard />
                 Billing

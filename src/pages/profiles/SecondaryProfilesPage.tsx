@@ -2,9 +2,12 @@ import React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
-import { Loader2, MoreHorizontal, Pencil, Plus, Trash2, User } from "lucide-react";
+import { Loader2, MenuIcon, MoreHorizontal, Pencil, Plus, Trash2, User, Users } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +17,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
 import { notifier } from "@/services/NotificationService.ts";
 import ProfileService, { type UserProfilesDto } from "@/services/ProfileService.ts";
+import { shorten } from "@/services/utils/StringUtils.ts";
 
 export const SecondaryProfilesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -49,13 +53,27 @@ export const SecondaryProfilesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("pages.secondaryProfiles.title", "Secondary Profiles")}</h1>
-        <Button onClick={() => navigate("create")}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t("pages.secondaryProfiles.createButton", "Create Profile")}
-        </Button>
+    <div className="bg-background p-4 space-y-4">
+      <h1 className="text-2xl font-bold">{t("pages.secondaryProfiles.title", "Secondary Profiles")}</h1>
+
+      {/* Search & Create */}
+      <div className="flex items-center space-x-2">
+        <Input
+          id="keyword"
+          className="flex-1"
+          placeholder={t("common.list.input.keywordSearch.placeholder", "Search...")}
+          disabled
+        />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="default" onClick={() => navigate("create")} className="p-2">
+              <Plus className="w-5 h-5" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t("pages.secondaryProfiles.createButton.tooltip", "Create Profile")}</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {isLoading && (
@@ -71,60 +89,120 @@ export const SecondaryProfilesPage: React.FC = () => {
       )}
 
       {!isLoading && !isError && (
-        <div className="rounded-md border">
+        <div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("pages.secondaryProfiles.columns.name", "Name")}</TableHead>
-                <TableHead>{t("pages.secondaryProfiles.columns.username", "Username")}</TableHead>
-                <TableHead>{t("pages.secondaryProfiles.columns.locale", "Locale")}</TableHead>
-                <TableHead className="w-[100px]">{t("pages.secondaryProfiles.columns.actions", "Actions")}</TableHead>
+                <TableHead className="min-w-8/12 sm:min-w-1/2 text-center">
+                  {t("pages.secondaryProfiles.columns.name", "Name")}
+                </TableHead>
+                <TableHead className="hidden sm:table-cell max-w-30 text-center">
+                  {t("pages.secondaryProfiles.columns.username", "Username")}
+                </TableHead>
+                <TableHead className="hidden sm:table-cell max-w-30 text-center">
+                  {t("pages.secondaryProfiles.columns.locale", "Locale")}
+                </TableHead>
+                <TableHead className="w-10">
+                  <div className="grid place-items-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Users className="w-4 h-4 cursor-pointer" aria-hidden="true" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t("pages.secondaryProfiles.columns.ownership", "Ownership")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TableHead>
+                <TableHead className="w-10">
+                  <div className="grid place-items-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <MenuIcon className="w-4 h-4 cursor-pointer" aria-hidden="true" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t("common.list.actions", "Actions")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {profiles.items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
                     {t("pages.secondaryProfiles.empty", "No secondary profiles found.")}
                   </TableCell>
                 </TableRow>
               ) : (
                 profiles.items.map((profile) => (
                   <TableRow key={profile.uuid}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">
-                          {profile.firstName && profile.lastName
-                            ? `${profile.firstName} ${profile.lastName}`
-                            : profile.username}
-                        </span>
+                    <TableCell className="min-w-8/12 sm:min-w-1/2 truncate">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            {shorten(
+                              profile.firstName && profile.lastName
+                                ? `${profile.firstName} ${profile.lastName}`
+                                : profile.username,
+                              10
+                            )}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="whitespace-normal break-words">
+                            {profile.firstName && profile.lastName
+                              ? `${profile.firstName} ${profile.lastName}`
+                              : profile.username}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell max-w-40 truncate">{profile.username}</TableCell>
+                    <TableCell className="hidden sm:table-cell max-w-40 truncate">
+                      <div className="grid place-items-center">
+                        <Badge variant="secondary" className="cursor-pointer">
+                          {profile.locale}
+                        </Badge>
                       </div>
                     </TableCell>
-                    <TableCell>{profile.username}</TableCell>
-                    <TableCell>{profile.locale}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`${profile.uuid}/edit`)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {t("common.edit", "Edit")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => handleDelete(profile.uuid)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t("common.delete", "Delete")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell className="w-10 truncate">
+                      <div className="grid place-items-center">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <User className="w-4 h-4 text-blue-600 dark:text-blue-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{t("pages.secondaryProfiles.row.ownership.secondary", "Secondary")}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-10 text-right">
+                      <div className="grid place-items-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="p-2">
+                              <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => navigate(`${profile.uuid}/edit`)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              {t("common.edit", "Edit")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDelete(profile.uuid)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("common.delete", "Delete")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
