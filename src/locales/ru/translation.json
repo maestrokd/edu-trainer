@@ -28,7 +28,32 @@
     "about": "О приложении",
     "continue": "Продолжить игру",
     "continueEmpty": "Ваши недавние игры появятся здесь.",
-    "futureSectionsHint": "Избранное и недавние появятся здесь скоро."
+    "futureSectionsHint": "Избранное и недавние появятся здесь скоро.",
+    "user": {
+      "upgrade": "Улучшить до Pro",
+      "subscriptions": "Подписки",
+      "account": "Аккаунт",
+      "settings": "Настройки",
+      "billing": "Оплата",
+      "notifications": "Уведомления",
+      "profiles": "Профили",
+      "logout": "Выйти"
+    }
+  },
+  "common": {
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "cancel": "Отмена",
+    "list": {
+      "actions": "Действия",
+      "input": {
+        "keywordSearch": {
+          "placeholder": "Поиск..."
+        }
+      }
+    }
   },
   "games": {
     "multiplication2": {
@@ -204,8 +229,15 @@
         "hundreds": "сотни",
         "thousands": "тысячи"
       },
-      "lower": { "ones": "единицы", "tens": "десятки", "hundreds": "сотни" },
-      "dir": { "up": "вверх", "down": "вниз" }
+      "lower": {
+        "ones": "единицы",
+        "tens": "десятки",
+        "hundreds": "сотни"
+      },
+      "dir": {
+        "up": "вверх",
+        "down": "вниз"
+      }
     },
     "input": {
       "placeholder": "ваш ответ",
@@ -445,6 +477,55 @@
     }
   },
   "pages": {
+    "secondaryProfiles": {
+      "title": "Второстепенные профили",
+      "createButton": {
+        "tooltip": "Создать профиль"
+      },
+      "loadError": "Не удалось загрузить профили.",
+      "empty": "Второстепенные профили не найдены.",
+      "confirmDelete": "Вы уверены, что хотите удалить этот профиль?",
+      "columns": {
+        "name": "Имя",
+        "username": "Никнейм",
+        "locale": "Язык",
+        "ownership": "Владение"
+      },
+      "row": {
+        "ownership": {
+          "secondary": "Второстепенный"
+        }
+      },
+      "notifications": {
+        "deleteSuccess": "Профиль успешно удален",
+        "deleteError": "Не удалось удалить профиль"
+      }
+    },
+    "profileForm": {
+      "createTitle": "Создать профиль",
+      "editTitle": "Редактировать профиль",
+      "username": "Никнейм",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "locale": "Язык",
+      "password": "Пароль",
+      "newPassword": "Новый пароль (необязательно)",
+      "localePlaceholder": "Выберите язык",
+      "locales": {
+        "en": "Английский (США)",
+        "uk": "Украинский",
+        "ru": "Русский"
+      }
+    },
+    "createProfile": {
+      "success": "Профиль успешно создан",
+      "error": "Не удалось создать профиль"
+    },
+    "editProfile": {
+      "success": "Профиль успешно обновлен",
+      "error": "Не удалось обновить профиль",
+      "notFound": "Профиль не найден"
+    },
     "settings": {
       "title": "Настройки",
       "telegramLanguage": {

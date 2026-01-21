@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Settings2, Sparkles, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import {
@@ -28,6 +29,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const canManageProfiles = user.authorities?.includes("MANAGE_PROFILES");
@@ -75,12 +77,12 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
-                Upgrade to Pro
+                {t("menu.user.upgrade", "Upgrade to Pro")}
               </DropdownMenuItem>
               {canManageSubscriptions && (
                 <DropdownMenuItem onClick={() => navigate("/subscriptions")}>
                   <CreditCard />
-                  Subscriptions
+                  {t("menu.user.subscriptions", "Subscriptions")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>
@@ -88,33 +90,33 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                Account
+                {t("menu.user.account", "Account")}
               </DropdownMenuItem>
               {canManageProfiles && (
                 <DropdownMenuItem onClick={() => navigate("/settings")}>
                   <Settings2 />
-                  Settings
+                  {t("menu.user.settings", "Settings")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem>
                 <CreditCard />
-                Billing
+                {t("menu.user.billing", "Billing")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
-                Notifications
+                {t("menu.user.notifications", "Notifications")}
               </DropdownMenuItem>
               {canManageProfiles && (
                 <DropdownMenuItem onClick={() => navigate("/settings/profiles")}>
                   <Users />
-                  Profiles
+                  {t("menu.user.profiles", "Profiles")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
               <LogOut />
-              Log out
+              {t("menu.user.logout", "Log out")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
