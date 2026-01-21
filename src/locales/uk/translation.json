@@ -545,9 +545,9 @@
     },
     "loginPage": {
       "titlePrompt": "Вхід до акаунту",
-      "email": {
-        "label": "Email",
-        "placeholder": "Введіть вашу електронну пошту"
+      "identifier": {
+        "label": "Email або Ім'я користувача",
+        "placeholder": "Введіть ваш email або ім'я користувача"
       },
       "password": {
         "label": "Пароль",
@@ -559,7 +559,7 @@
       "registrationPrompt": "Не маєте облікового запису?",
       "registrationLinkText": "Зареєструватися",
       "notifications": {
-        "submitError": "Ми не можемо знайти цей емейл або пароль. Спробуйте ще раз."
+        "submitError": "Ми не можемо знайти цей емейл, ім'я користувача або пароль. Спробуйте ще раз."
       }
     },
     "registrationPage": {

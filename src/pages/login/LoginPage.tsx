@@ -15,7 +15,7 @@ import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/Langua
 export const LoginPage: React.FC = () => {
   const { t } = useTranslation();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      await login(email, password);
+      await login(identifier, password);
       navigate(from, { replace: true });
     } catch (error: unknown) {
       const errorCode = extractErrorCode(error);
@@ -64,14 +64,13 @@ export const LoginPage: React.FC = () => {
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t("pages.loginPage.email.label")}</Label>
+              <Label htmlFor="identifier">{t("pages.loginPage.identifier.label")}</Label>
               <Input
-                id="email"
-                placeholder="name@example.com"
+                id="identifier"
+                placeholder={t("pages.loginPage.identifier.placeholder")}
                 required
-                // type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 disabled={loading}
               />
             </div>
