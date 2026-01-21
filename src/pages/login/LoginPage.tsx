@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.t
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { AlertCircleIcon, Loader2 } from "lucide-react";
@@ -17,6 +18,7 @@ export const LoginPage: React.FC = () => {
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -84,11 +86,21 @@ export const LoginPage: React.FC = () => {
               <Input
                 id="password"
                 required
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="show-password"
+                  checked={showPassword}
+                  onCheckedChange={(checked) => setShowPassword(!!checked)}
+                />
+                <Label htmlFor="show-password" className="text-sm font-normal cursor-pointer">
+                  {t("pages.loginPage.password.showPasswordLabel")}
+                </Label>
+              </div>
             </div>
             <Button className="w-full" type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

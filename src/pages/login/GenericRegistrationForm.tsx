@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { AlertCircleIcon, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -52,6 +53,8 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
     handleConfirmChange,
     handleSubmit,
   } = useRegistrationForm({ mode: formMode });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const { t } = useTranslation();
 
@@ -141,7 +144,7 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
               <Label htmlFor="password">{t("pages.registrationPage.password.label")}</Label>
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={handlePasswordChange}
@@ -165,12 +168,26 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
               <Label htmlFor="confirmPassword">{t("pages.registrationPage.confirmPassword.label")}</Label>
               <Input
                 id="confirmPassword"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={confirmPassword}
                 onChange={handleConfirmChange}
                 disabled={submitLoading}
               />
+              <div className="flex items-center space-x-2 mt-2">
+                <Checkbox
+                  id="show-password"
+                  checked={showPassword}
+                  onCheckedChange={(checked) => setShowPassword(!!checked)}
+                />
+                <Label htmlFor="show-password" className="text-sm font-normal cursor-pointer">
+                  {t(
+                    formMode === FormMode.REGISTRATION
+                      ? "pages.registrationPage.password.showPasswordLabel"
+                      : "pages.resetPasswordPage.password.showPasswordLabel"
+                  )}
+                </Label>
+              </div>
               {confirmError && (
                 <Alert variant="destructive" className="mt-2" role="alert" aria-live="assertive">
                   <AlertDescription>{confirmError}</AlertDescription>
