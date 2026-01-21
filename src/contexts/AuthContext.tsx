@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { post, registerLogoutFn, registerRefreshFn } from "@/services/ApiService.ts";
-import { type LoginResponse, logout as apiLogout } from "@/services/AuthService.ts";
+import { type LoginResponse, logout as apiLogout, logoutTelegram } from "@/services/AuthService.ts";
 import { getMe, type UserProfileDto } from "@/services/ProfileService.ts";
 import WebApp from "@twa-dev/sdk";
 import { jwtDecode } from "jwt-decode";
@@ -72,7 +72,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshFn = async (): Promise<string> => {
     if (telegramInitDataString) {
-      return await loginWithTelegram();
+      // return await loginWithTelegram();
+      return await refresh();
     } else {
       return await refresh();
     }
@@ -160,7 +161,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     // Call backend logout
-    apiLogout().catch((e) => console.error("Logout error", e));
+    if (telegramInitDataString) {
+      logoutTelegram(telegramInitDataString).catch((e) => console.error("Logout Telegram error", e));
+    } else {
+      apiLogout().catch((e) => console.error("Logout error", e));
+    }
+
     setToken(null);
     setPrincipal(null);
     localStorage.removeItem("token");

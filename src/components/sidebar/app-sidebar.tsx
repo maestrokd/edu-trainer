@@ -45,10 +45,6 @@ const data = {
           title: "Broken",
           url: "#dsfgds",
         },
-        {
-          title: "Subscriptions",
-          url: "subscriptions",
-        },
       ],
     },
     {
@@ -98,10 +94,6 @@ const data = {
       url: "#",
       icon: Settings2,
       items: [
-        {
-          title: "General",
-          url: "settings",
-        },
         {
           title: "Health",
           url: "#",

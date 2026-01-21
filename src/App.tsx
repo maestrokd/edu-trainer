@@ -65,10 +65,12 @@ export default function App() {
           }
         >
           <Route path="private-menu" element={<PrivateMenuPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="subscriptions" element={<SubscriptionPage />} />
+          <Route element={<AuthorityRoute authority="MANAGE_SUBSCRIPTIONS" />}>
+            <Route path="subscriptions" element={<SubscriptionPage />} />
+          </Route>
 
           <Route element={<AuthorityRoute authority="MANAGE_PROFILES" />}>
+            <Route path="settings" element={<SettingsPage />} />
             <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
             <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
             <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
