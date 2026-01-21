@@ -94,12 +94,12 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
             <Label htmlFor="locale">{t("pages.profileForm.locale", "Locale")}</Label>
             <Select value={formData.locale} onValueChange={(val) => handleChange("locale", val)} disabled={isLoading}>
               <SelectTrigger>
-                <SelectValue placeholder="Select locale" />
+                <SelectValue placeholder={t("pages.profileForm.localePlaceholder", "Select locale")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en-US">English (US)</SelectItem>
-                <SelectItem value="uk-UA">Українська</SelectItem>
-                <SelectItem value="ru-RU">Русский</SelectItem>
+                <SelectItem value="en-US">{t("pages.profileForm.locales.en", "English (US)")}</SelectItem>
+                <SelectItem value="uk-UA">{t("pages.profileForm.locales.uk", "Українська")}</SelectItem>
+                <SelectItem value="ru-RU">{t("pages.profileForm.locales.ru", "Русский")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

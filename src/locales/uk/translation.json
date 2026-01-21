@@ -28,7 +28,32 @@
     "about": "Про застосунок",
     "continue": "Продовжити гру",
     "continueEmpty": "Ваші нещодавні ігри зʼявляться тут.",
-    "futureSectionsHint": "Обране та нещодавні зʼявляться тут незабаром."
+    "futureSectionsHint": "Обране та нещодавні зʼявляться тут незабаром.",
+    "user": {
+      "upgrade": "Покращити до Pro",
+      "subscriptions": "Підписки",
+      "account": "Обліковий запис",
+      "settings": "Налаштування",
+      "billing": "Оплата",
+      "notifications": "Сповіщення",
+      "profiles": "Профілі",
+      "logout": "Вийти"
+    }
+  },
+  "common": {
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "save": "Зберегти",
+    "saving": "Збереження...",
+    "cancel": "Скасувати",
+    "list": {
+      "actions": "Дії",
+      "input": {
+        "keywordSearch": {
+          "placeholder": "Пошук..."
+        }
+      }
+    }
   },
   "games": {
     "multiplication2": {
@@ -204,8 +229,15 @@
         "hundreds": "сотні",
         "thousands": "тисячі"
       },
-      "lower": { "ones": "одиниці", "tens": "десятки", "hundreds": "сотні" },
-      "dir": { "up": "вгору", "down": "вниз" }
+      "lower": {
+        "ones": "одиниці",
+        "tens": "десятки",
+        "hundreds": "сотні"
+      },
+      "dir": {
+        "up": "вгору",
+        "down": "вниз"
+      }
     },
     "input": {
       "placeholder": "ваша відповідь",
@@ -445,6 +477,55 @@
     }
   },
   "pages": {
+    "secondaryProfiles": {
+      "title": "Другорядні профілі",
+      "createButton": {
+        "tooltip": "Створити профіль"
+      },
+      "loadError": "Не вдалося завантажити профілі.",
+      "empty": "Другорядних профілів не знайдено.",
+      "confirmDelete": "Ви впевнені, що хочете видалити цей профіль?",
+      "columns": {
+        "name": "Ім'я",
+        "username": "Нікнейм",
+        "locale": "Мова",
+        "ownership": "Власність"
+      },
+      "row": {
+        "ownership": {
+          "secondary": "Другорядний"
+        }
+      },
+      "notifications": {
+        "deleteSuccess": "Профіль успішно видалено",
+        "deleteError": "Не вдалося видалити профіль"
+      }
+    },
+    "profileForm": {
+      "createTitle": "Створити профіль",
+      "editTitle": "Редагувати профіль",
+      "username": "Нікнейм",
+      "firstName": "Ім'я",
+      "lastName": "Прізвище",
+      "locale": "Мова",
+      "password": "Пароль",
+      "newPassword": "Новий пароль (необов'язково)",
+      "localePlaceholder": "Оберіть мову",
+      "locales": {
+        "en": "Англійська (США)",
+        "uk": "Українська",
+        "ru": "Російська"
+      }
+    },
+    "createProfile": {
+      "success": "Профіль успішно створено",
+      "error": "Не вдалося створити профіль"
+    },
+    "editProfile": {
+      "success": "Профіль успішно оновлено",
+      "error": "Не вдалося оновити профіль",
+      "notFound": "Профіль не знайдено"
+    },
     "settings": {
       "title": "Налаштування",
       "telegramLanguage": {

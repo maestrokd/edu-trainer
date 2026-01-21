@@ -133,7 +133,7 @@ const SettingsPage: React.FC = () => {
           <div className="flex justify-end">
             <Button type="button" className="w-full sm:w-1/2" onClick={onSave} disabled={loading || saving || !locale}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {saving ? "Saving…" : "Save"}
+              {saving ? t("common.saving", "Saving…") : t("common.save", "Save")}
             </Button>
           </div>
         </CardContent>
