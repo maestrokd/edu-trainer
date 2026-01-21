@@ -29,7 +29,7 @@ export const CreateSecondaryProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+    <div className="flex-1 bg-background p-4 flex items-center justify-center">
       <ProfileForm
         mode="create"
         onSubmit={handleSubmit}

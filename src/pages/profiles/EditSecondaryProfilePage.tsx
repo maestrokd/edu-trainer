@@ -45,7 +45,7 @@ export const EditSecondaryProfilePage: React.FC = () => {
 
   if (isLoadingProfile) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center flex-1">
         <Loader2 className="animate-spin h-8 w-8" />
       </div>
     );
@@ -53,14 +53,14 @@ export const EditSecondaryProfilePage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center flex-1">
         <p>{t("pages.editProfile.notFound", "Profile not found")}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+    <div className="flex-1 bg-background p-4 flex items-center justify-center">
       <ProfileForm
         mode="edit"
         initialData={{
