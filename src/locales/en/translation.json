@@ -545,9 +545,9 @@
     },
     "loginPage": {
       "titlePrompt": "Sign in to your account",
-      "email": {
-        "label": "Email",
-        "placeholder": "Enter your email"
+      "identifier": {
+        "label": "Email or Username",
+        "placeholder": "Enter your email or username"
       },
       "password": {
         "label": "Password",
@@ -559,7 +559,7 @@
       "registrationPrompt": "Don't have an account?",
       "registrationLinkText": "Sign up",
       "notifications": {
-        "submitError": "We can't find that email or password. Try again."
+        "submitError": "We can't find that email, username, or password. Try again."
       }
     },
     "registrationPage": {

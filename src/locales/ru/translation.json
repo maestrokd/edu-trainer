@@ -545,9 +545,9 @@
     },
     "loginPage": {
       "titlePrompt": "Войдите в свой аккаунт",
-      "email": {
-        "label": "Email",
-        "placeholder": "Введите вашу электронную почту"
+      "identifier": {
+        "label": "Email или Имя пользователя",
+        "placeholder": "Введите ваш email или имя пользователя"
       },
       "password": {
         "label": "Пароль",
@@ -559,7 +559,7 @@
       "registrationPrompt": "Нет аккаунта?",
       "registrationLinkText": "Зарегистрироваться",
       "notifications": {
-        "submitError": "Не удаётся найти этот email или пароль. Попробуйте снова."
+        "submitError": "Мы не можем найти этот email, имя пользователя или пароль. Попробуйте снова."
       }
     },
     "registrationPage": {
