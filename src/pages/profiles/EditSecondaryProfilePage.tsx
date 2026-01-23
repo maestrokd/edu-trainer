@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ProfileForm, type ProfileFormData } from "./ProfileForm";
 import ProfileService from "@/services/ProfileService";
+import { extractErrorCode } from "@/services/ApiService";
 import { notifier } from "@/services/NotificationService";
 import { Loader2 } from "lucide-react";
 
@@ -32,8 +33,14 @@ export const EditSecondaryProfilePage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["secondaryProfiles"] });
       navigate("/settings/profiles");
     },
-    onError: (error: any) => {
-      notifier.error(t("pages.editProfile.error", "Failed to update profile"));
+    onError: (error: unknown) => {
+      const errorCode = extractErrorCode(error);
+      const messageKey = errorCode ? `errors.codes.${errorCode}` : "pages.editProfile.error";
+      const message = t(messageKey, {
+        defaultValue: t("errors.codes.UNKNOWN"),
+      });
+
+      notifier.error(message);
       console.error(error);
     },
   });

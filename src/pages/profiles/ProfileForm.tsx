@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { Loader2 } from "lucide-react";
 
 export interface ProfileFormData {
@@ -32,6 +33,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
     lastName: "",
     locale: "en-US", // Default locale
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -112,12 +114,22 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
             </Label>
             <Input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required={mode === "create"}
               value={formData.password}
               onChange={(e) => handleChange("password", e.target.value)}
               disabled={isLoading}
             />
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="show-password"
+                checked={showPassword}
+                onCheckedChange={(checked) => setShowPassword(!!checked)}
+              />
+              <Label htmlFor="show-password" className="text-sm font-normal cursor-pointer">
+                {t("pages.profileForm.showPasswordLabel", "Show password")}
+              </Label>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

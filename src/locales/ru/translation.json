@@ -510,6 +510,7 @@
       "locale": "Язык",
       "password": "Пароль",
       "newPassword": "Новый пароль (необязательно)",
+      "showPasswordLabel": "Показать пароль",
       "localePlaceholder": "Выберите язык",
       "locales": {
         "en": "Английский (США)",
@@ -689,14 +690,14 @@
       "INVALID_VERIFICATION_CODE": "Неверный код подтверждения. Пожалуйста, попробуйте ещё раз.",
       "PROFILE_NOT_FOUND": "Не удаётся найти этот аккаунт.",
       "EMAIL_ALREADY_EXISTS": "Email уже зарегистрирован.",
+      "USERNAME_ALREADY_EXISTS": "Username уже зарегистрирован.",
+      "MAX_SECONDARY_PROFILES_REACHED": "Лимит дополнительных профилей достигнут.",
+      "PROFILE_OWNERSHIP_VIOLATION": "Нарушение владения профилем.",
       "RATE_LIMIT_EXCEEDED": "Слишком много попыток. Попробуйте позже.",
       "USER_BLOCKED": "Пользователь заблокирован.",
       "AUTHENTICATION_FAILED": "Ошибка аутентификации.",
       "TOKEN_NOT_VALID": "Недействительный токен.",
       "MISSING_COOKIE": "Недействительный или отсутствующий файл cookie.",
-      "SPREADSHEET_ID_EXISTS": "ID Google таблицы уже зарегистрирован.",
-      "SPREADSHEET_NAME_EXISTS": "Название профиля таблицы уже используется.",
-      "SPREADSHEET_ACCESS_DENIED": "Доступ к Google таблице не предоставлен.",
       "INVALID_PROMO_CODE": "Неверный, использованный или устаревший промокод.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активный период продления подписки."
     }
