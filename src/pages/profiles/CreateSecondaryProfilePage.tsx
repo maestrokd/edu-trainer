@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ProfileForm, type ProfileFormData } from "./ProfileForm";
 import ProfileService from "@/services/ProfileService";
+import { extractErrorCode } from "@/services/ApiService";
 import { notifier } from "@/services/NotificationService";
 
 export const CreateSecondaryProfilePage: React.FC = () => {
@@ -18,8 +19,14 @@ export const CreateSecondaryProfilePage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["secondaryProfiles"] });
       navigate("/settings/profiles");
     },
-    onError: (error: any) => {
-      notifier.error(t("pages.createProfile.error", "Failed to create profile"));
+    onError: (error: unknown) => {
+      const errorCode = extractErrorCode(error);
+      const messageKey = errorCode ? `errors.codes.${errorCode}` : "pages.createProfile.error";
+      const message = t(messageKey, {
+        defaultValue: t("errors.codes.UNKNOWN"),
+      });
+
+      notifier.error(message);
       console.error(error);
     },
   });

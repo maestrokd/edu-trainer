@@ -510,6 +510,7 @@
       "locale": "Мова",
       "password": "Пароль",
       "newPassword": "Новий пароль (необов'язково)",
+      "showPasswordLabel": "Показати пароль",
       "localePlaceholder": "Оберіть мову",
       "locales": {
         "en": "Англійська (США)",
@@ -688,15 +689,15 @@
       "INVALID_CREDENTIALS": "Ми не можемо знайти цей емейл або пароль. Спробуйте ще раз.",
       "INVALID_VERIFICATION_CODE": "Невірний код перевірки. Будь ласка, спробуйте ще раз.",
       "PROFILE_NOT_FOUND": "Ми не можемо знайти цей аккаунт.",
-      "EMAIL_ALREADY_EXISTS": "Email вже існує.",
+      "EMAIL_ALREADY_EXISTS": "Email вже зареєстровано.",
+      "USERNAME_ALREADY_EXISTS": "Username вже зареєстровано.",
+      "MAX_SECONDARY_PROFILES_REACHED": "Ліміт додаткових профілів досягнуто.",
+      "PROFILE_OWNERSHIP_VIOLATION": "Нарушение владения профилем.",
       "RATE_LIMIT_EXCEEDED": "Забагато спроб. Спробуйте пізніше.",
       "USER_BLOCKED": "Користувача заблоковано.",
       "AUTHENTICATION_FAILED": "Помилка автентифікації.",
       "TOKEN_NOT_VALID": "Недійсний токен.",
       "MISSING_COOKIE": "Недійсний або відсутній cookie.",
-      "SPREADSHEET_ID_EXISTS": "ID Google таблиці вже зареєстровано.",
-      "SPREADSHEET_NAME_EXISTS": "Назва профілю таблиці вже використовується.",
-      "SPREADSHEET_ACCESS_DENIED": "Доступ до Google таблиці не надано.",
       "INVALID_PROMO_CODE": "Невірний, використаний або застарілий промокод.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активний період продовження підписки."
     }

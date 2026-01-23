@@ -510,6 +510,7 @@
       "locale": "Locale",
       "password": "Password",
       "newPassword": "New Password (Optional)",
+      "showPasswordLabel": "Show password",
       "localePlaceholder": "Select locale",
       "locales": {
         "en": "English (US)",
@@ -689,14 +690,14 @@
       "INVALID_VERIFICATION_CODE": "Invalid verification code. Please try again.",
       "PROFILE_NOT_FOUND": "We can't find that profile.",
       "EMAIL_ALREADY_EXISTS": "Email already exists.",
+      "USERNAME_ALREADY_EXISTS": "Username already exists.",
+      "MAX_SECONDARY_PROFILES_REACHED": "Limit of secondary profiles reached.",
+      "PROFILE_OWNERSHIP_VIOLATION": "Profile ownership violation.",
       "RATE_LIMIT_EXCEEDED": "Too many attempts. Try again later.",
       "USER_BLOCKED": "User blocked.",
       "AUTHENTICATION_FAILED": "Authentication failed.",
       "TOKEN_NOT_VALID": "Token not valid.",
       "MISSING_COOKIE": "Invalid or absent cookie.",
-      "SPREADSHEET_ID_EXISTS": "Spreadsheet ID already registered.",
-      "SPREADSHEET_NAME_EXISTS": "Sheet Profile name already exists.",
-      "SPREADSHEET_ACCESS_DENIED": "Access to the spreadsheet was not provided.",
       "INVALID_PROMO_CODE": "Invalid or expired promo code.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window."
     }
