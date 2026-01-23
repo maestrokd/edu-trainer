@@ -52,7 +52,7 @@ export const EditSecondaryProfilePage: React.FC = () => {
 
   if (isLoadingProfile) {
     return (
-      <div className="flex justify-center items-center flex-1">
+      <div className="flex justify-center items-center flex-1 bg-background">
         <Loader2 className="animate-spin h-8 w-8" />
       </div>
     );
@@ -60,27 +60,25 @@ export const EditSecondaryProfilePage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="flex justify-center items-center flex-1">
+      <div className="flex justify-center items-center flex-1 bg-background">
         <p>{t("pages.editProfile.notFound", "Profile not found")}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 bg-background p-4 flex items-center justify-center">
-      <ProfileForm
-        mode="edit"
-        initialData={{
-          username: profile.username,
-          firstName: profile.firstName || "",
-          lastName: profile.lastName || "",
-          locale: profile.locale,
-        }}
-        onSubmit={handleSubmit}
-        isLoading={updateMutation.isPending}
-        onCancel={() => navigate("/settings/profiles")}
-      />
-    </div>
+    <ProfileForm
+      mode="edit"
+      initialData={{
+        username: profile.username,
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        locale: profile.locale,
+      }}
+      onSubmit={handleSubmit}
+      isLoading={updateMutation.isPending}
+      onCancel={() => navigate("/settings/profiles")}
+    />
   );
 };
 

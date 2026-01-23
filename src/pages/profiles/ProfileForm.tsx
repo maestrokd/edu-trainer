@@ -51,98 +51,100 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
   };
 
   return (
-    <Card className="max-w-md w-full mx-auto">
-      <CardHeader>
-        <CardTitle>
-          {mode === "create"
-            ? t("pages.profileForm.createTitle", "Create Profile")
-            : t("pages.profileForm.editTitle", "Edit Profile")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">{t("pages.profileForm.username", "Username")}</Label>
-            <Input
-              id="username"
-              required
-              disabled={mode === "edit" || isLoading} // Username might be immutable or used as ID? Task says update request doesn't include username.
-              value={formData.username}
-              onChange={(e) => handleChange("username", e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="firstName">{t("pages.profileForm.firstName", "First Name")}</Label>
-            <Input
-              id="firstName"
-              value={formData.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="lastName">{t("pages.profileForm.lastName", "Last Name")}</Label>
-            <Input
-              id="lastName"
-              value={formData.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="locale">{t("pages.profileForm.locale", "Locale")}</Label>
-            <Select value={formData.locale} onValueChange={(val) => handleChange("locale", val)} disabled={isLoading}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("pages.profileForm.localePlaceholder", "Select locale")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en-US">{t("pages.profileForm.locales.en", "English (US)")}</SelectItem>
-                <SelectItem value="uk-UA">{t("pages.profileForm.locales.uk", "Українська")}</SelectItem>
-                <SelectItem value="ru-RU">{t("pages.profileForm.locales.ru", "Русский")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">
-              {mode === "create"
-                ? t("pages.profileForm.password", "Password")
-                : t("pages.profileForm.newPassword", "New Password (Optional)")}
-            </Label>
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              required={mode === "create"}
-              value={formData.password}
-              onChange={(e) => handleChange("password", e.target.value)}
-              disabled={isLoading}
-            />
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="show-password"
-                checked={showPassword}
-                onCheckedChange={(checked) => setShowPassword(!!checked)}
+    <div className="flex-1 bg-background py-0 px-0 sm:py-8 sm:px-4">
+      <Card className="max-w-md w-full mx-auto">
+        <CardHeader>
+          <CardTitle>
+            {mode === "create"
+              ? t("pages.profileForm.createTitle", "Create Profile")
+              : t("pages.profileForm.editTitle", "Edit Profile")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">{t("pages.profileForm.username", "Username")}</Label>
+              <Input
+                id="username"
+                required
+                disabled={mode === "edit" || isLoading} // Username might be immutable or used as ID? Task says update request doesn't include username.
+                value={formData.username}
+                onChange={(e) => handleChange("username", e.target.value)}
               />
-              <Label htmlFor="show-password" className="text-sm font-normal cursor-pointer">
-                {t("pages.profileForm.showPasswordLabel", "Show password")}
-              </Label>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-              {t("common.cancel", "Cancel")}
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t("common.save", "Save")}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">{t("pages.profileForm.firstName", "First Name")}</Label>
+              <Input
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => handleChange("firstName", e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="lastName">{t("pages.profileForm.lastName", "Last Name")}</Label>
+              <Input
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) => handleChange("lastName", e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="locale">{t("pages.profileForm.locale", "Locale")}</Label>
+              <Select value={formData.locale} onValueChange={(val) => handleChange("locale", val)} disabled={isLoading}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("pages.profileForm.localePlaceholder", "Select locale")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en-US">{t("pages.profileForm.locales.en", "English (US)")}</SelectItem>
+                  <SelectItem value="uk-UA">{t("pages.profileForm.locales.uk", "Українська")}</SelectItem>
+                  <SelectItem value="ru-RU">{t("pages.profileForm.locales.ru", "Русский")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">
+                {mode === "create"
+                  ? t("pages.profileForm.password", "Password")
+                  : t("pages.profileForm.newPassword", "New Password (Optional)")}
+              </Label>
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                required={mode === "create"}
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+                disabled={isLoading}
+              />
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="show-password"
+                  checked={showPassword}
+                  onCheckedChange={(checked) => setShowPassword(!!checked)}
+                />
+                <Label htmlFor="show-password" className="text-sm font-normal cursor-pointer">
+                  {t("pages.profileForm.showPasswordLabel", "Show password")}
+                </Label>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+                {t("common.cancel", "Cancel")}
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("common.save", "Save")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
