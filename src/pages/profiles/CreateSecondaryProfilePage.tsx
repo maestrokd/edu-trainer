@@ -36,14 +36,12 @@ export const CreateSecondaryProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-background p-4 flex items-center justify-center">
-      <ProfileForm
-        mode="create"
-        onSubmit={handleSubmit}
-        isLoading={createMutation.isPending}
-        onCancel={() => navigate("/settings/profiles")}
-      />
-    </div>
+    <ProfileForm
+      mode="create"
+      onSubmit={handleSubmit}
+      isLoading={createMutation.isPending}
+      onCancel={() => navigate("/settings/profiles")}
+    />
   );
 };
 

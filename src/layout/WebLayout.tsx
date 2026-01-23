@@ -2,7 +2,7 @@ import React, { type ReactNode } from "react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar.tsx";
 import { AppSidebar } from "@/components/sidebar/app-sidebar.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
-import { BreadcrumbComponent } from "@/components/BreadcrumbComponent.tsx";
+// import { BreadcrumbComponent } from "@/components/BreadcrumbComponent.tsx";
 import { Toaster } from "@/components/ui/sonner.tsx";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
 import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
@@ -39,7 +39,7 @@ const WebLayout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-                <BreadcrumbComponent />
+                {/* <BreadcrumbComponent /> */}
               </div>
 
               {/* Right: Language marker + dropdown */}
