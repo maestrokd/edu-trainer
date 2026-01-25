@@ -516,6 +516,9 @@
         "en": "English (US)",
         "uk": "Ukrainian",
         "ru": "Russian"
+      },
+      "validation": {
+        "invalidUsername": "Username can only contain letters, digits, '-', '_', '.'."
       }
     },
     "createProfile": {
