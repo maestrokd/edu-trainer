@@ -1,10 +1,14 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { post, registerLogoutFn, registerRefreshFn } from "@/services/ApiService.ts";
-import { type LoginResponse } from "@/services/AuthService.ts";
+import { type LoginResponse, logout as apiLogout, logoutTelegram } from "@/services/AuthService.ts";
+import { getMe, type UserProfileDto } from "@/services/ProfileService.ts";
 import WebApp from "@twa-dev/sdk";
 import { jwtDecode } from "jwt-decode";
 
 export const Authority = {
+  MANAGE_PROFILES: "MANAGE_PROFILES",
+  MANAGE_SUBSCRIPTIONS: "MANAGE_SUBSCRIPTIONS",
+  VIEW_REPORTS: "VIEW_REPORTS",
   SPECIAL_GAMES: "SPECIAL_GAMES",
 } as const;
 
@@ -20,6 +24,10 @@ interface Principal {
   id: string;
   authorities: Authority[];
   username: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  profileType: "PRIMARY" | "SECONDARY";
 }
 
 export const EmailVerificationType = {
@@ -59,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     registerRefreshFn(refreshFn);
-    registerLogoutFn(logout);
+    registerLogoutFn(logoutFn);
   });
 
   const refreshFn = async (): Promise<string> => {
@@ -70,11 +78,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const logoutFn = async (): Promise<void> => {
+    apiLogout().catch((e) => console.error("Logout error", e));
+    setToken(null);
+    setPrincipal(null);
+    localStorage.removeItem("token");
+  };
+
   const refresh = async (): Promise<string> => {
     try {
       const { accessToken } = await post<LoginResponse>("/auth/refresh", undefined, { withCredentials: true });
       setToken(accessToken);
       localStorage.setItem("token", accessToken);
+      const newPrincipal = await fetchPrincipalData(accessToken);
+      setPrincipal(newPrincipal);
       return accessToken;
     } catch (e) {
       console.error("AuthProvider Refresh - error", e);
@@ -105,15 +122,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     setToken(accessToken);
     localStorage.setItem("token", accessToken);
-    const { sub, authorities } = jwtDecode<{
-      sub: string;
-      authorities: string[];
-    }>(accessToken);
-    setPrincipal({
-      id: sub,
-      username: "",
-      authorities: toAuthorities(authorities),
-    });
+    const newPrincipal = await fetchPrincipalData(accessToken);
+    setPrincipal(newPrincipal);
   };
 
   const doResetPassword = async (
@@ -139,15 +149,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     setToken(accessToken);
     localStorage.setItem("token", accessToken);
-    const { sub, authorities } = jwtDecode<{
-      sub: string;
-      authorities: string[];
-    }>(accessToken);
-    setPrincipal({
-      id: sub,
-      username: "",
-      authorities: toAuthorities(authorities),
-    });
+    const newPrincipal = await fetchPrincipalData(accessToken);
+    setPrincipal(newPrincipal);
   };
 
   const loginWithTelegram = async (initDataParam?: string | null): Promise<string> => {
@@ -157,10 +160,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     setToken(accessToken);
     localStorage.setItem("token", accessToken);
+    const newPrincipal = await fetchPrincipalData(accessToken);
+    setPrincipal(newPrincipal);
     return accessToken;
   };
 
   const logout = () => {
+    // Call backend logout
+    if (telegramInitDataString) {
+      logoutTelegram(telegramInitDataString).catch((e) => console.error("Logout Telegram error", e));
+    } else {
+      apiLogout().catch((e) => console.error("Logout error", e));
+    }
+
     setToken(null);
     setPrincipal(null);
     localStorage.removeItem("token");
@@ -202,15 +214,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       if (token) {
-        const { sub, authorities } = jwtDecode<{
-          sub: string;
-          authorities: string[];
-        }>(token);
-        setPrincipal({
-          id: sub,
-          username: "",
-          authorities: toAuthorities(authorities),
-        });
+        try {
+          const newPrincipal = await fetchPrincipalData(token);
+          setPrincipal(newPrincipal);
+        } catch (e) {
+          console.error("AuthProvider useEffect - fetchPrincipalData - error", e);
+        }
       }
       setInitDone(true);
     };
@@ -240,6 +249,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+const fetchPrincipalData = async (token: string): Promise<Principal> => {
+  // We still decode token for authorities if they are not in the profile response or if we prefer token source of truth for authz
+  const { sub, authorities } = jwtDecode<{
+    sub: string;
+    authorities: string[];
+  }>(token);
+
+  const profile: UserProfileDto = await getMe();
+
+  return {
+    id: sub,
+    username: profile.username,
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    email: profile.email,
+    profileType: profile.profileType,
+    authorities: toAuthorities(authorities),
+  };
 };
 
 export const useAuth = (): AuthContextType => {
