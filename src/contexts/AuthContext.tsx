@@ -67,16 +67,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     registerRefreshFn(refreshFn);
-    registerLogoutFn(logout);
+    registerLogoutFn(logoutFn);
   });
 
   const refreshFn = async (): Promise<string> => {
     if (telegramInitDataString) {
-      // return await loginWithTelegram();
-      return await refresh();
+      return await loginWithTelegram();
     } else {
       return await refresh();
     }
+  };
+
+  const logoutFn = async (): Promise<void> => {
+    apiLogout().catch((e) => console.error("Logout error", e));
+    setToken(null);
+    setPrincipal(null);
+    localStorage.removeItem("token");
   };
 
   const refresh = async (): Promise<string> => {
