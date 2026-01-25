@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
-import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
+import { AlertCircleIcon, Loader2 } from "lucide-react";
+import { validatePassword } from "@/services/PasswordValidator.ts";
 
 export interface ProfileFormData {
   username: string;
@@ -34,6 +36,8 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
     locale: "en-US", // Default locale
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -43,11 +47,44 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
 
   const handleChange = (field: keyof ProfileFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "password") {
+      if (value) {
+        setPasswordErrors(validatePassword(value));
+      } else {
+        setPasswordErrors([]);
+      }
+    }
+    if (field === "username") {
+      setUsernameError(null);
+    }
+  };
+
+  const handleUsernameBlur = () => {
+    const trimmed = formData.username.trim();
+    if (trimmed !== formData.username) {
+      setFormData((prev) => ({ ...prev, username: trimmed }));
+    }
+
+    if (!trimmed) {
+      setUsernameError(null);
+      return;
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9-._]+$/;
+    if (!usernameRegex.test(trimmed)) {
+      setUsernameError(
+        t("pages.profileForm.validation.invalidUsername", "Username can only contain letters, digits, '-', '_', '.'.")
+      );
+    } else {
+      setUsernameError(null);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (usernameError || passwordErrors.length > 0) return;
+    const trimmedUsername = formData.username.trim();
+    onSubmit({ ...formData, username: trimmedUsername });
   };
 
   return (
@@ -67,10 +104,17 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
               <Input
                 id="username"
                 required
-                disabled={mode === "edit" || isLoading} // Username might be immutable or used as ID? Task says update request doesn't include username.
+                disabled={mode === "edit" || isLoading}
                 value={formData.username}
                 onChange={(e) => handleChange("username", e.target.value)}
+                onBlur={handleUsernameBlur}
               />
+              {usernameError && (
+                <Alert variant="destructive" className="mt-2" role="alert" aria-live="assertive">
+                  <AlertCircleIcon className="h-4 w-4" />
+                  <AlertDescription>{usernameError}</AlertDescription>
+                </Alert>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -121,6 +165,18 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
                 onChange={(e) => handleChange("password", e.target.value)}
                 disabled={isLoading}
               />
+              {passwordErrors.length > 0 && (
+                <Alert variant="destructive" className="mt-2" role="alert" aria-live="assertive">
+                  <AlertCircleIcon className="h-4 w-4" />
+                  <AlertDescription>
+                    <ul className="list-disc list-inside space-y-1">
+                      {passwordErrors.map((msg, idx) => (
+                        <li key={idx}>{msg}</li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="show-password"
@@ -137,7 +193,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
               <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
                 {t("common.cancel", "Cancel")}
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || passwordErrors.length > 0 || !!usernameError}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t("common.save", "Save")}
               </Button>

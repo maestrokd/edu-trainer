@@ -31,8 +31,13 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
+    const trimmedIdentifier = identifier.trim();
+    if (trimmedIdentifier !== identifier) {
+      setIdentifier(trimmedIdentifier);
+    }
+
     try {
-      await login(identifier, password);
+      await login(trimmedIdentifier, password);
       navigate(from, { replace: true });
     } catch (error: unknown) {
       const errorCode = extractErrorCode(error);
@@ -73,6 +78,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
+                onBlur={() => setIdentifier((prev) => prev.trim())}
                 disabled={loading}
               />
             </div>

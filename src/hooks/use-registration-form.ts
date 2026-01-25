@@ -34,6 +34,7 @@ interface UseVerificationFormReturn {
   submitError: string | null;
   secondsLeft: number;
   handleEmailChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleEmailBlur: () => void;
   handleSendCode: () => Promise<void>;
   handleCodeChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handlePasswordChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -93,6 +94,13 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
       setEmailError(t("pages.registrationPage.validation.invalidEmail"));
     } else {
       setEmailError(null);
+    }
+  };
+
+  const handleEmailBlur = () => {
+    const trimmed = email.trim();
+    if (trimmed !== email) {
+      setEmail(trimmed);
     }
   };
 
@@ -156,13 +164,18 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
     setSubmitLoading(true);
     setSubmitError(null);
 
+    const trimmedEmail = email.trim();
+    if (trimmedEmail !== email) {
+      setEmail(trimmedEmail);
+    }
+
     try {
       if (FormMode.PASSWORD_RESET === mode) {
-        await doResetPassword(email, password, confirmPassword, confirmationCode);
+        await doResetPassword(trimmedEmail, password, confirmPassword, confirmationCode);
         notifier.success(t("pages.resetPasswordPage.notifications.submitSuccess"));
         navigate("/login", { replace: true });
       } else {
-        await doRegister(email, password, confirmPassword, confirmationCode);
+        await doRegister(trimmedEmail, password, confirmPassword, confirmationCode);
         notifier.success(t("pages.registrationPage.notifications.submitSuccess"));
         navigate("/", { replace: true });
       }
@@ -200,6 +213,7 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
     submitError,
     secondsLeft,
     handleEmailChange,
+    handleEmailBlur,
     handleSendCode,
     handleCodeChange,
     handlePasswordChange,

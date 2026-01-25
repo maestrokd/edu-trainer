@@ -47,6 +47,7 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
     submitError,
     secondsLeft,
     handleEmailChange,
+    handleEmailBlur,
     handleSendCode,
     handleCodeChange,
     handlePasswordChange,
@@ -87,6 +88,7 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
                 required
                 value={email}
                 onChange={handleEmailChange}
+                onBlur={handleEmailBlur}
                 disabled={sendCodeLoading || submitLoading}
                 autoFocus
               />
