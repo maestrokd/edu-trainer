@@ -28,7 +28,32 @@
     "about": "Про застосунок",
     "continue": "Продовжити гру",
     "continueEmpty": "Ваші нещодавні ігри зʼявляться тут.",
-    "futureSectionsHint": "Обране та нещодавні зʼявляться тут незабаром."
+    "futureSectionsHint": "Обране та нещодавні зʼявляться тут незабаром.",
+    "user": {
+      "upgrade": "Покращити до Pro",
+      "subscriptions": "Підписки",
+      "account": "Обліковий запис",
+      "settings": "Налаштування",
+      "billing": "Оплата",
+      "notifications": "Сповіщення",
+      "profiles": "Профілі",
+      "logout": "Вийти"
+    }
+  },
+  "common": {
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "save": "Зберегти",
+    "saving": "Збереження...",
+    "cancel": "Скасувати",
+    "list": {
+      "actions": "Дії",
+      "input": {
+        "keywordSearch": {
+          "placeholder": "Пошук..."
+        }
+      }
+    }
   },
   "games": {
     "multiplication2": {
@@ -204,8 +229,15 @@
         "hundreds": "сотні",
         "thousands": "тисячі"
       },
-      "lower": { "ones": "одиниці", "tens": "десятки", "hundreds": "сотні" },
-      "dir": { "up": "вгору", "down": "вниз" }
+      "lower": {
+        "ones": "одиниці",
+        "tens": "десятки",
+        "hundreds": "сотні"
+      },
+      "dir": {
+        "up": "вгору",
+        "down": "вниз"
+      }
     },
     "input": {
       "placeholder": "ваша відповідь",
@@ -445,6 +477,59 @@
     }
   },
   "pages": {
+    "secondaryProfiles": {
+      "title": "Другорядні профілі",
+      "createButton": {
+        "tooltip": "Створити профіль"
+      },
+      "loadError": "Не вдалося завантажити профілі.",
+      "empty": "Другорядних профілів не знайдено.",
+      "confirmDelete": "Ви впевнені, що хочете видалити цей профіль?",
+      "columns": {
+        "name": "Ім'я",
+        "username": "Нікнейм",
+        "locale": "Мова",
+        "ownership": "Власність"
+      },
+      "row": {
+        "ownership": {
+          "secondary": "Другорядний"
+        }
+      },
+      "notifications": {
+        "deleteSuccess": "Профіль успішно видалено",
+        "deleteError": "Не вдалося видалити профіль"
+      }
+    },
+    "profileForm": {
+      "createTitle": "Створити профіль",
+      "editTitle": "Редагувати профіль",
+      "username": "Нікнейм",
+      "firstName": "Ім'я",
+      "lastName": "Прізвище",
+      "locale": "Мова",
+      "password": "Пароль",
+      "newPassword": "Новий пароль (необов'язково)",
+      "showPasswordLabel": "Показати пароль",
+      "localePlaceholder": "Оберіть мову",
+      "locales": {
+        "en": "Англійська (США)",
+        "uk": "Українська",
+        "ru": "Російська"
+      },
+      "validation": {
+        "invalidUsername": "Нікнейм може містити лише літери, цифри, '-', '_', '.'."
+      }
+    },
+    "createProfile": {
+      "success": "Профіль успішно створено",
+      "error": "Не вдалося створити профіль"
+    },
+    "editProfile": {
+      "success": "Профіль успішно оновлено",
+      "error": "Не вдалося оновити профіль",
+      "notFound": "Профіль не знайдено"
+    },
     "settings": {
       "title": "Налаштування",
       "telegramLanguage": {
@@ -464,21 +549,22 @@
     },
     "loginPage": {
       "titlePrompt": "Вхід до акаунту",
-      "email": {
-        "label": "Email",
-        "placeholder": "Введіть вашу електронну пошту"
+      "identifier": {
+        "label": "Email або Ім'я користувача",
+        "placeholder": "Введіть ваш email або ім'я користувача"
       },
       "password": {
         "label": "Пароль",
         "placeholder": "Введіть ваш пароль",
-        "forgotPasswordLinkText": "Забули пароль?"
+        "forgotPasswordLinkText": "Забули пароль?",
+        "showPasswordLabel": "Показати пароль"
       },
       "submitButton": "Увійти",
       "submitButtonLoading": "Вхід до облікового запису в процесі...",
       "registrationPrompt": "Не маєте облікового запису?",
       "registrationLinkText": "Зареєструватися",
       "notifications": {
-        "submitError": "Ми не можемо знайти цей емейл або пароль. Спробуйте ще раз."
+        "submitError": "Ми не можемо знайти цей емейл, ім'я користувача або пароль. Спробуйте ще раз."
       }
     },
     "registrationPage": {
@@ -496,7 +582,8 @@
       },
       "password": {
         "label": "Пароль",
-        "placeholder": "Введіть ваш пароль"
+        "placeholder": "Введіть ваш пароль",
+        "showPasswordLabel": "Показати пароль"
       },
       "confirmPassword": {
         "label": "Підтвердьте пароль",
@@ -531,7 +618,8 @@
       },
       "password": {
         "label": "Пароль",
-        "placeholder": "Введіть ваш пароль"
+        "placeholder": "Введіть ваш пароль",
+        "showPasswordLabel": "Показати пароль"
       },
       "confirmPassword": {
         "label": "Підтвердьте пароль",
@@ -604,15 +692,15 @@
       "INVALID_CREDENTIALS": "Ми не можемо знайти цей емейл або пароль. Спробуйте ще раз.",
       "INVALID_VERIFICATION_CODE": "Невірний код перевірки. Будь ласка, спробуйте ще раз.",
       "PROFILE_NOT_FOUND": "Ми не можемо знайти цей аккаунт.",
-      "EMAIL_ALREADY_EXISTS": "Email вже існує.",
+      "EMAIL_ALREADY_EXISTS": "Email вже зареєстровано.",
+      "USERNAME_ALREADY_EXISTS": "Username вже зареєстровано.",
+      "MAX_SECONDARY_PROFILES_REACHED": "Ліміт додаткових профілів досягнуто.",
+      "PROFILE_OWNERSHIP_VIOLATION": "Нарушение владения профилем.",
       "RATE_LIMIT_EXCEEDED": "Забагато спроб. Спробуйте пізніше.",
       "USER_BLOCKED": "Користувача заблоковано.",
       "AUTHENTICATION_FAILED": "Помилка автентифікації.",
       "TOKEN_NOT_VALID": "Недійсний токен.",
       "MISSING_COOKIE": "Недійсний або відсутній cookie.",
-      "SPREADSHEET_ID_EXISTS": "ID Google таблиці вже зареєстровано.",
-      "SPREADSHEET_NAME_EXISTS": "Назва профілю таблиці вже використовується.",
-      "SPREADSHEET_ACCESS_DENIED": "Доступ до Google таблиці не надано.",
       "INVALID_PROMO_CODE": "Невірний, використаний або застарілий промокод.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активний період продовження підписки."
     }

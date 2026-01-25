@@ -23,3 +23,13 @@ export const useLoginWithTelegram = async (initData: string): Promise<void> => {
   });
   localStorage.setItem("token", accessToken);
 };
+
+export const logout = async (): Promise<void> => {
+  await post("/auth/logout");
+};
+
+export const logoutTelegram = async (initData: string): Promise<void> => {
+  await post("/auth/logout/telegram", {
+    initData,
+  });
+};
