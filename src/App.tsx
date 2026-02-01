@@ -1,5 +1,4 @@
 import { Outlet, Route, Routes } from "react-router";
-import MenuPage from "./pages/Menu.tsx";
 import RabbitJumpX9 from "./pages/jumping-rabbit/JumpingRabbit.tsx";
 import MultiplicationTrainer from "@/pages/multiplication-trainer/MultiplicationTrainer.tsx";
 import CompareNumbersGame from "@/pages/compare-numbers/CompareNumbersGame.tsx";
@@ -15,7 +14,7 @@ import WebLayout from "./layout/WebLayout.tsx";
 import { Navigate } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage.tsx";
 import SubscriptionPage from "@/pages/subscriptions/SubscriptionPage.tsx";
-import PrivateMenuPage from "@/pages/PrivateMenuPage";
+import MenuPage from "@/pages/MenuPage.tsx";
 import AuthorityRoute from "@/components/AuthorityRoute.tsx";
 import SecondaryProfilesPage from "@/pages/profiles/SecondaryProfilesPage.tsx";
 import CreateSecondaryProfilePage from "@/pages/profiles/CreateSecondaryProfilePage.tsx";
@@ -56,15 +55,16 @@ export default function App() {
           </DefaultLayout>
         }
       />
-      <Route element={<PrivateRoute />}>
-        <Route
-          element={
-            <WebLayout>
-              <Outlet />
-            </WebLayout>
-          }
-        >
-          <Route path="private-menu" element={<PrivateMenuPage />} />
+      <Route
+        element={
+          <WebLayout>
+            <Outlet />
+          </WebLayout>
+        }
+      >
+        <Route path="/" element={<MenuPage />} />
+
+        <Route element={<PrivateRoute />}>
           <Route element={<AuthorityRoute authority="MANAGE_SUBSCRIPTIONS" />}>
             <Route path="subscriptions" element={<SubscriptionPage />} />
           </Route>
@@ -76,10 +76,9 @@ export default function App() {
             <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
           </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
+
       <Route element={<CommonLayout />}>
-        <Route path="/" element={<MenuPage />} />
         <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
         <Route path="/multiplication-trainer" element={<MultiplicationTrainer />} />
         <Route path="/multiplication-rabbit" element={<RabbitJumpX9 />} />
@@ -87,6 +86,7 @@ export default function App() {
         <Route path="/rounding-trainer" element={<RoundingGame />} />
         <Route path="/add-sub-trainer" element={<AddSubTrainer />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

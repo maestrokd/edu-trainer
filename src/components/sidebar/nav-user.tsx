@@ -1,6 +1,15 @@
 "use client";
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Settings2, Sparkles, Users } from "lucide-react";
+import {
+  /*BadgeCheck,
+  Bell,*/
+  ChevronsUpDown,
+  CreditCard,
+  LogOut,
+  Settings2,
+  /*Sparkles,*/
+  Users,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
@@ -75,10 +84,10 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              {/*<DropdownMenuItem>
                 <Sparkles />
                 {t("menu.user.upgrade", "Upgrade to Pro")}
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
               {canManageSubscriptions && (
                 <DropdownMenuItem onClick={() => navigate("/subscriptions")}>
                   <CreditCard />
@@ -88,24 +97,24 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              {/*<DropdownMenuItem>
                 <BadgeCheck />
                 {t("menu.user.account", "Account")}
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
               {canManageProfiles && (
                 <DropdownMenuItem onClick={() => navigate("/settings")}>
                   <Settings2 />
                   {t("menu.user.settings", "Settings")}
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem>
+              {/*<DropdownMenuItem>
                 <CreditCard />
                 {t("menu.user.billing", "Billing")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
                 {t("menu.user.notifications", "Notifications")}
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
               {canManageProfiles && (
                 <DropdownMenuItem onClick={() => navigate("/settings/profiles")}>
                   <Users />
