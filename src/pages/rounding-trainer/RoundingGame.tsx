@@ -23,7 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
+import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
 
 // ----------------------------------
@@ -632,7 +632,7 @@ export default function RoundingGame() {
                     <span className="w-full">{RT.labels.menu}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle />
+                    <ModeToggle />
                     <LanguageSelector mode={LanguageSelectorMode.ICON} />
                   </div>
                 </div>
