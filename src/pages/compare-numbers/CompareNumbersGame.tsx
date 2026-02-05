@@ -24,7 +24,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Settings } from "lucide-react";
 
-import ThemeToggle from "@/components/menu/ThemeToggle";
+import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector";
 
 import { cn } from "@/lib/utils";
@@ -607,7 +607,7 @@ export default function CompareNumbersGame() {
                     <span className="w-full">{tr("menuLabel")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle />
+                    <ModeToggle />
                     <LanguageSelector mode={LanguageSelectorMode.ICON} />
                   </div>
                 </div>

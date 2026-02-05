@@ -7,6 +7,7 @@
     }
   },
   "menu": {
+    "home": "Home",
     "mainMenuLabel": "Main Menu",
     "title": "Edu Trainer",
     "search": "Search",
@@ -28,6 +29,10 @@
     "about": "About",
     "continue": "Continue playing",
     "continueEmpty": "Your recent games will appear here.",
+    "empty": {
+      "title": "No games found",
+      "desc": "Try selecting another category or adjusting your search."
+    },
     "futureSectionsHint": "Favorites and recent will appear here soon.",
     "user": {
       "upgrade": "Upgrade to Pro",
@@ -37,7 +42,9 @@
       "billing": "Billing",
       "notifications": "Notifications",
       "profiles": "Profiles",
-      "logout": "Log out"
+      "logout": "Log out",
+      "login": "Log in",
+      "loginDesc": "Access your account"
     }
   },
   "common": {
@@ -45,6 +52,7 @@
     "delete": "Delete",
     "save": "Save",
     "saving": "Saving...",
+    "loading": "Loading...",
     "cancel": "Cancel",
     "list": {
       "actions": "Actions",
@@ -682,6 +690,9 @@
           "error": "Promo code invalid or expired."
         }
       }
+    },
+    "menu": {
+      "loadError": "Failed to load menu items. Please try again later."
     }
   },
   "errors": {
