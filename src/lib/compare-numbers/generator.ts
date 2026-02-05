@@ -1,10 +1,6 @@
 export type CompareRelation = ">" | "<" | "=";
 
-export type CompareNumberTypeKey =
-  | "nonNegativeInt"
-  | "signedInt"
-  | "decimal"
-  | "fraction";
+export type CompareNumberTypeKey = "nonNegativeInt" | "signedInt" | "decimal" | "fraction";
 
 export interface GapSettings {
   min: number;
@@ -106,49 +102,29 @@ export interface PreparedGenerator {
 
 const EPS = 1e-9;
 
-function clampNumber(
-  value: number,
-  minValue: number,
-  maxValue: number,
-): number {
+function clampNumber(value: number, minValue: number, maxValue: number): number {
   if (!Number.isFinite(value)) return minValue;
   return Math.min(Math.max(value, minValue), maxValue);
 }
 
 function sanitizeGap(gap: GapSettings): GapSettings {
   const min = Math.max(0, Number.isFinite(gap.min) ? gap.min : 0);
-  const maxValue =
-    gap.max == null || !Number.isFinite(gap.max)
-      ? null
-      : Math.max(min, gap.max);
+  const maxValue = gap.max == null || !Number.isFinite(gap.max) ? null : Math.max(min, gap.max);
   return { min, max: maxValue };
 }
 
-function sanitizeRange(
-  minInput: number,
-  maxInput: number,
-  lowerBound?: number,
-): { min: number; max: number } {
+function sanitizeRange(minInput: number, maxInput: number, lowerBound?: number): { min: number; max: number } {
   const min = Number.isFinite(minInput) ? minInput : 0;
   const max = Number.isFinite(maxInput) ? maxInput : min;
-  const normalizedMin =
-    lowerBound != null
-      ? Math.max(lowerBound, Math.min(min, max))
-      : Math.min(min, max);
+  const normalizedMin = lowerBound != null ? Math.max(lowerBound, Math.min(min, max)) : Math.min(min, max);
   const normalizedMax = Math.max(normalizedMin, max);
   return { min: normalizedMin, max: normalizedMax };
 }
 
-function validNonNegativeConfig(
-  config: IntegerTypeConfig,
-): PreparedInteger | null {
+function validNonNegativeConfig(config: IntegerTypeConfig): PreparedInteger | null {
   if (!config.enabled) return null;
   const gap = sanitizeGap(config.gap);
-  const { min, max } = sanitizeRange(
-    Math.max(0, config.min),
-    Math.max(0, config.max),
-    0,
-  );
+  const { min, max } = sanitizeRange(Math.max(0, config.min), Math.max(0, config.max), 0);
   if (min > max) return null;
   return {
     key: "nonNegativeInt",
@@ -235,12 +211,12 @@ function buildFraction(config: FractionTypeConfig): PreparedFraction | null {
       ({ min: numeratorMin, max: numeratorMax } = sanitizeRange(
         Math.max(1, config.numeratorMin),
         Math.max(1, config.numeratorMax),
-        1,
+        1
       ));
       ({ min: denominatorMin, max: denominatorMax } = sanitizeRange(
         Math.max(1, config.denominatorMin),
         Math.max(1, config.denominatorMax),
-        1,
+        1
       ));
       break;
   }
@@ -293,10 +269,7 @@ function randomInt(min: number, max: number): number {
 
 function pickType(types: PreparedType[]): PreparedType | null {
   if (types.length === 0) return null;
-  const positiveWeightTotal = types.reduce(
-    (acc, type) => acc + Math.max(0, type.weight),
-    0,
-  );
+  const positiveWeightTotal = types.reduce((acc, type) => acc + Math.max(0, type.weight), 0);
   const total = positiveWeightTotal > 0 ? positiveWeightTotal : types.length;
   const target = Math.random() * total;
   if (positiveWeightTotal <= 0) {
@@ -324,8 +297,7 @@ function generateIntegerValue(type: PreparedInteger): GeneratedValue {
 
 function generateDecimalValue(type: PreparedDecimal): GeneratedValue | null {
   if (type.precisions.length === 0) return null;
-  const precision =
-    type.precisions[Math.floor(Math.random() * type.precisions.length)];
+  const precision = type.precisions[Math.floor(Math.random() * type.precisions.length)];
   const factor = 10 ** precision;
   const minInt = Math.ceil(type.min * factor - EPS);
   const maxInt = Math.floor(type.max * factor + EPS);
@@ -347,14 +319,9 @@ function intersection<T>(left: readonly T[], right: readonly T[]): T[] {
   return left.filter((item) => rightSet.has(item));
 }
 
-function pickPrecision(
-  type: PreparedDecimal,
-  preferred?: readonly number[],
-): number {
+function pickPrecision(type: PreparedDecimal, preferred?: readonly number[]): number {
   const source =
-    preferred && preferred.length > 0
-      ? preferred.filter((value) => type.precisions.includes(value))
-      : null;
+    preferred && preferred.length > 0 ? preferred.filter((value) => type.precisions.includes(value)) : null;
   const pool = source && source.length > 0 ? source : type.precisions;
   const index = Math.floor(Math.random() * pool.length);
   return pool[index];
@@ -366,12 +333,7 @@ function integerPartRange(type: PreparedDecimal): { min: number; max: number } {
   return { min: Math.trunc(minValue), max: Math.trunc(maxValue) };
 }
 
-function selectBiasedInt(
-  start: number,
-  end: number,
-  bias: DecimalBias,
-  anchor?: number,
-): number {
+function selectBiasedInt(start: number, end: number, bias: DecimalBias, anchor?: number): number {
   if (start >= end) {
     return start;
   }
@@ -404,11 +366,10 @@ function selectBiasedInt(
 function decimalBoundsForInteger(
   type: PreparedDecimal,
   targetInt: number,
-  precision: number,
+  precision: number
 ): { start: number; end: number } | null {
   const factor = 10 ** precision;
-  let start =
-    targetInt >= 0 ? targetInt * factor : (targetInt - 1) * factor + 1;
+  let start = targetInt >= 0 ? targetInt * factor : (targetInt - 1) * factor + 1;
   let end = targetInt >= 0 ? (targetInt + 1) * factor - 1 : targetInt * factor;
   const minInt = Math.ceil(type.min * factor - EPS);
   const maxInt = Math.floor(type.max * factor + EPS);
@@ -425,22 +386,16 @@ function generateDecimalWithIntegerPart(
   targetInt: number,
   precision: number,
   bias: DecimalBias,
-  anchorValue?: number,
+  anchorValue?: number
 ): GeneratedValue | null {
   const bounds = decimalBoundsForInteger(type, targetInt, precision);
   if (!bounds) {
     return null;
   }
   const factor = 10 ** precision;
-  const anchorInt =
-    anchorValue != null ? Math.round(anchorValue * factor) : undefined;
+  const anchorInt = anchorValue != null ? Math.round(anchorValue * factor) : undefined;
   for (let attempt = 0; attempt < 25; attempt++) {
-    const candidateInt = selectBiasedInt(
-      bounds.start,
-      bounds.end,
-      bias,
-      anchorInt,
-    );
+    const candidateInt = selectBiasedInt(bounds.start, bounds.end, bias, anchorInt);
     const value = candidateInt / factor;
     if (Math.trunc(value) !== targetInt) {
       continue;
@@ -457,7 +412,7 @@ function generateDecimalWithIntegerPart(
 
 function tryGenerateSameIntegerDecimals(
   leftType: PreparedDecimal,
-  rightType: PreparedDecimal,
+  rightType: PreparedDecimal
 ): { left: GeneratedValue; right: GeneratedValue } | null {
   const leftRange = integerPartRange(leftType);
   const rightRange = integerPartRange(rightType);
@@ -466,40 +421,20 @@ function tryGenerateSameIntegerDecimals(
   if (sharedMin > sharedMax) {
     return null;
   }
-  const sharedPrecisions = intersection(
-    leftType.precisions,
-    rightType.precisions,
-  );
+  const sharedPrecisions = intersection(leftType.precisions, rightType.precisions);
   const targetInt = randomInt(sharedMin, sharedMax);
   const leftPrecision = pickPrecision(leftType, sharedPrecisions);
   const rightPrecision = pickPrecision(rightType, sharedPrecisions);
-  const leftValue = generateDecimalWithIntegerPart(
-    leftType,
-    targetInt,
-    leftPrecision,
-    "random",
-  );
+  const leftValue = generateDecimalWithIntegerPart(leftType, targetInt, leftPrecision, "random");
   if (!leftValue) {
     return null;
   }
-  let rightValue = generateDecimalWithIntegerPart(
-    rightType,
-    targetInt,
-    rightPrecision,
-    "near",
-    leftValue.value,
-  );
+  let rightValue = generateDecimalWithIntegerPart(rightType, targetInt, rightPrecision, "near", leftValue.value);
   if (!rightValue) {
     return null;
   }
   if (Math.abs(leftValue.value - rightValue.value) < EPS) {
-    rightValue = generateDecimalWithIntegerPart(
-      rightType,
-      targetInt,
-      rightPrecision,
-      "high",
-      leftValue.value,
-    );
+    rightValue = generateDecimalWithIntegerPart(rightType, targetInt, rightPrecision, "high", leftValue.value);
     if (!rightValue || Math.abs(leftValue.value - rightValue.value) < EPS) {
       return null;
     }
@@ -509,7 +444,7 @@ function tryGenerateSameIntegerDecimals(
 
 function tryGenerateNeighborIntegerDecimals(
   leftType: PreparedDecimal,
-  rightType: PreparedDecimal,
+  rightType: PreparedDecimal
 ): { left: GeneratedValue; right: GeneratedValue } | null {
   const leftRange = integerPartRange(leftType);
   const rightRange = integerPartRange(rightType);
@@ -533,18 +468,8 @@ function tryGenerateNeighborIntegerDecimals(
     const rightPrecision = pickPrecision(rightType);
     const leftBias: DecimalBias = rightInt > leftInt ? "high" : "low";
     const rightBias: DecimalBias = rightInt > leftInt ? "low" : "high";
-    const leftValue = generateDecimalWithIntegerPart(
-      leftType,
-      leftInt,
-      leftPrecision,
-      leftBias,
-    );
-    const rightValue = generateDecimalWithIntegerPart(
-      rightType,
-      rightInt,
-      rightPrecision,
-      rightBias,
-    );
+    const leftValue = generateDecimalWithIntegerPart(leftType, leftInt, leftPrecision, leftBias);
+    const rightValue = generateDecimalWithIntegerPart(rightType, rightInt, rightPrecision, rightBias);
     if (!leftValue || !rightValue) {
       continue;
     }
@@ -558,7 +483,7 @@ function tryGenerateNeighborIntegerDecimals(
 
 function generateDecimalPair(
   leftType: PreparedDecimal,
-  rightType: PreparedDecimal,
+  rightType: PreparedDecimal
 ): { left: GeneratedValue; right: GeneratedValue } | null {
   for (let attempt = 0; attempt < 120; attempt++) {
     const preferSameInteger = Math.random() < 0.75;
@@ -653,13 +578,10 @@ export function canGenerate(prepared: PreparedGenerator): boolean {
   return prepared.types.length > 0;
 }
 
-export function generateExercise(
-  prepared: PreparedGenerator,
-): GeneratedExercise | null {
+export function generateExercise(prepared: PreparedGenerator): GeneratedExercise | null {
   if (prepared.types.length === 0) return null;
   const equalityCandidates = prepared.types.filter((type) => type.gap.min <= 0);
-  const canForceEquality =
-    equalityCandidates.length > 0 && prepared.equalRatio > 0;
+  const canForceEquality = equalityCandidates.length > 0 && prepared.equalRatio > 0;
   const wantsEquality = canForceEquality && Math.random() < prepared.equalRatio;
 
   const maxAttempts = 300;

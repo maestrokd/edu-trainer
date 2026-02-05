@@ -7,6 +7,7 @@
     }
   },
   "menu": {
+    "home": "Главная",
     "mainMenuLabel": "Главное меню",
     "title": "Edu Тренер",
     "search": "Поиск",
@@ -28,7 +29,39 @@
     "about": "О приложении",
     "continue": "Продолжить игру",
     "continueEmpty": "Ваши недавние игры появятся здесь.",
-    "futureSectionsHint": "Избранное и недавние появятся здесь скоро."
+    "empty": {
+      "title": "Игры не найдены",
+      "desc": "Попробуйте выбрать другую категорию или изменить запрос."
+    },
+    "futureSectionsHint": "Избранное и недавние появятся здесь скоро.",
+    "user": {
+      "upgrade": "Улучшить до Pro",
+      "subscriptions": "Подписки",
+      "account": "Аккаунт",
+      "settings": "Настройки",
+      "billing": "Оплата",
+      "notifications": "Уведомления",
+      "profiles": "Профили",
+      "logout": "Выйти",
+      "login": "Войти",
+      "loginDesc": "Доступ к вашему аккаунту"
+    }
+  },
+  "common": {
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "loading": "Загрузка...",
+    "cancel": "Отмена",
+    "list": {
+      "actions": "Действия",
+      "input": {
+        "keywordSearch": {
+          "placeholder": "Поиск..."
+        }
+      }
+    }
   },
   "games": {
     "multiplication2": {
@@ -204,8 +237,15 @@
         "hundreds": "сотни",
         "thousands": "тысячи"
       },
-      "lower": { "ones": "единицы", "tens": "десятки", "hundreds": "сотни" },
-      "dir": { "up": "вверх", "down": "вниз" }
+      "lower": {
+        "ones": "единицы",
+        "tens": "десятки",
+        "hundreds": "сотни"
+      },
+      "dir": {
+        "up": "вверх",
+        "down": "вниз"
+      }
     },
     "input": {
       "placeholder": "ваш ответ",
@@ -445,6 +485,59 @@
     }
   },
   "pages": {
+    "secondaryProfiles": {
+      "title": "Второстепенные профили",
+      "createButton": {
+        "tooltip": "Создать профиль"
+      },
+      "loadError": "Не удалось загрузить профили.",
+      "empty": "Второстепенные профили не найдены.",
+      "confirmDelete": "Вы уверены, что хотите удалить этот профиль?",
+      "columns": {
+        "name": "Имя",
+        "username": "Никнейм",
+        "locale": "Язык",
+        "ownership": "Владение"
+      },
+      "row": {
+        "ownership": {
+          "secondary": "Второстепенный"
+        }
+      },
+      "notifications": {
+        "deleteSuccess": "Профиль успешно удален",
+        "deleteError": "Не удалось удалить профиль"
+      }
+    },
+    "profileForm": {
+      "createTitle": "Создать профиль",
+      "editTitle": "Редактировать профиль",
+      "username": "Никнейм",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "locale": "Язык",
+      "password": "Пароль",
+      "newPassword": "Новый пароль (необязательно)",
+      "showPasswordLabel": "Показать пароль",
+      "localePlaceholder": "Выберите язык",
+      "locales": {
+        "en": "Английский (США)",
+        "uk": "Украинский",
+        "ru": "Русский"
+      },
+      "validation": {
+        "invalidUsername": "Никнейм может содержать только буквы, цифры, '-', '_', '.'."
+      }
+    },
+    "createProfile": {
+      "success": "Профиль успешно создан",
+      "error": "Не удалось создать профиль"
+    },
+    "editProfile": {
+      "success": "Профиль успешно обновлен",
+      "error": "Не удалось обновить профиль",
+      "notFound": "Профиль не найден"
+    },
     "settings": {
       "title": "Настройки",
       "telegramLanguage": {
@@ -464,21 +557,22 @@
     },
     "loginPage": {
       "titlePrompt": "Войдите в свой аккаунт",
-      "email": {
-        "label": "Email",
-        "placeholder": "Введите вашу электронную почту"
+      "identifier": {
+        "label": "Email или Имя пользователя",
+        "placeholder": "Введите ваш email или имя пользователя"
       },
       "password": {
         "label": "Пароль",
         "placeholder": "Введите ваш пароль",
-        "forgotPasswordLinkText": "Забыли пароль?"
+        "forgotPasswordLinkText": "Забыли пароль?",
+        "showPasswordLabel": "Показать пароль"
       },
       "submitButton": "Войти",
       "submitButtonLoading": "Выполняется вход...",
       "registrationPrompt": "Нет аккаунта?",
       "registrationLinkText": "Зарегистрироваться",
       "notifications": {
-        "submitError": "Не удаётся найти этот email или пароль. Попробуйте снова."
+        "submitError": "Мы не можем найти этот email, имя пользователя или пароль. Попробуйте снова."
       }
     },
     "registrationPage": {
@@ -496,7 +590,8 @@
       },
       "password": {
         "label": "Пароль",
-        "placeholder": "Введите ваш пароль"
+        "placeholder": "Введите ваш пароль",
+        "showPasswordLabel": "Показать пароль"
       },
       "confirmPassword": {
         "label": "Подтвердите пароль",
@@ -531,7 +626,8 @@
       },
       "password": {
         "label": "Пароль",
-        "placeholder": "Введите ваш пароль"
+        "placeholder": "Введите ваш пароль",
+        "showPasswordLabel": "Показать пароль"
       },
       "confirmPassword": {
         "label": "Подтвердите пароль",
@@ -594,6 +690,9 @@
           "error": "Неверный, использованный или устаревший промокод."
         }
       }
+    },
+    "menu": {
+      "loadError": "Не удалось загрузить пункты меню. Пожалуйста, попробуйте позже."
     }
   },
   "errors": {
@@ -605,14 +704,14 @@
       "INVALID_VERIFICATION_CODE": "Неверный код подтверждения. Пожалуйста, попробуйте ещё раз.",
       "PROFILE_NOT_FOUND": "Не удаётся найти этот аккаунт.",
       "EMAIL_ALREADY_EXISTS": "Email уже зарегистрирован.",
+      "USERNAME_ALREADY_EXISTS": "Username уже зарегистрирован.",
+      "MAX_SECONDARY_PROFILES_REACHED": "Лимит дополнительных профилей достигнут.",
+      "PROFILE_OWNERSHIP_VIOLATION": "Нарушение владения профилем.",
       "RATE_LIMIT_EXCEEDED": "Слишком много попыток. Попробуйте позже.",
       "USER_BLOCKED": "Пользователь заблокирован.",
       "AUTHENTICATION_FAILED": "Ошибка аутентификации.",
       "TOKEN_NOT_VALID": "Недействительный токен.",
       "MISSING_COOKIE": "Недействительный или отсутствующий файл cookie.",
-      "SPREADSHEET_ID_EXISTS": "ID Google таблицы уже зарегистрирован.",
-      "SPREADSHEET_NAME_EXISTS": "Название профиля таблицы уже используется.",
-      "SPREADSHEET_ACCESS_DENIED": "Доступ к Google таблице не предоставлен.",
       "INVALID_PROMO_CODE": "Неверный, использованный или устаревший промокод.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активный период продления подписки."
     }

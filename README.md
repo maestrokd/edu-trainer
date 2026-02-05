@@ -2,10 +2,64 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
+
+- Node.js (Latest LTS recommended)
+- npm (comes with Node.js)
+
+### Installation
+
+```bash
+npm install
+```
+
+### Local Development
+
+To start the development server:
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5173` (or another port if 5173 is busy).
+
+### Building for Production
+
+To build the application for production:
+
+```bash
+npm run build
+```
+
+To preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## Code Style & Formatting
+
+This project uses **Prettier** for code formatting and **ESLint** for code quality.
+
+### Formatting
+
+To automatically format the entire project:
+
+```bash
+npm run format
+```
+
+It is recommended to install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extension for VS Code and enable "Format On Save" in your editor settings.
+
+### Linting
+
+To check for code quality issues:
+
+```bash
+npm run lint
+```
 
 ## Expanding the ESLint configuration
 

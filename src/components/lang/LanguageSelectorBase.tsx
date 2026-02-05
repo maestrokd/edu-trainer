@@ -1,13 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select.tsx";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 
 const SUPPORTED_LANGUAGES: readonly string[] = ["en", "uk", "ru"];
 
@@ -19,10 +12,7 @@ const LanguageSelectorBase: React.FC = () => {
   };
 
   return (
-    <Select
-      defaultValue={i18n.language}
-      onValueChange={(v) => changeLanguage(v)}
-    >
+    <Select defaultValue={i18n.resolvedLanguage || i18n.language} onValueChange={(v) => changeLanguage(v)}>
       <SelectTrigger>
         <SelectValue defaultValue={i18n.language} placeholder="select lang" />
       </SelectTrigger>

@@ -7,23 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
@@ -34,26 +21,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Settings } from "lucide-react";
 
-import ThemeToggle from "@/components/menu/ThemeToggle";
-import LanguageSelector, {
-  LanguageSelectorMode,
-} from "@/components/lang/LanguageSelector";
+import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
+import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector";
 
 import { cn } from "@/lib/utils";
 
-import {
-  canGenerate,
-  generateExercise,
-  prepareGenerator,
-} from "@/lib/compare-numbers/generator";
+import { canGenerate, generateExercise, prepareGenerator } from "@/lib/compare-numbers/generator";
 import type {
   CompareNumberTypeKey,
   CompareRelation,
@@ -115,12 +91,10 @@ const PRECISION_OPTIONS = [0, 1, 2, 3, 4];
 type NotificationVariant = "success" | "error" | "info" | "warning" | "muted";
 
 const NOTIFICATION_STYLES: Record<NotificationVariant, string> = {
-  success:
-    "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
+  success: "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
   error: "border-destructive/40 bg-destructive/10 text-destructive",
   info: "border-primary/30 bg-primary/10 text-primary",
-  warning:
-    "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200",
+  warning: "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200",
   muted: "border-muted-foreground/30 bg-muted/50 text-muted-foreground",
 };
 
@@ -131,24 +105,17 @@ interface NotificationBannerProps extends Omit<AlertProps, "variant"> {
   children: React.ReactNode;
 }
 
-function NotificationBanner({
-  variant = "info",
-  children,
-  className,
-  ...alertProps
-}: NotificationBannerProps) {
+function NotificationBanner({ variant = "info", children, className, ...alertProps }: NotificationBannerProps) {
   return (
     <Alert
       {...alertProps}
       className={cn(
         "flex flex-col items-center justify-center px-4 py-3 text-center",
         NOTIFICATION_STYLES[variant],
-        className,
+        className
       )}
     >
-      <AlertDescription className="text-sm font-medium">
-        {children}
-      </AlertDescription>
+      <AlertDescription className="text-sm font-medium">{children}</AlertDescription>
     </Alert>
   );
 }
@@ -160,22 +127,17 @@ interface NotificationPayload {
 
 export default function CompareNumbersGame() {
   const { t } = useTranslation();
-  const tr = React.useCallback(
-    (key: string, options?: Record<string, unknown>) =>
-      t(`cmpNmbrGm.${key}`, options),
-    [t],
-  );
+  const tr = React.useCallback((key: string, options?: Record<string, unknown>) => t(`cmpNmbrGm.${key}`, options), [t]);
 
   const [screen, setScreen] = React.useState<Screen>("setup");
 
-  const [nonNegativeConfig, setNonNegativeConfig] =
-    React.useState<IntegerState>({
-      enabled: true,
-      weight: 25,
-      min: 0,
-      max: 99,
-      gap: { min: 0, max: null },
-    });
+  const [nonNegativeConfig, setNonNegativeConfig] = React.useState<IntegerState>({
+    enabled: true,
+    weight: 25,
+    min: 0,
+    max: 99,
+    gap: { min: 0, max: null },
+  });
 
   const [signedConfig, setSignedConfig] = React.useState<IntegerState>({
     enabled: false,
@@ -207,9 +169,7 @@ export default function CompareNumbersGame() {
     gap: { min: 0, max: null },
   });
 
-  const [openMode, setOpenMode] = React.useState<ModeKey | undefined>(
-    undefined,
-  );
+  const [openMode, setOpenMode] = React.useState<ModeKey | undefined>(undefined);
 
   const [equalRatio, setEqualRatio] = React.useState<number>(10);
   const [timerMinutes, setTimerMinutes] = React.useState<number | null>(null);
@@ -218,31 +178,21 @@ export default function CompareNumbersGame() {
   const [enableSound, setEnableSound] = React.useState<boolean>(false);
   const [enableVibration, setEnableVibration] = React.useState<boolean>(false);
 
-  const handleAccordionChange = React.useCallback(
-    (value: string | undefined) => {
-      if (!value) {
-        setOpenMode(undefined);
-        return;
-      }
+  const handleAccordionChange = React.useCallback((value: string | undefined) => {
+    if (!value) {
+      setOpenMode(undefined);
+      return;
+    }
 
-      if (
-        value === "nonNegative" ||
-        value === "signed" ||
-        value === "decimal" ||
-        value === "fraction"
-      ) {
-        setOpenMode(value);
-      }
-    },
-    [],
-  );
+    if (value === "nonNegative" || value === "signed" || value === "decimal" || value === "fraction") {
+      setOpenMode(value);
+    }
+  }, []);
 
   const [correctCount, setCorrectCount] = React.useState<number>(0);
   const [wrongCount, setWrongCount] = React.useState<number>(0);
   const [history, setHistory] = React.useState<HistoryEntry[]>([]);
-  const [exercise, setExercise] = React.useState<GeneratedExercise | null>(
-    null,
-  );
+  const [exercise, setExercise] = React.useState<GeneratedExercise | null>(null);
   const [gameOver, setGameOver] = React.useState<boolean>(false);
   const [endReason, setEndReason] = React.useState<EndReason>(null);
   const [feedback, setFeedback] = React.useState<{
@@ -264,11 +214,7 @@ export default function CompareNumbersGame() {
 
   const triggerFeedback = React.useCallback(
     (isCorrect: boolean) => {
-      if (
-        enableVibration &&
-        typeof navigator !== "undefined" &&
-        navigator.vibrate
-      ) {
+      if (enableVibration && typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate(isCorrect ? 25 : [10, 60, 10]);
       }
       if (!enableSound) return;
@@ -294,7 +240,7 @@ export default function CompareNumbersGame() {
         console.error("Audio feedback error", error);
       }
     },
-    [enableSound, enableVibration],
+    [enableSound, enableVibration]
   );
 
   const finishSession = React.useCallback((reason: EndReason) => {
@@ -313,17 +259,10 @@ export default function CompareNumbersGame() {
         fraction: fractionConfig,
         equalRatio: equalRatioFraction,
       }),
-    [
-      nonNegativeConfig,
-      signedConfig,
-      decimalConfig,
-      fractionConfig,
-      equalRatioFraction,
-    ],
+    [nonNegativeConfig, signedConfig, decimalConfig, fractionConfig, equalRatioFraction]
   );
 
-  const exercisesLimit =
-    maxExercises !== null && maxExercises > 0 ? maxExercises : null;
+  const exercisesLimit = maxExercises !== null && maxExercises > 0 ? maxExercises : null;
 
   const handleAnswer = React.useCallback(
     (relation: CompareRelation) => {
@@ -370,15 +309,7 @@ export default function CompareNumbersGame() {
         setTaskId((id) => id + 1);
       }
     },
-    [
-      exercise,
-      gameOver,
-      history.length,
-      exercisesLimit,
-      triggerFeedback,
-      finishSession,
-      generatorPreview,
-    ],
+    [exercise, gameOver, history.length, exercisesLimit, triggerFeedback, finishSession, generatorPreview]
   );
 
   const canStart = canGenerate(generatorPreview);
@@ -397,16 +328,11 @@ export default function CompareNumbersGame() {
   }, [generatorPreview]);
 
   const totalExercises = history.length;
-  const accuracy =
-    totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+  const accuracy = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
 
-  const timerLimitMinutes =
-    timerMinutes !== null && timerMinutes > 0 ? timerMinutes : null;
+  const timerLimitMinutes = timerMinutes !== null && timerMinutes > 0 ? timerMinutes : null;
   const hasTimer = timerLimitMinutes !== null;
-  const timeLeft =
-    timerLimitMinutes !== null
-      ? Math.max(0, timerLimitMinutes * 60 - elapsedSec)
-      : null;
+  const timeLeft = timerLimitMinutes !== null ? Math.max(0, timerLimitMinutes * 60 - elapsedSec) : null;
 
   React.useEffect(() => {
     if (!timerActive) return;
@@ -436,7 +362,7 @@ export default function CompareNumbersGame() {
 
   const historyDisplay = React.useMemo(
     () => (historyOrder === "asc" ? history : [...history].reverse()),
-    [history, historyOrder],
+    [history, historyOrder]
   );
 
   const formatTime = React.useCallback((totalSec: number) => {
@@ -540,15 +466,9 @@ export default function CompareNumbersGame() {
       if (next.preset !== "custom") {
         return next;
       }
-      const numeratorMin = Math.max(
-        1,
-        Math.min(next.numeratorMin, next.numeratorMax),
-      );
+      const numeratorMin = Math.max(1, Math.min(next.numeratorMin, next.numeratorMax));
       const numeratorMax = Math.max(numeratorMin, next.numeratorMax);
-      const denominatorMin = Math.max(
-        1,
-        Math.min(next.denominatorMin, next.denominatorMax),
-      );
+      const denominatorMin = Math.max(1, Math.min(next.denominatorMin, next.denominatorMax));
       const denominatorMax = Math.max(denominatorMin, next.denominatorMax);
       return {
         ...next,
@@ -594,15 +514,7 @@ export default function CompareNumbersGame() {
       setExercise(nextExercise);
     }
     setTaskId((id) => id + 1);
-  }, [
-    canStart,
-    nonNegativeConfig,
-    signedConfig,
-    decimalConfig,
-    fractionConfig,
-    equalRatioFraction,
-    resetTimer,
-  ]);
+  }, [canStart, nonNegativeConfig, signedConfig, decimalConfig, fractionConfig, equalRatioFraction, resetTimer]);
 
   const backToSetup = React.useCallback(() => {
     setScreen("setup");
@@ -669,9 +581,7 @@ export default function CompareNumbersGame() {
       <div className="w-full flex flex-col h-full">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-xs text-muted-foreground">
-              {tr("title")}
-            </span>
+            <span className="hidden sm:inline text-xs text-muted-foreground">{tr("title")}</span>
           </div>
           <div className="flex items-center text-center">
             {screen === "play" && (
@@ -686,12 +596,7 @@ export default function CompareNumbersGame() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={tr("aria.openMenu") ?? undefined}
-                className="size-8"
-              >
+              <Button variant="ghost" size="icon" aria-label={tr("aria.openMenu") ?? undefined} className="size-8">
                 <Settings className="size-6" />
               </Button>
             </DropdownMenuTrigger>
@@ -702,7 +607,7 @@ export default function CompareNumbersGame() {
                     <span className="w-full">{tr("menuLabel")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle />
+                    <ModeToggle />
                     <LanguageSelector mode={LanguageSelectorMode.ICON} />
                   </div>
                 </div>
@@ -711,12 +616,8 @@ export default function CompareNumbersGame() {
               <DropdownMenuGroup>
                 {screen === "play" && (
                   <>
-                    <DropdownMenuItem onSelect={() => newSession()}>
-                      {tr("actions.newSession")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => backToSetup()}>
-                      {tr("actions.changeSetup")}
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => newSession()}>{tr("actions.newSession")}</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => backToSetup()}>{tr("actions.changeSetup")}</DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
@@ -731,19 +632,11 @@ export default function CompareNumbersGame() {
         {screen === "setup" ? (
           <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-6xl mx-auto w-full sm:mt-6 overflow-auto">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg sm:text-xl font-semibold">
-                {tr("setup.title")}
-              </h2>
-              {!canStart && (
-                <span className="text-sm font-medium text-destructive">
-                  {tr("errors.unavailable")}
-                </span>
-              )}
+              <h2 className="text-lg sm:text-xl font-semibold">{tr("setup.title")}</h2>
+              {!canStart && <span className="text-sm font-medium text-destructive">{tr("errors.unavailable")}</span>}
             </div>
 
-            <p className="mt-3 text-sm text-muted-foreground">
-              {tr("setup.intro")}
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">{tr("setup.intro")}</p>
 
             <Accordion
               type="single"
@@ -761,16 +654,11 @@ export default function CompareNumbersGame() {
                 onEnabledChange={(checked) => {
                   sanitizeNonNegativeConfig({ enabled: checked });
                 }}
-                showAvailabilityError={
-                  nonNegativeConfig.enabled && !typeAvailableMap.nonNegativeInt
-                }
+                showAvailabilityError={nonNegativeConfig.enabled && !typeAvailableMap.nonNegativeInt}
                 availabilityText={tr("types.messages.unavailable")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <LabeledField
-                    label={tr("ranges.min")!}
-                    htmlFor="non-negative-min"
-                  >
+                  <LabeledField label={tr("ranges.min")!} htmlFor="non-negative-min">
                     <Input
                       id="non-negative-min"
                       type="number"
@@ -779,9 +667,7 @@ export default function CompareNumbersGame() {
                       disabled={!nonNegativeConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const min = Number.isFinite(value)
-                          ? Math.max(0, value)
-                          : 0;
+                        const min = Number.isFinite(value) ? Math.max(0, value) : 0;
                         sanitizeNonNegativeConfig({
                           min,
                           max: Math.max(min, nonNegativeConfig.max),
@@ -789,10 +675,7 @@ export default function CompareNumbersGame() {
                       }}
                     />
                   </LabeledField>
-                  <LabeledField
-                    label={tr("ranges.max")!}
-                    htmlFor="non-negative-max"
-                  >
+                  <LabeledField label={tr("ranges.max")!} htmlFor="non-negative-max">
                     <Input
                       id="non-negative-max"
                       type="number"
@@ -801,9 +684,7 @@ export default function CompareNumbersGame() {
                       disabled={!nonNegativeConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const max = Number.isFinite(value)
-                          ? Math.max(0, value)
-                          : nonNegativeConfig.min;
+                        const max = Number.isFinite(value) ? Math.max(0, value) : nonNegativeConfig.min;
                         sanitizeNonNegativeConfig({
                           max: Math.max(nonNegativeConfig.min, max),
                         });
@@ -831,9 +712,7 @@ export default function CompareNumbersGame() {
                 />
                 <WeightField
                   value={nonNegativeConfig.weight}
-                  onChange={(value) =>
-                    sanitizeNonNegativeConfig({ weight: value })
-                  }
+                  onChange={(value) => sanitizeNonNegativeConfig({ weight: value })}
                   label={tr("weights.label")!}
                   disabled={!nonNegativeConfig.enabled}
                 />
@@ -848,9 +727,7 @@ export default function CompareNumbersGame() {
                 onEnabledChange={(checked) => {
                   sanitizeSignedConfig({ enabled: checked });
                 }}
-                showAvailabilityError={
-                  signedConfig.enabled && !typeAvailableMap.signedInt
-                }
+                showAvailabilityError={signedConfig.enabled && !typeAvailableMap.signedInt}
                 availabilityText={tr("types.messages.unavailable")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -862,9 +739,7 @@ export default function CompareNumbersGame() {
                       disabled={!signedConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const min = Number.isFinite(value)
-                          ? value
-                          : signedConfig.min;
+                        const min = Number.isFinite(value) ? value : signedConfig.min;
                         sanitizeSignedConfig({
                           min,
                           max: Math.max(min, signedConfig.max),
@@ -880,9 +755,7 @@ export default function CompareNumbersGame() {
                       disabled={!signedConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const max = Number.isFinite(value)
-                          ? value
-                          : signedConfig.max;
+                        const max = Number.isFinite(value) ? value : signedConfig.max;
                         sanitizeSignedConfig({
                           max: Math.max(signedConfig.min, max),
                         });
@@ -925,9 +798,7 @@ export default function CompareNumbersGame() {
                 onEnabledChange={(checked) => {
                   sanitizeDecimalConfig({ enabled: checked });
                 }}
-                showAvailabilityError={
-                  decimalConfig.enabled && !typeAvailableMap.decimal
-                }
+                showAvailabilityError={decimalConfig.enabled && !typeAvailableMap.decimal}
                 availabilityText={tr("types.messages.decimalRange")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -940,9 +811,7 @@ export default function CompareNumbersGame() {
                       disabled={!decimalConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const min = Number.isFinite(value)
-                          ? value
-                          : decimalConfig.min;
+                        const min = Number.isFinite(value) ? value : decimalConfig.min;
                         sanitizeDecimalConfig({
                           min,
                           max: Math.max(min, decimalConfig.max),
@@ -959,9 +828,7 @@ export default function CompareNumbersGame() {
                       disabled={!decimalConfig.enabled}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const max = Number.isFinite(value)
-                          ? value
-                          : decimalConfig.max;
+                        const max = Number.isFinite(value) ? value : decimalConfig.max;
                         sanitizeDecimalConfig({
                           max: Math.max(decimalConfig.min, max),
                         });
@@ -970,10 +837,7 @@ export default function CompareNumbersGame() {
                   </LabeledField>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <LabeledField
-                    label={tr("precision.mode")!}
-                    htmlFor="decimal-mode"
-                  >
+                  <LabeledField label={tr("precision.mode")!} htmlFor="decimal-mode">
                     <Select
                       value={decimalConfig.precisionMode}
                       onValueChange={(val) =>
@@ -983,35 +847,24 @@ export default function CompareNumbersGame() {
                       }
                       disabled={!decimalConfig.enabled}
                     >
-                      <SelectTrigger
-                        id="decimal-mode"
-                        disabled={!decimalConfig.enabled}
-                      >
+                      <SelectTrigger id="decimal-mode" disabled={!decimalConfig.enabled}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="exact">
-                          {tr("precision.exact")}
-                        </SelectItem>
-                        <SelectItem value="upTo">
-                          {tr("precision.upTo")}
-                        </SelectItem>
+                        <SelectItem value="exact">{tr("precision.exact")}</SelectItem>
+                        <SelectItem value="upTo">{tr("precision.upTo")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </LabeledField>
                   <LabeledField
                     label={
-                      decimalConfig.precisionMode === "exact"
-                        ? tr("precision.exactValue")!
-                        : tr("precision.maxValue")!
+                      decimalConfig.precisionMode === "exact" ? tr("precision.exactValue")! : tr("precision.maxValue")!
                     }
                     htmlFor="decimal-precision"
                   >
                     <Select
                       value={String(
-                        decimalConfig.precisionMode === "exact"
-                          ? decimalConfig.precision
-                          : decimalConfig.maxPrecision,
+                        decimalConfig.precisionMode === "exact" ? decimalConfig.precision : decimalConfig.maxPrecision
                       )}
                       onValueChange={(val) => {
                         const num = Number(val);
@@ -1024,10 +877,7 @@ export default function CompareNumbersGame() {
                       }}
                       disabled={!decimalConfig.enabled}
                     >
-                      <SelectTrigger
-                        id="decimal-precision"
-                        disabled={!decimalConfig.enabled}
-                      >
+                      <SelectTrigger id="decimal-precision" disabled={!decimalConfig.enabled}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1075,16 +925,11 @@ export default function CompareNumbersGame() {
                 onEnabledChange={(checked) => {
                   sanitizeFractionConfig({ enabled: checked });
                 }}
-                showAvailabilityError={
-                  fractionConfig.enabled && !typeAvailableMap.fraction
-                }
+                showAvailabilityError={fractionConfig.enabled && !typeAvailableMap.fraction}
                 availabilityText={tr("types.messages.unavailable")}
               >
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <LabeledField
-                    label={tr("fractions.mode")!}
-                    htmlFor="fraction-mode"
-                  >
+                  <LabeledField label={tr("fractions.mode")!} htmlFor="fraction-mode">
                     <Select
                       value={fractionConfig.preset}
                       onValueChange={(val) =>
@@ -1094,131 +939,78 @@ export default function CompareNumbersGame() {
                       }
                       disabled={!fractionConfig.enabled}
                     >
-                      <SelectTrigger
-                        id="fraction-mode"
-                        disabled={!fractionConfig.enabled}
-                      >
+                      <SelectTrigger id="fraction-mode" disabled={!fractionConfig.enabled}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="preset12">
-                          {tr("fractions.preset12")}
-                        </SelectItem>
-                        <SelectItem value="preset20">
-                          {tr("fractions.preset20")}
-                        </SelectItem>
-                        <SelectItem value="custom">
-                          {tr("fractions.custom")}
-                        </SelectItem>
+                        <SelectItem value="preset12">{tr("fractions.preset12")}</SelectItem>
+                        <SelectItem value="preset20">{tr("fractions.preset20")}</SelectItem>
+                        <SelectItem value="custom">{tr("fractions.custom")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </LabeledField>
-                  <LabeledField
-                    label={tr("fractions.numerator")!}
-                    htmlFor="fraction-num-min"
-                  >
+                  <LabeledField label={tr("fractions.numerator")!} htmlFor="fraction-num-min">
                     <Input
                       id="fraction-num-min"
                       type="number"
                       min={1}
                       value={fractionConfig.numeratorMin}
-                      disabled={
-                        !fractionConfig.enabled ||
-                        fractionConfig.preset !== "custom"
-                      }
+                      disabled={!fractionConfig.enabled || fractionConfig.preset !== "custom"}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const min = Number.isFinite(value)
-                          ? Math.max(1, value)
-                          : fractionConfig.numeratorMin;
+                        const min = Number.isFinite(value) ? Math.max(1, value) : fractionConfig.numeratorMin;
                         sanitizeFractionConfig({
                           numeratorMin: min,
-                          numeratorMax: Math.max(
-                            min,
-                            fractionConfig.numeratorMax,
-                          ),
+                          numeratorMax: Math.max(min, fractionConfig.numeratorMax),
                         });
                       }}
                     />
                   </LabeledField>
-                  <LabeledField
-                    label={tr("fractions.numeratorMax")!}
-                    htmlFor="fraction-num-max"
-                  >
+                  <LabeledField label={tr("fractions.numeratorMax")!} htmlFor="fraction-num-max">
                     <Input
                       id="fraction-num-max"
                       type="number"
                       min={1}
                       value={fractionConfig.numeratorMax}
-                      disabled={
-                        !fractionConfig.enabled ||
-                        fractionConfig.preset !== "custom"
-                      }
+                      disabled={!fractionConfig.enabled || fractionConfig.preset !== "custom"}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const max = Number.isFinite(value)
-                          ? Math.max(1, value)
-                          : fractionConfig.numeratorMax;
+                        const max = Number.isFinite(value) ? Math.max(1, value) : fractionConfig.numeratorMax;
                         sanitizeFractionConfig({
-                          numeratorMax: Math.max(
-                            fractionConfig.numeratorMin,
-                            max,
-                          ),
+                          numeratorMax: Math.max(fractionConfig.numeratorMin, max),
                         });
                       }}
                     />
                   </LabeledField>
-                  <LabeledField
-                    label={tr("fractions.denominator")!}
-                    htmlFor="fraction-den-min"
-                  >
+                  <LabeledField label={tr("fractions.denominator")!} htmlFor="fraction-den-min">
                     <Input
                       id="fraction-den-min"
                       type="number"
                       min={1}
                       value={fractionConfig.denominatorMin}
-                      disabled={
-                        !fractionConfig.enabled ||
-                        fractionConfig.preset !== "custom"
-                      }
+                      disabled={!fractionConfig.enabled || fractionConfig.preset !== "custom"}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const min = Number.isFinite(value)
-                          ? Math.max(1, value)
-                          : fractionConfig.denominatorMin;
+                        const min = Number.isFinite(value) ? Math.max(1, value) : fractionConfig.denominatorMin;
                         sanitizeFractionConfig({
                           denominatorMin: min,
-                          denominatorMax: Math.max(
-                            min,
-                            fractionConfig.denominatorMax,
-                          ),
+                          denominatorMax: Math.max(min, fractionConfig.denominatorMax),
                         });
                       }}
                     />
                   </LabeledField>
-                  <LabeledField
-                    label={tr("fractions.denominatorMax")!}
-                    htmlFor="fraction-den-max"
-                  >
+                  <LabeledField label={tr("fractions.denominatorMax")!} htmlFor="fraction-den-max">
                     <Input
                       id="fraction-den-max"
                       type="number"
                       min={1}
                       value={fractionConfig.denominatorMax}
-                      disabled={
-                        !fractionConfig.enabled ||
-                        fractionConfig.preset !== "custom"
-                      }
+                      disabled={!fractionConfig.enabled || fractionConfig.preset !== "custom"}
                       onChange={(event) => {
                         const value = Number(event.target.value);
-                        const max = Number.isFinite(value)
-                          ? Math.max(1, value)
-                          : fractionConfig.denominatorMax;
+                        const max = Number.isFinite(value) ? Math.max(1, value) : fractionConfig.denominatorMax;
                         sanitizeFractionConfig({
-                          denominatorMax: Math.max(
-                            fractionConfig.denominatorMin,
-                            max,
-                          ),
+                          denominatorMax: Math.max(fractionConfig.denominatorMin, max),
                         });
                       }}
                     />
@@ -1244,9 +1036,7 @@ export default function CompareNumbersGame() {
                 />
                 <WeightField
                   value={fractionConfig.weight}
-                  onChange={(value) =>
-                    sanitizeFractionConfig({ weight: value })
-                  }
+                  onChange={(value) => sanitizeFractionConfig({ weight: value })}
                   label={tr("weights.label")!}
                   disabled={!fractionConfig.enabled}
                 />
@@ -1265,43 +1055,26 @@ export default function CompareNumbersGame() {
                     min={0}
                     max={50}
                     value={equalRatio}
-                    onChange={(event) =>
-                      setEqualRatio(Number(event.target.value))
-                    }
+                    onChange={(event) => setEqualRatio(Number(event.target.value))}
                     className="w-full"
                   />
-                  <span className="w-14 text-right text-sm font-medium">
-                    {equalRatio}%
-                  </span>
+                  <span className="w-14 text-right text-sm font-medium">{equalRatio}%</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {tr("equal.hint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{tr("equal.hint")}</p>
               </div>
 
               <div className="grid gap-3">
                 <Label>{tr("history.order.label")}</Label>
-                <Select
-                  value={historyOrder}
-                  onValueChange={(value) =>
-                    setHistoryOrder(value as HistoryOrder)
-                  }
-                >
+                <Select value={historyOrder} onValueChange={(value) => setHistoryOrder(value as HistoryOrder)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="asc">
-                      {tr("history.order.oldest")}
-                    </SelectItem>
-                    <SelectItem value="desc">
-                      {tr("history.order.newest")}
-                    </SelectItem>
+                    <SelectItem value="asc">{tr("history.order.oldest")}</SelectItem>
+                    <SelectItem value="desc">{tr("history.order.newest")}</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  {tr("history.order.hint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{tr("history.order.hint")}</p>
               </div>
             </div>
 
@@ -1319,25 +1092,16 @@ export default function CompareNumbersGame() {
                       return;
                     }
                     const value = parseInt(event.target.value, 10);
-                    setTimerMinutes(
-                      Number.isFinite(value) ? Math.max(0, value) : null,
-                    );
+                    setTimerMinutes(Number.isFinite(value) ? Math.max(0, value) : null);
                   }}
                   onBlur={(event) => {
                     const value = parseInt(event.target.value, 10);
-                    setTimerMinutes(
-                      Number.isFinite(value) && value > 0 ? value : null,
-                    );
+                    setTimerMinutes(Number.isFinite(value) && value > 0 ? value : null);
                   }}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {tr("session.timerHint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{tr("session.timerHint")}</p>
               </LabeledField>
-              <LabeledField
-                label={tr("session.maxExercises")!}
-                htmlFor="max-exercises"
-              >
+              <LabeledField label={tr("session.maxExercises")!} htmlFor="max-exercises">
                 <Input
                   id="max-exercises"
                   type="number"
@@ -1350,20 +1114,14 @@ export default function CompareNumbersGame() {
                       return;
                     }
                     const value = parseInt(event.target.value, 10);
-                    setMaxExercises(
-                      Number.isFinite(value) ? Math.max(0, value) : null,
-                    );
+                    setMaxExercises(Number.isFinite(value) ? Math.max(0, value) : null);
                   }}
                   onBlur={(event) => {
                     const value = parseInt(event.target.value, 10);
-                    setMaxExercises(
-                      Number.isFinite(value) && value > 0 ? value : null,
-                    );
+                    setMaxExercises(Number.isFinite(value) && value > 0 ? value : null);
                   }}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {tr("session.maxExercisesHint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{tr("session.maxExercisesHint")}</p>
               </LabeledField>
             </div>
 
@@ -1390,11 +1148,7 @@ export default function CompareNumbersGame() {
             </NotificationBanner>
 
             <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2">
-              <Button
-                onClick={() => startSession()}
-                disabled={!canStart}
-                className="w-full sm:w-auto"
-              >
+              <Button onClick={() => startSession()} disabled={!canStart} className="w-full sm:w-auto">
                 {tr("setup.start")}
               </Button>
               <Button asChild variant="outline" className="w-full sm:w-auto">
@@ -1412,32 +1166,19 @@ export default function CompareNumbersGame() {
                   className="flex flex-col gap-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <StatCard
-                      label={tr("stats.correct")}
-                      value={correctCount}
-                    />
+                    <StatCard label={tr("stats.correct")} value={correctCount} />
                     <StatCard label={tr("stats.wrong")} value={wrongCount} />
-                    <StatCard
-                      label={tr("stats.accuracy")}
-                      value={`${accuracy}%`}
-                    />
+                    <StatCard label={tr("stats.accuracy")} value={`${accuracy}%`} />
                     <StatCard
                       label={hasTimer ? tr("stats.timeLeft") : tr("stats.time")}
-                      value={
-                        hasTimer
-                          ? formatTime(timeLeft ?? 0)
-                          : formatTime(elapsedSec)
-                      }
+                      value={hasTimer ? formatTime(timeLeft ?? 0) : formatTime(elapsedSec)}
                     />
                   </div>
 
                   {activeNotifications.length > 0 && (
                     <div className="space-y-3">
                       {activeNotifications.map((notification, index) => (
-                        <NotificationBanner
-                          key={`${notification.variant}-${index}`}
-                          variant={notification.variant}
-                        >
+                        <NotificationBanner key={`${notification.variant}-${index}`} variant={notification.variant}>
                           {notification.message}
                         </NotificationBanner>
                       ))}
@@ -1445,61 +1186,41 @@ export default function CompareNumbersGame() {
                   )}
 
                   <div className="rounded-2xl border bg-background/40 p-6 text-center shadow-sm">
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {tr("play.compare")}
-                    </div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">{tr("play.compare")}</div>
                     <div
                       key={taskId}
                       className={cn(
                         "mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center justify-items-center gap-2 sm:gap-4",
-                        displaySizeClass,
+                        displaySizeClass
                       )}
                     >
                       <span className="font-semibold whitespace-nowrap text-center leading-tight">
                         {exercise?.left.display ?? ""}
                       </span>
-                      <span className="font-semibold text-muted-foreground">
-                        ?
-                      </span>
+                      <span className="font-semibold text-muted-foreground">?</span>
                       <span className="font-semibold whitespace-nowrap text-center leading-tight">
                         {exercise?.right.display ?? ""}
                       </span>
                     </div>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
-                      <Button
-                        size="lg"
-                        onClick={() => handleAnswer("<")}
-                        disabled={sessionEnded}
-                      >
+                      <Button size="lg" onClick={() => handleAnswer("<")} disabled={sessionEnded}>
                         &lt;
                       </Button>
-                      <Button
-                        size="lg"
-                        onClick={() => handleAnswer("=")}
-                        disabled={sessionEnded}
-                      >
+                      <Button size="lg" onClick={() => handleAnswer("=")} disabled={sessionEnded}>
                         =
                       </Button>
-                      <Button
-                        size="lg"
-                        onClick={() => handleAnswer(">")}
-                        disabled={sessionEnded}
-                      >
+                      <Button size="lg" onClick={() => handleAnswer(">")} disabled={sessionEnded}>
                         &gt;
                       </Button>
                     </div>
-                    <p className="mt-3 text-xs text-muted-foreground">
-                      {tr("play.hotkeys")}
-                    </p>
+                    <p className="mt-3 text-xs text-muted-foreground">{tr("play.hotkeys")}</p>
                   </div>
                 </div>
               </div>
 
               <aside className="h-full overflow-hidden rounded-xl border bg-muted/40">
                 <div className="flex items-center justify-between border-b bg-muted/60 px-4 py-3">
-                  <div className="text-base font-semibold">
-                    {tr("history.title")}
-                  </div>
+                  <div className="text-base font-semibold">{tr("history.title")}</div>
                   <span className="text-xs text-muted-foreground">
                     {tr("history.total", { count: history.length })}
                   </span>
@@ -1508,39 +1229,23 @@ export default function CompareNumbersGame() {
                   <Table>
                     <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur">
                       <TableRow>
-                        <TableHead className="w-10 text-center text-xs">
-                          #
-                        </TableHead>
-                        <TableHead className="text-xs">
-                          {tr("history.example")}
-                        </TableHead>
-                        <TableHead className="text-xs">
-                          {tr("history.answer")}
-                        </TableHead>
+                        <TableHead className="w-10 text-center text-xs">#</TableHead>
+                        <TableHead className="text-xs">{tr("history.example")}</TableHead>
+                        <TableHead className="text-xs">{tr("history.answer")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {historyDisplay.length === 0 ? (
                         <TableRow>
-                          <TableCell
-                            colSpan={3}
-                            className="py-6 text-center text-sm text-muted-foreground"
-                          >
+                          <TableCell colSpan={3} className="py-6 text-center text-sm text-muted-foreground">
                             {tr("history.empty")}
                           </TableCell>
                         </TableRow>
                       ) : (
                         historyDisplay.map((entry, index) => (
-                          <TableRow
-                            key={entry.id}
-                            className={
-                              entry.isCorrect ? "" : "bg-destructive/5"
-                            }
-                          >
+                          <TableRow key={entry.id} className={entry.isCorrect ? "" : "bg-destructive/5"}>
                             <TableCell className="text-center text-xs text-muted-foreground">
-                              {historyOrder === "asc"
-                                ? index + 1
-                                : history.length - index}
+                              {historyOrder === "asc" ? index + 1 : history.length - index}
                             </TableCell>
                             <TableCell>
                               <div className="text-sm font-medium leading-tight">
@@ -1548,10 +1253,7 @@ export default function CompareNumbersGame() {
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {tr("history.correct", {
-                                  relation: symbolLabel(
-                                    entry.correctRelation,
-                                    tr,
-                                  ),
+                                  relation: symbolLabel(entry.correctRelation, tr),
                                   left: entry.left.display,
                                   right: entry.right.display,
                                 })}
@@ -1561,28 +1263,19 @@ export default function CompareNumbersGame() {
                               {entry.isCorrect ? (
                                 <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                                   {tr("history.result.correct", {
-                                    relation: symbolLabel(
-                                      entry.userRelation,
-                                      tr,
-                                    ),
+                                    relation: symbolLabel(entry.userRelation, tr),
                                   })}
                                 </div>
                               ) : (
                                 <div className="grid gap-1 text-sm text-destructive">
                                   <span>
                                     {tr("history.result.user", {
-                                      relation: symbolLabel(
-                                        entry.userRelation,
-                                        tr,
-                                      ),
+                                      relation: symbolLabel(entry.userRelation, tr),
                                     })}
                                   </span>
                                   <span>
                                     {tr("history.result.expected", {
-                                      relation: symbolLabel(
-                                        entry.correctRelation,
-                                        tr,
-                                      ),
+                                      relation: symbolLabel(entry.correctRelation, tr),
                                     })}
                                   </span>
                                 </div>
@@ -1680,44 +1373,24 @@ function TypeCard({
             onKeyDown={(event) => event.stopPropagation()}
           />
           <div className="flex-1 text-left">
-            <div className="text-sm font-semibold leading-tight sm:text-base">
-              {title}
-            </div>
-            <p className="text-xs leading-snug text-muted-foreground sm:text-sm">
-              {description}
-            </p>
+            <div className="text-sm font-semibold leading-tight sm:text-base">{title}</div>
+            <p className="text-xs leading-snug text-muted-foreground sm:text-sm">{description}</p>
           </div>
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-3 pb-4 sm:px-5">
-        <fieldset
-          disabled={!enabled}
-          className={cn(
-            "space-y-3 pt-3 sm:space-y-5 sm:pt-4",
-            !enabled && "opacity-60",
-          )}
-        >
+        <fieldset disabled={!enabled} className={cn("space-y-3 pt-3 sm:space-y-5 sm:pt-4", !enabled && "opacity-60")}>
           {children}
         </fieldset>
         {showAvailabilityError && availabilityText && (
-          <p className="pt-3 text-xs font-medium text-destructive">
-            {availabilityText}
-          </p>
+          <p className="pt-3 text-xs font-medium text-destructive">{availabilityText}</p>
         )}
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-function LabeledField({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
+function LabeledField({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={htmlFor}>{label}</Label>
@@ -1818,9 +1491,7 @@ function WeightField({
           disabled={disabled}
           onChange={(event) => {
             const val = Number(event.target.value);
-            onChange(
-              Number.isFinite(val) ? Math.max(0, Math.min(100, val)) : value,
-            );
+            onChange(Number.isFinite(val) ? Math.max(0, Math.min(100, val)) : value);
           }}
           className="w-20"
         />
@@ -1846,34 +1517,18 @@ function ToggleRow({
     <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-sm sm:px-3 sm:py-2.5">
       <div className="flex-1">
         <div className="font-medium leading-tight">{label}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground leading-snug">
-            {description}
-          </p>
-        )}
+        {description && <p className="text-xs text-muted-foreground leading-snug">{description}</p>}
       </div>
-      <Switch
-        id={id}
-        checked={checked}
-        onCheckedChange={(value) => onChange(Boolean(value))}
-      />
+      <Switch id={id} checked={checked} onCheckedChange={(value) => onChange(Boolean(value))} />
     </div>
   );
 }
 
-function StatCard({
-  label,
-  value,
-}: {
-  label: string | null;
-  value: number | string;
-}) {
+function StatCard({ label, value }: { label: string | null; value: number | string }) {
   return (
     <Card className="rounded-xl border shadow-sm min-w-20 py-0">
       <CardContent className="px-3 py-1.5">
-        <div className="text-[11px] text-muted-foreground leading-tight">
-          {label}
-        </div>
+        <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
         <div className="text-base font-semibold leading-tight">{value}</div>
       </CardContent>
     </Card>
@@ -1882,7 +1537,7 @@ function StatCard({
 
 function symbolLabel(
   relation: CompareRelation,
-  translate: (key: string, options?: Record<string, unknown>) => string | null,
+  translate: (key: string, options?: Record<string, unknown>) => string | null
 ) {
   switch (relation) {
     case "<":
@@ -1896,7 +1551,7 @@ function symbolLabel(
 
 function summarizeTypes(
   map: Record<CompareNumberTypeKey, boolean>,
-  tr: (key: string, options?: Record<string, unknown>) => string | null,
+  tr: (key: string, options?: Record<string, unknown>) => string | null
 ) {
   const names: string[] = [];
   if (map.nonNegativeInt) names.push(tr("types.labels.nonNegative") ?? "");

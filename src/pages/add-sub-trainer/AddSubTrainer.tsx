@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ThemeToggle from "@/components/menu/ThemeToggle";
+import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector";
 import { cn } from "@/lib/utils";
 
@@ -146,10 +146,7 @@ function generateOptions(correct: number): number[] {
 
 export default function AddSubTrainer() {
   const { t } = useTranslation();
-  const tr = React.useCallback(
-    (key: string, vars?: Record<string, unknown>) => t(`addSubT.${key}`, vars),
-    [t],
-  );
+  const tr = React.useCallback((key: string, vars?: Record<string, unknown>) => t(`addSubT.${key}`, vars), [t]);
 
   const [screen, setScreen] = React.useState<Screen>("setup");
   const [playMode, setPlayMode] = React.useState<PlayMode>("quiz");
@@ -243,13 +240,10 @@ export default function AddSubTrainer() {
     prepareTask();
   }, [canStart, prepareTask, resetTimer]);
 
-  const finishGame = React.useCallback(
-    (reason: "time" | "limit") => {
-      setGameOver(true);
-      setEndReason(reason);
-    },
-    [],
-  );
+  const finishGame = React.useCallback((reason: "time" | "limit") => {
+    setGameOver(true);
+    setEndReason(reason);
+  }, []);
 
   React.useEffect(() => {
     if (!timerActive || !timerMinutes) return;
@@ -270,8 +264,7 @@ export default function AddSubTrainer() {
   const submitAnswer = React.useCallback(
     (choice?: number) => {
       if (!task || gameOver) return;
-      const parsedValue =
-        typeof choice === "number" ? choice : Number.parseInt(answer.trim(), 10);
+      const parsedValue = typeof choice === "number" ? choice : Number.parseInt(answer.trim(), 10);
       const isCorrect = Number.isFinite(parsedValue) && parsedValue === task.correctAnswer;
 
       setHistory((prev) => [
@@ -317,7 +310,7 @@ export default function AddSubTrainer() {
 
       prepareTask();
     },
-    [answer, correctCount, enableSounds, finishGame, gameOver, maxExercises, prepareTask, task, tr, wrongCount],
+    [answer, correctCount, enableSounds, finishGame, gameOver, maxExercises, prepareTask, task, tr, wrongCount]
   );
 
   const handleKeyDown = React.useCallback(
@@ -326,7 +319,7 @@ export default function AddSubTrainer() {
         submitAnswer();
       }
     },
-    [submitAnswer],
+    [submitAnswer]
   );
 
   const displayStatus = React.useMemo(() => {
@@ -371,7 +364,7 @@ export default function AddSubTrainer() {
                     <span className="w-full">{tr("menu")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle />
+                    <ModeToggle />
                     <LanguageSelector mode={LanguageSelectorMode.ICON} />
                   </div>
                 </div>
@@ -561,7 +554,9 @@ export default function AddSubTrainer() {
                     <AlertDescription>
                       {endReason === "time"
                         ? tr("play.finished.time")
-                        : tr("play.finished.limit", { count: maxExercises || 0 })}
+                        : tr("play.finished.limit", {
+                            count: maxExercises || 0,
+                          })}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -572,10 +567,7 @@ export default function AddSubTrainer() {
                   <StatCard label={tr("stats.accuracy")!} value={`${accuracy}%`} />
                   <StatCard label={tr("stats.time")!} value={formatTime(elapsedSec)} />
                   {timerMinutes && (
-                    <StatCard
-                      label={tr("stats.timeLeft")!}
-                      value={formatTime(timerMinutes * 60 - elapsedSec)}
-                    />
+                    <StatCard label={tr("stats.timeLeft")!} value={formatTime(timerMinutes * 60 - elapsedSec)} />
                   )}
                   <StatCard label={tr("stats.streak")!} value={`${streak} / ${bestStreak}`} />
                 </div>
@@ -622,11 +614,7 @@ export default function AddSubTrainer() {
                       <p
                         className={cn(
                           "mt-3 text-sm font-medium",
-                          gameOver
-                            ? "text-primary"
-                            : lastWasCorrect
-                              ? "text-emerald-600"
-                              : "text-destructive",
+                          gameOver ? "text-primary" : lastWasCorrect ? "text-emerald-600" : "text-destructive"
                         )}
                       >
                         {displayStatus}
@@ -667,7 +655,9 @@ export default function AddSubTrainer() {
                               <div className="text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
                                 <span className="inline-flex items-center gap-1">
                                   <XCircle className="size-4" aria-hidden />
-                                  {tr("table.incorrect", { correct: row.correctAnswer })}
+                                  {tr("table.incorrect", {
+                                    correct: row.correctAnswer,
+                                  })}
                                 </span>
                               </div>
                             )}
@@ -686,15 +676,7 @@ export default function AddSubTrainer() {
   );
 }
 
-function LabeledField({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
+function LabeledField({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={htmlFor}>{label}:</Label>

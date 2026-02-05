@@ -5,22 +5,9 @@ import { useTranslation } from "react-i18next";
 // shadcn/ui primitives (same set your project already uses)
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -36,10 +23,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
-import LanguageSelector, {
-  LanguageSelectorMode,
-} from "@/components/lang/LanguageSelector.tsx";
+import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
+import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
 
 // ----------------------------------
 // Types & constants
@@ -81,18 +66,12 @@ function useRoundT() {
       changeRange: t("roundT.changeRange", "Change setup"),
       start: t("roundT.start", "Start"),
       setupLabel: t("roundT.setup.label", "Settings"),
-      setupIntro: t(
-        "roundT.setup.intro",
-        "Choose what kind of numbers and places to practice.",
-      ),
+      setupIntro: t("roundT.setup.intro", "Choose what kind of numbers and places to practice."),
       mode: t("roundT.setup.mode", "Mode"),
       modeInput: t("roundT.mode.input", "Input"),
       modeQuiz: t("roundT.mode.quiz", "Quiz"),
       timer: t("roundT.setup.timer", "Timer (minutes, 0 = unlimited)"),
-      maxExercises: t(
-        "roundT.setup.maxExercises",
-        "Max exercises (0 = unlimited)",
-      ),
+      maxExercises: t("roundT.setup.maxExercises", "Max exercises (0 = unlimited)"),
       numberTypes: t("roundT.setup.numberTypes", "Number types"),
       wholeNumbers: t("roundT.setup.whole", "Whole numbers"),
       decimals: t("roundT.setup.decimals", "Decimals"),
@@ -112,29 +91,16 @@ function useRoundT() {
       hundreds: t("roundT.targets.hundreds", "hundreds (100s)"),
       thousands: t("roundT.targets.thousands", "thousands (1000s)"),
       sounds: t("roundT.setup.sounds", "Enable sounds"),
-      includeTie: t(
-        "roundT.setup.includeTie",
-        "Guarantee at least one tie-case (5) per session",
-      ),
-      showHint: t(
-        "roundT.setup.showHint",
-        "Show place-value hint under the prompt",
-      ),
-      note: t(
-        "roundT.setup.note",
-        "Tip: leave filters empty to include everything.",
-      ),
+      includeTie: t("roundT.setup.includeTie", "Guarantee at least one tie-case (5) per session"),
+      showHint: t("roundT.setup.showHint", "Show place-value hint under the prompt"),
+      note: t("roundT.setup.note", "Tip: leave filters empty to include everything."),
       // Play
       rangeAccuracy: (min: string, max: string, acc: number) =>
-        t(
-          "roundT.rangeAccuracy",
-          "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
-          {
-            min,
-            max,
-            acc,
-          },
-        ),
+        t("roundT.rangeAccuracy", "Range: {{min}}–{{max}} · Accuracy: {{acc}}%", {
+          min,
+          max,
+          acc,
+        }),
       statsCorrect: t("roundT.stats.correct", "Correct"),
       statsWrong: t("roundT.stats.wrong", "Wrong"),
       statsAccuracy: t("roundT.stats.accuracy", "Accuracy"),
@@ -142,11 +108,7 @@ function useRoundT() {
       statsTimeLeft: t("roundT.stats.timeLeft", "Time left"),
       finishedTime: t("roundT.finished.timeUp", "Time is up!"),
       finishedCount: (count: number) =>
-        t(
-          "roundT.finished.exLimit",
-          "Finished! You answered {{count}} tasks.",
-          { count },
-        ),
+        t("roundT.finished.exLimit", "Finished! You answered {{count}} tasks.", { count }),
       // Table
       tableExample: t("roundT.table.example", "Exercise"),
       tableAnswer: t("roundT.table.answer", "Answer"),
@@ -195,10 +157,7 @@ function formatTime(totalSec: number) {
 
 function useLocaleNumberFormatter() {
   const { i18n } = useTranslation();
-  const nf = React.useMemo(
-    () => new Intl.NumberFormat(i18n.language || undefined),
-    [i18n.language],
-  );
+  const nf = React.useMemo(() => new Intl.NumberFormat(i18n.language || undefined), [i18n.language]);
   return (n: number) => nf.format(n);
 }
 
@@ -280,20 +239,18 @@ function getCheckDigitForPlace(n: number, place: TargetPlace): number {
 function useBeeps(enabled: boolean) {
   const ctxRef = React.useRef<AudioContext | null>(null);
 
-  const ensureCtx =
-    React.useCallback(async (): Promise<AudioContext | null> => {
-      if (!enabled) return null;
-      const Ctx =
-        (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (!ctxRef.current) {
-        if (!Ctx) return null;
-        ctxRef.current = new Ctx();
-      }
-      const ctx = ctxRef.current;
-      if (!ctx) return null;
-      if (ctx.state === "suspended") await ctx.resume();
-      return ctx;
-    }, [enabled]);
+  const ensureCtx = React.useCallback(async (): Promise<AudioContext | null> => {
+    if (!enabled) return null;
+    const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!ctxRef.current) {
+      if (!Ctx) return null;
+      ctxRef.current = new Ctx();
+    }
+    const ctx = ctxRef.current;
+    if (!ctx) return null;
+    if (ctx.state === "suspended") await ctx.resume();
+    return ctx;
+  }, [enabled]);
 
   const beep = React.useCallback(
     async (freq = 880, durationMs = 120, gain = 0.05) => {
@@ -309,7 +266,7 @@ function useBeeps(enabled: boolean) {
       o.start();
       o.stop(ctx.currentTime + durationMs / 1000);
     },
-    [enabled, ensureCtx],
+    [enabled, ensureCtx]
   );
 
   const chord = React.useCallback(async () => {
@@ -340,8 +297,7 @@ export default function RoundingGame() {
   const [decimalPlaces, setDecimalPlaces] = React.useState<number>(1); // used when decimals enabled
 
   const [includePositives, setIncludePositives] = React.useState<boolean>(true);
-  const [includeNegatives, setIncludeNegatives] =
-    React.useState<boolean>(false);
+  const [includeNegatives, setIncludeNegatives] = React.useState<boolean>(false);
 
   // Magnitude
   const [magMode, setMagMode] = React.useState<MagnitudeMode>("digits");
@@ -460,10 +416,7 @@ export default function RoundingGame() {
       dMin = clamp(dMin, 1, 10);
       dMax = clamp(dMax, 1, 10);
       // Ensure min digits large enough for minPlace
-      const minDigitsFromPlace = Math.max(
-        1,
-        Math.ceil(Math.log10(minPlace + 1)),
-      ); // e.g., 100 -> 3
+      const minDigitsFromPlace = Math.max(1, Math.ceil(Math.log10(minPlace + 1))); // e.g., 100 -> 3
       dMin = Math.max(dMin, minDigitsFromPlace);
       const digits = randInt(dMin, dMax);
       const low = 10 ** (digits - 1);
@@ -591,17 +544,11 @@ export default function RoundingGame() {
     const correctRounded = roundHalfUpTo(original, target);
     const isCorrect = user === correctRounded;
 
-    function buildExplanationLocalized(
-      n: number,
-      place: TargetPlace,
-      correct: number,
-    ): string {
+    function buildExplanationLocalized(n: number, place: TargetPlace, correct: number): string {
       const check = getCheckDigitForPlace(n, place);
       const directionKey = check >= 5 ? "up" : "down";
-      const targetKey =
-        place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
-      const lowerKey =
-        place === 10 ? "ones" : place === 100 ? "tens" : "hundreds";
+      const targetKey = place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
+      const lowerKey = place === 10 ? "ones" : place === 100 ? "tens" : "hundreds";
       return RT.t("roundT.expl.template", {
         target: RT.t(`roundT.expl.target.${targetKey}`),
         lower: RT.t(`roundT.expl.lower.${lowerKey}`),
@@ -657,38 +604,23 @@ export default function RoundingGame() {
         <div className="flex items-center justify-between gap-2">
           {/* Left: Home + Title */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-xs text-muted-foreground">
-              {RT.labels.title}
-            </span>
+            <span className="hidden sm:inline text-xs text-muted-foreground">{RT.labels.title}</span>
           </div>
 
           <div className="flex items-center text-center">
             {screen === "play" && (
               <span className="w-full text-[10px] sm:text-xs text-muted-foreground">
-                {RT.labels.rangeAccuracy(
-                  minRangeLabel(),
-                  maxRangeLabel(),
-                  accuracy,
-                )}
+                {RT.labels.rangeAccuracy(minRangeLabel(), maxRangeLabel(), accuracy)}
               </span>
             )}
 
-            {screen === "setup" && (
-              <span className="w-full text-muted-foreground">
-                {RT.labels.setupLabel}
-              </span>
-            )}
+            {screen === "setup" && <span className="w-full text-muted-foreground">{RT.labels.setupLabel}</span>}
           </div>
 
           {/* Right: Settings menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={RT.labels.setupLabel}
-                className="size-8"
-              >
+              <Button variant="ghost" size="icon" aria-label={RT.labels.setupLabel} className="size-8">
                 <Settings className="size-6" />
               </Button>
             </DropdownMenuTrigger>
@@ -700,7 +632,7 @@ export default function RoundingGame() {
                     <span className="w-full">{RT.labels.menu}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle />
+                    <ModeToggle />
                     <LanguageSelector mode={LanguageSelectorMode.ICON} />
                   </div>
                 </div>
@@ -710,12 +642,8 @@ export default function RoundingGame() {
               <DropdownMenuGroup>
                 {screen === "play" && (
                   <>
-                    <DropdownMenuItem onSelect={() => newSession()}>
-                      {RT.labels.newSession}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => backToSetup()}>
-                      {RT.labels.changeRange}
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => newSession()}>{RT.labels.newSession}</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => backToSetup()}>{RT.labels.changeRange}</DropdownMenuItem>
 
                     <DropdownMenuSeparator />
                   </>
@@ -736,23 +664,13 @@ export default function RoundingGame() {
               <Card>
                 <CardContent className="grid gap-6">
                   <LabeledField label={RT.labels.mode} htmlFor="mode-select">
-                    <Select
-                      value={mode}
-                      onValueChange={(val) => setMode(val as Mode)}
-                    >
-                      <SelectTrigger
-                        id="mode-select"
-                        className="rounded-xl w-full h-10"
-                      >
+                    <Select value={mode} onValueChange={(val) => setMode(val as Mode)}>
+                      <SelectTrigger id="mode-select" className="rounded-xl w-full h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="quiz">
-                          {RT.labels.modeQuiz}
-                        </SelectItem>
-                        <SelectItem value="input">
-                          {RT.labels.modeInput}
-                        </SelectItem>
+                        <SelectItem value="quiz">{RT.labels.modeQuiz}</SelectItem>
+                        <SelectItem value="input">{RT.labels.modeInput}</SelectItem>
                       </SelectContent>
                     </Select>
                   </LabeledField>
@@ -769,9 +687,7 @@ export default function RoundingGame() {
                       }}
                       onBlur={(e) => {
                         const v = parseInt(e.target.value, 10);
-                        setTimerMinutes(
-                          Number.isFinite(v) ? Math.max(0, v) : 0,
-                        );
+                        setTimerMinutes(Number.isFinite(v) ? Math.max(0, v) : 0);
                       }}
                       className="rounded-xl"
                     />
@@ -789,20 +705,14 @@ export default function RoundingGame() {
                       }}
                       onBlur={(e) => {
                         const v = parseInt(e.target.value, 10);
-                        setMaxExercises(
-                          Number.isFinite(v) ? Math.max(0, v) : 0,
-                        );
+                        setMaxExercises(Number.isFinite(v) ? Math.max(0, v) : 0);
                       }}
                       className="rounded-xl"
                     />
                   </LabeledField>
 
                   <div className="flex items-center gap-2">
-                    <Switch
-                      checked={soundsEnabled}
-                      onCheckedChange={setSoundsEnabled}
-                      id="sound-switch"
-                    />
+                    <Switch checked={soundsEnabled} onCheckedChange={setSoundsEnabled} id="sound-switch" />
                     <Label htmlFor="sound-switch">{RT.labels.sounds}</Label>
                   </div>
                 </CardContent>
@@ -825,30 +735,20 @@ export default function RoundingGame() {
                         <Checkbox
                           id="dec-check"
                           checked={includeDecimals}
-                          onCheckedChange={(v) =>
-                            setIncludeDecimals(Boolean(v))
-                          }
+                          onCheckedChange={(v) => setIncludeDecimals(Boolean(v))}
                         />
                         <Label>{RT.labels.decimals}</Label>
                       </div>
                     </div>
                   </LabeledField>
 
-                  <LabeledField
-                    label={RT.labels.decimalPlaces}
-                    htmlFor="dec-places"
-                  >
+                  <LabeledField label={RT.labels.decimalPlaces} htmlFor="dec-places">
                     <Select
                       value={String(decimalPlaces)}
-                      onValueChange={(val) =>
-                        setDecimalPlaces(parseInt(val, 10))
-                      }
+                      onValueChange={(val) => setDecimalPlaces(parseInt(val, 10))}
                       disabled={!includeDecimals}
                     >
-                      <SelectTrigger
-                        id="dec-places"
-                        className="rounded-xl w-full h-10"
-                      >
+                      <SelectTrigger id="dec-places" className="rounded-xl w-full h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -867,9 +767,7 @@ export default function RoundingGame() {
                         <Checkbox
                           id="pos-check"
                           checked={includePositives}
-                          onCheckedChange={(v) =>
-                            setIncludePositives(Boolean(v))
-                          }
+                          onCheckedChange={(v) => setIncludePositives(Boolean(v))}
                         />
                         <Label>{RT.labels.positives}</Label>
                       </div>
@@ -877,9 +775,7 @@ export default function RoundingGame() {
                         <Checkbox
                           id="neg-check"
                           checked={includeNegatives}
-                          onCheckedChange={(v) =>
-                            setIncludeNegatives(Boolean(v))
-                          }
+                          onCheckedChange={(v) => setIncludeNegatives(Boolean(v))}
                         />
                         <Label>{RT.labels.negatives}</Label>
                       </div>
@@ -914,20 +810,9 @@ export default function RoundingGame() {
 
                   {magMode === "digits" ? (
                     <div className="grid grid-cols-2 gap-4">
-                      <LabeledField
-                        label={RT.labels.minDigits}
-                        htmlFor="min-digits"
-                      >
-                        <Select
-                          value={String(minDigits)}
-                          onValueChange={(val) =>
-                            setMinDigits(parseInt(val, 10))
-                          }
-                        >
-                          <SelectTrigger
-                            id="min-digits"
-                            className="rounded-xl w-full h-10"
-                          >
+                      <LabeledField label={RT.labels.minDigits} htmlFor="min-digits">
+                        <Select value={String(minDigits)} onValueChange={(val) => setMinDigits(parseInt(val, 10))}>
+                          <SelectTrigger id="min-digits" className="rounded-xl w-full h-10">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -939,20 +824,9 @@ export default function RoundingGame() {
                           </SelectContent>
                         </Select>
                       </LabeledField>
-                      <LabeledField
-                        label={RT.labels.maxDigits}
-                        htmlFor="max-digits"
-                      >
-                        <Select
-                          value={String(maxDigits)}
-                          onValueChange={(val) =>
-                            setMaxDigits(parseInt(val, 10))
-                          }
-                        >
-                          <SelectTrigger
-                            id="max-digits"
-                            className="rounded-xl w-full h-10"
-                          >
+                      <LabeledField label={RT.labels.maxDigits} htmlFor="max-digits">
+                        <Select value={String(maxDigits)} onValueChange={(val) => setMaxDigits(parseInt(val, 10))}>
+                          <SelectTrigger id="max-digits" className="rounded-xl w-full h-10">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -967,35 +841,21 @@ export default function RoundingGame() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-4">
-                      <LabeledField
-                        label={RT.labels.minValue}
-                        htmlFor="min-value"
-                      >
+                      <LabeledField label={RT.labels.minValue} htmlFor="min-value">
                         <Input
                           id="min-value"
                           type="number"
                           value={minValue}
-                          onChange={(e) =>
-                            setMinValue(
-                              parseInt(e.target.value || "0", 10) || 0,
-                            )
-                          }
+                          onChange={(e) => setMinValue(parseInt(e.target.value || "0", 10) || 0)}
                           className="rounded-xl"
                         />
                       </LabeledField>
-                      <LabeledField
-                        label={RT.labels.maxValue}
-                        htmlFor="max-value"
-                      >
+                      <LabeledField label={RT.labels.maxValue} htmlFor="max-value">
                         <Input
                           id="max-value"
                           type="number"
                           value={maxValue}
-                          onChange={(e) =>
-                            setMaxValue(
-                              parseInt(e.target.value || "0", 10) || 0,
-                            )
-                          }
+                          onChange={(e) => setMaxValue(parseInt(e.target.value || "0", 10) || 0)}
                           className="rounded-xl"
                         />
                       </LabeledField>
@@ -1009,27 +869,15 @@ export default function RoundingGame() {
                   <LabeledField label={RT.labels.targets} htmlFor="">
                     <div className="flex flex-wrap gap-4">
                       <div className="inline-flex items-center gap-2">
-                        <Checkbox
-                          id="t10"
-                          checked={target10}
-                          onCheckedChange={(v) => setTarget10(Boolean(v))}
-                        />
+                        <Checkbox id="t10" checked={target10} onCheckedChange={(v) => setTarget10(Boolean(v))} />
                         <Label>{RT.labels.tens}</Label>
                       </div>
                       <div className="inline-flex items-center gap-2">
-                        <Checkbox
-                          id="t100"
-                          checked={target100}
-                          onCheckedChange={(v) => setTarget100(Boolean(v))}
-                        />
+                        <Checkbox id="t100" checked={target100} onCheckedChange={(v) => setTarget100(Boolean(v))} />
                         <Label>{RT.labels.hundreds}</Label>
                       </div>
                       <div className="inline-flex items-center gap-2">
-                        <Checkbox
-                          id="t1000"
-                          checked={target1000}
-                          onCheckedChange={(v) => setTarget1000(Boolean(v))}
-                        />
+                        <Checkbox id="t1000" checked={target1000} onCheckedChange={(v) => setTarget1000(Boolean(v))} />
                         <Label>{RT.labels.thousands}</Label>
                       </div>
                     </div>
@@ -1045,11 +893,7 @@ export default function RoundingGame() {
                       <Label>{RT.labels.includeTie}</Label>
                     </div>
                     <div className="inline-flex items-center gap-2">
-                      <Checkbox
-                        id="hint"
-                        checked={showHint}
-                        onCheckedChange={(v) => setShowHint(Boolean(v))}
-                      />
+                      <Checkbox id="hint" checked={showHint} onCheckedChange={(v) => setShowHint(Boolean(v))} />
                       <Label>{RT.labels.showHint}</Label>
                     </div>
                   </div>
@@ -1088,24 +932,12 @@ export default function RoundingGame() {
 
                 {/* Stats */}
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <StatCard
-                    label={RT.labels.statsCorrect}
-                    value={correctCount}
-                  />
+                  <StatCard label={RT.labels.statsCorrect} value={correctCount} />
                   <StatCard label={RT.labels.statsWrong} value={wrongCount} />
-                  <StatCard
-                    label={RT.labels.statsAccuracy}
-                    value={`${accuracy}%`}
-                  />
-                  <StatCard
-                    label={RT.labels.statsTime}
-                    value={formatTime(elapsedSec)}
-                  />
+                  <StatCard label={RT.labels.statsAccuracy} value={`${accuracy}%`} />
+                  <StatCard label={RT.labels.statsTime} value={formatTime(elapsedSec)} />
                   {timerMinutes > 0 && (
-                    <StatCard
-                      label={RT.labels.statsTimeLeft}
-                      value={formatTime(timerMinutes * 60 - elapsedSec)}
-                    />
+                    <StatCard label={RT.labels.statsTimeLeft} value={formatTime(timerMinutes * 60 - elapsedSec)} />
                   )}
                 </div>
 
@@ -1113,15 +945,12 @@ export default function RoundingGame() {
                 {gameOver === false && (
                   <div className="text-center mb-6">
                     <div className="text-3xl sm:text-5xl font-semibold tracking-wide select-none">
-                      {fmt(original)} <span aria-hidden>→</span>{" "}
-                      <span className="sr-only">{RT.labels.srTo}</span>{" "}
+                      {fmt(original)} <span aria-hidden>→</span> <span className="sr-only">{RT.labels.srTo}</span>{" "}
                       {targetLabelL(target)}
                     </div>
 
                     {showHint && (
-                      <div className="mt-2 text-sm text-muted-foreground">
-                        {renderHint(original, target)}
-                      </div>
+                      <div className="mt-2 text-sm text-muted-foreground">{renderHint(original, target)}</div>
                     )}
 
                     <div className="mt-4 flex items-center justify-center gap-3">
@@ -1139,11 +968,7 @@ export default function RoundingGame() {
                             disabled={gameOver}
                             className="w-48 text-center text-2xl sm:text-3xl rounded-xl"
                           />
-                          <Button
-                            onClick={() => submit()}
-                            disabled={gameOver}
-                            className="text-lg"
-                          >
+                          <Button onClick={() => submit()} disabled={gameOver} className="text-lg">
                             {RT.labels.inputSubmit}
                           </Button>
                         </>
@@ -1157,9 +982,7 @@ export default function RoundingGame() {
                                 (e.currentTarget as HTMLButtonElement).blur();
                                 if (!gameOver) submit(opt);
                               }}
-                              onTouchEnd={(e) =>
-                                (e.currentTarget as HTMLButtonElement).blur()
-                              }
+                              onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
                               aria-label={`${opt}`}
                               disabled={gameOver}
                               className="px-5 py-4 text-2xl font-medium"
@@ -1171,11 +994,7 @@ export default function RoundingGame() {
                       )}
                     </div>
 
-                    <div
-                      className="mt-4 text-lg sm:text-xl"
-                      aria-live="polite"
-                      aria-atomic="true"
-                    >
+                    <div className="mt-4 text-lg sm:text-xl" aria-live="polite" aria-atomic="true">
                       {lastLine && (
                         <span className="inline-flex items-center gap-2">
                           <span className="font-medium">{lastLine}</span>
@@ -1193,11 +1012,7 @@ export default function RoundingGame() {
                       )}
                     </div>
 
-                    {mode === "input" && (
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        {RT.labels.inputHint}
-                      </p>
-                    )}
+                    {mode === "input" && <p className="mt-2 text-xs text-muted-foreground">{RT.labels.inputHint}</p>}
                   </div>
                 )}
               </div>
@@ -1207,24 +1022,15 @@ export default function RoundingGame() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted">
                     <TableRow>
-                      <TableHead className="px-4 text-center">
-                        {RT.labels.tableExample}
-                      </TableHead>
-                      <TableHead className="px-4 text-center">
-                        {RT.labels.tableAnswer}
-                      </TableHead>
-                      <TableHead className="px-4 text-center">
-                        {RT.labels.tableResult}
-                      </TableHead>
+                      <TableHead className="px-4 text-center">{RT.labels.tableExample}</TableHead>
+                      <TableHead className="px-4 text-center">{RT.labels.tableAnswer}</TableHead>
+                      <TableHead className="px-4 text-center">{RT.labels.tableResult}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {history.length === 0 ? (
                       <TableRow>
-                        <TableCell
-                          className="px-4 py-3 text-muted-foreground"
-                          colSpan={3}
-                        >
+                        <TableCell className="px-4 py-3 text-muted-foreground" colSpan={3}>
                           {RT.labels.tableEmpty}
                         </TableCell>
                       </TableRow>
@@ -1238,21 +1044,14 @@ export default function RoundingGame() {
                             </span>
                             <span className="inline sm:hidden leading-tight whitespace-normal">
                               <span className="block">{fmt(h.original)}</span>
-                              <span className="block">
-                                → {targetLabelL(h.target)}
-                              </span>
+                              <span className="block">→ {targetLabelL(h.target)}</span>
                             </span>
                           </TableCell>
-                          <TableCell className="px-4 py-2 text-center">
-                            {fmt(h.user)}
-                          </TableCell>
+                          <TableCell className="px-4 py-2 text-center">{fmt(h.user)}</TableCell>
                           <TableCell className="px-4 py-2 align-top">
                             {h.correct ? (
                               <span className="inline-flex items-center gap-1 text-green-700">
-                                <span
-                                  role="img"
-                                  aria-label={RT.labels.ariaCorrect}
-                                >
+                                <span role="img" aria-label={RT.labels.ariaCorrect}>
                                   ✅
                                 </span>
                                 {RT.labels.tableCorrect}
@@ -1260,10 +1059,7 @@ export default function RoundingGame() {
                             ) : (
                               <div className="text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
                                 <span className="inline-flex items-center gap-1">
-                                  <span
-                                    role="img"
-                                    aria-label={RT.labels.ariaWrong}
-                                  >
+                                  <span role="img" aria-label={RT.labels.ariaWrong}>
                                     ❌
                                   </span>
                                   {RT.t("roundT.table.incorrect", {
@@ -1300,8 +1096,7 @@ export default function RoundingGame() {
   }
 
   function targetLabelL(place: TargetPlace): string {
-    const key =
-      place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
+    const key = place === 10 ? "tens" : place === 100 ? "hundreds" : "thousands";
     return RT.t(`roundT.expl.target.${key}`);
   }
 
@@ -1309,8 +1104,7 @@ export default function RoundingGame() {
     const abs = Math.abs(Math.trunc(n));
     const check = getCheckDigitForPlace(n, place);
     const dir = check >= 5 ? "↑" : "↓";
-    const lowerKey =
-      place === 10 ? "ones" : place === 100 ? "tens" : "hundreds";
+    const lowerKey = place === 10 ? "ones" : place === 100 ? "tens" : "hundreds";
     const lower = RT.t(`roundT.expl.lower.${lowerKey}`);
     return (
       <span>
@@ -1359,15 +1153,7 @@ function generateOptions(n: number, place: TargetPlace): number[] {
 // Small presentational pieces
 // ----------------------------------
 
-function LabeledField({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
+function LabeledField({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={htmlFor}>{label}:</Label>
@@ -1380,9 +1166,7 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
     <Card className="rounded-xl border shadow-sm min-w-20 py-0">
       <CardContent className="px-3 py-1.5">
-        <div className="text-[11px] text-muted-foreground leading-tight">
-          {label}
-        </div>
+        <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
         <div className="text-base font-semibold leading-tight">{value}</div>
       </CardContent>
     </Card>

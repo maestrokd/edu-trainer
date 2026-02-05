@@ -7,18 +7,14 @@ export const LanguageSelectorMode = {
   ICON: "ICON",
 } as const;
 
-export type LanguageSelectorMode =
-  (typeof LanguageSelectorMode)[keyof typeof LanguageSelectorMode];
+export type LanguageSelectorMode = (typeof LanguageSelectorMode)[keyof typeof LanguageSelectorMode];
 
 export interface LanguageSelectorProps {
   mode?: LanguageSelectorMode;
   className?: string;
 }
 
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({
-  mode = LanguageSelectorMode.FULL,
-  className = "",
-}) => {
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({ mode = LanguageSelectorMode.FULL, className = "" }) => {
   // ICON mode: invisible <select> overlays the globe
   if (mode === LanguageSelectorMode.ICON) {
     return (

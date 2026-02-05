@@ -5,22 +5,9 @@ import { useTranslation } from "react-i18next";
 // shadcn/ui primitives
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label.tsx";
@@ -34,10 +21,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ThemeToggle from "@/components/menu/ThemeToggle.tsx";
-import LanguageSelector, {
-  LanguageSelectorMode,
-} from "@/components/lang/LanguageSelector.tsx";
+import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
+import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
 
 // ----------------------------
 // Types & helpers
@@ -217,8 +202,7 @@ export default function MultiplicationTrainer() {
 
   function pickNextTask(min = minVal, max = maxVal) {
     let chosenOp: Op = "mul";
-    if (includeMul && includeDiv)
-      chosenOp = Math.random() < 0.5 ? "mul" : "div";
+    if (includeMul && includeDiv) chosenOp = Math.random() < 0.5 ? "mul" : "div";
     else if (includeDiv && !includeMul) chosenOp = "div";
 
     let na = 0;
@@ -301,9 +285,7 @@ export default function MultiplicationTrainer() {
     const correctAnswer = op === "mul" ? a * b : Math.floor(a / b);
     const isCorrect = user === correctAnswer;
 
-    setHistory((h) =>
-      [{ a, b, answer: user, correct: isCorrect, op }, ...h].slice(0, 100),
-    );
+    setHistory((h) => [{ a, b, answer: user, correct: isCorrect, op }, ...h].slice(0, 100));
     setLastLine(`${a} ${op === "mul" ? "×" : "÷"} ${b} = ${user}`);
     setLastCorrect(isCorrect);
 
@@ -333,9 +315,7 @@ export default function MultiplicationTrainer() {
         <div className="flex items-center justify-between gap-2">
           {/* Left: Title */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-xs text-muted-foreground">
-              {t("multiT.title")}
-            </span>
+            <span className="hidden sm:inline text-xs text-muted-foreground">{t("multiT.title")}</span>
           </div>
 
           <div className="flex items-center text-center">
@@ -353,12 +333,7 @@ export default function MultiplicationTrainer() {
           {/* Right: Settings menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("multiT.menu") || "Menu"}
-                className="size-8"
-              >
+              <Button variant="ghost" size="icon" aria-label={t("multiT.menu") || "Menu"} className="size-8">
                 <Settings className="size-6" />
               </Button>
             </DropdownMenuTrigger>
@@ -370,7 +345,7 @@ export default function MultiplicationTrainer() {
                     <span className="w-full">{t("multiT.menu")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggle />
+                    <ModeToggle />
                     <LanguageSelector mode={LanguageSelectorMode.ICON} />
                   </div>
                 </div>
@@ -380,12 +355,8 @@ export default function MultiplicationTrainer() {
               <DropdownMenuGroup>
                 {screen === "play" && (
                   <>
-                    <DropdownMenuItem onSelect={() => newSession()}>
-                      {t("multiT.newSession")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => backToSetup()}>
-                      {t("multiT.changeRange")}
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => newSession()}>{t("multiT.newSession")}</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => backToSetup()}>{t("multiT.changeRange")}</DropdownMenuItem>
 
                     <DropdownMenuSeparator />
                   </>
@@ -409,79 +380,44 @@ export default function MultiplicationTrainer() {
               {/* Range & Mode */}
               <Card>
                 <CardContent className="p-4 sm:p-6 grid gap-4">
-                  <LabeledField
-                    label={t("multiT.setup.min")!}
-                    htmlFor="min-select"
-                  >
-                    <Select
-                      value={String(minVal)}
-                      onValueChange={(val) => setMinVal(parseInt(val, 10))}
-                    >
-                      <SelectTrigger
-                        id="min-select"
-                        className="rounded-xl w-full h-10"
-                      >
+                  <LabeledField label={t("multiT.setup.min")!} htmlFor="min-select">
+                    <Select value={String(minVal)} onValueChange={(val) => setMinVal(parseInt(val, 10))}>
+                      <SelectTrigger id="min-select" className="rounded-xl w-full h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 11 }, (_, i) => i + 2).map(
-                          (n) => (
-                            <SelectItem key={n} value={String(n)}>
-                              {n}
-                            </SelectItem>
-                          ),
-                        )}
+                        {Array.from({ length: 11 }, (_, i) => i + 2).map((n) => (
+                          <SelectItem key={n} value={String(n)}>
+                            {n}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </LabeledField>
 
-                  <LabeledField
-                    label={t("multiT.setup.max")!}
-                    htmlFor="max-select"
-                  >
-                    <Select
-                      value={String(maxVal)}
-                      onValueChange={(val) => setMaxVal(parseInt(val, 10))}
-                    >
-                      <SelectTrigger
-                        id="max-select"
-                        className="rounded-xl w-full h-10"
-                      >
+                  <LabeledField label={t("multiT.setup.max")!} htmlFor="max-select">
+                    <Select value={String(maxVal)} onValueChange={(val) => setMaxVal(parseInt(val, 10))}>
+                      <SelectTrigger id="max-select" className="rounded-xl w-full h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 11 }, (_, i) => i + 2).map(
-                          (n) => (
-                            <SelectItem key={n} value={String(n)}>
-                              {n}
-                            </SelectItem>
-                          ),
-                        )}
+                        {Array.from({ length: 11 }, (_, i) => i + 2).map((n) => (
+                          <SelectItem key={n} value={String(n)}>
+                            {n}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </LabeledField>
 
-                  <LabeledField
-                    label={t("multiT.setup.mode")!}
-                    htmlFor="mode-select"
-                  >
-                    <Select
-                      value={mode}
-                      onValueChange={(val) => setMode(val as Mode)}
-                    >
-                      <SelectTrigger
-                        id="mode-select"
-                        className="rounded-xl w-full h-10"
-                      >
+                  <LabeledField label={t("multiT.setup.mode")!} htmlFor="mode-select">
+                    <Select value={mode} onValueChange={(val) => setMode(val as Mode)}>
+                      <SelectTrigger id="mode-select" className="rounded-xl w-full h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="quiz">
-                          {t("multiT.mode.quiz")}
-                        </SelectItem>
-                        <SelectItem value="input">
-                          {t("multiT.mode.input")}
-                        </SelectItem>
+                        <SelectItem value="quiz">{t("multiT.mode.quiz")}</SelectItem>
+                        <SelectItem value="input">{t("multiT.mode.input")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </LabeledField>
@@ -510,10 +446,7 @@ export default function MultiplicationTrainer() {
                     </div>
                   </div>
 
-                  <LabeledField
-                    label={t("multiT.setup.timer")!}
-                    htmlFor="timer-min"
-                  >
+                  <LabeledField label={t("multiT.setup.timer")!} htmlFor="timer-min">
                     <Input
                       id="timer-min"
                       type="number"
@@ -526,18 +459,13 @@ export default function MultiplicationTrainer() {
                       }}
                       onBlur={(e) => {
                         const v = parseInt(e.target.value, 10);
-                        setTimerMinutes(
-                          Number.isFinite(v) ? Math.max(0, v) : 0,
-                        );
+                        setTimerMinutes(Number.isFinite(v) ? Math.max(0, v) : 0);
                       }}
                       className="rounded-xl"
                     />
                   </LabeledField>
 
-                  <LabeledField
-                    label={t("multiT.setup.maxExercises")!}
-                    htmlFor="max-ex"
-                  >
+                  <LabeledField label={t("multiT.setup.maxExercises")!} htmlFor="max-ex">
                     <Input
                       id="max-ex"
                       type="number"
@@ -550,9 +478,7 @@ export default function MultiplicationTrainer() {
                       }}
                       onBlur={(e) => {
                         const v = parseInt(e.target.value, 10);
-                        setMaxExercises(
-                          Number.isFinite(v) ? Math.max(0, v) : 0,
-                        );
+                        setMaxExercises(Number.isFinite(v) ? Math.max(0, v) : 0);
                       }}
                       className="rounded-xl"
                     />
@@ -572,9 +498,7 @@ export default function MultiplicationTrainer() {
               </Button>
             </div>
 
-            <p className="text-xs text-muted-foreground mt-3">
-              {t("multiT.setup.note")}
-            </p>
+            <p className="text-xs text-muted-foreground mt-3">{t("multiT.setup.note")}</p>
           </div>
         ) : (
           <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
@@ -596,27 +520,12 @@ export default function MultiplicationTrainer() {
 
                 {/* Stats */}
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <StatCard
-                    label={t("multiT.stats.correct")!}
-                    value={correctCount}
-                  />
-                  <StatCard
-                    label={t("multiT.stats.wrong")!}
-                    value={wrongCount}
-                  />
-                  <StatCard
-                    label={t("multiT.stats.accuracy")!}
-                    value={`${accuracy}%`}
-                  />
-                  <StatCard
-                    label={t("multiT.stats.time")!}
-                    value={formatTime(elapsedSec)}
-                  />
+                  <StatCard label={t("multiT.stats.correct")!} value={correctCount} />
+                  <StatCard label={t("multiT.stats.wrong")!} value={wrongCount} />
+                  <StatCard label={t("multiT.stats.accuracy")!} value={`${accuracy}%`} />
+                  <StatCard label={t("multiT.stats.time")!} value={formatTime(elapsedSec)} />
                   {timerMinutes > 0 && (
-                    <StatCard
-                      label={t("multiT.stats.timeLeft")!}
-                      value={formatTime(timerMinutes * 60 - elapsedSec)}
-                    />
+                    <StatCard label={t("multiT.stats.timeLeft")!} value={formatTime(timerMinutes * 60 - elapsedSec)} />
                   )}
                 </div>
 
@@ -625,10 +534,7 @@ export default function MultiplicationTrainer() {
                   <div className="text-center mb-6">
                     <div className="text-4xl sm:text-6xl font-semibold tracking-wide select-none">
                       {a} <span aria-hidden>{op === "mul" ? "×" : "÷"}</span>{" "}
-                      <span className="sr-only">
-                        {op === "mul" ? t("multiT.sr.mul") : t("multiT.sr.div")}
-                      </span>{" "}
-                      {b} =
+                      <span className="sr-only">{op === "mul" ? t("multiT.sr.mul") : t("multiT.sr.div")}</span> {b} =
                     </div>
 
                     <div className="mt-4 flex items-center justify-center gap-3">
@@ -640,20 +546,14 @@ export default function MultiplicationTrainer() {
                             inputMode="numeric"
                             pattern="[0-9]*"
                             placeholder={t("multiT.input.placeholder") || ""}
-                            aria-label={
-                              t("multiT.aria.answerField") || undefined
-                            }
+                            aria-label={t("multiT.aria.answerField") || undefined}
                             value={answer}
                             onChange={(e) => setAnswer(e.target.value)}
                             onKeyDown={onKeyDown}
                             disabled={gameOver}
                             className="w-40 text-center text-2xl sm:text-3xl rounded-xl"
                           />
-                          <Button
-                            onClick={() => submit()}
-                            disabled={gameOver}
-                            className="text-lg"
-                          >
+                          <Button onClick={() => submit()} disabled={gameOver} className="text-lg">
                             {t("multiT.input.submit")}
                           </Button>
                         </>
@@ -667,13 +567,8 @@ export default function MultiplicationTrainer() {
                                 (e.currentTarget as HTMLButtonElement).blur();
                                 if (!gameOver) submit(opt);
                               }}
-                              onTouchEnd={(e) =>
-                                (e.currentTarget as HTMLButtonElement).blur()
-                              }
-                              aria-label={
-                                t("multiT.quiz.optionAria", { opt }) ||
-                                undefined
-                              }
+                              onTouchEnd={(e) => (e.currentTarget as HTMLButtonElement).blur()}
+                              aria-label={t("multiT.quiz.optionAria", { opt }) || undefined}
                               disabled={gameOver}
                               className="px-5 py-4 text-2xl font-medium"
                             >
@@ -684,27 +579,17 @@ export default function MultiplicationTrainer() {
                       )}
                     </div>
 
-                    <div
-                      className="mt-4 text-lg sm:text-xl"
-                      aria-live="polite"
-                      aria-atomic="true"
-                    >
+                    <div className="mt-4 text-lg sm:text-xl" aria-live="polite" aria-atomic="true">
                       {lastLine && (
                         <span className="inline-flex items-center gap-2">
                           <span className="font-medium">{lastLine}</span>
                           {lastCorrect === true && (
-                            <span
-                              role="img"
-                              aria-label={t("multiT.aria.correct") || undefined}
-                            >
+                            <span role="img" aria-label={t("multiT.aria.correct") || undefined}>
                               ✅
                             </span>
                           )}
                           {lastCorrect === false && (
-                            <span
-                              role="img"
-                              aria-label={t("multiT.aria.wrong") || undefined}
-                            >
+                            <span role="img" aria-label={t("multiT.aria.wrong") || undefined}>
                               ❌
                             </span>
                           )}
@@ -712,11 +597,7 @@ export default function MultiplicationTrainer() {
                       )}
                     </div>
 
-                    {mode === "input" && (
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        {t("multiT.input.hint")}
-                      </p>
-                    )}
+                    {mode === "input" && <p className="mt-2 text-xs text-muted-foreground">{t("multiT.input.hint")}</p>}
                   </div>
                 )}
               </div>
@@ -726,24 +607,15 @@ export default function MultiplicationTrainer() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted">
                     <TableRow>
-                      <TableHead className="px-4 text-center">
-                        {t("multiT.table.example")}
-                      </TableHead>
-                      <TableHead className="px-4 text-center">
-                        {t("multiT.table.answer")}
-                      </TableHead>
-                      <TableHead className="px-4 text-center">
-                        {t("multiT.table.result")}
-                      </TableHead>
+                      <TableHead className="px-4 text-center">{t("multiT.table.example")}</TableHead>
+                      <TableHead className="px-4 text-center">{t("multiT.table.answer")}</TableHead>
+                      <TableHead className="px-4 text-center">{t("multiT.table.result")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {history.length === 0 ? (
                       <TableRow>
-                        <TableCell
-                          className="px-4 py-3 text-muted-foreground"
-                          colSpan={3}
-                        >
+                        <TableCell className="px-4 py-3 text-muted-foreground" colSpan={3}>
                           {t("multiT.table.empty")}
                         </TableCell>
                       </TableRow>
@@ -753,18 +625,11 @@ export default function MultiplicationTrainer() {
                           <TableCell className="px-4 py-2 text-center whitespace-nowrap">
                             {h.a} {h.op === "mul" ? "×" : "÷"} {h.b}
                           </TableCell>
-                          <TableCell className="px-4 py-2 text-center">
-                            {h.answer}
-                          </TableCell>
+                          <TableCell className="px-4 py-2 text-center">{h.answer}</TableCell>
                           <TableCell className="px-4 py-2 align-top">
                             {h.correct ? (
                               <span className="inline-flex items-center gap-1 text-green-700">
-                                <span
-                                  role="img"
-                                  aria-label={
-                                    t("multiT.aria.correct") || undefined
-                                  }
-                                >
+                                <span role="img" aria-label={t("multiT.aria.correct") || undefined}>
                                   ✅
                                 </span>
                                 {t("multiT.table.correct")}
@@ -772,19 +637,11 @@ export default function MultiplicationTrainer() {
                             ) : (
                               <div className="text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
                                 <span className="inline-flex items-center gap-1">
-                                  <span
-                                    role="img"
-                                    aria-label={
-                                      t("multiT.aria.wrong") || undefined
-                                    }
-                                  >
+                                  <span role="img" aria-label={t("multiT.aria.wrong") || undefined}>
                                     ❌
                                   </span>
                                   {t("multiT.table.incorrect", {
-                                    correct:
-                                      h.op === "mul"
-                                        ? h.a * h.b
-                                        : Math.floor(h.a / h.b),
+                                    correct: h.op === "mul" ? h.a * h.b : Math.floor(h.a / h.b),
                                   })}
                                 </span>
                               </div>
@@ -807,15 +664,7 @@ export default function MultiplicationTrainer() {
 // ----------------------------
 // Small presentational pieces
 // ----------------------------
-function LabeledField({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
+function LabeledField({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={htmlFor}>{label}:</Label>
@@ -828,9 +677,7 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
     <Card className="rounded-xl border shadow-sm min-w-20 py-0">
       <CardContent className="px-3 py-1.5">
-        <div className="text-[11px] text-muted-foreground leading-tight">
-          {label}
-        </div>
+        <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
         <div className="text-base font-semibold leading-tight">{value}</div>
       </CardContent>
     </Card>

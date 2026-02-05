@@ -1,10 +1,6 @@
-import * as React from "react"
-import {BookOpen, Bot, Command, Frame, LifeBuoy, Map, PieChart, Send, Settings2, SquareTerminal,} from "lucide-react"
-
-import {NavMain} from "@/components/sidebar/nav-main.tsx"
-import {NavProjects} from "@/components/sidebar/nav-projects.tsx"
-import {NavSecondary} from "@/components/sidebar/nav-secondary.tsx"
-import {NavUser} from "@/components/sidebar/nav-user.tsx"
+import * as React from "react";
+import { Command, LifeBuoy, Send, SquareTerminal, LogIn } from "lucide-react";
+import { NavUser } from "@/components/sidebar/nav-user.tsx";
 import {
   Sidebar,
   SidebarContent,
@@ -13,165 +9,98 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar.tsx"
+} from "@/components/ui/sidebar.tsx";
+import { useAuth } from "@/contexts/AuthContext.tsx";
+import { useSidebarContext } from "@/contexts/SidebarContext";
+import { Link } from "react-router-dom";
+import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { useTranslation } from "react-i18next";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+const navSecondaryData = [
+  {
+    title: "Support",
+    url: "#",
+    icon: LifeBuoy,
   },
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "Home",
-          url: "",
-        },
-        {
-          title: "Menu",
-          url: "menu",
-        },
-        {
-          title: "Private Menu",
-          url: "private-menu",
-        },
-        {
-          title: "Broken",
-          url: "#dsfgds",
-        },
-        {
-          title: "Subscriptions",
-          url: "subscriptions",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "settings",
-        },
-        {
-          title: "Health",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
+  {
+    title: "Feedback",
+    url: "#",
+    icon: Send,
+  },
+];
 
-export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useTranslation();
+  const { principal } = useAuth();
+  const { sidebarContent } = useSidebarContext();
+
+  const user = React.useMemo(() => {
+    if (!principal) return null;
+    return {
+      name:
+        principal.firstName && principal.lastName ? `${principal.firstName} ${principal.lastName}` : principal.username,
+      email: principal.email || principal.username,
+      avatar: "", // TODO: Add avatar to principal or profile
+      authorities: principal.authorities,
+    };
+  }, [principal]);
+
   return (
-      <Sidebar variant="inset" {...props}>
-        <SidebarHeader>
+    <Sidebar variant="inset" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link to="/">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Command className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{t("menu.title")}</span>
+                  <span className="truncate text-xs">{t("menu.home")}</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip={t("menu.home")}>
+              <Link to="/">
+                <SquareTerminal />
+                <span>{t("menu.home")}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        {/* Dynamic Content */}
+        {sidebarContent}
+
+        {/* Secondary Nav (Support, Feedback) - Pushed to bottom of content area */}
+        <NavSecondary items={navSecondaryData} className="mt-auto" />
+      </SidebarContent>
+      <SidebarFooter>
+        {user ? (
+          <NavUser user={user} />
+        ) : (
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <a href="#">
-                  <div
-                      className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <Command className="size-4"/>
+              <SidebarMenuButton asChild size="lg">
+                <Link to="/login">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <LogIn className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Acme Inc</span>
-                    <span className="truncate text-xs">Enterprise</span>
+                    <span className="truncate font-medium">{t("menu.user.login")}</span>
+                    <span className="truncate text-xs">{t("menu.user.loginDesc")}</span>
                   </div>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent>
-          <NavMain items={data.navMain}/>
-          <NavProjects projects={data.projects}/>
-          <NavSecondary items={data.navSecondary} className="mt-auto"/>
-        </SidebarContent>
-        <SidebarFooter>
-          <NavUser user={data.user}/>
-        </SidebarFooter>
-      </Sidebar>
-  )
+        )}
+      </SidebarFooter>
+    </Sidebar>
+  );
 }
