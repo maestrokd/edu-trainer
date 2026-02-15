@@ -83,6 +83,10 @@
     "rabbit": {
       "title": "Jumping Rabbit",
       "desc": "Arcade jumping with math twists."
+    },
+    "picChoose": {
+      "title": "Choose the Picture",
+      "desc": "Listen to the sound and pick the right picture."
     }
   },
   "multiT": {
@@ -714,6 +718,38 @@
       "MISSING_COOKIE": "Invalid or absent cookie.",
       "INVALID_PROMO_CODE": "Invalid or expired promo code.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window."
+    }
+  },
+  "picChooseT": {
+    "menu": "Menu",
+    "title": "Choose the Picture",
+    "actions": {
+      "newSession": "New session",
+      "changeSetup": "Change setup",
+      "toMenu": "Main menu"
+    },
+    "setup": {
+      "title": "Setup",
+      "intro": "Configure the game by selecting categories or specific pictures.",
+      "categories": "Categories",
+      "start": "Start Playing",
+      "allCategories": "All Categories"
+    },
+    "play": {
+      "instruction": "Press the button to hear the word",
+      "feedback": {
+        "correct": "Correct! Well done!",
+        "wrong": "Try again!"
+      }
+    },
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy"
+    },
+    "aria": {
+      "playSound": "Play sound",
+      "pickPicture": "Pick this picture"
     }
   }
 }

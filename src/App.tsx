@@ -19,6 +19,7 @@ import AuthorityRoute from "@/components/AuthorityRoute.tsx";
 import SecondaryProfilesPage from "@/pages/profiles/SecondaryProfilesPage.tsx";
 import CreateSecondaryProfilePage from "@/pages/profiles/CreateSecondaryProfilePage.tsx";
 import EditSecondaryProfilePage from "@/pages/profiles/EditSecondaryProfilePage.tsx";
+import PictureChooseGame from "@/pages/picture-choose/PictureChooseGame.tsx";
 
 export default function App() {
   return (
@@ -85,6 +86,7 @@ export default function App() {
         <Route path="/compare-numbers" element={<CompareNumbersGame />} />
         <Route path="/rounding-trainer" element={<RoundingGame />} />
         <Route path="/add-sub-trainer" element={<AddSubTrainer />} />
+        <Route path="/picture-choose" element={<PictureChooseGame />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

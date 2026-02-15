@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Calculator, Info, Rabbit, Ruler, LayoutGrid, Loader2, AlertTriangle, Search } from "lucide-react";
+import { Calculator, Info, Rabbit, Ruler, LayoutGrid, Loader2, AlertTriangle, Search, Volume2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import MenuApiClient, { type ApiMenuItem, MenuCategory } from "@/services/MenuApiClient";
@@ -24,6 +24,7 @@ const iconMap: Record<string, LucideIcon> = {
   Info,
   Rabbit,
   Ruler,
+  Volume2,
   PlusMinus: Calculator, // Using Calculator for math operations as fallback
 };
 
@@ -62,7 +63,27 @@ export default function MenuPage() {
       ),
   });
 
-  const menuItems = menuData?.content || [];
+  const menuItems = useMemo(() => {
+    const items = [...(menuData?.content || [])];
+
+    // Add local Choose the Picture game if not present
+    if (!items.find((item) => item.id === "pic-choose-local")) {
+      items.push({
+        id: "pic-choose-local",
+        type: "GAME",
+        path: "/picture-choose",
+        name: "picChoose",
+        title: t("games.picChoose.title"),
+        description: t("games.picChoose.desc"),
+        category: MenuCategory.ARCADE,
+        iconKey: "Volume2",
+        badge: "NEW",
+        tags: ["arcade", "audio"],
+      });
+    }
+
+    return items;
+  }, [menuData, t]);
 
   const categories = useMemo(() => {
     return [
