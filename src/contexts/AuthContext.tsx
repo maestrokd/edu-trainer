@@ -10,6 +10,7 @@ export const Authority = {
   MANAGE_SUBSCRIPTIONS: "MANAGE_SUBSCRIPTIONS",
   VIEW_REPORTS: "VIEW_REPORTS",
   SPECIAL_GAMES: "SPECIAL_GAMES",
+  ENGLISH_COACH_OPENAI: "ENGLISH_COACH_OPENAI",
 } as const;
 
 export type Authority = (typeof Authority)[keyof typeof Authority];

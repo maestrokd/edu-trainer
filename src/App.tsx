@@ -16,11 +16,16 @@ import SettingsPage from "@/pages/SettingsPage.tsx";
 import SubscriptionPage from "@/pages/subscriptions/SubscriptionPage.tsx";
 import MenuPage from "@/pages/MenuPage.tsx";
 import AuthorityRoute from "@/components/AuthorityRoute.tsx";
+import { Authority } from "@/contexts/AuthContext.tsx";
 import SecondaryProfilesPage from "@/pages/profiles/SecondaryProfilesPage.tsx";
 import CreateSecondaryProfilePage from "@/pages/profiles/CreateSecondaryProfilePage.tsx";
 import EditSecondaryProfilePage from "@/pages/profiles/EditSecondaryProfilePage.tsx";
+import EnglishCoachPage from "@/pages/EnglishCoachPage.tsx";
+
+import { usePageTitle } from "@/hooks/usePageTitle.ts";
 
 export default function App() {
+  usePageTitle();
   return (
     <Routes>
       <Route
@@ -65,15 +70,19 @@ export default function App() {
         <Route path="/" element={<MenuPage />} />
 
         <Route element={<PrivateRoute />}>
-          <Route element={<AuthorityRoute authority="MANAGE_SUBSCRIPTIONS" />}>
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} />}>
             <Route path="subscriptions" element={<SubscriptionPage />} />
           </Route>
 
-          <Route element={<AuthorityRoute authority="MANAGE_PROFILES" />}>
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
             <Route path="settings" element={<SettingsPage />} />
             <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
             <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
             <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
+          </Route>
+
+          <Route element={<AuthorityRoute authority={Authority.ENGLISH_COACH_OPENAI} />}>
+            <Route path="english-coach" element={<EnglishCoachPage />} />
           </Route>
         </Route>
       </Route>
