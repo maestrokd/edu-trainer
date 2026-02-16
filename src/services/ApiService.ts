@@ -37,6 +37,9 @@ export function extractErrorCode(error: unknown): string | null {
   if (error instanceof ApiError) {
     return error.errorCode;
   }
+  if (error && typeof error === "object" && "errorCode" in error && typeof (error as any).errorCode === "string") {
+    return (error as any).errorCode;
+  }
   return null;
 }
 
