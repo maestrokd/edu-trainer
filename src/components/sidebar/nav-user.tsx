@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar.tsx";
-import { useAuth } from "@/contexts/AuthContext.tsx";
+import { Authority, useAuth } from "@/contexts/AuthContext.tsx";
 import { useNavigate } from "react-router-dom";
 
 export function NavUser({
@@ -41,8 +41,8 @@ export function NavUser({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const canManageProfiles = user.authorities?.includes("MANAGE_PROFILES");
-  const canManageSubscriptions = user.authorities?.includes("MANAGE_SUBSCRIPTIONS");
+  const canManageProfiles = user.authorities?.includes(Authority.MANAGE_PROFILES);
+  const canManageSubscriptions = user.authorities?.includes(Authority.MANAGE_SUBSCRIPTIONS);
 
   return (
     <SidebarMenu>
