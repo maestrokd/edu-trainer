@@ -60,9 +60,16 @@
   "common": {
     "edit": "Edit",
     "delete": "Delete",
+    "create": "Create",
+    "new": "New",
+    "back": "Back",
     "save": "Save",
     "saving": "Saving...",
     "loading": "Loading...",
+    "refresh": "Refresh",
+    "previous": "Previous",
+    "next": "Next",
+    "retry": "Retry",
     "cancel": "Cancel",
     "list": {
       "actions": "Actions",
@@ -93,6 +100,10 @@
     "rabbit": {
       "title": "Jumping Rabbit",
       "desc": "Arcade jumping with math twists."
+    },
+    "familyTask": {
+      "title": "Family Task Manager",
+      "desc": "Organize chores, routines, and rewards for the whole family."
     }
   },
   "multiT": {
@@ -965,6 +976,348 @@
       "microphoneUnsupported": "Your browser does not support microphone access.",
       "microphoneDenied": "Microphone access was denied. Please allow it in your browser settings.",
       "recordingFailed": "Recording failed. Please try again."
+    }
+  },
+  "familyTask": {
+    "sidebar": {
+      "title": "Family Tasks",
+      "dashboard": "Dashboard",
+      "today": "Today",
+      "chores": "Chores",
+      "routines": "Routines",
+      "approvals": "Approvals",
+      "rewards": "Rewards",
+      "stars": "Stars",
+      "redemptions": "Redemptions",
+      "profiles": "Profiles",
+      "lists": "Lists",
+      "templateCollections": "Template Collections",
+      "settings": "Settings",
+      "display": "Display",
+      "management": "Management"
+    },
+    "dashboard": {
+      "welcome": "Welcome, {{name}}!",
+      "allKids": "All kids",
+      "today": "Today",
+      "previousDay": "Previous day",
+      "nextDay": "Next day",
+      "completeTask": "Complete task",
+      "family": "Family",
+      "familyName": "Show family name",
+      "filtersEmpty": "No tasks in the enabled filters.",
+      "stats": {
+        "pendingApprovals": "Pending Approvals",
+        "todayTasks": "Tasks Today",
+        "starBalance": "Star Balance"
+      },
+      "profiles": "Family Profiles",
+      "quickActions": "Quick Actions"
+    },
+    "gates": {
+      "loginTitle": "Log in to continue",
+      "loginDescription": "Sign in to save progress, track stars history, and sync family tasks across devices.",
+      "loginCta": "Log in",
+      "upgradeTitle": "Upgrade to unlock advanced tools",
+      "upgradeDescription": "Premium access enables advanced insights, richer workflows, and additional family automations.",
+      "upgradeCta": "View plans",
+      "parentOnlyTitle": "Parent access required"
+    },
+    "today": {
+      "title": "Today's Tasks",
+      "empty": "No tasks scheduled for today.",
+      "slots": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "anytime": "Anytime",
+        "chore": "One-off Chores",
+        "chores": "Chores"
+      },
+      "submit": "Submit for Approval",
+      "submitted": "Submitted",
+      "approved": "Approved"
+    },
+    "chores": {
+      "title": "Chores",
+      "create": "Create Chore",
+      "edit": "Edit Chore",
+      "noChores": "No chores defined yet.",
+      "details": "Chore Details",
+      "dueDate": "Due Date",
+      "badges": {
+        "upcoming": "Upcoming",
+        "dueToday": "Due today",
+        "overdue": "Overdue",
+        "noDueDate": "No due date"
+      },
+      "form": {
+        "title": "Title",
+        "description": "Description",
+        "points": "Stars",
+        "assignedTo": "Assigned To"
+      }
+    },
+    "routines": {
+      "title": "Routines",
+      "create": "Create Routine",
+      "edit": "Edit Routine",
+      "noRoutines": "No routines defined yet.",
+      "dateRangeNotStarted": "Not started yet",
+      "dateRangeEnded": "Date range ended",
+      "slots": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "anytime": "Anytime"
+      }
+    },
+    "approvals": {
+      "title": "Approvals",
+      "tasks": "Task Completions",
+      "rewards": "Reward Redemptions",
+      "empty": "All clear! No pending approvals.",
+      "taskEmpty": "No pending task approvals.",
+      "redemptionEmpty": "No pending redemption requests.",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "rewards": {
+      "title": "Rewards",
+      "create": "Create Reward",
+      "edit": "Edit Reward",
+      "noRewards": "No rewards available.",
+      "cost": "Cost: {{points}} stars",
+      "redeem": "Redeem",
+      "redeemFor": "Redeem ⭐ {{cost}}",
+      "balance": "Your Balance: {{points}} stars",
+      "viewRedemptions": "View Redemptions",
+      "quantity": "Quantity",
+      "quantityShort": "Qty",
+      "quantityLimited": "Limit quantity",
+      "unlimitedQuantity": "Reward remains available while active.",
+      "needStars": "Need {{count}} stars",
+      "redeemed": "Redeemed",
+      "redeemedOn": "Redeemed on {{date}}",
+      "showRedeemed": "Show redeemed",
+      "hideRedeemed": "Hide redeemed",
+      "unknownReward": "Reward",
+      "emptyBoard": "Ready for a new goal?",
+      "emptyBoardHint": "Create a reward in the app.",
+      "confirmTitle": "Redeem \"{{title}}\"?",
+      "confirmBody": "This will spend {{cost}} stars.",
+      "confirmRedeem": "Redeem \"{{title}}\" for {{cost}} stars?",
+      "panelHint": "Assign profiles, set emoji and stars cost, then save so the reward appears in the dashboard."
+    },
+    "stars": {
+      "title": "Stars",
+      "manageTitle": "Adjust Stars",
+      "manageSubtitle": "Manual stars adjustments for child profiles",
+      "panelHint": "Choose a child profile, add or subtract stars, and keep track of every adjustment in the ledger.",
+      "child": "Child Profile",
+      "adjustmentType": "Adjustment Type",
+      "add": "Add",
+      "subtract": "Subtract",
+      "amount": "Stars Amount",
+      "reason": "Reason",
+      "reasonPlaceholder": "MANUAL_BONUS_WEEKEND_HELP or MANUAL_CORRECTION",
+      "addStars": "Add Stars",
+      "subtractStars": "Subtract Stars",
+      "currentBalance": "Current Balance",
+      "selectedChild": "Selected Child",
+      "ledgerTitle": "Stars Ledger",
+      "ledgerSubtitle": "Latest entries for selected child profile",
+      "totalEntries": "Total: {{count}}",
+      "noEntries": "No stars entries found.",
+      "date": "Date",
+      "delta": "Delta",
+      "pageSummary": "{{from}}-{{to}} of {{total}}",
+      "pageNumber": "Page {{current}}/{{total}}",
+      "saved": "Stars adjustment saved.",
+      "noReason": "No reason"
+    },
+    "redemptions": {
+      "title": "My Redemptions",
+      "empty": "No redemptions yet.",
+      "noDate": "Unknown date",
+      "status": {
+        "requested": "Requested",
+        "approved": "Approved",
+        "completed": "Completed",
+        "rejected": "Rejected"
+      }
+    },
+    "profiles": {
+      "title": "Child Profiles",
+      "create": "Add Child Profile",
+      "edit": "Edit Profile",
+      "unknown": "Unknown",
+      "noProfiles": "No child profiles yet."
+    },
+    "lists": {
+      "title": "Family Lists",
+      "create": "Create List",
+      "noLists": "No lists found.",
+      "addItem": "Add item"
+    },
+    "settings": {
+      "empty": "No configurable family task settings are available."
+    },
+    "templateCollections": {
+      "title": "Template Collections",
+      "description": "Export and import reusable routine, chore, and reward templates.",
+      "controls": "Collection Controls",
+      "pickType": "Choose template collection type.",
+      "type": "Collection type",
+      "tabs": {
+        "export": "Export",
+        "import": "Import"
+      },
+      "collection": {
+        "routines": "Routines",
+        "chores": "Chores",
+        "rewards": "Rewards"
+      },
+      "contract": {
+        "routines": "Routine templates contain recurrence settings only. Imports create inactive, unassigned drafts.",
+        "chores": "Chore templates contain generic task fields only. Imports create inactive, unassigned drafts.",
+        "rewards": "Reward templates contain reward metadata only. Imports create inactive, unassigned drafts."
+      },
+      "filters": {
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "columns": {
+        "title": "Title",
+        "recurrence": "Recurrence",
+        "slot": "Slot",
+        "starsReward": "Stars",
+        "starsCost": "Stars cost",
+        "availableQuantity": "Available quantity",
+        "dueDate": "Due date",
+        "active": "Status"
+      },
+      "grouping": {
+        "toggleExport": "Group by routine slot",
+        "toggleImport": "Group by routine slot",
+        "unspecified": "Unspecified"
+      },
+      "validation": {
+        "title": "Validation issues returned by backend:",
+        "fileRequired": "Please choose a JSON file first.",
+        "fileTooLarge": "File is larger than 1 MiB. Maximum allowed size is 1,048,576 bytes.",
+        "emptyJson": "JSON is empty.",
+        "parseError": "JSON parse error: {{detail}}",
+        "unknownError": "Unknown error",
+        "invalidRoot": "JSON root must be an object.",
+        "missingSchemaVersion": "schemaVersion is required.",
+        "invalidItems": "items must be an array.",
+        "invalidItemEntry": "Each item must be an object."
+      },
+      "error": {
+        "generic": "Operation failed."
+      },
+      "selection": {
+        "required": "Select at least one item before continuing.",
+        "counter": "{{selected}} selected out of {{total}} filtered",
+        "selectAll": "Select all",
+        "clearAll": "Clear all",
+        "selectFiltered": "Select all filtered",
+        "clearFiltered": "Clear filtered selection"
+      },
+      "preview": {
+        "direct": "Direct Export Preview",
+        "selected": "Selected Export Preview",
+        "pretty": "Backend-generated prettified JSON preview."
+      },
+      "copy": {
+        "success": "JSON copied to clipboard.",
+        "failure": "Failed to copy JSON.",
+        "notAvailable": "Clipboard API is not available."
+      },
+      "export": {
+        "stateFilter": "State filter",
+        "loadCandidates": "Load candidates",
+        "noCandidates": "No candidates loaded yet.",
+        "downloaded": "Downloaded {{fileName}}",
+        "direct": {
+          "title": "Direct Export",
+          "description": "Export all filtered items and preview or download backend-generated JSON."
+        },
+        "interactive": {
+          "title": "Interactive Export",
+          "description": "Load candidates, select individual items, then preview or download selected templates."
+        }
+      },
+      "import": {
+        "blocked": "Import is blocked because preview contains invalid items. Fix data or reduce selection first.",
+        "created": "Created {{count}} item(s).",
+        "fileReadError": "Failed to read file.",
+        "source": {
+          "upload": "Upload JSON file",
+          "paste": "Paste JSON"
+        },
+        "loadJson": "Load JSON",
+        "pastePlaceholder": "Paste template collection JSON here...",
+        "payloadSummary": "schemaVersion: {{version}} · items: {{count}}",
+        "itemFallbackTitle": "Item {{index}}",
+        "draftNote": "Imported items are inactive and unassigned drafts. Assign profiles before activation.",
+        "openList": "Open {{collection}} list",
+        "success": "Import Completed",
+        "successDescription": "Templates were imported successfully.",
+        "successCounts": "Created {{created}} out of {{requested}} requested item(s).",
+        "direct": {
+          "title": "Direct File Import",
+          "description": "Upload a JSON file and preview or import it directly via backend file endpoints."
+        },
+        "interactive": {
+          "title": "Interactive Import",
+          "description": "Load JSON from file or pasted text, select items, preview import result, then import selection."
+        },
+        "preview": {
+          "title": "Import Preview Result",
+          "description": "Review counts and validation details before executing import.",
+          "total": "Total",
+          "valid": "Valid",
+          "invalid": "Invalid",
+          "wouldCreate": "Would create",
+          "warnings": "Warnings",
+          "errors": "Errors",
+          "noWarnings": "No warnings.",
+          "noErrors": "No errors."
+        }
+      },
+      "unlimited": "Unlimited",
+      "schemaNotice": "Unsupported schemaVersion \"{{version}}\". Supported version is \"1.0\".",
+      "selectLabel": "Select",
+      "previewJson": "Preview JSON",
+      "downloadJson": "Download JSON",
+      "previewSelectedJson": "Preview Selected JSON",
+      "downloadSelectedJson": "Download Selected JSON",
+      "previewFile": "Preview File",
+      "importFile": "Import File",
+      "previewImport": "Preview Import",
+      "importSelected": "Import Selected",
+      "copyJson": "Copy JSON"
+    },
+    "errors": {
+      "forbidden": "This section is available to parents only.",
+      "starBalance": "Failed to load stars balance.",
+      "starHistory": "Failed to load stars history.",
+      "starManagementLoad": "Failed to load stars data.",
+      "starAdjustmentSave": "Failed to save stars adjustment."
+    },
+    "common": {
+      "stars_one": "{{count}} star",
+      "stars_other": "{{count}} stars",
+      "noAssigned": "Everyone",
+      "frequency": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "weekdays": "Mon-Fri",
+        "weekends": "Sat-Sun"
+      }
     }
   }
 }
