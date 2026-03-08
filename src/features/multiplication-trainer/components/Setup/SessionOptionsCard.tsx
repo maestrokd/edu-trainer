@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { NumericInput } from "@/components/ui/numeric-input";
-import { LabeledField } from "../Shared/LabeledField";
+import { LabeledField } from "@/components/ui/labeled-field";
 
 interface SessionOptionsCardProps {
   includeMul: boolean;

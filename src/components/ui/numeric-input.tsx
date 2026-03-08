@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
  *     - This signals the field is "unlimited" and 0 === no limit.
  *     - When the user clears the field and blurs, it returns to value 0 (∞).
  * - On blur, defaults to `fallbackValue` (default: 0) when field is left empty or non-numeric.
- * - Restricts input to digit characters only.
+ * - Restricts input to digit characters only (and "-" if allowNegative is true).
  */
 interface NumericInputProps {
     id?: string;
@@ -19,6 +19,7 @@ interface NumericInputProps {
     min?: number;
     fallbackValue?: number;
     showInfinityWhenZero?: boolean;
+    allowNegative?: boolean;
     className?: string;
     disabled?: boolean;
     "aria-label"?: string;
@@ -37,6 +38,7 @@ export function NumericInput({
     min = 0,
     fallbackValue = 0,
     showInfinityWhenZero = false,
+    allowNegative = false,
     className,
     disabled,
     "aria-label": ariaLabel,
@@ -55,13 +57,20 @@ export function NumericInput({
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const inputVal = e.target.value;
-        // Allow only digits or empty string (user clears to type freely)
-        if (inputVal !== "" && !/^\d+$/.test(inputVal)) return;
+        // Allow digits, or empty string, or leading minus if allowNegative
+        if (inputVal !== "") {
+            if (allowNegative) {
+                if (!/^-?\d*$/.test(inputVal)) return;
+            } else {
+                if (!/^\d+$/.test(inputVal)) return;
+            }
+        }
         setRaw(inputVal);
         // Update domain state immediately while typing (only on valid number)
         const parsed = parseInt(inputVal, 10);
         if (!Number.isNaN(parsed)) {
-            onChange(Math.max(min, parsed));
+            const effectiveMin = allowNegative ? (min === 0 ? -Infinity : min) : min;
+            onChange(Math.max(effectiveMin, parsed));
         } else if (inputVal === "" && showInfinityWhenZero) {
             // Empty field in ∞ mode means "unlimited" = 0
             onChange(fallbackValue);
@@ -70,7 +79,8 @@ export function NumericInput({
 
     function handleBlur() {
         const parsed = parseInt(raw, 10);
-        const safeValue = Number.isFinite(parsed) ? Math.max(min, parsed) : fallbackValue;
+        const effectiveMin = allowNegative ? (min === 0 ? -Infinity : min) : min;
+        const safeValue = Number.isFinite(parsed) ? Math.max(effectiveMin, parsed) : fallbackValue;
         setRaw(toRaw(safeValue, showInfinityWhenZero));
         onChange(safeValue);
     }
@@ -79,8 +89,8 @@ export function NumericInput({
         <Input
             id={id}
             type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
+            inputMode={allowNegative ? "text" : "numeric"}
+            pattern={allowNegative ? undefined : "[0-9]*"}
             value={raw}
             placeholder={showInfinityWhenZero && raw === "" ? "∞" : undefined}
             onChange={handleChange}
