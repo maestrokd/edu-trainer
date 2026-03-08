@@ -24,6 +24,30 @@ import EnglishCoachPage from "@/pages/EnglishCoachPage.tsx";
 
 import { usePageTitle } from "@/hooks/usePageTitle.ts";
 
+import {
+  FamilyTaskDashboardPage,
+  TodayPage,
+  SharedDisplayPage,
+  ChoresPage,
+  ChoreDetailsPage,
+  RoutinesPage,
+  RoutineDetailsPage,
+  ApprovalsPage,
+  RewardsPage,
+  RewardDetailsPage,
+  RewardRedemptionsPage,
+  ListsPage,
+  ListDetailsPage,
+  CalendarPage,
+  EventDetailsPage,
+  ProfilesPage,
+  ProfileDetailsPage,
+  InvitationsPage,
+  DevicesPage,
+  DeviceDetailsPage,
+  FamilyTaskSettingsPage,
+} from "@/features/familyTaskManager";
+
 export default function App() {
   usePageTitle();
   return (
@@ -83,6 +107,41 @@ export default function App() {
 
           <Route element={<AuthorityRoute authority={Authority.ENGLISH_COACH_OPENAI} />}>
             <Route path="english-coach" element={<EnglishCoachPage />} />
+          </Route>
+
+          <Route element={<AuthorityRoute authority={Authority.FAMILY_TASK_MANAGER} />}>
+            <Route path="family-tasks" element={<FamilyTaskDashboardPage />} />
+            <Route path="family-tasks/today" element={<TodayPage />} />
+            <Route path="family-tasks/rewards" element={<RewardsPage />} />
+            <Route path="family-tasks/lists" element={<ListsPage />} />
+            <Route path="family-tasks/lists/:listUuid" element={<ListDetailsPage />} />
+            <Route path="family-tasks/calendar" element={<CalendarPage />} />
+            <Route path="family-tasks/devices" element={<DevicesPage />} />
+            <Route path="family-tasks/display" element={<SharedDisplayPage />} />
+
+            <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
+              <Route path="family-tasks/tasks" element={<Navigate to="/family-tasks/tasks/chores" replace />} />
+              <Route path="family-tasks/tasks/chores" element={<ChoresPage />} />
+              <Route path="family-tasks/tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />
+              <Route path="family-tasks/tasks/routines" element={<RoutinesPage />} />
+              <Route path="family-tasks/tasks/routines/:routineUuid" element={<RoutineDetailsPage />} />
+              <Route path="family-tasks/approvals" element={<ApprovalsPage />} />
+              <Route path="family-tasks/chores" element={<ChoresPage />} />
+              <Route path="family-tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />
+              <Route path="family-tasks/routines" element={<RoutinesPage />} />
+              <Route path="family-tasks/routines/:routineUuid" element={<RoutineDetailsPage />} />
+              <Route path="family-tasks/redemptions" element={<RewardRedemptionsPage />} />
+              <Route path="family-tasks/rewards/redemptions" element={<RewardRedemptionsPage />} />
+              <Route path="family-tasks/rewards/:rewardUuid" element={<RewardDetailsPage />} />
+              <Route path="family-tasks/calendar/events/new" element={<EventDetailsPage />} />
+              <Route path="family-tasks/calendar/events/:eventUuid" element={<EventDetailsPage />} />
+              <Route path="family-tasks/profiles" element={<ProfilesPage />} />
+              <Route path="family-tasks/profiles/:profileUuid" element={<ProfileDetailsPage />} />
+              <Route path="family-tasks/invitations" element={<InvitationsPage />} />
+              <Route path="family-tasks/devices/new" element={<DeviceDetailsPage />} />
+              <Route path="family-tasks/devices/:deviceUuid" element={<DeviceDetailsPage />} />
+              <Route path="family-tasks/settings" element={<FamilyTaskSettingsPage />} />
+            </Route>
           </Route>
         </Route>
       </Route>

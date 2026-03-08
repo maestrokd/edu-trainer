@@ -15,6 +15,7 @@ import { useSidebarContext } from "@/contexts/SidebarContext";
 import { Link } from "react-router-dom";
 import { NavSecondary } from "@/components/sidebar/nav-secondary";
 import { useTranslation } from "react-i18next";
+import { Authority } from "@/contexts/AuthContext.tsx";
 
 const navSecondaryData = [
   {
@@ -71,6 +72,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          {principal?.authorities?.includes(Authority.FAMILY_TASK_MANAGER) && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={t("familyTask.sidebar.title", "Family Tasks")}>
+                <Link to="/family-tasks">
+                  <Command />
+                  <span>{t("familyTask.sidebar.title", "Family Tasks")}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

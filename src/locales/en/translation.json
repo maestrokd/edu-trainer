@@ -58,6 +58,7 @@
     "save": "Save",
     "saving": "Saving...",
     "loading": "Loading...",
+    "retry": "Retry",
     "cancel": "Cancel",
     "list": {
       "actions": "Actions",
@@ -88,6 +89,10 @@
     "rabbit": {
       "title": "Jumping Rabbit",
       "desc": "Arcade jumping with math twists."
+    },
+    "familyTask": {
+      "title": "Family Task Manager",
+      "desc": "Organize chores, routines, and rewards for the whole family."
     }
   },
   "multiT": {
@@ -784,6 +789,164 @@
       "microphoneUnsupported": "Your browser does not support microphone access.",
       "microphoneDenied": "Microphone access was denied. Please allow it in your browser settings.",
       "recordingFailed": "Recording failed. Please try again."
+    }
+  },
+  "familyTask": {
+    "sidebar": {
+      "title": "Family Tasks",
+      "dashboard": "Dashboard",
+      "today": "Today",
+      "chores": "Chores",
+      "routines": "Routines",
+      "approvals": "Approvals",
+      "rewards": "Rewards",
+      "redemptions": "Redemptions",
+      "profiles": "Profiles",
+      "lists": "Lists",
+      "calendar": "Calendar",
+      "invitations": "Invitations",
+      "devices": "Devices",
+      "settings": "Settings",
+      "display": "Display",
+      "management": "Management"
+    },
+    "dashboard": {
+      "welcome": "Welcome, {{name}}!",
+      "allKids": "All kids",
+      "today": "Today",
+      "previousDay": "Previous day",
+      "nextDay": "Next day",
+      "completeTask": "Complete task",
+      "family": "Family",
+      "familyName": "Show family name",
+      "filtersEmpty": "No tasks in the enabled filters.",
+      "stats": {
+        "pendingApprovals": "Pending Approvals",
+        "todayTasks": "Tasks Today",
+        "starBalance": "Star Balance"
+      },
+      "profiles": "Family Profiles",
+      "quickActions": "Quick Actions"
+    },
+    "gates": {
+      "loginTitle": "Log in to continue",
+      "loginDescription": "Sign in to save progress, track stars history, and sync family tasks across devices.",
+      "loginCta": "Log in",
+      "upgradeTitle": "Upgrade to unlock advanced tools",
+      "upgradeDescription": "Premium access enables advanced insights, richer workflows, and additional family automations.",
+      "upgradeCta": "View plans",
+      "parentOnlyTitle": "Parent access required"
+    },
+    "today": {
+      "title": "Today's Tasks",
+      "empty": "No tasks scheduled for today.",
+      "slots": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "anytime": "Anytime",
+        "chore": "One-off Chores",
+        "chores": "Chores"
+      },
+      "submit": "Submit for Approval",
+      "submitted": "Submitted",
+      "approved": "Approved"
+    },
+    "chores": {
+      "title": "Chores",
+      "create": "Create Chore",
+      "edit": "Edit Chore",
+      "noChores": "No chores defined yet.",
+      "details": "Chore Details",
+      "form": {
+        "title": "Title",
+        "description": "Description",
+        "points": "Stars",
+        "assignedTo": "Assigned To"
+      }
+    },
+    "routines": {
+      "title": "Routines",
+      "create": "Create Routine",
+      "edit": "Edit Routine",
+      "noRoutines": "No routines defined yet.",
+      "slots": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "anytime": "Anytime"
+      }
+    },
+    "approvals": {
+      "title": "Approvals",
+      "tasks": "Task Completions",
+      "rewards": "Reward Redemptions",
+      "empty": "All clear! No pending approvals.",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "rewards": {
+      "title": "Rewards",
+      "create": "Create Reward",
+      "edit": "Edit Reward",
+      "noRewards": "No rewards available.",
+      "cost": "Cost: {{points}} stars",
+      "redeem": "Redeem",
+      "balance": "Your Balance: {{points}} stars"
+    },
+    "redemptions": {
+      "title": "My Redemptions",
+      "empty": "No redemptions yet.",
+      "status": {
+        "requested": "Requested",
+        "approved": "Approved",
+        "completed": "Completed",
+        "rejected": "Rejected"
+      }
+    },
+    "profiles": {
+      "title": "Child Profiles",
+      "create": "Add Child Profile",
+      "edit": "Edit Profile",
+      "noProfiles": "No child profiles yet."
+    },
+    "lists": {
+      "title": "Family Lists",
+      "create": "Create List",
+      "noLists": "No lists found.",
+      "addItem": "Add item"
+    },
+    "invitations": {
+      "title": "Manage Family",
+      "invite": "Invite Member",
+      "sent": "Invitations Sent",
+      "form": {
+        "email": "Email Address",
+        "role": "Role"
+      },
+      "roles": {
+        "parent": "Parent",
+        "child": "Child"
+      }
+    },
+    "devices": {
+      "title": "Devices & Display",
+      "displaySettings": "Display Settings",
+      "showClock": "Show Clock",
+      "showWeather": "Show Weather",
+      "linkedDevices": "Linked Devices",
+      "linkNew": "Link New Device"
+    },
+    "common": {
+      "stars_one": "{{count}} star",
+      "stars_other": "{{count}} stars",
+      "noAssigned": "Everyone",
+      "frequency": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "weekdays": "Mon-Fri",
+        "weekends": "Sat-Sun"
+      }
     }
   }
 }
