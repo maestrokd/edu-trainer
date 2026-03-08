@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LabeledField } from "../Shared/LabeledField";
+import { LabeledField } from "@/components/ui/labeled-field";
 import type { Mode } from "../../model/trainer.types";
 
 interface RangeSettingsCardProps {

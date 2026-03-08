@@ -1,4 +1,4 @@
-import { StatCard } from "./StatCard";
+import { StatCard } from "@/components/ui/stat-card";
 import { formatTime } from "../lib/time";
 
 interface StatsBarProps {
