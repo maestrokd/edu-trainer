@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Command, LifeBuoy, Send, SquareTerminal, LogIn } from "lucide-react";
+import { Command, LifeBuoy, Send, SquareTerminal, LogIn, BriefcaseBusiness } from "lucide-react";
 import { NavUser } from "@/components/sidebar/nav-user.tsx";
 import {
   Sidebar,
@@ -72,6 +72,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          {principal ? (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={t("bidManager.sidebar.title", "Bid Manager")}>
+                <Link to="/mailboxes/bids">
+                  <BriefcaseBusiness />
+                  <span>{t("bidManager.sidebar.title", "Bid Manager")}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ) : null}
 
           {principal?.authorities?.includes(Authority.FAMILY_TASK_MANAGER) && (
             <SidebarMenuItem>

@@ -47,6 +47,7 @@ import {
   DeviceDetailsPage,
   FamilyTaskSettingsPage,
 } from "@/features/familyTaskManager";
+import { BidDashboardPage, BidDetailsPage } from "@/features/bidManager";
 
 export default function App() {
   usePageTitle();
@@ -94,6 +95,10 @@ export default function App() {
         <Route path="/" element={<MenuPage />} />
 
         <Route element={<PrivateRoute />}>
+          <Route path="mailboxes/bids" element={<BidDashboardPage />} />
+          <Route path="mailboxes/:mailboxId/bids" element={<BidDashboardPage />} />
+          <Route path="mailboxes/:mailboxId/bids/:bidId" element={<BidDetailsPage />} />
+
           <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} />}>
             <Route path="subscriptions" element={<SubscriptionPage />} />
           </Route>
