@@ -18,6 +18,7 @@ interface MultiplicationTrainerPlayScreenProps {
   inputValue: string;
   onInputChange: (val: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  showHistory?: boolean;
   labels: {
     finishedTimeUp: string;
     finishedExLimit: (count: number) => string;
@@ -54,13 +55,16 @@ export function MultiplicationTrainerPlayScreen({
   inputValue,
   onInputChange,
   inputRef,
+  showHistory = true,
   labels,
 }: MultiplicationTrainerPlayScreenProps) {
   const { gameOver, endReason, progress, config, currentTask } = state;
 
   return (
     <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
+      <div
+        className={`grid grid-cols-1 ${showHistory ? "lg:grid-cols-2" : ""} gap-6 h-full min-h-0`}
+      >
         {/* Left column */}
         <div className="flex flex-col min-h-0">
           {/* Finished banner */}
@@ -133,19 +137,21 @@ export function MultiplicationTrainerPlayScreen({
         </div>
 
         {/* Right column: history */}
-        <HistoryTable
-          history={progress.history}
-          labels={{
-            exampleColumn: labels.tableExample,
-            answerColumn: labels.tableAnswer,
-            resultColumn: labels.tableResult,
-            emptyText: labels.tableEmpty,
-            correctResultText: labels.tableCorrect,
-            incorrectResultText: labels.tableIncorrect,
-            correctAria: labels.ariaCorrect,
-            wrongAria: labels.ariaWrong,
-          }}
-        />
+        {showHistory && (
+          <HistoryTable
+            history={progress.history}
+            labels={{
+              exampleColumn: labels.tableExample,
+              answerColumn: labels.tableAnswer,
+              resultColumn: labels.tableResult,
+              emptyText: labels.tableEmpty,
+              correctResultText: labels.tableCorrect,
+              incorrectResultText: labels.tableIncorrect,
+              correctAria: labels.ariaCorrect,
+              wrongAria: labels.ariaWrong,
+            }}
+          />
+        )}
       </div>
     </div>
   );
