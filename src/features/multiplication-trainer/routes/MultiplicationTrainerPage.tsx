@@ -12,6 +12,7 @@ export function MultiplicationTrainerPage() {
 
   // Thin ephemeral state for the single input component
   const [inputValue, setInputValue] = useState("");
+  const [showHistory, setShowHistory] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus effect from original monolith, kept purely at the view composition layer
@@ -26,6 +27,7 @@ export function MultiplicationTrainerPage() {
     menu: t("multiT.menu"),
     newSession: t("multiT.newSession"),
     changeRange: t("multiT.changeRange"),
+    showHistory: t("multiT.showHistory"),
     mainMenuLabel: t("menu.mainMenuLabel"),
   };
 
@@ -42,6 +44,8 @@ export function MultiplicationTrainerPage() {
       playStatsSnippet={playStatsSnippet}
       onNewSession={actions.newSession}
       onBackToSetup={actions.backToSetup}
+      showHistory={showHistory}
+      onToggleHistory={() => setShowHistory((prev) => !prev)}
       headerLabels={headerLabels}
     >
       {state.screen === "setup" ? (
@@ -94,6 +98,7 @@ export function MultiplicationTrainerPage() {
           inputValue={inputValue}
           onInputChange={setInputValue}
           inputRef={inputRef}
+          showHistory={showHistory}
           labels={{
             finishedTimeUp: t("multiT.finished.timeUp"),
             finishedExLimit: (count: number) => t("multiT.finished.exLimit", { count }),
