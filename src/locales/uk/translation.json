@@ -94,6 +94,7 @@
     "menu": "Меню",
     "title": "Тренажер множення",
     "rangeAccuracy": "Діапазон: {{min}}–{{max}} · Точність: {{acc}}%",
+    "showHistory": "Показати історію",
     "newSession": "Нова сесія",
     "changeRange": "Змінити діапазон",
     "aria": {

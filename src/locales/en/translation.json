@@ -94,6 +94,7 @@
     "menu": "Menu",
     "title": "Multiplication Trainer",
     "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
+    "showHistory": "Show history",
     "newSession": "New session",
     "changeRange": "Change range",
     "aria": {

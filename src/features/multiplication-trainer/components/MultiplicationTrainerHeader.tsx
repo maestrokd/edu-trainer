@@ -6,10 +6,13 @@ interface MultiplicationTrainerHeaderProps {
   playStatsSnippet: string | null;
   onNewSession: () => void;
   onBackToSetup: () => void;
+  showHistory: boolean;
+  onToggleHistory: () => void;
   labels: {
     menu: string;
     newSession: string;
     changeRange: string;
+    showHistory: string;
     mainMenuLabel: string;
   };
 }
@@ -20,6 +23,8 @@ export function MultiplicationTrainerHeader({
   playStatsSnippet,
   onNewSession,
   onBackToSetup,
+  showHistory,
+  onToggleHistory,
   labels,
 }: MultiplicationTrainerHeaderProps) {
   return (
@@ -40,6 +45,8 @@ export function MultiplicationTrainerHeader({
         showPlayActions={isPlayScreen}
         onNewSession={onNewSession}
         onBackToSetup={onBackToSetup}
+        showHistory={showHistory}
+        onToggleHistory={onToggleHistory}
         labels={labels}
       />
     </div>

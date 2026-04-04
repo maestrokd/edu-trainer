@@ -94,6 +94,7 @@
     "menu": "Меню",
     "title": "Тренажер умножения",
     "rangeAccuracy": "Диапазон: {{min}}–{{max}} · Точность: {{acc}}%",
+    "showHistory": "Показать историю",
     "newSession": "Новая сессия",
     "changeRange": "Изменить диапазон",
     "aria": {

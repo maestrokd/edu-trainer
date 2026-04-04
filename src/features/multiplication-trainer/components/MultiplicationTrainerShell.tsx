@@ -7,6 +7,7 @@ interface MultiplicationTrainerShellProps {
     menu: string;
     newSession: string;
     changeRange: string;
+    showHistory: string;
     mainMenuLabel: string;
   };
   title: string;
@@ -14,6 +15,8 @@ interface MultiplicationTrainerShellProps {
   playStatsSnippet: string | null;
   onNewSession: () => void;
   onBackToSetup: () => void;
+  showHistory: boolean;
+  onToggleHistory: () => void;
 }
 
 export function MultiplicationTrainerShell({
@@ -24,6 +27,8 @@ export function MultiplicationTrainerShell({
   playStatsSnippet,
   onNewSession,
   onBackToSetup,
+  showHistory,
+  onToggleHistory,
 }: MultiplicationTrainerShellProps) {
   return (
     <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
@@ -34,6 +39,8 @@ export function MultiplicationTrainerShell({
           playStatsSnippet={playStatsSnippet}
           onNewSession={onNewSession}
           onBackToSetup={onBackToSetup}
+          showHistory={showHistory}
+          onToggleHistory={onToggleHistory}
           labels={headerLabels}
         />
         {children}

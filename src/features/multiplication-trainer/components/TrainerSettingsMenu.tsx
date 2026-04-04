@@ -1,6 +1,8 @@
 import { Link } from "react-router";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +19,13 @@ interface TrainerSettingsMenuProps {
   showPlayActions: boolean;
   onNewSession: () => void;
   onBackToSetup: () => void;
+  showHistory: boolean;
+  onToggleHistory: () => void;
   labels: {
     menu: string;
     newSession: string;
     changeRange: string;
+    showHistory: string;
     mainMenuLabel: string;
   };
 }
@@ -29,6 +34,8 @@ export function TrainerSettingsMenu({
   showPlayActions,
   onNewSession,
   onBackToSetup,
+  showHistory,
+  onToggleHistory,
   labels,
 }: TrainerSettingsMenuProps) {
   return (
@@ -56,6 +63,18 @@ export function TrainerSettingsMenu({
         <DropdownMenuGroup>
           {showPlayActions && (
             <>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <div className="flex items-center justify-between w-full">
+                  <Label htmlFor="history-toggle" className="cursor-pointer">
+                    {labels.showHistory}
+                  </Label>
+                  <Switch
+                    id="history-toggle"
+                    checked={showHistory}
+                    onCheckedChange={() => onToggleHistory()}
+                  />
+                </div>
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onNewSession()}>{labels.newSession}</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onBackToSetup()}>{labels.changeRange}</DropdownMenuItem>
 
