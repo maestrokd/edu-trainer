@@ -23,7 +23,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@supabase/supabase-js": ["./src/stubs/supabase-js"],
+      "sonner": ["./src/stubs/sonner"]
     }
   },
   "include": ["src"]
