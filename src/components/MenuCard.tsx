@@ -25,21 +25,21 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
   return (
     <Card
       className={cn(
-        "relative overflow-hidden transition-all duration-300 border-muted-foreground/15 bg-card/60 backdrop-blur-md h-full flex flex-col gap-1 py-2 sm:py-6",
+        "menu-card relative overflow-hidden transition-all duration-300 border-muted-foreground/15 bg-card/60 backdrop-blur-md h-full flex flex-col gap-1 py-2 sm:py-6",
         !isMobile &&
           "group hover:shadow-2xl dark:hover:shadow-primary/20 hover:-translate-y-1.5 active:scale-[0.98] active:bg-muted/30"
       )}
     >
       {/* Decorative background element - Desktop only */}
       {!isMobile && (
-        <div className="absolute -right-4 -top-4 size-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-500" />
+        <div className="menu-card__blob absolute -right-4 -top-4 size-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-500" />
       )}
 
       <CardHeader className="p-4 pb-2 relative z-10">
         <div className="flex items-start gap-3">
           <div
             className={cn(
-              "rounded-2xl bg-primary/10 p-2.5 shadow-inner shrink-0 transition-all duration-500",
+              "menu-card__icon-shell rounded-2xl bg-primary/10 p-2.5 shadow-inner shrink-0 transition-all duration-500",
               !isMobile && "group-hover:bg-primary/20 group-hover:rotate-6 group-hover:scale-110"
             )}
           >
@@ -52,7 +52,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                   <Badge
                     variant="secondary"
                     className={cn(
-                      "text-[10px] h-4.5 px-1.5 font-black uppercase tracking-wider shadow-sm transition-all duration-300",
+                      "menu-card__badge text-[10px] h-4.5 px-1.5 font-black uppercase tracking-wider shadow-sm transition-all duration-300",
                       !isMobile && "group-hover:bg-primary group-hover:text-primary-foreground"
                     )}
                   >
@@ -84,7 +84,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
               <Sheet>
                 <SheetTrigger asChild>
                   <button
-                    className="absolute -right-1 -top-1 p-1.5 rounded-full text-primary/70 active:text-primary transition-colors duration-300"
+                    className="menu-card__info-button absolute -right-1 -top-1 p-1.5 rounded-full text-primary/70 active:text-primary transition-colors duration-300"
                     onClick={(e) => e.stopPropagation()}
                     aria-label="Info"
                   >
@@ -132,7 +132,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="absolute -right-1 -top-1 p-1.5 rounded-full text-muted-foreground/50 transition-all duration-300 lg:opacity-0 lg:group-hover/info:opacity-100 hover:bg-primary/10 hover:text-primary"
+                      className="menu-card__info-button absolute -right-1 -top-1 p-1.5 rounded-full text-muted-foreground/50 transition-all duration-300 lg:opacity-0 lg:group-hover/info:opacity-100 hover:bg-primary/10 hover:text-primary"
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
@@ -154,7 +154,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
               <span
                 key={tag}
                 className={cn(
-                  "text-[10px] bg-primary/5 border border-primary/10 px-2.5 py-0.5 rounded-full text-primary/70 font-bold transition-colors cursor-default",
+                  "menu-card__tag text-[10px] bg-primary/5 border border-primary/10 px-2.5 py-0.5 rounded-full text-primary/70 font-bold transition-colors cursor-default",
                   !isMobile && "hover:bg-primary/10"
                 )}
               >
@@ -176,7 +176,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
         >
           <div
             className={cn(
-              "flex items-center justify-center size-6 rounded-lg bg-primary-foreground/20 transition-colors",
+              "menu-card__play-icon flex items-center justify-center size-6 rounded-lg bg-primary-foreground/20 transition-colors",
               !isMobile && "group-hover:bg-primary-foreground/30"
             )}
           >

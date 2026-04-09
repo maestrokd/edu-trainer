@@ -55,3 +55,70 @@
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #737373;
 }
+
+/* MenuCard legacy fixes: avoid solid fallback colors for alpha-based utilities */
+.menu-card {
+  background-color: var(--card);
+  border-color: #d4d4d4;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.dark .menu-card {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.menu-card__blob {
+  display: none !important;
+}
+
+.menu-card__icon-shell {
+  background-color: rgba(47, 47, 47, 0.1);
+  box-shadow: inset 0 1px 2px rgba(47, 47, 47, 0.08);
+}
+
+.dark .menu-card__icon-shell {
+  background-color: rgba(229, 229, 229, 0.16);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.12);
+}
+
+.menu-card__badge {
+  background-color: #e5e5e5;
+  color: #262626;
+  border-color: #d4d4d4;
+  box-shadow: none;
+}
+
+.dark .menu-card__badge {
+  background-color: #404040;
+  color: #fafafa;
+  border-color: #5a5a5a;
+}
+
+.menu-card__tag {
+  background-color: rgba(47, 47, 47, 0.08);
+  border-color: rgba(47, 47, 47, 0.2);
+  color: #404040;
+}
+
+.dark .menu-card__tag {
+  background-color: rgba(229, 229, 229, 0.12);
+  border-color: rgba(229, 229, 229, 0.28);
+  color: #e5e5e5;
+}
+
+.menu-card__info-button {
+  color: #737373;
+}
+
+.dark .menu-card__info-button {
+  color: #a3a3a3;
+}
+
+.menu-card__play-icon {
+  background-color: rgba(250, 250, 250, 0.24);
+}
+
+.dark .menu-card__play-icon {
+  background-color: rgba(47, 47, 47, 0.28);
+}
