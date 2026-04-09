@@ -1,7 +1,7 @@
 import { Outlet, Route, Routes } from "react-router";
 import RabbitJumpX9 from "./pages/jumping-rabbit/JumpingRabbit.tsx";
 import { MultiplicationTrainerPage } from "@/features/multiplication-trainer";
-import CompareNumbersGame from "@/pages/compare-numbers/CompareNumbersGame.tsx";
+import { CompareNumbersTrainerPage } from "@/features/compare-numbers-trainer";
 import RoundingGame from "@/pages/rounding-trainer/RoundingGame.tsx";
 import { AddSubTrainerPage } from "@/features/add-sub-trainer";
 import CommonLayout from "@/layout/CommonLayout.tsx";
@@ -91,7 +91,7 @@ export default function App() {
         <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
         <Route path="/multiplication-trainer" element={<MultiplicationTrainerPage />} />
         <Route path="/multiplication-rabbit" element={<RabbitJumpX9 />} />
-        <Route path="/compare-numbers" element={<CompareNumbersGame />} />
+        <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
         <Route path="/rounding-trainer" element={<RoundingGame />} />
         <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />
       </Route>
