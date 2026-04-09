@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import { QuizKeyboardPad } from "@/components/ui/quiz-keyboard-pad";
 import { cn } from "@/lib/utils";
 import type { CompareRelation } from "@/lib/compare-numbers/generator";
 import type { CompareNumbersSessionState, HistoryEntry, HistoryOrder } from "../model/trainer.types";
@@ -96,6 +96,15 @@ export function CompareNumbersPlayScreen({
     return feedbackNotification ? [feedbackNotification] : [];
   }, [feedbackNotification, sessionNotification]);
 
+  const relationOptions = React.useMemo(
+    () => [
+      { key: "less", value: "<" as const, label: "<", ariaLabel: relationLabel("<", tr) },
+      { key: "equal", value: "=" as const, label: "=", ariaLabel: relationLabel("=", tr) },
+      { key: "greater", value: ">" as const, label: ">", ariaLabel: relationLabel(">", tr) },
+    ],
+    [tr]
+  );
+
   return (
     <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 sm:mt-6 flex-1 overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-6 h-full min-h-0">
@@ -143,33 +152,16 @@ export function CompareNumbersPlayScreen({
                 </span>
               </div>
 
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button
-                  size="lg"
-                  className="compare-answer-button"
-                  onClick={() => onAnswer("<")}
+              <div className="mt-6 flex justify-center">
+                <QuizKeyboardPad<CompareRelation>
+                  taskId={session.taskId}
+                  options={relationOptions}
+                  onSelect={onAnswer}
                   disabled={sessionEnded}
-                >
-                  &lt;
-                </Button>
-                <Button
-                  size="lg"
-                  className="compare-answer-button"
-                  onClick={() => onAnswer("=")}
-                  disabled={sessionEnded}
-                >
-                  =
-                </Button>
-                <Button
-                  size="lg"
-                  className="compare-answer-button"
-                  onClick={() => onAnswer(">")}
-                  disabled={sessionEnded}
-                >
-                  &gt;
-                </Button>
+                  columns={3}
+                  hotkeysHint={tr("play.hotkeys")}
+                />
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">{tr("play.hotkeys")}</p>
             </div>
           </div>
         </div>
