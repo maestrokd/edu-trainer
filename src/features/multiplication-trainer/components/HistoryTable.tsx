@@ -17,7 +17,7 @@ interface HistoryTableProps {
 
 export function HistoryTable({ history, labels }: HistoryTableProps) {
   return (
-    <div className="h-full overflow-auto rounded-xl border">
+    <div className="trainer-history-table h-full overflow-auto rounded-xl border">
       <Table>
         <TableHeader className="sticky top-0 bg-muted">
           <TableRow>
@@ -44,14 +44,14 @@ export function HistoryTable({ history, labels }: HistoryTableProps) {
                   <TableCell className="px-4 py-2 text-center">{h.answer}</TableCell>
                   <TableCell className="px-4 py-2 align-top">
                     {h.correct ? (
-                      <span className="inline-flex items-center gap-1 text-green-700">
+                      <span className="trainer-history-result-ok inline-flex items-center gap-1 text-green-700">
                         <span role="img" aria-label={labels.correctAria}>
                           ✅
                         </span>
                         {labels.correctResultText}
                       </span>
                     ) : (
-                      <div className="text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
+                      <div className="trainer-history-result-bad text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
                         <span className="inline-flex items-center gap-1">
                           <span role="img" aria-label={labels.wrongAria}>
                             ❌
