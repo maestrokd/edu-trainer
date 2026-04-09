@@ -1,13 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { QuizKeyboardPad } from "@/components/ui/quiz-keyboard-pad";
+import { StatisticsBlock } from "@/components/ui/statistics-block";
 import { cn } from "@/lib/utils";
 import type { CompareRelation } from "@/lib/compare-numbers/generator";
 import type { CompareNumbersSessionState, HistoryEntry, HistoryOrder } from "../model/trainer.types";
 import { formatTime, relationLabel, resolveDisplaySizeClass } from "../lib/format";
 import { CompareNumbersHistoryTable } from "./CompareNumbersHistoryTable";
 import { NotificationBanner, type NotificationPayload } from "./shared/NotificationBanner";
-import { StatCard } from "./shared/StatCard";
 
 interface CompareNumbersPlayScreenProps {
   session: CompareNumbersSessionState;
@@ -105,6 +105,31 @@ export function CompareNumbersPlayScreen({
     [tr]
   );
 
+  const statsItems = React.useMemo(() => {
+    const baseItems = [
+      { key: "correct", label: tr("stats.correct"), value: session.correctCount },
+      { key: "wrong", label: tr("stats.wrong"), value: session.wrongCount },
+      { key: "accuracy", label: tr("stats.accuracy"), value: `${accuracy}%` },
+    ];
+
+    if (hasTimer) {
+      baseItems.push({
+        key: "timeLeft",
+        label: tr("stats.timeLeft"),
+        value: formatTime(timeLeft ?? 0),
+      });
+      return baseItems;
+    }
+
+    baseItems.push({
+      key: "time",
+      label: tr("stats.time"),
+      value: formatTime(elapsedSec),
+    });
+
+    return baseItems;
+  }, [accuracy, elapsedSec, hasTimer, session.correctCount, session.wrongCount, timeLeft, tr]);
+
   return (
     <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 sm:mt-6 flex-1 overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-6 h-full min-h-0">
@@ -114,15 +139,7 @@ export function CompareNumbersPlayScreen({
             tabIndex={-1}
             className="flex flex-col gap-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
           >
-            <div className="flex flex-wrap items-center gap-2">
-              <StatCard label={tr("stats.correct")} value={session.correctCount} />
-              <StatCard label={tr("stats.wrong")} value={session.wrongCount} />
-              <StatCard label={tr("stats.accuracy")} value={`${accuracy}%`} />
-              <StatCard
-                label={hasTimer ? tr("stats.timeLeft") : tr("stats.time")}
-                value={hasTimer ? formatTime(timeLeft ?? 0) : formatTime(elapsedSec)}
-              />
-            </div>
+            <StatisticsBlock items={statsItems} />
 
             {activeNotifications.length > 0 && (
               <div className="space-y-3">

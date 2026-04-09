@@ -1,4 +1,4 @@
-import { StatCard } from "@/components/ui/stat-card";
+import { StatisticsBlock } from "@/components/ui/statistics-block";
 import { formatTime } from "../lib/time";
 
 interface StatsBarProps {
@@ -17,15 +17,20 @@ interface StatsBarProps {
 }
 
 export function StatsBar({ correctCount, wrongCount, accuracy, elapsedSec, timerLimitSec, labels }: StatsBarProps) {
-  return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      <StatCard label={labels.correct} value={correctCount} />
-      <StatCard label={labels.wrong} value={wrongCount} />
-      <StatCard label={labels.accuracy} value={`${accuracy}%`} />
-      <StatCard label={labels.time} value={formatTime(elapsedSec)} />
-      {timerLimitSec > 0 && (
-        <StatCard label={labels.timeLeft} value={formatTime(Math.max(0, timerLimitSec - elapsedSec))} />
-      )}
-    </div>
-  );
+  const statsItems = [
+    { key: "correct", label: labels.correct, value: correctCount },
+    { key: "wrong", label: labels.wrong, value: wrongCount },
+    { key: "accuracy", label: labels.accuracy, value: `${accuracy}%` },
+    { key: "time", label: labels.time, value: formatTime(elapsedSec) },
+  ];
+
+  if (timerLimitSec > 0) {
+    statsItems.push({
+      key: "timeLeft",
+      label: labels.timeLeft,
+      value: formatTime(Math.max(0, timerLimitSec - elapsedSec)),
+    });
+  }
+
+  return <StatisticsBlock items={statsItems} className="mb-4" />;
 }
