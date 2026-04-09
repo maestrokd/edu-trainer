@@ -62,9 +62,7 @@ export function MultiplicationTrainerPlayScreen({
 
   return (
     <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
-      <div
-        className={`grid grid-cols-1 ${showHistory ? "lg:grid-cols-2" : ""} gap-6 h-full min-h-0`}
-      >
+      <div className={`grid grid-cols-1 ${showHistory ? "lg:grid-cols-2" : ""} gap-6 h-full min-h-0`}>
         {/* Left column */}
         <div className="flex flex-col min-h-0">
           {/* Finished banner */}
