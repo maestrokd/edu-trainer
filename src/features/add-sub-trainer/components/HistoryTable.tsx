@@ -4,7 +4,7 @@ import type { HistoryItem } from "../model/trainer.types";
 
 export function HistoryTable({ history, tr }: { history: HistoryItem[]; tr: any }) {
   return (
-    <div className="h-full overflow-auto rounded-xl border">
+    <div className="trainer-history-table h-full overflow-auto rounded-xl border">
       <Table>
         <TableHeader className="sticky top-0 bg-muted">
           <TableRow>
@@ -27,12 +27,12 @@ export function HistoryTable({ history, tr }: { history: HistoryItem[]; tr: any 
                 <TableCell className="px-4 py-2 text-center">{row.userAnswer || "—"}</TableCell>
                 <TableCell className="px-4 py-2 align-top">
                   {row.isCorrect ? (
-                    <span className="inline-flex items-center gap-1 text-green-700">
+                    <span className="trainer-history-result-ok inline-flex items-center gap-1 text-green-700">
                       <CheckCircle2 className="size-4" aria-hidden />
                       {tr("table.correct")}
                     </span>
                   ) : (
-                    <div className="text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
+                    <div className="trainer-history-result-bad text-red-700 whitespace-normal break-words text-pretty leading-tight max-w-[12rem] sm:max-w-none">
                       <span className="inline-flex items-center gap-1">
                         <XCircle className="size-4" aria-hidden />
                         {tr("table.incorrect", {

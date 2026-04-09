@@ -1203,13 +1203,28 @@ export default function CompareNumbersGame() {
                       </span>
                     </div>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
-                      <Button size="lg" onClick={() => handleAnswer("<")} disabled={sessionEnded}>
+                      <Button
+                        size="lg"
+                        className="compare-answer-button"
+                        onClick={() => handleAnswer("<")}
+                        disabled={sessionEnded}
+                      >
                         &lt;
                       </Button>
-                      <Button size="lg" onClick={() => handleAnswer("=")} disabled={sessionEnded}>
+                      <Button
+                        size="lg"
+                        className="compare-answer-button"
+                        onClick={() => handleAnswer("=")}
+                        disabled={sessionEnded}
+                      >
                         =
                       </Button>
-                      <Button size="lg" onClick={() => handleAnswer(">")} disabled={sessionEnded}>
+                      <Button
+                        size="lg"
+                        className="compare-answer-button"
+                        onClick={() => handleAnswer(">")}
+                        disabled={sessionEnded}
+                      >
                         &gt;
                       </Button>
                     </div>
@@ -1218,8 +1233,8 @@ export default function CompareNumbersGame() {
                 </div>
               </div>
 
-              <aside className="h-full overflow-hidden rounded-xl border bg-muted/40">
-                <div className="flex items-center justify-between border-b bg-muted/60 px-4 py-3">
+              <aside className="trainer-history-table compare-history-table h-full overflow-hidden rounded-xl border bg-muted/40">
+                <div className="compare-history-table__header flex items-center justify-between border-b bg-muted/60 px-4 py-3">
                   <div className="text-base font-semibold">{tr("history.title")}</div>
                   <span className="text-xs text-muted-foreground">
                     {tr("history.total", { count: history.length })}
@@ -1227,7 +1242,7 @@ export default function CompareNumbersGame() {
                 </div>
                 <div className="h-[420px] overflow-auto">
                   <Table>
-                    <TableHeader className="sticky top-0 bg-muted/70 backdrop-blur">
+                    <TableHeader className="compare-history-table__head sticky top-0 bg-muted/70 backdrop-blur">
                       <TableRow>
                         <TableHead className="w-10 text-center text-xs">#</TableHead>
                         <TableHead className="text-xs">{tr("history.example")}</TableHead>
@@ -1243,7 +1258,10 @@ export default function CompareNumbersGame() {
                         </TableRow>
                       ) : (
                         historyDisplay.map((entry, index) => (
-                          <TableRow key={entry.id} className={entry.isCorrect ? "" : "bg-destructive/5"}>
+                          <TableRow
+                            key={entry.id}
+                            className={entry.isCorrect ? "" : "compare-history-row-incorrect bg-destructive/5"}
+                          >
                             <TableCell className="text-center text-xs text-muted-foreground">
                               {historyOrder === "asc" ? index + 1 : history.length - index}
                             </TableCell>
@@ -1261,13 +1279,13 @@ export default function CompareNumbersGame() {
                             </TableCell>
                             <TableCell>
                               {entry.isCorrect ? (
-                                <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                                <div className="trainer-history-result-ok text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                                   {tr("history.result.correct", {
                                     relation: symbolLabel(entry.userRelation, tr),
                                   })}
                                 </div>
                               ) : (
-                                <div className="grid gap-1 text-sm text-destructive">
+                                <div className="trainer-history-result-bad grid gap-1 text-sm text-destructive">
                                   <span>
                                     {tr("history.result.user", {
                                       relation: symbolLabel(entry.userRelation, tr),

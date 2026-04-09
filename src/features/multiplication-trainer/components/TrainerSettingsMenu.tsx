@@ -68,11 +68,7 @@ export function TrainerSettingsMenu({
                   <Label htmlFor="history-toggle" className="cursor-pointer">
                     {labels.showHistory}
                   </Label>
-                  <Switch
-                    id="history-toggle"
-                    checked={showHistory}
-                    onCheckedChange={() => onToggleHistory()}
-                  />
+                  <Switch id="history-toggle" checked={showHistory} onCheckedChange={() => onToggleHistory()} />
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onNewSession()}>{labels.newSession}</DropdownMenuItem>
