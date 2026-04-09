@@ -117,7 +117,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                   </SheetHeader>
                   <div className="mt-8 mb-4">
                     <Button
-                      className="w-full h-11 text-base font-bold shadow-lg shadow-primary/20"
+                      className="menu-card__sheet-play-button w-full h-11 text-base font-bold shadow-lg shadow-primary/20"
                       onClick={() => {
                         navigate(item.path);
                       }}
@@ -166,7 +166,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
 
         <Button
           className={cn(
-            "w-full mt-4 h-10 font-bold shadow-lg shadow-primary/10 flex items-center justify-center gap-2 rounded-xl transition-all duration-300",
+            "menu-card__play-button w-full mt-4 h-10 font-bold shadow-lg shadow-primary/10 flex items-center justify-center gap-2 rounded-xl transition-all duration-300",
             !isMobile && "group-hover:bg-primary group-hover:shadow-primary/25 group-hover:scale-[1.02] active:scale-95"
           )}
           onClick={(e) => {
