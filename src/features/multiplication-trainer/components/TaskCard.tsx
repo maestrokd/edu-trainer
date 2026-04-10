@@ -25,7 +25,7 @@ export function TaskCard({
   wrongAria,
 }: TaskCardProps) {
   return (
-    <div className="text-center mb-6">
+    <div className="text-center">
       <div className="text-4xl sm:text-6xl font-semibold tracking-wide select-none">
         {a} <span aria-hidden>{op === "mul" ? "×" : "÷"}</span> <span className="sr-only">{srLabel}</span> {b} =
       </div>

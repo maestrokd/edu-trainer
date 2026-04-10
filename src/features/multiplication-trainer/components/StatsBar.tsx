@@ -32,5 +32,5 @@ export function StatsBar({ correctCount, wrongCount, accuracy, elapsedSec, timer
     });
   }
 
-  return <StatisticsBlock items={statsItems} className="mb-4" />;
+  return <StatisticsBlock items={statsItems} />;
 }

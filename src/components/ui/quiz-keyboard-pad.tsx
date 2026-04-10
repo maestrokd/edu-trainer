@@ -40,7 +40,7 @@ export function QuizKeyboardPad<T extends string | number>({
 }: QuizKeyboardPadProps<T>) {
   return (
     <div className={cn("w-full max-w-md", className)}>
-      <div className={cn("grid gap-3 w-full", gridColumns[columns])}>
+      <div className={cn("grid gap-2 sm:gap-3 w-full", gridColumns[columns])}>
         {options.map((option, index) => (
           <Button
             key={option.key ?? `${taskId}-${index}`}
@@ -52,7 +52,7 @@ export function QuizKeyboardPad<T extends string | number>({
             onTouchEnd={(event) => (event.currentTarget as HTMLButtonElement).blur()}
             aria-label={option.ariaLabel}
             disabled={disabled}
-            className={cn("px-5 py-4 text-2xl font-medium", buttonClassName)}
+            className={cn("px-3 py-3 text-xl font-medium sm:px-5 sm:py-4 sm:text-2xl", buttonClassName)}
           >
             <span className="inline-flex items-center gap-2">
               <span>{option.label ?? option.value}</span>

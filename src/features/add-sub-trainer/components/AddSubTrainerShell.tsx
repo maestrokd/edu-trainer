@@ -8,7 +8,7 @@ export function AddSubTrainerShell() {
 
   return (
     <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
-      <div className="w-full flex flex-col h-full">
+      <div className="w-full h-full min-h-0 flex flex-col gap-3 sm:gap-4">
         <AddSubTrainerHeader controller={controller} />
         {controller.state.screen === "setup" ? (
           <AddSubTrainerSetupScreen controller={controller} />

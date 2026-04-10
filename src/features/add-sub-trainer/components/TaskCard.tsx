@@ -25,7 +25,7 @@ export function TaskCard({
   const displayStatus = gameOver ? null : lastFeedback;
 
   return (
-    <div className="text-center mb-6">
+    <div className="text-center">
       <div className="text-4xl sm:text-6xl font-semibold tracking-wide select-none">
         {task.prompt.replace(/\?/g, "☐")}
       </div>

@@ -63,7 +63,7 @@ export function ResultHistoryTable<Row>({
   header,
 }: ResultHistoryTableProps<Row>) {
   return (
-    <div className={cn("trainer-history-table h-full min-h-0 overflow-auto rounded-xl border", className)}>
+    <div className={cn("trainer-history-table flex h-full min-h-0 flex-col overflow-hidden rounded-xl border", className)}>
       {header && (
         <div className={cn("flex items-center justify-between border-b bg-muted px-4 py-3", header.className)}>
           <div className={cn("text-base font-semibold", header.titleClassName)}>{header.title}</div>
@@ -73,7 +73,7 @@ export function ResultHistoryTable<Row>({
         </div>
       )}
 
-      <div className={cn("h-full", scrollAreaClassName)}>
+      <div className={cn("min-h-0 flex-1 overflow-auto", scrollAreaClassName)}>
         <Table className={tableClassName}>
           <TableHeader className={cn("sticky top-0 bg-muted", headerClassName)}>
             <TableRow>
@@ -100,7 +100,10 @@ export function ResultHistoryTable<Row>({
               </TableRow>
             ) : (
               rows.map((row, index) => (
-                <TableRow key={getRowKey ? getRowKey(row, index) : index} className={cn("border-t", getRowClassName?.(row, index))}>
+                <TableRow
+                  key={getRowKey ? getRowKey(row, index) : index}
+                  className={cn("border-t", getRowClassName?.(row, index))}
+                >
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}

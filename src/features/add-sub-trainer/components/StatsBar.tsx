@@ -37,5 +37,5 @@ export function StatsBar({
     value: `${streak} / ${bestStreak}`,
   });
 
-  return <StatisticsBlock items={statsItems} className="mb-4" />;
+  return <StatisticsBlock items={statsItems} />;
 }

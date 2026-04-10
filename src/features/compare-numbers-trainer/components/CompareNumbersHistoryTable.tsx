@@ -23,8 +23,6 @@ export function CompareNumbersHistoryTable({
       emptyText={tr("history.empty") ?? ""}
       getRowKey={(entry) => entry.id}
       getRowClassName={(entry) => (entry.isCorrect ? undefined : "compare-history-row-incorrect bg-destructive/5")}
-      className="overflow-hidden"
-      scrollAreaClassName="h-[420px] overflow-auto"
       header={{
         title: tr("history.title") ?? "",
         summary: tr("history.total", { count: history.length }) ?? "",
