@@ -69,7 +69,7 @@ export function TaskCard({
   if (gameOver || !task) return null;
 
   return (
-    <div className="text-center mb-6">
+    <div className="text-center">
       <div className="text-3xl sm:text-5xl font-semibold tracking-wide select-none">
         {formatNumber(task.original)} <span aria-hidden>→</span> <span className="sr-only">{t("roundT.sr.to")}</span>{" "}
         {targetLabel(task.target, t)}

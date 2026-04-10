@@ -12,7 +12,7 @@ export function FinishedBanner({ endReason, totalAnswered }: FinishedBannerProps
   if (!endReason) return null;
 
   return (
-    <Alert className="mb-4 bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-300">
+    <Alert className="bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-300">
       <AlertDescription>
         {endReason === "time"
           ? t("roundT.finished.timeUp")

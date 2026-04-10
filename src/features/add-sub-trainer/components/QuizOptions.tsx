@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { QuizKeyboardPad } from "@/components/ui/quiz-keyboard-pad";
 import { generateOptions } from "../lib/quiz-options";
 
 export function QuizOptions({
@@ -14,18 +14,14 @@ export function QuizOptions({
   const options = useMemo(() => generateOptions(correctAnswer), [correctAnswer]);
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
-      {options.map((opt) => (
-        <Button
-          key={opt}
-          variant="secondary"
-          className="addsub-quiz-option min-w-20"
-          onClick={() => onSelect(opt)}
-          disabled={disabled}
-        >
-          {opt}
-        </Button>
-      ))}
-    </div>
+    <QuizKeyboardPad
+      taskId={correctAnswer}
+      disabled={disabled}
+      onSelect={onSelect}
+      options={options.map((option, index) => ({
+        key: `${correctAnswer}-${index}`,
+        value: option,
+      }))}
+    />
   );
 }

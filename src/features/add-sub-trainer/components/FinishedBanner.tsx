@@ -5,7 +5,7 @@ export function FinishedBanner({ state, tr }: { state: SessionState; tr: any }) 
   if (!state.gameOver) return null;
 
   return (
-    <Alert className="mb-4">
+    <Alert>
       <AlertDescription>
         {state.endReason === "time"
           ? tr("play.finished.time")

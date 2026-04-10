@@ -5,6 +5,7 @@ import { TaskCard } from "./TaskCard";
 import { AnswerInput } from "./AnswerInput";
 import { QuizOptions } from "./QuizOptions";
 import { HistoryTable } from "./HistoryTable";
+import { TrainerPlayLayout } from "@/components/ui/trainer-play-layout";
 import type { SessionState } from "../model/trainer.types";
 
 interface MultiplicationTrainerPlayScreenProps {
@@ -61,96 +62,91 @@ export function MultiplicationTrainerPlayScreen({
   const { gameOver, endReason, progress, config, currentTask } = state;
 
   return (
-    <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
-      <div className={`grid grid-cols-1 ${showHistory ? "lg:grid-cols-2" : ""} gap-6 h-full min-h-0`}>
-        {/* Left column */}
-        <div className="flex flex-col min-h-0">
-          {/* Finished banner */}
-          <FinishedBanner
-            endReason={endReason}
-            totalAnswered={totalAnswered}
-            timeUpLabel={labels.finishedTimeUp}
-            exLimitLabel={labels.finishedExLimit}
-          />
-
-          {/* Stats */}
-          <StatsBar
-            correctCount={progress.correctCount}
-            wrongCount={progress.wrongCount}
-            accuracy={accuracy}
-            elapsedSec={elapsedSec}
-            timerLimitSec={config.timerMinutes * 60}
-            labels={{
-              correct: labels.statsCorrect,
-              wrong: labels.statsWrong,
-              accuracy: labels.statsAccuracy,
-              time: labels.statsTime,
-              timeLeft: labels.statsTimeLeft,
-            }}
-          />
-
-          {/* Current task */}
-          {!gameOver && currentTask && (
-            <TaskCard
-              a={currentTask.a}
-              b={currentTask.b}
-              op={currentTask.op}
-              srLabel={currentTask.op === "mul" ? labels.srOperatorMul : labels.srOperatorDiv}
-              lastLine={progress.lastLine}
-              lastCorrect={progress.lastCorrect}
-              correctAria={labels.ariaCorrect}
-              wrongAria={labels.ariaWrong}
-            >
-              {config.mode === "input" ? (
-                <AnswerInput
-                  ref={inputRef}
-                  answer={inputValue}
-                  onChange={onInputChange}
-                  onSubmit={() => {
-                    const parsed = parseInt(inputValue.trim(), 10);
-                    if (!Number.isNaN(parsed)) {
-                      onAnswerSubmit(parsed);
-                      onInputChange(""); // reset local input
-                    } else if (inputRef.current) {
-                      inputRef.current.focus();
-                    }
-                  }}
-                  disabled={!isInteractable}
-                  placeholder={labels.inputPlaceholder}
-                  submitLabel={labels.inputSubmit}
-                  hintLabel={labels.inputHint}
-                  ariaLabel={labels.ariaAnswerField}
-                />
-              ) : (
-                <QuizOptions
-                  options={currentTask.options}
-                  taskId={currentTask.taskId}
-                  onSelect={onAnswerSubmit}
-                  disabled={!isInteractable}
-                  getAriaLabel={labels.ariaOption}
-                />
-              )}
-            </TaskCard>
-          )}
-        </div>
-
-        {/* Right column: history */}
-        {showHistory && (
-          <HistoryTable
-            history={progress.history}
-            labels={{
-              exampleColumn: labels.tableExample,
-              answerColumn: labels.tableAnswer,
-              resultColumn: labels.tableResult,
-              emptyText: labels.tableEmpty,
-              correctResultText: labels.tableCorrect,
-              incorrectResultText: labels.tableIncorrect,
-              correctAria: labels.ariaCorrect,
-              wrongAria: labels.ariaWrong,
-            }}
-          />
-        )}
-      </div>
-    </div>
+    <TrainerPlayLayout
+      showHistory={showHistory}
+      banner={
+        <FinishedBanner
+          endReason={endReason}
+          totalAnswered={totalAnswered}
+          timeUpLabel={labels.finishedTimeUp}
+          exLimitLabel={labels.finishedExLimit}
+        />
+      }
+      stats={
+        <StatsBar
+          correctCount={progress.correctCount}
+          wrongCount={progress.wrongCount}
+          accuracy={accuracy}
+          elapsedSec={elapsedSec}
+          timerLimitSec={config.timerMinutes * 60}
+          labels={{
+            correct: labels.statsCorrect,
+            wrong: labels.statsWrong,
+            accuracy: labels.statsAccuracy,
+            time: labels.statsTime,
+            timeLeft: labels.statsTimeLeft,
+          }}
+        />
+      }
+      main={
+        !gameOver && currentTask ? (
+          <TaskCard
+            a={currentTask.a}
+            b={currentTask.b}
+            op={currentTask.op}
+            srLabel={currentTask.op === "mul" ? labels.srOperatorMul : labels.srOperatorDiv}
+            lastLine={progress.lastLine}
+            lastCorrect={progress.lastCorrect}
+            correctAria={labels.ariaCorrect}
+            wrongAria={labels.ariaWrong}
+          >
+            {config.mode === "input" ? (
+              <AnswerInput
+                ref={inputRef}
+                answer={inputValue}
+                onChange={onInputChange}
+                onSubmit={() => {
+                  const parsed = parseInt(inputValue.trim(), 10);
+                  if (!Number.isNaN(parsed)) {
+                    onAnswerSubmit(parsed);
+                    onInputChange(""); // reset local input
+                  } else if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}
+                disabled={!isInteractable}
+                placeholder={labels.inputPlaceholder}
+                submitLabel={labels.inputSubmit}
+                hintLabel={labels.inputHint}
+                ariaLabel={labels.ariaAnswerField}
+              />
+            ) : (
+              <QuizOptions
+                options={currentTask.options}
+                taskId={currentTask.taskId}
+                onSelect={onAnswerSubmit}
+                disabled={!isInteractable}
+                getAriaLabel={labels.ariaOption}
+              />
+            )}
+          </TaskCard>
+        ) : null
+      }
+      history={
+        <HistoryTable
+          history={progress.history}
+          labels={{
+            exampleColumn: labels.tableExample,
+            answerColumn: labels.tableAnswer,
+            resultColumn: labels.tableResult,
+            emptyText: labels.tableEmpty,
+            correctResultText: labels.tableCorrect,
+            incorrectResultText: labels.tableIncorrect,
+            correctAria: labels.ariaCorrect,
+            wrongAria: labels.ariaWrong,
+          }}
+        />
+      }
+    />
   );
 }

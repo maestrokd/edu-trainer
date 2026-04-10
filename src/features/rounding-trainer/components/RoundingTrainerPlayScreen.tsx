@@ -4,6 +4,7 @@ import { FinishedBanner } from "./FinishedBanner";
 import { HistoryTable } from "./HistoryTable";
 import { StatsBar } from "./StatsBar";
 import { TaskCard } from "./TaskCard";
+import { TrainerPlayLayout } from "@/components/ui/trainer-play-layout";
 
 interface RoundingTrainerPlayScreenProps {
   state: SessionState;
@@ -35,39 +36,36 @@ export function RoundingTrainerPlayScreen({
   const totalAnswered = state.progress.correctCount + state.progress.wrongCount;
 
   return (
-    <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
-        <div className="flex flex-col min-h-0">
-          {state.gameOver && <FinishedBanner endReason={state.endReason} totalAnswered={totalAnswered} />}
-
-          <StatsBar
-            correctCount={state.progress.correctCount}
-            wrongCount={state.progress.wrongCount}
-            accuracy={accuracy}
-            elapsedSec={elapsedSec}
-            timerMinutes={state.config.timerMinutes}
-            timeLeft={timeLeft}
-          />
-
-          <TaskCard
-            task={state.currentTask}
-            mode={state.config.mode}
-            showHint={state.config.showHint}
-            gameOver={state.gameOver}
-            inputValue={inputValue}
-            lastLine={state.progress.lastLine}
-            lastCorrect={state.progress.lastCorrect}
-            formatNumber={formatNumber}
-            inputRef={inputRef}
-            onInputChange={onInputChange}
-            onInputSubmit={onInputSubmit}
-            onInputKeyDown={onInputKeyDown}
-            onQuizSelect={onQuizSelect}
-          />
-        </div>
-
-        <HistoryTable history={state.progress.history} formatNumber={formatNumber} />
-      </div>
-    </div>
+    <TrainerPlayLayout
+      banner={state.gameOver ? <FinishedBanner endReason={state.endReason} totalAnswered={totalAnswered} /> : null}
+      stats={
+        <StatsBar
+          correctCount={state.progress.correctCount}
+          wrongCount={state.progress.wrongCount}
+          accuracy={accuracy}
+          elapsedSec={elapsedSec}
+          timerMinutes={state.config.timerMinutes}
+          timeLeft={timeLeft}
+        />
+      }
+      main={
+        <TaskCard
+          task={state.currentTask}
+          mode={state.config.mode}
+          showHint={state.config.showHint}
+          gameOver={state.gameOver}
+          inputValue={inputValue}
+          lastLine={state.progress.lastLine}
+          lastCorrect={state.progress.lastCorrect}
+          formatNumber={formatNumber}
+          inputRef={inputRef}
+          onInputChange={onInputChange}
+          onInputSubmit={onInputSubmit}
+          onInputKeyDown={onInputKeyDown}
+          onQuizSelect={onQuizSelect}
+        />
+      }
+      history={<HistoryTable history={state.progress.history} formatNumber={formatNumber} />}
+    />
   );
 }

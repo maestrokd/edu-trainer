@@ -5,6 +5,7 @@ import { StatsBar } from "./StatsBar";
 import { TaskCard } from "./TaskCard";
 import { HistoryTable } from "./HistoryTable";
 import { FinishedBanner } from "./FinishedBanner";
+import { TrainerPlayLayout } from "@/components/ui/trainer-play-layout";
 
 export function AddSubTrainerPlayScreen({ controller }: { controller: any }) {
   const { t } = useTranslation();
@@ -25,29 +26,24 @@ export function AddSubTrainerPlayScreen({ controller }: { controller: any }) {
   }, [elapsedSec, timerActive, timerMinutes, controller.actions]);
 
   return (
-    <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 flex-1 overflow-hidden mt-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
-        <div className="flex flex-col min-h-0">
-          <FinishedBanner state={state} tr={tr} />
-
-          <StatsBar state={state} accuracy={accuracy} elapsedSec={elapsedSec} tr={tr} />
-
-          {state.currentTask && !state.gameOver && (
-            <TaskCard
-              task={state.currentTask}
-              config={state.config}
-              isPlayInteractable={isPlayInteractable}
-              submitAnswer={controller.actions.submitAnswer}
-              gameOver={state.gameOver}
-              lastWasCorrect={state.progress.lastWasCorrect}
-              lastFeedback={state.progress.lastFeedback}
-              tr={tr}
-            />
-          )}
-        </div>
-
-        <HistoryTable history={state.progress.history} tr={tr} />
-      </div>
-    </div>
+    <TrainerPlayLayout
+      banner={<FinishedBanner state={state} tr={tr} />}
+      stats={<StatsBar state={state} accuracy={accuracy} elapsedSec={elapsedSec} tr={tr} />}
+      main={
+        state.currentTask && !state.gameOver ? (
+          <TaskCard
+            task={state.currentTask}
+            config={state.config}
+            isPlayInteractable={isPlayInteractable}
+            submitAnswer={controller.actions.submitAnswer}
+            gameOver={state.gameOver}
+            lastWasCorrect={state.progress.lastWasCorrect}
+            lastFeedback={state.progress.lastFeedback}
+            tr={tr}
+          />
+        ) : null
+      }
+      history={<HistoryTable history={state.progress.history} tr={tr} />}
+    />
   );
 }

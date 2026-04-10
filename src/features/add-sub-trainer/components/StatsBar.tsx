@@ -1,4 +1,4 @@
-import { StatCard } from "@/components/ui/stat-card";
+import { StatisticsBlock } from "@/components/ui/statistics-block";
 import { formatTime } from "../lib/time";
 import type { SessionState } from "../model/trainer.types";
 
@@ -16,16 +16,26 @@ export function StatsBar({
   const { correctCount, wrongCount, streak, bestStreak } = state.progress;
   const timerMinutes = state.config.timerMinutes;
 
-  return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      <StatCard label={tr("stats.correct")!} value={correctCount} />
-      <StatCard label={tr("stats.wrong")!} value={wrongCount} />
-      <StatCard label={tr("stats.accuracy")!} value={`${accuracy}%`} />
-      <StatCard label={tr("stats.time")!} value={formatTime(elapsedSec)} />
-      {timerMinutes > 0 && (
-        <StatCard label={tr("stats.timeLeft")!} value={formatTime(Math.max(0, timerMinutes * 60 - elapsedSec))} />
-      )}
-      <StatCard label={tr("stats.streak")!} value={`${streak} / ${bestStreak}`} />
-    </div>
-  );
+  const statsItems = [
+    { key: "correct", label: tr("stats.correct")!, value: correctCount },
+    { key: "wrong", label: tr("stats.wrong")!, value: wrongCount },
+    { key: "accuracy", label: tr("stats.accuracy")!, value: `${accuracy}%` },
+    { key: "time", label: tr("stats.time")!, value: formatTime(elapsedSec) },
+  ];
+
+  if (timerMinutes > 0) {
+    statsItems.push({
+      key: "timeLeft",
+      label: tr("stats.timeLeft")!,
+      value: formatTime(Math.max(0, timerMinutes * 60 - elapsedSec)),
+    });
+  }
+
+  statsItems.push({
+    key: "streak",
+    label: tr("stats.streak")!,
+    value: `${streak} / ${bestStreak}`,
+  });
+
+  return <StatisticsBlock items={statsItems} />;
 }

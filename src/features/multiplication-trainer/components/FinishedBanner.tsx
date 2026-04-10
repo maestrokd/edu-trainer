@@ -11,7 +11,7 @@ export function FinishedBanner({ endReason, totalAnswered, timeUpLabel, exLimitL
   if (!endReason) return null;
 
   return (
-    <Alert className="mb-4">
+    <Alert>
       <AlertDescription>{endReason === "time" ? timeUpLabel : exLimitLabel(totalAnswered)}</AlertDescription>
     </Alert>
   );

@@ -32,7 +32,7 @@ export function MultiplicationTrainerShell({
 }: MultiplicationTrainerShellProps) {
   return (
     <div className="min-h-dvh w-full bg-gradient-to-br bg-background flex flex-col p-2 sm:p-4 overflow-hidden">
-      <div className="w-full flex flex-col h-full gap-4">
+      <div className="w-full h-full min-h-0 flex flex-col gap-3 sm:gap-4">
         <MultiplicationTrainerHeader
           title={title}
           isPlayScreen={isPlayScreen}
