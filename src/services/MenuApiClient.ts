@@ -5,11 +5,13 @@ export const MenuCategory = {
   MATH: "MATH",
   ARCADE: "ARCADE",
   INFO: "INFO",
+  COACH: "COACH",
 } as const;
 export type MenuCategory = (typeof MenuCategory)[keyof typeof MenuCategory];
 
 export const MenuType = {
   GAME: "GAME",
+  COACH: "COACH",
   // Add other types as they become known
 } as const;
 export type MenuType = (typeof MenuType)[keyof typeof MenuType];

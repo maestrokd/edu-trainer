@@ -1,9 +1,9 @@
 import { Outlet, Route, Routes } from "react-router";
 import RabbitJumpX9 from "./pages/jumping-rabbit/JumpingRabbit.tsx";
-import MultiplicationTrainer from "@/pages/multiplication-trainer/MultiplicationTrainer.tsx";
-import CompareNumbersGame from "@/pages/compare-numbers/CompareNumbersGame.tsx";
-import RoundingGame from "@/pages/rounding-trainer/RoundingGame.tsx";
-import AddSubTrainer from "@/pages/add-sub-trainer/AddSubTrainer.tsx";
+import { MultiplicationTrainerPage } from "@/features/multiplication-trainer";
+import { CompareNumbersTrainerPage } from "@/features/compare-numbers-trainer";
+import { RoundingTrainerPage } from "@/features/rounding-trainer";
+import { AddSubTrainerPage } from "@/features/add-sub-trainer";
 import CommonLayout from "@/layout/CommonLayout.tsx";
 import RegistrationPage from "@/pages/login/RegistrationPage.tsx";
 import DefaultLayout from "@/layout/DefaultLayout.tsx";
@@ -16,11 +16,16 @@ import SettingsPage from "@/pages/SettingsPage.tsx";
 import SubscriptionPage from "@/pages/subscriptions/SubscriptionPage.tsx";
 import MenuPage from "@/pages/MenuPage.tsx";
 import AuthorityRoute from "@/components/AuthorityRoute.tsx";
+import { Authority } from "@/contexts/AuthContext.tsx";
 import SecondaryProfilesPage from "@/pages/profiles/SecondaryProfilesPage.tsx";
 import CreateSecondaryProfilePage from "@/pages/profiles/CreateSecondaryProfilePage.tsx";
 import EditSecondaryProfilePage from "@/pages/profiles/EditSecondaryProfilePage.tsx";
+import EnglishCoachPage from "@/pages/EnglishCoachPage.tsx";
+
+import { usePageTitle } from "@/hooks/usePageTitle.ts";
 
 export default function App() {
+  usePageTitle();
   return (
     <Routes>
       <Route
@@ -65,26 +70,30 @@ export default function App() {
         <Route path="/" element={<MenuPage />} />
 
         <Route element={<PrivateRoute />}>
-          <Route element={<AuthorityRoute authority="MANAGE_SUBSCRIPTIONS" />}>
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} />}>
             <Route path="subscriptions" element={<SubscriptionPage />} />
           </Route>
 
-          <Route element={<AuthorityRoute authority="MANAGE_PROFILES" />}>
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
             <Route path="settings" element={<SettingsPage />} />
             <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
             <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
             <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
+          </Route>
+
+          <Route element={<AuthorityRoute authority={Authority.ENGLISH_COACH_OPENAI} />}>
+            <Route path="english-coach" element={<EnglishCoachPage />} />
           </Route>
         </Route>
       </Route>
 
       <Route element={<CommonLayout />}>
         <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
-        <Route path="/multiplication-trainer" element={<MultiplicationTrainer />} />
+        <Route path="/multiplication-trainer" element={<MultiplicationTrainerPage />} />
         <Route path="/multiplication-rabbit" element={<RabbitJumpX9 />} />
-        <Route path="/compare-numbers" element={<CompareNumbersGame />} />
-        <Route path="/rounding-trainer" element={<RoundingGame />} />
-        <Route path="/add-sub-trainer" element={<AddSubTrainer />} />
+        <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
+        <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
+        <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

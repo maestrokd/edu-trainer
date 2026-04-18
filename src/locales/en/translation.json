@@ -1,4 +1,9 @@
 {
+  "app": {
+    "tab": {
+      "title": "Edu Trainer"
+    }
+  },
   "lang": {
     "code": {
       "en": "En",
@@ -89,6 +94,7 @@
     "menu": "Menu",
     "title": "Multiplication Trainer",
     "rangeAccuracy": "Range: {{min}}–{{max}} · Accuracy: {{acc}}%",
+    "showHistory": "Show history",
     "newSession": "New session",
     "changeRange": "Change range",
     "aria": {
@@ -713,7 +719,71 @@
       "TOKEN_NOT_VALID": "Token not valid.",
       "MISSING_COOKIE": "Invalid or absent cookie.",
       "INVALID_PROMO_CODE": "Invalid or expired promo code.",
-      "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window."
+      "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window.",
+      "ENGLISH_COACH_SESSIONS_LIMIT_REACHED": "You reached the maximum number of English Coach sessions. Delete an existing session to continue."
+    }
+  },
+  "englishCoach": {
+    "pageTitle": "English Coach",
+    "emptyChat": "Start a conversation to practice your English!",
+    "session": {
+      "usage": "Session Usage",
+      "tokens": "{{total}} / {{limit}} tokens used"
+    },
+    "retry": "Retry",
+    "voice": {
+      "startRecording": "Start recording",
+      "stopRecording": "Stop recording",
+      "stopAndSend": "Stop and Send"
+    },
+    "audio": {
+      "play": "Play audio",
+      "pause": "Pause audio",
+      "retry": "Retry audio",
+      "retryVoice": "Retry voice",
+      "playVoice": "Play audio",
+      "loading": "Loading...",
+      "autoplay": "Autoplay speech"
+    },
+    "composer": {
+      "placeholder": "Type your message…",
+      "send": "Send message"
+    },
+    "message": {
+      "you": "You",
+      "coach": "Coach"
+    },
+    "feedback": {
+      "title": "Feedback",
+      "grammar": "Grammar",
+      "fluency": "Fluency",
+      "vocabulary": "Vocabulary"
+    },
+    "practice": {
+      "title": "Next Practice",
+      "addToChat": "Add to chat"
+    },
+    "status": {
+      "transcribing": "Transcribing…",
+      "thinking": "Coach is thinking…",
+      "speaking": "Generating speech…"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "new": "New session",
+      "empty": "No sessions yet. Start a new one!",
+      "messages": "msgs",
+      "rename": "Rename",
+      "delete": "Delete",
+      "restore": "Restore",
+      "confirmDelete": "Are you sure you want to delete this session?",
+      "confirmRestore": "Are you sure you want to restore this session?",
+      "limitReached": "You reached the maximum number of English Coach sessions. Delete an existing session to continue."
+    },
+    "errors": {
+      "microphoneUnsupported": "Your browser does not support microphone access.",
+      "microphoneDenied": "Microphone access was denied. Please allow it in your browser settings.",
+      "recordingFailed": "Recording failed. Please try again."
     }
   }
 }
