@@ -7,24 +7,24 @@ export interface RedeemRequest {
 
 export interface RedeemResponse {
   planName: string;
-  endsAt: Date;
+  endsAt: Date | null;
 }
 
 export interface EntitlementsResponse {
   planName: string;
-  endsAt: Date;
+  endsAt: Date | null;
   authorities: Authority[];
 }
 
 // Transport (DTO) types returned by the backend
 interface RedeemResponseDto {
   planName: string;
-  endsAt: string; // ISO string with offset
+  endsAt: string | null; // ISO string with offset
 }
 
 interface EntitlementsResponseDto {
   planName: string;
-  endsAt: string; // ISO string with offset
+  endsAt: string | null; // ISO string with offset
   authorities: Authority[];
 }
 
@@ -32,6 +32,12 @@ function generateIdempotencyKey() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function parseNullableDate(isoString: string | null): Date | null {
+  if (!isoString) return null;
+  const parsed = new Date(isoString);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 class SubscriptionsApiClient {
@@ -49,7 +55,7 @@ class SubscriptionsApiClient {
       },
     }).then((dto) => ({
       planName: dto.planName,
-      endsAt: new Date(dto.endsAt),
+      endsAt: parseNullableDate(dto.endsAt),
     }));
   }
 
@@ -57,7 +63,7 @@ class SubscriptionsApiClient {
     const url = `/private/subscriptions/entitlements/me`;
     return get<EntitlementsResponseDto>(url).then((dto) => ({
       planName: dto.planName,
-      endsAt: new Date(dto.endsAt),
+      endsAt: parseNullableDate(dto.endsAt),
       authorities: dto.authorities,
     }));
   }

@@ -21,6 +21,13 @@ import SecondaryProfilesPage from "@/pages/profiles/SecondaryProfilesPage.tsx";
 import CreateSecondaryProfilePage from "@/pages/profiles/CreateSecondaryProfilePage.tsx";
 import EditSecondaryProfilePage from "@/pages/profiles/EditSecondaryProfilePage.tsx";
 import EnglishCoachPage from "@/pages/EnglishCoachPage.tsx";
+import CreateTenantInvitationPage from "@/pages/invitations/CreateTenantInvitationPage.tsx";
+import AcceptTenantInvitationPage from "@/pages/invitations/AcceptTenantInvitationPage.tsx";
+import InvitationRegistrationPage from "@/pages/invitations/InvitationRegistrationPage.tsx";
+import TenantInvitationSuccessPage from "@/pages/invitations/TenantInvitationSuccessPage.tsx";
+import TenantProfilesPage from "@/pages/tenant/TenantProfilesPage.tsx";
+import TenantInvitationsPage from "@/pages/tenant/TenantInvitationsPage.tsx";
+import SelectTenantPage from "@/pages/tenant/SelectTenantPage.tsx";
 
 import { usePageTitle } from "@/hooks/usePageTitle.ts";
 
@@ -61,6 +68,30 @@ export default function App() {
         }
       />
       <Route
+        path="auth/invitations/:token"
+        element={
+          <DefaultLayout>
+            <AcceptTenantInvitationPage />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="auth/invitations/:token/register"
+        element={
+          <DefaultLayout>
+            <InvitationRegistrationPage />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="auth/invitations/:token/success"
+        element={
+          <DefaultLayout>
+            <TenantInvitationSuccessPage />
+          </DefaultLayout>
+        }
+      />
+      <Route
         element={
           <WebLayout>
             <Outlet />
@@ -70,15 +101,24 @@ export default function App() {
         <Route path="/" element={<MenuPage />} />
 
         <Route element={<PrivateRoute />}>
-          <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} />}>
+          <Route path="settings/tenants/select" element={<SelectTenantPage />} />
+
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
+            <Route path="settings/tenant-profiles" element={<TenantProfilesPage />} />
+          </Route>
+
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} requireTenantOwner />}>
             <Route path="subscriptions" element={<SubscriptionPage />} />
           </Route>
 
-          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
+          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} requireTenantOwner />}>
             <Route path="settings" element={<SettingsPage />} />
             <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
             <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
             <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
+            <Route path="settings/tenant-invitations" element={<TenantInvitationsPage />} />
+            <Route path="settings/tenant-invitations/create" element={<CreateTenantInvitationPage />} />
+            <Route path="settings/profiles/invitations/create" element={<CreateTenantInvitationPage />} />
           </Route>
 
           <Route element={<AuthorityRoute authority={Authority.ENGLISH_COACH_OPENAI} />}>

@@ -24,7 +24,8 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+  const fromState = (location.state as { from?: { pathname?: string; search?: string; hash?: string } })?.from;
+  const from = fromState ? `${fromState.pathname ?? "/"}${fromState.search ?? ""}${fromState.hash ?? ""}` : "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

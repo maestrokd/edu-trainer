@@ -1,6 +1,11 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { post, registerLogoutFn, registerRefreshFn } from "@/services/ApiService.ts";
-import { type LoginResponse, logout as apiLogout, logoutTelegram } from "@/services/AuthService.ts";
+import {
+  type LoginResponse,
+  TenantMembershipRole,
+  logout as apiLogout,
+  logoutTelegram,
+} from "@/services/AuthService.ts";
 import { getMe, type UserProfileDto } from "@/services/ProfileService.ts";
 import WebApp from "@twa-dev/sdk";
 import { jwtDecode } from "jwt-decode";
@@ -21,7 +26,27 @@ const toAuthorities = (arr: string[] | undefined | null): Authority[] => {
   return arr.filter((a): a is Authority => allowed.has(a as Authority));
 };
 
-interface Principal {
+const toTenantRole = (
+  role: (typeof TenantMembershipRole)[keyof typeof TenantMembershipRole] | string | null | undefined
+): (typeof TenantMembershipRole)[keyof typeof TenantMembershipRole] | null => {
+  if (!role) return null;
+  const allowed = new Set(Object.values(TenantMembershipRole));
+  return allowed.has(role as (typeof TenantMembershipRole)[keyof typeof TenantMembershipRole])
+    ? (role as (typeof TenantMembershipRole)[keyof typeof TenantMembershipRole])
+    : null;
+};
+
+const resolveActiveTenantName = (
+  authResponse: LoginResponse | undefined,
+  activeTenantUuid: string | null
+): string | null => {
+  if (!authResponse) return null;
+  if (authResponse.activeTenantName) return authResponse.activeTenantName;
+  if (!activeTenantUuid) return null;
+  return authResponse.tenants?.find((tenant) => tenant.tenantUuid === activeTenantUuid)?.name ?? null;
+};
+
+export interface Principal {
   id: string;
   authorities: Authority[];
   username: string;
@@ -29,6 +54,9 @@ interface Principal {
   lastName: string | null;
   email: string | null;
   profileType: "PRIMARY" | "SECONDARY";
+  activeTenantUuid: string | null;
+  activeTenantName: string | null;
+  activeTenantRole: (typeof TenantMembershipRole)[keyof typeof TenantMembershipRole] | null;
 }
 
 export const EmailVerificationType = {
@@ -44,7 +72,13 @@ interface AuthContextType {
   principal: Principal | null;
   isTelegram: boolean;
   sendConfirmationCode: (email: string, verificationCodeType: EmailVerificationType) => Promise<void>;
-  doRegister: (email: string, password: string, confirmPassword: string, confirmationCode: string) => Promise<void>;
+  doRegister: (
+    email: string,
+    password: string,
+    confirmPassword: string,
+    confirmationCode: string,
+    invitationToken?: string
+  ) => Promise<void>;
   doResetPassword: (
     email: string,
     password: string,
@@ -86,14 +120,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
   };
 
+  const applyAuthenticatedSession = async (authResponse: LoginResponse): Promise<string> => {
+    const accessToken = authResponse.accessToken;
+    setToken(accessToken);
+    localStorage.setItem("token", accessToken);
+    const newPrincipal = await fetchPrincipalData(accessToken, authResponse);
+    setPrincipal(newPrincipal);
+    return accessToken;
+  };
+
   const refresh = async (): Promise<string> => {
     try {
-      const { accessToken } = await post<LoginResponse>("/auth/refresh", undefined, { withCredentials: true });
-      setToken(accessToken);
-      localStorage.setItem("token", accessToken);
-      const newPrincipal = await fetchPrincipalData(accessToken);
-      setPrincipal(newPrincipal);
-      return accessToken;
+      const authResponse = await post<LoginResponse>("/auth/refresh", undefined, { withCredentials: true });
+      return await applyAuthenticatedSession(authResponse);
     } catch (e) {
       console.error("AuthProvider Refresh - error", e);
       throw e;
@@ -101,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const sendConfirmationCode = async (email: string, verificationCodeType: EmailVerificationType): Promise<void> => {
-    await post<LoginResponse>("/auth/email/verification/send", {
+    await post<void>("/auth/email/verification/send", {
       email,
       verificationCodeType,
       initData: telegramInitDataString,
@@ -112,19 +151,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     confirmPassword: string,
-    confirmationCode: string
+    confirmationCode: string,
+    invitationToken?: string
   ): Promise<void> => {
-    const { accessToken } = await post<LoginResponse>("/auth/registration", {
+    const authResponse = await post<LoginResponse>("/auth/registration", {
       email,
       emailVerificationCode: confirmationCode,
       password,
       confirmPassword,
       initData: telegramInitDataString,
+      invitationToken,
     });
-    setToken(accessToken);
-    localStorage.setItem("token", accessToken);
-    const newPrincipal = await fetchPrincipalData(accessToken);
-    setPrincipal(newPrincipal);
+    await applyAuthenticatedSession(authResponse);
   };
 
   const doResetPassword = async (
@@ -133,7 +171,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     confirmPassword: string,
     confirmationCode: string
   ): Promise<void> => {
-    await post<LoginResponse>("/auth/password/reset", {
+    await post<void>("/auth/password/reset", {
       email,
       emailVerificationCode: confirmationCode,
       password,
@@ -143,27 +181,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = async (email: string, password: string): Promise<void> => {
-    const { accessToken } = await post<LoginResponse>("/auth/login", {
+    const authResponse = await post<LoginResponse>("/auth/login", {
       username: email,
       password,
       initData: telegramInitDataString,
     });
-    setToken(accessToken);
-    localStorage.setItem("token", accessToken);
-    const newPrincipal = await fetchPrincipalData(accessToken);
-    setPrincipal(newPrincipal);
+    await applyAuthenticatedSession(authResponse);
   };
 
   const loginWithTelegram = async (initDataParam?: string | null): Promise<string> => {
     const initData = initDataParam ?? telegramInitDataString;
-    const { accessToken } = await post<LoginResponse>("/auth/login/telegram", {
+    const authResponse = await post<LoginResponse>("/auth/login/telegram", {
       initData: initData,
     });
-    setToken(accessToken);
-    localStorage.setItem("token", accessToken);
-    const newPrincipal = await fetchPrincipalData(accessToken);
-    setPrincipal(newPrincipal);
-    return accessToken;
+    return await applyAuthenticatedSession(authResponse);
   };
 
   const logout = () => {
@@ -193,13 +224,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         WebApp.ready();
       }
 
-      let token = null;
       if (WebApp?.initData) {
         const initDataString = WebApp.initData;
         if (initDataString) {
           setTelegramInitDataString(initDataString);
           try {
-            token = await loginWithTelegram(initDataString);
+            await loginWithTelegram(initDataString);
           } catch (e) {
             console.error("AuthProvider useEffect - loginWithTelegram - error", e);
           }
@@ -208,18 +238,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const savedJwt = localStorage.getItem("token");
         if (savedJwt) {
           try {
-            token = await refresh();
+            await refresh();
           } catch (e) {
             console.error("AuthProvider useEffect - refresh savedJwt - error", e);
           }
-        }
-      }
-      if (token) {
-        try {
-          const newPrincipal = await fetchPrincipalData(token);
-          setPrincipal(newPrincipal);
-        } catch (e) {
-          console.error("AuthProvider useEffect - fetchPrincipalData - error", e);
         }
       }
       setInitDone(true);
@@ -252,14 +274,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const fetchPrincipalData = async (token: string): Promise<Principal> => {
+const fetchPrincipalData = async (token: string, authResponse?: LoginResponse): Promise<Principal> => {
   // We still decode token for authorities if they are not in the profile response or if we prefer token source of truth for authz
-  const { sub, authorities } = jwtDecode<{
+  const { sub, authorities, activeTenantUuid, activeTenantRole } = jwtDecode<{
     sub: string;
     authorities: string[];
+    activeTenantUuid?: string | null;
+    activeTenantRole?: string | null;
   }>(token);
 
   const profile: UserProfileDto = await getMe();
+  const resolvedActiveTenantUuid = authResponse?.activeTenantUuid ?? activeTenantUuid ?? null;
+  const resolvedActiveTenantRole = toTenantRole(authResponse?.activeTenantRole ?? activeTenantRole);
 
   return {
     id: sub,
@@ -269,6 +295,9 @@ const fetchPrincipalData = async (token: string): Promise<Principal> => {
     email: profile.email,
     profileType: profile.profileType,
     authorities: toAuthorities(authorities),
+    activeTenantUuid: resolvedActiveTenantUuid,
+    activeTenantName: resolveActiveTenantName(authResponse, resolvedActiveTenantUuid),
+    activeTenantRole: resolvedActiveTenantRole,
   };
 };
 
