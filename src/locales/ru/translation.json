@@ -47,9 +47,14 @@
       "billing": "Оплата",
       "notifications": "Уведомления",
       "profiles": "Профили",
+      "tenantProfiles": "Профили тенанта",
+      "tenantInvitations": "Приглашения тенанта",
+      "selectTenant": "Выбрать тенант",
       "logout": "Выйти",
       "login": "Войти",
-      "loginDesc": "Доступ к вашему аккаунту"
+      "loginDesc": "Доступ к вашему аккаунту",
+      "activeTenant": "Тенант: {{tenantName}}",
+      "activeTenantEmpty": "Нет активного тенанта"
     }
   },
   "common": {
@@ -496,6 +501,9 @@
       "createButton": {
         "tooltip": "Создать профиль"
       },
+      "inviteButton": {
+        "label": "Пригласить пользователя"
+      },
       "loadError": "Не удалось загрузить профили.",
       "empty": "Второстепенные профили не найдены.",
       "confirmDelete": "Вы уверены, что хотите удалить этот профиль?",
@@ -543,6 +551,169 @@
       "success": "Профиль успешно обновлен",
       "error": "Не удалось обновить профиль",
       "notFound": "Профиль не найден"
+    },
+    "tenantInvitationsCreate": {
+      "title": "Пригласить пользователя в тенант",
+      "activeTenant": "Активный тенант: {{tenantName}}",
+      "email": {
+        "label": "Email",
+        "placeholder": "name@example.com"
+      },
+      "role": {
+        "label": "Роль",
+        "options": {
+          "PARENT": "Родитель",
+          "CAREGIVER": "Опекун",
+          "MEMBER": "Участник",
+          "VIEWER": "Наблюдатель"
+        }
+      },
+      "locale": {
+        "label": "Язык",
+        "options": {
+          "en-US": "Английский (США)",
+          "uk-UA": "Украинский",
+          "ru-RU": "Русский"
+        }
+      },
+      "submitButton": "Отправить приглашение",
+      "submitButtonLoading": "Отправка приглашения...",
+      "notifications": {
+        "success": "Приглашение успешно отправлено.",
+        "submitError": "Не удалось отправить приглашение.",
+        "sentDetails": "Приглашение отправлено на {{email}}. Действует до {{expiresAt}}."
+      },
+      "errors": {
+        "noActiveTenant": "Активный тенант не найден. Переключите тенант и попробуйте снова."
+      }
+    },
+    "tenantInvitationAccept": {
+      "title": "Приглашение в тенант",
+      "summary": "Вас пригласили в {{tenantName}} с ролью {{role}}.",
+      "fields": {
+        "email": "Приглашенный email",
+        "expiresAt": "Действует до"
+      },
+      "joinButton": "Присоединиться к тенанту",
+      "loginButton": "Войти для присоединения",
+      "backToLoginButton": "Перейти к входу",
+      "states": {
+        "accepting": "Присоединение к тенанту...",
+        "invalidToken": "Ссылка приглашения недействительна.",
+        "expired": "Срок действия приглашения истек.",
+        "alreadyProcessed": "Это приглашение уже обработано."
+      },
+      "notifications": {
+        "acceptSuccess": "Вы успешно присоединились к тенанту.",
+        "acceptError": "Не удалось принять приглашение."
+      }
+    },
+    "tenantInvitationRegistration": {
+      "title": "Присоединение к тенанту",
+      "summary": "Вы присоединяетесь к {{tenantName}} с ролью {{role}}.",
+      "fields": {
+        "email": "Приглашенный email",
+        "expiresAt": "Действует до"
+      },
+      "submitButton": "Создать аккаунт и присоединиться",
+      "backToLoginButton": "Перейти к входу",
+      "states": {
+        "invalidToken": "Ссылка приглашения недействительна.",
+        "expired": "Срок действия приглашения истек.",
+        "alreadyProcessed": "Это приглашение уже обработано.",
+        "mustLogoutFirst": "Выйдите из текущего аккаунта перед созданием приглашенного аккаунта."
+      },
+      "notifications": {
+        "submitSuccess": "Аккаунт создан, приглашение принято.",
+        "submitError": "Не удалось завершить регистрацию по приглашению."
+      }
+    },
+    "tenantInvitationSuccess": {
+      "title": "Приглашение принято",
+      "summary": "Ваше приглашение успешно обработано.",
+      "summaryWithTenant": "Вы присоединились к {{tenantName}} с ролью {{role}}.",
+      "loginButton": "Перейти к входу",
+      "selectTenantButton": "Выбрать тенант",
+      "homeButton": "Открыть приложение"
+    },
+    "tenantSelect": {
+      "title": "Выбрать тенант",
+      "activeTenant": "Активный тенант: {{tenantName}}",
+      "defaultBadge": "По умолчанию",
+      "switchButton": "Переключить тенант",
+      "switchButtonLoading": "Переключение...",
+      "currentButton": "Текущий тенант",
+      "columns": {
+        "name": "Тенант",
+        "role": "Роль",
+        "status": "Статус",
+        "joinedAt": "Присоединился",
+        "action": "Действие"
+      },
+      "empty": "Участий в тенантах не найдено.",
+      "notifications": {
+        "switchSuccess": "Активный тенант переключен на {{tenantName}}.",
+        "switchError": "Не удалось переключить тенант."
+      }
+    },
+    "tenantProfiles": {
+      "title": "Профили тенанта",
+      "activeTenant": "Активный тенант: {{tenantName}}",
+      "filters": {
+        "all": "Все",
+        "search": "Поиск",
+        "searchPlaceholder": "Имя, username или email",
+        "profileType": "Тип профиля",
+        "role": "Роль",
+        "membershipStatus": "Статус членства",
+        "active": "Активность"
+      },
+      "profileType": {
+        "ADULT": "Взрослый",
+        "CHILD": "Ребёнок"
+      },
+      "activeValues": {
+        "true": "Активный",
+        "false": "Неактивный"
+      },
+      "columns": {
+        "displayName": "Имя",
+        "profileType": "Тип",
+        "email": "Email",
+        "username": "Username",
+        "role": "Роль",
+        "membershipStatus": "Членство",
+        "active": "Активность",
+        "createdAt": "Создан"
+      },
+      "empty": "Профили тенанта не найдены.",
+      "errors": {
+        "noActiveTenant": "Активный тенант не найден. Переключите тенант и попробуйте снова."
+      }
+    },
+    "tenantInvitations": {
+      "title": "Приглашения тенанта",
+      "activeTenant": "Активный тенант: {{tenantName}}",
+      "inviteButton": "Пригласить пользователя",
+      "filters": {
+        "all": "Все",
+        "search": "Поиск",
+        "searchPlaceholder": "Email",
+        "role": "Роль",
+        "status": "Статус"
+      },
+      "columns": {
+        "email": "Email",
+        "role": "Роль",
+        "status": "Статус",
+        "expiresAt": "Действует до",
+        "acceptedAt": "Принято",
+        "createdAt": "Создано"
+      },
+      "empty": "Приглашения тенанта не найдены.",
+      "errors": {
+        "noActiveTenant": "Активный тенант не найден. Переключите тенант и попробуйте снова."
+      }
     },
     "settings": {
       "title": "Настройки",
@@ -718,6 +889,16 @@
       "AUTHENTICATION_FAILED": "Ошибка аутентификации.",
       "TOKEN_NOT_VALID": "Недействительный токен.",
       "MISSING_COOKIE": "Недействительный или отсутствующий файл cookie.",
+      "TENANT_MEMBERSHIP_NOT_FOUND": "Для этого пользователя не найдено членство в тенанте.",
+      "FORBIDDEN": "У вас нет доступа к этому действию в активном тенанте.",
+      "IDEMPOTENCY_ERROR": "Этот запрос уже был обработан.",
+      "VALIDATION_ERROR": "Проверьте введённые данные и попробуйте ещё раз.",
+      "INVITATION_NOT_FOUND": "Приглашение не найдено.",
+      "INVITATION_EXPIRED": "Срок действия приглашения истек.",
+      "INVITATION_ALREADY_PROCESSED": "Приглашение уже обработано.",
+      "INVITATION_EMAIL_MISMATCH": "Войдите под email, на который отправлено приглашение.",
+      "INVITATION_ALREADY_EXISTS": "Для этого пользователя уже существует активное приглашение.",
+      "USER_ALREADY_TENANT_MEMBER": "Пользователь уже является участником тенанта.",
       "INVALID_PROMO_CODE": "Неверный, использованный или устаревший промокод.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активный период продления подписки.",
       "ENGLISH_COACH_SESSIONS_LIMIT_REACHED": "Вы достигли максимального количества сессий в English Coach. Удалите существующую сессию, чтобы продолжить."

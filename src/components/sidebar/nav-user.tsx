@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  Building2,
   /*BadgeCheck,
   Bell,*/
   ChevronsUpDown,
   CreditCard,
   LogOut,
+  MailPlus,
   Settings2,
   /*Sparkles,*/
   Users,
@@ -23,7 +25,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar.tsx";
-import { Authority, useAuth } from "@/contexts/AuthContext.tsx";
+import { Authority, type Principal, useAuth } from "@/contexts/AuthContext.tsx";
+import { TenantMembershipRole } from "@/services/AuthService.ts";
 import { useNavigate } from "react-router-dom";
 
 export function NavUser({
@@ -34,6 +37,8 @@ export function NavUser({
     email: string;
     avatar: string;
     authorities: string[];
+    activeTenantName: Principal["activeTenantName"];
+    activeTenantRole: Principal["activeTenantRole"];
   };
 }) {
   const { isMobile } = useSidebar();
@@ -41,8 +46,17 @@ export function NavUser({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const canManageProfiles = user.authorities?.includes(Authority.MANAGE_PROFILES);
-  const canManageSubscriptions = user.authorities?.includes(Authority.MANAGE_SUBSCRIPTIONS);
+  const ownerInActiveTenant = user.activeTenantRole === TenantMembershipRole.OWNER;
+  const canManageProfiles = ownerInActiveTenant && user.authorities?.includes(Authority.MANAGE_PROFILES);
+  const canViewTenantProfiles = user.authorities?.includes(Authority.MANAGE_PROFILES);
+  const canManageTenantInvitations = ownerInActiveTenant && user.authorities?.includes(Authority.MANAGE_PROFILES);
+  const canManageSubscriptions = ownerInActiveTenant && user.authorities?.includes(Authority.MANAGE_SUBSCRIPTIONS);
+  const activeTenantTitle = user.activeTenantName
+    ? t("menu.user.activeTenant", { tenantName: user.activeTenantName })
+    : t("menu.user.activeTenantEmpty", "No active tenant");
+  const activeTenantMeta = user.activeTenantRole
+    ? `${activeTenantTitle} (${user.activeTenantRole})`
+    : activeTenantTitle;
 
   return (
     <SidebarMenu>
@@ -60,6 +74,7 @@ export function NavUser({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-[11px] text-muted-foreground">{activeTenantMeta}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -79,6 +94,7 @@ export function NavUser({
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate text-[11px] text-muted-foreground">{activeTenantMeta}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -97,6 +113,10 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => navigate("/settings/tenants/select")}>
+                <Building2 />
+                {t("menu.user.selectTenant", "Select tenant")}
+              </DropdownMenuItem>
               {/*<DropdownMenuItem>
                 <BadgeCheck />
                 {t("menu.user.account", "Account")}
@@ -119,6 +139,18 @@ export function NavUser({
                 <DropdownMenuItem onClick={() => navigate("/settings/profiles")}>
                   <Users />
                   {t("menu.user.profiles", "Profiles")}
+                </DropdownMenuItem>
+              )}
+              {canViewTenantProfiles && (
+                <DropdownMenuItem onClick={() => navigate("/settings/tenant-profiles")}>
+                  <Users />
+                  {t("menu.user.tenantProfiles", "Tenant Profiles")}
+                </DropdownMenuItem>
+              )}
+              {canManageTenantInvitations && (
+                <DropdownMenuItem onClick={() => navigate("/settings/tenant-invitations")}>
+                  <MailPlus />
+                  {t("menu.user.tenantInvitations", "Tenant Invitations")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>

@@ -47,9 +47,14 @@
       "billing": "Billing",
       "notifications": "Notifications",
       "profiles": "Profiles",
+      "tenantProfiles": "Tenant Profiles",
+      "tenantInvitations": "Tenant Invitations",
+      "selectTenant": "Select Tenant",
       "logout": "Log out",
       "login": "Log in",
-      "loginDesc": "Access your account"
+      "loginDesc": "Access your account",
+      "activeTenant": "Tenant: {{tenantName}}",
+      "activeTenantEmpty": "No active tenant"
     }
   },
   "common": {
@@ -496,6 +501,9 @@
       "createButton": {
         "tooltip": "Create Profile"
       },
+      "inviteButton": {
+        "label": "Invite user"
+      },
       "loadError": "Failed to load profiles.",
       "empty": "No secondary profiles found.",
       "confirmDelete": "Are you sure you want to delete this profile?",
@@ -543,6 +551,169 @@
       "success": "Profile updated successfully",
       "error": "Failed to update profile",
       "notFound": "Profile not found"
+    },
+    "tenantInvitationsCreate": {
+      "title": "Invite user to tenant",
+      "activeTenant": "Active tenant: {{tenantName}}",
+      "email": {
+        "label": "Email",
+        "placeholder": "name@example.com"
+      },
+      "role": {
+        "label": "Role",
+        "options": {
+          "PARENT": "Parent",
+          "CAREGIVER": "Caregiver",
+          "MEMBER": "Member",
+          "VIEWER": "Viewer"
+        }
+      },
+      "locale": {
+        "label": "Locale",
+        "options": {
+          "en-US": "English (US)",
+          "uk-UA": "Ukrainian",
+          "ru-RU": "Russian"
+        }
+      },
+      "submitButton": "Send invitation",
+      "submitButtonLoading": "Sending invitation...",
+      "notifications": {
+        "success": "Invitation sent successfully.",
+        "submitError": "Failed to send invitation.",
+        "sentDetails": "Invitation sent to {{email}}. Expires at {{expiresAt}}."
+      },
+      "errors": {
+        "noActiveTenant": "No active tenant found. Switch tenant and try again."
+      }
+    },
+    "tenantInvitationAccept": {
+      "title": "Tenant invitation",
+      "summary": "You are invited to join {{tenantName}} as {{role}}.",
+      "fields": {
+        "email": "Invited email",
+        "expiresAt": "Expires at"
+      },
+      "joinButton": "Join tenant",
+      "loginButton": "Sign in to join",
+      "backToLoginButton": "Go to login",
+      "states": {
+        "accepting": "Joining tenant...",
+        "invalidToken": "Invitation link is invalid.",
+        "expired": "This invitation has expired.",
+        "alreadyProcessed": "This invitation was already processed."
+      },
+      "notifications": {
+        "acceptSuccess": "You joined the tenant successfully.",
+        "acceptError": "Failed to accept invitation."
+      }
+    },
+    "tenantInvitationRegistration": {
+      "title": "Join tenant",
+      "summary": "You are joining {{tenantName}} as {{role}}.",
+      "fields": {
+        "email": "Invited email",
+        "expiresAt": "Expires at"
+      },
+      "submitButton": "Create account and join",
+      "backToLoginButton": "Go to login",
+      "states": {
+        "invalidToken": "Invitation link is invalid.",
+        "expired": "This invitation has expired.",
+        "alreadyProcessed": "This invitation has already been processed.",
+        "mustLogoutFirst": "Please log out before creating a new invited account."
+      },
+      "notifications": {
+        "submitSuccess": "Your account was created and invitation accepted.",
+        "submitError": "Failed to complete invited registration."
+      }
+    },
+    "tenantInvitationSuccess": {
+      "title": "Invitation accepted",
+      "summary": "Your invitation was successfully processed.",
+      "summaryWithTenant": "You joined {{tenantName}} as {{role}}.",
+      "loginButton": "Go to login",
+      "selectTenantButton": "Select tenant",
+      "homeButton": "Open app"
+    },
+    "tenantSelect": {
+      "title": "Select tenant",
+      "activeTenant": "Active tenant: {{tenantName}}",
+      "defaultBadge": "Default",
+      "switchButton": "Switch tenant",
+      "switchButtonLoading": "Switching...",
+      "currentButton": "Current tenant",
+      "columns": {
+        "name": "Tenant",
+        "role": "Role",
+        "status": "Status",
+        "joinedAt": "Joined at",
+        "action": "Action"
+      },
+      "empty": "No tenant memberships found.",
+      "notifications": {
+        "switchSuccess": "Active tenant switched to {{tenantName}}.",
+        "switchError": "Failed to switch tenant."
+      }
+    },
+    "tenantProfiles": {
+      "title": "Tenant profiles",
+      "activeTenant": "Active tenant: {{tenantName}}",
+      "filters": {
+        "all": "All",
+        "search": "Search",
+        "searchPlaceholder": "Name, username or email",
+        "profileType": "Profile type",
+        "role": "Role",
+        "membershipStatus": "Membership status",
+        "active": "Active"
+      },
+      "profileType": {
+        "ADULT": "Adult",
+        "CHILD": "Child"
+      },
+      "activeValues": {
+        "true": "Active",
+        "false": "Inactive"
+      },
+      "columns": {
+        "displayName": "Name",
+        "profileType": "Type",
+        "email": "Email",
+        "username": "Username",
+        "role": "Role",
+        "membershipStatus": "Membership",
+        "active": "Active",
+        "createdAt": "Created at"
+      },
+      "empty": "No tenant profiles found.",
+      "errors": {
+        "noActiveTenant": "No active tenant found. Switch tenant and try again."
+      }
+    },
+    "tenantInvitations": {
+      "title": "Tenant invitations",
+      "activeTenant": "Active tenant: {{tenantName}}",
+      "inviteButton": "Invite user",
+      "filters": {
+        "all": "All",
+        "search": "Search",
+        "searchPlaceholder": "Email",
+        "role": "Role",
+        "status": "Status"
+      },
+      "columns": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "expiresAt": "Expires at",
+        "acceptedAt": "Accepted at",
+        "createdAt": "Created at"
+      },
+      "empty": "No tenant invitations found.",
+      "errors": {
+        "noActiveTenant": "No active tenant found. Switch tenant and try again."
+      }
     },
     "settings": {
       "title": "Settings",
@@ -718,6 +889,16 @@
       "AUTHENTICATION_FAILED": "Authentication failed.",
       "TOKEN_NOT_VALID": "Token not valid.",
       "MISSING_COOKIE": "Invalid or absent cookie.",
+      "TENANT_MEMBERSHIP_NOT_FOUND": "No tenant membership found for this user.",
+      "FORBIDDEN": "You do not have access to this action in the active tenant.",
+      "IDEMPOTENCY_ERROR": "This request was already processed.",
+      "VALIDATION_ERROR": "Please check your input and try again.",
+      "INVITATION_NOT_FOUND": "Invitation not found.",
+      "INVITATION_EXPIRED": "Invitation has expired.",
+      "INVITATION_ALREADY_PROCESSED": "Invitation has already been processed.",
+      "INVITATION_EMAIL_MISMATCH": "Please sign in with the invited email.",
+      "INVITATION_ALREADY_EXISTS": "An active invitation already exists for this user.",
+      "USER_ALREADY_TENANT_MEMBER": "User is already a tenant member.",
       "INVALID_PROMO_CODE": "Invalid or expired promo code.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window.",
       "ENGLISH_COACH_SESSIONS_LIMIT_REACHED": "You reached the maximum number of English Coach sessions. Delete an existing session to continue."
