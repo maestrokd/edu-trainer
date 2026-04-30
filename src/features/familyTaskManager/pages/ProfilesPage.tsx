@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { childProfilesApi } from "../api/childProfilesApi";
 import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { NotoEmoji } from "../components/shared/NotoEmoji";
 import { TaskEmojiField } from "../components/tasks/TaskEmojiField";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { ChildProfileDto, CreateChildProfileRequest, PatchChildProfileRequest } from "../models/dto";
@@ -134,7 +135,7 @@ export function ProfileDetailsPage() {
   const { handleError } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { profileUuid } = useParams<{ profileUuid: string }>();
   const navigate = useNavigate();
@@ -155,7 +156,7 @@ export function ProfileDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isParent || isNew || !profileUuid) {
+    if (!canManage || isNew || !profileUuid) {
       return;
     }
 
@@ -182,7 +183,7 @@ export function ProfileDetailsPage() {
         })
       )
       .finally(() => setLoading(false));
-  }, [handleError, isNew, profileUuid, isParent]);
+  }, [canManage, handleError, isNew, profileUuid]);
 
   const handleSave = async () => {
     if (!displayName.trim() || (isNew && (!username.trim() || !password.trim()))) {

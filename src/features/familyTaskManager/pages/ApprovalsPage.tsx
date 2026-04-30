@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useInsetHeader } from "@/contexts/InsetHeaderContext";
 import { ApprovalsProfileColumn } from "../components/dashboard/ApprovalsProfileColumn";
 import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
+import { canManageFamilyTask } from "../domain/access";
 import { PROFILE_FALLBACK_COLORS } from "../domain/dashboard/color";
 import { groupApprovalsByProfileDateAndSlot } from "../domain/dashboard/approvals";
 import { SECTION_ORDER } from "../domain/dashboard/types";
@@ -45,7 +46,7 @@ export function ApprovalsPage() {
   useTrackFamilyTaskPageView("approvals");
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
   const { profiles, loading: familyLoading, error: familyError, refetch: refetchFamily } = useFamilyContext();
   const routineFilters = useMemo(() => ({ active: true }), []);
   const redemptionFilters = useMemo(
@@ -66,7 +67,7 @@ export function ApprovalsPage() {
     approve: approveTask,
     reject: rejectTask,
     refetch: refetchQueue,
-  } = useApprovalQueue(isParent);
+  } = useApprovalQueue(canManage);
 
   const {
     redemptions,

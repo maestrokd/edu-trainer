@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { listItemsApi, listSectionsApi, listsApi } from "../api/listsApi";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { FamilyListDto, ListItemDto, ListSectionDto } from "../models/dto";
@@ -14,7 +15,7 @@ export function ListsPage() {
   const { handleError } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const [lists, setLists] = useState<FamilyListDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,7 +94,7 @@ export function ListsPage() {
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold">{t("familyTask.lists.title", "Family Lists")}</h1>
 
-        {isParent && (
+        {canManage && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               className="rounded-md border bg-background px-3 py-2 text-sm"
@@ -143,7 +144,7 @@ export function ListsPage() {
                 {list.description && <p className="text-xs text-muted-foreground truncate">{list.description}</p>}
               </div>
 
-              {isParent && (
+              {canManage && (
                 <button
                   onClick={() => void handleDelete(list.uuid)}
                   className="text-xs border border-destructive text-destructive px-3 py-1 rounded-md hover:bg-destructive/10 transition"
@@ -170,7 +171,7 @@ export function ListDetailsPage() {
   const { handleError } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { listUuid } = useParams<{ listUuid: string }>();
   const [list, setList] = useState<FamilyListDto | null>(null);
@@ -324,7 +325,7 @@ export function ListDetailsPage() {
         {loading && <p className="text-muted-foreground">{t("common.loading", "Loading...")}</p>}
         {error && <p className="text-sm text-destructive">{t(error, "Failed to load list details.")}</p>}
 
-        {isParent && !loading && !error && (
+        {canManage && !loading && !error && (
           <div className="space-y-3">
             <div className="flex gap-2">
               <input
@@ -397,7 +398,7 @@ export function ListDetailsPage() {
                       <span className={`flex-1 text-sm ${item.completed ? "line-through text-muted-foreground" : ""}`}>
                         {item.title}
                       </span>
-                      {isParent && (
+                      {canManage && (
                         <button
                           onClick={() => void handleDeleteItem(item.uuid)}
                           className="text-xs text-destructive hover:underline"

@@ -1,8 +1,9 @@
 import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { FeatureLockedPanel } from "./FeatureLockedPanel";
 import { useFamilyTaskAnalytics } from "../../hooks/useFamilyTaskAnalytics";
+import { canManageFamilyTask } from "../../domain/access";
 
 interface ParentFeatureGateProps {
   children: ReactNode;
@@ -13,22 +14,22 @@ export function ParentFeatureGate({ children, featureId }: ParentFeatureGateProp
   const { t } = useTranslation();
   const { principal } = useAuth();
   const { trackFeatureLockedViewed } = useFamilyTaskAnalytics();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   useEffect(() => {
-    if (!isParent) {
+    if (!canManage) {
       trackFeatureLockedViewed(featureId, "parent_only");
     }
-  }, [featureId, isParent, trackFeatureLockedViewed]);
+  }, [canManage, featureId, trackFeatureLockedViewed]);
 
-  if (isParent) {
+  if (canManage) {
     return children;
   }
 
   return (
     <FeatureLockedPanel
-      title={t("familyTask.gates.parentOnlyTitle", "Parent access required")}
-      description={t("familyTask.errors.forbidden", "This section is available to parents only.")}
+      title={t("familyTask.gates.parentOnlyTitle", "Parent or owner access required")}
+      description={t("familyTask.errors.forbidden", "This section is available to owners and parents only.")}
     />
   );
 }

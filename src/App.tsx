@@ -53,6 +53,7 @@ import {
   FamilyTaskSettingsPage,
   TemplateCollectionsPage,
 } from "@/features/familyTaskManager";
+import { FamilyManageRoute } from "@/features/familyTaskManager/components/gates/FamilyManageRoute";
 
 export default function App() {
   usePageTitle();
@@ -156,7 +157,7 @@ export default function App() {
             <Route path="family-tasks/lists/:listUuid" element={<ListDetailsPage />} />
             <Route path="family-tasks/display" element={<SharedDisplayPage />} />
 
-            <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
+            <Route element={<FamilyManageRoute />}>
               <Route path="family-tasks/tasks" element={<Navigate to="/family-tasks/tasks/chores" replace />} />
               <Route path="family-tasks/tasks/chores" element={<ChoresPage />} />
               <Route path="family-tasks/tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />

@@ -3,13 +3,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { rewardsApi } from "../api/rewardsApi";
 import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { RewardLabelDropdown } from "../components/rewards/RewardLabelDropdown";
 import { AssigneeProfilesField } from "../components/tasks/AssigneeProfilesField";
 import { TaskEmojiField } from "../components/tasks/TaskEmojiField";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
@@ -48,7 +49,7 @@ export function RewardDetailsPage() {
   const { handleError } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { rewardUuid } = useParams<{ rewardUuid: string }>();
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ export function RewardDetailsPage() {
   }, [assigneeProfileUuids.length, isNew, profiles]);
 
   useEffect(() => {
-    if (!isParent || isNew || !rewardUuid) {
+    if (!canManage || isNew || !rewardUuid) {
       return;
     }
 
@@ -121,7 +122,7 @@ export function RewardDetailsPage() {
         })
       )
       .finally(() => setLoading(false));
-  }, [handleError, isNew, rewardUuid, isParent, updateLabelCache]);
+  }, [canManage, handleError, isNew, rewardUuid, updateLabelCache]);
 
   const canSave =
     title.trim().length > 0 &&

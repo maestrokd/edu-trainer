@@ -18,9 +18,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarContent } from "@/contexts/SidebarContext";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel } from "@/components/ui/sidebar";
 import { FAMILY_TASK_ROUTES } from "../../constants/routes";
+import { canManageFamilyTask } from "../../domain/access";
 
 interface FamilyNavItem {
   key: string;
@@ -141,7 +142,7 @@ export function FamilyTaskSidebarContent() {
   const { principal } = useAuth();
   const { pathname } = useLocation();
 
-  const isParent = useMemo(() => principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false, [principal]);
+  const canManage = useMemo(() => canManageFamilyTask(principal), [principal]);
 
   const content = useMemo(
     () => (
@@ -180,7 +181,7 @@ export function FamilyTaskSidebarContent() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isParent && (
+        {canManage && (
           <SidebarGroup>
             <SidebarGroupLabel>{t("familyTask.sidebar.management", "Management")}</SidebarGroupLabel>
             <SidebarGroupContent className="space-y-1">
@@ -217,7 +218,7 @@ export function FamilyTaskSidebarContent() {
         )}
       </>
     ),
-    [isParent, pathname, t]
+    [canManage, pathname, t]
   );
 
   useSidebarContent(content);

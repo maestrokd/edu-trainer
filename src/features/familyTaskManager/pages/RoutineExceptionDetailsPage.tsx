@@ -2,13 +2,14 @@ import { ArrowLeft, CalendarDays, CircleOff, MessageSquare, Trash2 } from "lucid
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { routineExceptionsApi } from "../api/routineExceptionsApi";
 import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { AssigneeProfilesField } from "../components/tasks/AssigneeProfilesField";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
 import { useRoutines } from "../hooks/useRoutines";
@@ -78,7 +79,7 @@ export function RoutineExceptionDetailsPage() {
   const { profiles, members, error: familyError, refetch: refetchFamilyContext } = useFamilyContext();
   const { routines, loading: routinesLoading, error: routinesError, refetch: refetchRoutines } = useRoutines();
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { routineUuid: routeRoutineUuidRaw, exceptionUuid } = useParams<{
     routineUuid?: string;
@@ -155,7 +156,7 @@ export function RoutineExceptionDetailsPage() {
       return;
     }
 
-    if (!isParent || !exceptionUuid) {
+    if (!canManage || !exceptionUuid) {
       setExceptionLoading(false);
       return;
     }
@@ -222,7 +223,7 @@ export function RoutineExceptionDetailsPage() {
     exceptionUuid,
     handleError,
     isNew,
-    isParent,
+    canManage,
     routeRoutineUuid,
     searchParams,
     seededException,

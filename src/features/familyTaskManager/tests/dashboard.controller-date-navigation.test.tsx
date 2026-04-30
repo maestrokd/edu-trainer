@@ -25,12 +25,9 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("@/contexts/AuthContext", () => ({
-  Authority: {
-    MANAGE_PROFILES: "MANAGE_PROFILES",
-  },
   useAuth: () => ({
     principal: {
-      authorities: ["MANAGE_PROFILES"],
+      activeTenantRole: "OWNER",
       profileType: "PRIMARY",
       username: "parent",
     },
@@ -104,7 +101,7 @@ describe("useFamilyTaskDashboardController date navigation", () => {
     expect(beforeDebounceFilters.to).toBe(initialFilters.to);
 
     act(() => {
-      vi.advanceTimersByTime(249);
+      vi.advanceTimersByTime(499);
     });
 
     const stillBeforeDebounceFilters = getLastOccurrenceFilters();

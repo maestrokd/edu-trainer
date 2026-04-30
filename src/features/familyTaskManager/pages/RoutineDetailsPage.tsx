@@ -13,13 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { routinesApi } from "../api/routinesApi";
 import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { AssigneeProfilesField } from "../components/tasks/AssigneeProfilesField";
 import { TaskEmojiField } from "../components/tasks/TaskEmojiField";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
@@ -34,7 +35,7 @@ export function RoutineDetailsPage() {
   const { handleError } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { profiles } = useFamilyContext();
   const { routineUuid } = useParams<{ routineUuid: string }>();
@@ -67,7 +68,7 @@ export function RoutineDetailsPage() {
   }, [assigneeProfileUuids.length, isNew, profiles]);
 
   useEffect(() => {
-    if (!isParent || isNew || !routineUuid) {
+    if (!canManage || isNew || !routineUuid) {
       return;
     }
 
@@ -99,7 +100,7 @@ export function RoutineDetailsPage() {
         })
       )
       .finally(() => setLoading(false));
-  }, [handleError, isNew, routineUuid, isParent]);
+  }, [canManage, handleError, isNew, routineUuid]);
 
   const weekdaysValue = useMemo(() => {
     if (recurrenceType !== FamilyRoutineRecurrenceType.WEEKLY) {

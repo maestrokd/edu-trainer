@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
+import { canManageFamilyTask } from "../domain/access";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import { useRoutines } from "../hooks/useRoutines";
 import { useFamilyContext } from "../hooks/useFamilyContext";
@@ -50,7 +51,7 @@ export function RoutinesPage() {
   useTrackFamilyTaskPageView("routines");
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { profiles } = useFamilyContext();
   const profileNameByUuid = useMemo(
@@ -91,7 +92,7 @@ export function RoutinesPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">{t("familyTask.routines.title", "Routines")}</h1>
-          {isParent && (
+          {canManage && (
             <Link
               to="/family-tasks/routines/new"
               className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition"
@@ -176,7 +177,7 @@ export function RoutinesPage() {
                         </p>
                       </div>
 
-                      {isParent && (
+                      {canManage && (
                         <div className="flex gap-2">
                           <Link
                             to={`/family-tasks/routines/${routine.uuid}`}

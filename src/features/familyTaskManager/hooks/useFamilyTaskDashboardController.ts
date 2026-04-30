@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { FamilyTaskAnalyticsEvent } from "../constants/events";
 import { addDays, isSameDay, normalizeDay, toLocalDateParam } from "../domain/dashboard/date";
 import { groupTasksByProfile } from "../domain/dashboard/tasks";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "./useFamilyContext";
 import { useFamilyTaskAnalytics } from "./useFamilyTaskAnalytics";
 import { useRoutines } from "./useRoutines";
@@ -30,8 +31,8 @@ export function useFamilyTaskDashboardController() {
   const selectedLocalDate = useMemo(() => toLocalDateParam(dayStart), [dayStart]);
   const [debouncedSelectedLocalDate, setDebouncedSelectedLocalDate] = useState(selectedLocalDate);
   const activeProfiles = useMemo(() => profiles.filter((profile) => profile.active), [profiles]);
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
-  const isSecondaryWithoutManageProfiles = principal?.profileType === "SECONDARY" && !isParent;
+  const canManage = canManageFamilyTask(principal);
+  const isSecondaryWithoutManageProfiles = principal?.profileType === "SECONDARY" && !canManage;
   const ownProfileUuid = useMemo(() => {
     if (!isSecondaryWithoutManageProfiles || !principal?.username) {
       return null;
@@ -39,7 +40,7 @@ export function useFamilyTaskDashboardController() {
 
     const username = principal.username.toLowerCase();
     return activeProfiles.find((profile) => profile.username.toLowerCase() === username)?.profileUuid ?? null;
-  }, [activeProfiles, isSecondaryWithoutManageProfiles, principal?.username]);
+  }, [activeProfiles, canManage, isSecondaryWithoutManageProfiles, principal?.username]);
 
   useEffect(() => {
     if (selectedLocalDate === debouncedSelectedLocalDate) {

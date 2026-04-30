@@ -1,10 +1,3 @@
-export const FamilyMemberRole = {
-  PARENT: "PARENT",
-  CHILD: "CHILD",
-} as const;
-
-export type FamilyMemberRole = (typeof FamilyMemberRole)[keyof typeof FamilyMemberRole];
-
 export const FamilyRoutineRecurrenceType = {
   DAILY: "DAILY",
   WEEKLY: "WEEKLY",

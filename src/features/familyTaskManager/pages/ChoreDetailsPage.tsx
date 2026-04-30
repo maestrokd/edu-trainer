@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { choresApi } from "../api/choresApi";
 import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { AssigneeProfilesField } from "../components/tasks/AssigneeProfilesField";
 import { TaskEmojiField } from "../components/tasks/TaskEmojiField";
+import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
@@ -24,7 +25,7 @@ export function ChoreDetailsPage() {
   const { handleError } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const { profiles } = useFamilyContext();
   const { choreUuid } = useParams<{ choreUuid: string }>();
@@ -52,7 +53,7 @@ export function ChoreDetailsPage() {
   }, [assigneeProfileUuids.length, isNew, profiles]);
 
   useEffect(() => {
-    if (!isParent || isNew || !choreUuid) {
+    if (!canManage || isNew || !choreUuid) {
       return;
     }
 
@@ -79,7 +80,7 @@ export function ChoreDetailsPage() {
         })
       )
       .finally(() => setLoading(false));
-  }, [choreUuid, handleError, isNew, isParent]);
+  }, [canManage, choreUuid, handleError, isNew]);
 
   const canSave = title.trim().length > 0 && assigneeProfileUuids.length > 0 && Boolean(dueDate);
 

@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
+import { canManageFamilyTask } from "../domain/access";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import { useChores } from "../hooks/useChores";
 import { useFamilyContext } from "../hooks/useFamilyContext";
@@ -68,7 +69,7 @@ export function ChoresPage() {
   useTrackFamilyTaskPageView("chores");
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
+  const canManage = canManageFamilyTask(principal);
 
   const [assigneeProfileUuid, setAssigneeProfileUuid] = useState<string>("");
   const [activeFilter, setActiveFilter] = useState<string>("active");
@@ -110,7 +111,7 @@ export function ChoresPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h1 className="text-2xl font-semibold">{t("familyTask.chores.title", "Chores")}</h1>
-          {isParent && (
+          {canManage && (
             <Link
               to="/family-tasks/chores/new"
               className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition"
@@ -224,7 +225,7 @@ export function ChoresPage() {
                   <p className="text-xs text-muted-foreground mt-0.5">⭐ {chore.starsReward}</p>
                 </div>
 
-                {isParent && (
+                {canManage && (
                   <div className="flex gap-2">
                     <Link
                       to={`/family-tasks/chores/${chore.uuid}`}

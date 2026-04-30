@@ -1,7 +1,6 @@
 import type {
   FamilyRewardLabelKind,
   FamilyRewardLabelMatchMode,
-  FamilyMemberRole,
   FamilyRewardRedemptionStatus,
   FamilyRoutineRecurrenceType,
   FamilyRoutineExceptionType,
@@ -10,6 +9,7 @@ import type {
   FamilyTaskOccurrenceStatus,
   FamilyTaskSourceType,
 } from "./enums";
+import type { TenantMembershipRole } from "@/services/AuthService";
 
 export interface ApiItemsResponse<T> {
   items: T[];
@@ -38,7 +38,7 @@ export interface FamilyInfoDto {
 export interface HouseholdMemberDto {
   memberUuid: string;
   profileUuid: string;
-  role: FamilyMemberRole;
+  role: TenantMembershipRole;
   displayName: string;
   avatarEmoji: string | null;
   color: string | null;

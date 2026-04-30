@@ -1021,7 +1021,7 @@
       "upgradeTitle": "Upgrade to unlock advanced tools",
       "upgradeDescription": "Premium access enables advanced insights, richer workflows, and additional family automations.",
       "upgradeCta": "View plans",
-      "parentOnlyTitle": "Parent access required"
+      "parentOnlyTitle": "Owner or parent access required"
     },
     "today": {
       "title": "Today's Tasks",

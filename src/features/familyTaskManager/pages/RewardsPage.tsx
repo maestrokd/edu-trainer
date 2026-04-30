@@ -3,7 +3,7 @@ import { Filter, Pencil, Plus, Search, Sparkles, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Authority, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useInsetHeader } from "@/contexts/InsetHeaderContext";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { RewardLabelDropdown } from "../components/rewards/RewardLabelDropdown";
 import { NotoEmoji } from "../components/shared/NotoEmoji";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
+import { canManageFamilyTask } from "../domain/access";
 import { PROFILE_FALLBACK_COLORS, hexToRgba } from "../domain/dashboard/color";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
@@ -246,8 +247,8 @@ export function RewardsPage() {
   const { getErrorMessage } = useFamilyTaskErrorHandler();
 
   const { principal } = useAuth();
-  const isParent = principal?.authorities?.includes(Authority.MANAGE_PROFILES) ?? false;
-  const isSecondaryWithoutManageProfiles = principal?.profileType === "SECONDARY" && !isParent;
+  const canManage = canManageFamilyTask(principal);
+  const isSecondaryWithoutManageProfiles = principal?.profileType === "SECONDARY" && !canManage;
 
   const { profiles, loading: familyLoading, error: familyError, refetch: refetchFamilyContext } = useFamilyContext();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -286,7 +287,7 @@ export function RewardsPage() {
     loading: ownBalanceLoading,
     error: ownBalanceError,
     refetch: refetchOwnBalance,
-  } = useStarsBalance(undefined, !isParent);
+  } = useStarsBalance(undefined, !canManage);
 
   const [balancesByProfileUuid, setBalancesByProfileUuid] = useState<Record<string, number>>({});
   const [balancesLoading, setBalancesLoading] = useState(false);
@@ -414,7 +415,7 @@ export function RewardsPage() {
   }, [visibleProfiles]);
 
   const loadParentBalances = useCallback(async () => {
-    if (!isParent) {
+    if (!canManage) {
       setBalancesByProfileUuid({});
       setBalancesError(null);
       setBalancesLoading(false);
@@ -451,14 +452,14 @@ export function RewardsPage() {
     } finally {
       setBalancesLoading(false);
     }
-  }, [activeProfiles, getErrorMessage, isParent]);
+  }, [activeProfiles, canManage, getErrorMessage]);
 
   useEffect(() => {
     void loadParentBalances();
   }, [loadParentBalances]);
 
   const refreshDashboard = async () => {
-    await Promise.all([refetchFamilyContext(), refetch(), isParent ? loadParentBalances() : refetchOwnBalance()]);
+    await Promise.all([refetchFamilyContext(), refetch(), canManage ? loadParentBalances() : refetchOwnBalance()]);
   };
 
   const columns = useMemo(() => {
@@ -467,7 +468,7 @@ export function RewardsPage() {
     const unassignedRewards = rewards.filter((reward) => reward.assigneeProfileUuids.length === 0);
 
     const profileColumns = visibleProfiles.map((profile) => {
-      const starsBalance = isParent
+      const starsBalance = canManage
         ? (balancesByProfileUuid[profile.profileUuid] ?? 0)
         : profile.profileUuid === fallbackOwnProfileUuid
           ? (balance?.balance ?? 0)
@@ -488,7 +489,7 @@ export function RewardsPage() {
       };
     });
 
-    if (!isParent || unassignedRewards.length === 0) {
+    if (!canManage || unassignedRewards.length === 0) {
       return profileColumns;
     }
 
@@ -509,7 +510,7 @@ export function RewardsPage() {
     balancesByProfileUuid,
     fallbackOwnProfileUuid,
     i18n.language,
-    isParent,
+    canManage,
     rewards,
     t,
     visibleProfiles,
@@ -552,8 +553,8 @@ export function RewardsPage() {
     }
   };
 
-  const pageLoading = familyLoading || loading || (!isParent && ownBalanceLoading) || (isParent && balancesLoading);
-  const hasBlockingError = Boolean(error || (isParent && familyError));
+  const pageLoading = familyLoading || loading || (!canManage && ownBalanceLoading) || (canManage && balancesLoading);
+  const hasBlockingError = Boolean(error || (canManage && familyError));
   const hasActiveFilters =
     !urlFilters.active ||
     Boolean(urlFilters.primaryLabelUuid) ||
@@ -640,7 +641,7 @@ export function RewardsPage() {
             ) : null}
           </button>
 
-          {isParent ? (
+          {canManage ? (
             <Link
               to={FAMILY_TASK_ROUTES.rewardsStars}
               aria-label={t("familyTask.stars.manageTitle", "Adjust Stars")}
@@ -652,7 +653,7 @@ export function RewardsPage() {
             </Link>
           ) : null}
 
-          {isParent ? (
+          {canManage ? (
             <Link
               to={FAMILY_TASK_ROUTES.rewardsNew}
               aria-label={t("common.new", "+ New")}
@@ -666,7 +667,7 @@ export function RewardsPage() {
         </div>
       </div>
     ),
-    [activeFiltersCount, hasActiveFilters, isParent, searchDraft, t]
+    [activeFiltersCount, canManage, hasActiveFilters, searchDraft, t]
   );
 
   useInsetHeader(appHeaderContent, { visible: true, deps: [appHeaderContent] });
@@ -730,7 +731,7 @@ export function RewardsPage() {
           </div>
         ) : null}
 
-        {familyError && isParent ? (
+        {familyError && canManage ? (
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-destructive/40 dark:bg-destructive/15 dark:text-destructive">
             <span>{t(familyError, "Failed to load family context.")}</span>
             <button className="font-medium underline" onClick={() => void refreshDashboard()}>
@@ -748,13 +749,13 @@ export function RewardsPage() {
           </div>
         ) : null}
 
-        {ownBalanceError && !isParent ? (
+        {ownBalanceError && !canManage ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-destructive/40 dark:bg-destructive/15 dark:text-destructive">
             {t(ownBalanceError, "Failed to load stars balance.")}
           </div>
         ) : null}
 
-        {balancesError && isParent ? (
+        {balancesError && canManage ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-destructive/40 dark:bg-destructive/15 dark:text-destructive">
             {t(balancesError, "Failed to load stars balance.")}
           </div>
@@ -861,7 +862,7 @@ export function RewardsPage() {
                                       </div>
 
                                       <div className="flex justify-end">
-                                        {isParent ? (
+                                        {canManage ? (
                                           <Link
                                             to={`/family-tasks/rewards/${reward.uuid}`}
                                             className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
