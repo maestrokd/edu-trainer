@@ -47,9 +47,14 @@
       "billing": "Оплата",
       "notifications": "Сповіщення",
       "profiles": "Профілі",
+      "tenantProfiles": "Профілі тенанта",
+      "tenantInvitations": "Запрошення тенанта",
+      "selectTenant": "Обрати тенант",
       "logout": "Вийти",
       "login": "Увійти",
-      "loginDesc": "Доступ до вашого облікового запису"
+      "loginDesc": "Доступ до вашого облікового запису",
+      "activeTenant": "Тенант: {{tenantName}}",
+      "activeTenantEmpty": "Немає активного тенанта"
     }
   },
   "common": {
@@ -496,6 +501,9 @@
       "createButton": {
         "tooltip": "Створити профіль"
       },
+      "inviteButton": {
+        "label": "Запросити користувача"
+      },
       "loadError": "Не вдалося завантажити профілі.",
       "empty": "Другорядних профілів не знайдено.",
       "confirmDelete": "Ви впевнені, що хочете видалити цей профіль?",
@@ -543,6 +551,169 @@
       "success": "Профіль успішно оновлено",
       "error": "Не вдалося оновити профіль",
       "notFound": "Профіль не знайдено"
+    },
+    "tenantInvitationsCreate": {
+      "title": "Запросити користувача до тенанта",
+      "activeTenant": "Активний тенант: {{tenantName}}",
+      "email": {
+        "label": "Email",
+        "placeholder": "name@example.com"
+      },
+      "role": {
+        "label": "Роль",
+        "options": {
+          "PARENT": "Батько/мати",
+          "CAREGIVER": "Опікун",
+          "MEMBER": "Учасник",
+          "VIEWER": "Спостерігач"
+        }
+      },
+      "locale": {
+        "label": "Мова",
+        "options": {
+          "en-US": "Англійська (США)",
+          "uk-UA": "Українська",
+          "ru-RU": "Російська"
+        }
+      },
+      "submitButton": "Надіслати запрошення",
+      "submitButtonLoading": "Надсилання запрошення...",
+      "notifications": {
+        "success": "Запрошення успішно надіслано.",
+        "submitError": "Не вдалося надіслати запрошення.",
+        "sentDetails": "Запрошення надіслано на {{email}}. Дійсне до {{expiresAt}}."
+      },
+      "errors": {
+        "noActiveTenant": "Активний тенант не знайдено. Перемкніть тенант і повторіть."
+      }
+    },
+    "tenantInvitationAccept": {
+      "title": "Запрошення до тенанта",
+      "summary": "Вас запрошено до {{tenantName}} як {{role}}.",
+      "fields": {
+        "email": "Запрошений email",
+        "expiresAt": "Дійсне до"
+      },
+      "joinButton": "Приєднатися до тенанта",
+      "loginButton": "Увійти для приєднання",
+      "backToLoginButton": "Перейти до входу",
+      "states": {
+        "accepting": "Приєднання до тенанта...",
+        "invalidToken": "Посилання запрошення недійсне.",
+        "expired": "Термін дії запрошення закінчився.",
+        "alreadyProcessed": "Це запрошення вже оброблено."
+      },
+      "notifications": {
+        "acceptSuccess": "Ви успішно приєдналися до тенанта.",
+        "acceptError": "Не вдалося прийняти запрошення."
+      }
+    },
+    "tenantInvitationRegistration": {
+      "title": "Приєднання до тенанта",
+      "summary": "Ви приєднуєтесь до {{tenantName}} як {{role}}.",
+      "fields": {
+        "email": "Запрошений email",
+        "expiresAt": "Дійсне до"
+      },
+      "submitButton": "Створити акаунт і приєднатися",
+      "backToLoginButton": "Перейти до входу",
+      "states": {
+        "invalidToken": "Посилання запрошення недійсне.",
+        "expired": "Термін дії запрошення закінчився.",
+        "alreadyProcessed": "Це запрошення вже оброблено.",
+        "mustLogoutFirst": "Вийдіть з поточного акаунта перед створенням запрошеного акаунта."
+      },
+      "notifications": {
+        "submitSuccess": "Акаунт створено, запрошення прийнято.",
+        "submitError": "Не вдалося завершити реєстрацію за запрошенням."
+      }
+    },
+    "tenantInvitationSuccess": {
+      "title": "Запрошення прийнято",
+      "summary": "Ваше запрошення успішно оброблено.",
+      "summaryWithTenant": "Ви приєдналися до {{tenantName}} як {{role}}.",
+      "loginButton": "Перейти до входу",
+      "selectTenantButton": "Обрати тенант",
+      "homeButton": "Відкрити застосунок"
+    },
+    "tenantSelect": {
+      "title": "Обрати тенант",
+      "activeTenant": "Активний тенант: {{tenantName}}",
+      "defaultBadge": "За замовчуванням",
+      "switchButton": "Перемкнути тенант",
+      "switchButtonLoading": "Перемикання...",
+      "currentButton": "Поточний тенант",
+      "columns": {
+        "name": "Тенант",
+        "role": "Роль",
+        "status": "Статус",
+        "joinedAt": "Приєднано",
+        "action": "Дія"
+      },
+      "empty": "Членств у тенантах не знайдено.",
+      "notifications": {
+        "switchSuccess": "Активний тенант змінено на {{tenantName}}.",
+        "switchError": "Не вдалося перемкнути тенант."
+      }
+    },
+    "tenantProfiles": {
+      "title": "Профілі тенанта",
+      "activeTenant": "Активний тенант: {{tenantName}}",
+      "filters": {
+        "all": "Усі",
+        "search": "Пошук",
+        "searchPlaceholder": "Ім'я, username або email",
+        "profileType": "Тип профілю",
+        "role": "Роль",
+        "membershipStatus": "Статус членства",
+        "active": "Активність"
+      },
+      "profileType": {
+        "ADULT": "Дорослий",
+        "CHILD": "Дитина"
+      },
+      "activeValues": {
+        "true": "Активний",
+        "false": "Неактивний"
+      },
+      "columns": {
+        "displayName": "Ім'я",
+        "profileType": "Тип",
+        "email": "Email",
+        "username": "Username",
+        "role": "Роль",
+        "membershipStatus": "Членство",
+        "active": "Активність",
+        "createdAt": "Створено"
+      },
+      "empty": "Профілів тенанта не знайдено.",
+      "errors": {
+        "noActiveTenant": "Активний тенант не знайдено. Перемкніть тенант і повторіть."
+      }
+    },
+    "tenantInvitations": {
+      "title": "Запрошення тенанта",
+      "activeTenant": "Активний тенант: {{tenantName}}",
+      "inviteButton": "Запросити користувача",
+      "filters": {
+        "all": "Усі",
+        "search": "Пошук",
+        "searchPlaceholder": "Email",
+        "role": "Роль",
+        "status": "Статус"
+      },
+      "columns": {
+        "email": "Email",
+        "role": "Роль",
+        "status": "Статус",
+        "expiresAt": "Дійсне до",
+        "acceptedAt": "Прийнято",
+        "createdAt": "Створено"
+      },
+      "empty": "Запрошень тенанта не знайдено.",
+      "errors": {
+        "noActiveTenant": "Активний тенант не знайдено. Перемкніть тенант і повторіть."
+      }
     },
     "settings": {
       "title": "Налаштування",
@@ -718,6 +889,16 @@
       "AUTHENTICATION_FAILED": "Помилка автентифікації.",
       "TOKEN_NOT_VALID": "Недійсний токен.",
       "MISSING_COOKIE": "Недійсний або відсутній cookie.",
+      "TENANT_MEMBERSHIP_NOT_FOUND": "Для цього користувача не знайдено членства у тенанті.",
+      "FORBIDDEN": "У вас немає доступу до цієї дії в активному тенанті.",
+      "IDEMPOTENCY_ERROR": "Цей запит уже був оброблений.",
+      "VALIDATION_ERROR": "Перевірте введені дані та спробуйте ще раз.",
+      "INVITATION_NOT_FOUND": "Запрошення не знайдено.",
+      "INVITATION_EXPIRED": "Термін дії запрошення закінчився.",
+      "INVITATION_ALREADY_PROCESSED": "Запрошення вже оброблено.",
+      "INVITATION_EMAIL_MISMATCH": "Увійдіть під email, на який надійшло запрошення.",
+      "INVITATION_ALREADY_EXISTS": "Для цього користувача вже існує активне запрошення.",
+      "USER_ALREADY_TENANT_MEMBER": "Користувач уже є учасником тенанта.",
       "INVALID_PROMO_CODE": "Невірний, використаний або застарілий промокод.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Не активний період продовження підписки.",
       "ENGLISH_COACH_SESSIONS_LIMIT_REACHED": "Ви досягли максимальної кількості сесій English Coach. Видаліть існуючу сесію, щоб продовжити."

@@ -42,6 +42,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       email: principal.email || principal.username,
       avatar: "", // TODO: Add avatar to principal or profile
       authorities: principal.authorities,
+      activeTenantName: principal.activeTenantName,
+      activeTenantRole: principal.activeTenantRole,
     };
   }, [principal]);
 

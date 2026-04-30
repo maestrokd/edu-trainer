@@ -76,12 +76,12 @@ export default function SubscriptionPage() {
     return endsAtMs >= now && endsAtMs <= now + tenDaysMs;
   }, [entitlements]);
 
-  function formatLocal(dt?: Date) {
+  function formatLocal(dt?: Date | null) {
     if (!dt) return t("pages.subscriptionPage.info.noDate");
     return dt.toLocaleString(); // Local timezone representation. :contentReference[oaicite:3]{index=3}
   }
 
-  function formatUTC(dt?: Date) {
+  function formatUTC(dt?: Date | null) {
     if (!dt) return t("pages.subscriptionPage.info.noDate");
     return dt.toLocaleString(undefined, {
       timeZone: "UTC",
@@ -122,7 +122,7 @@ export default function SubscriptionPage() {
       const res = await SubscriptionsApiClient.redeemPromoCode(req);
       notifier.success(
         t("pages.subscriptionPage.notifications.redeem.success", {
-          until: res.endsAt.toString(),
+          until: formatLocal(res.endsAt),
         })
       );
       setPromoCode("");

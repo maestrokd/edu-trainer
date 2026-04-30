@@ -13,7 +13,6 @@ export interface UserProfileDto {
   lastName: string | null;
   email: string | null;
   locale: string;
-  primaryProfileUuid: string | null;
   verifiedEmail: boolean;
 }
 
@@ -37,7 +36,7 @@ export const getMe = async (): Promise<UserProfileDto> => {
 };
 
 export const retrieveSecondary = async (profileUuid: string): Promise<UserProfileDto> => {
-  return await get<UserProfileDto>(`private/profiles/secondaries/${profileUuid}`);
+  return await get<UserProfileDto>(`/private/profiles/secondaries/${profileUuid}`);
 };
 
 export const listSecondaries = async (): Promise<UserProfilesDto> => {
