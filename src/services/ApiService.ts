@@ -60,7 +60,7 @@ export function registerLogoutFn(fn: typeof logoutFn) {
 }
 
 // 1. Create axios instance with baseURL & JSON headers
-const apiClient: AxiosInstance = axios.create({
+export const apiClient: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BE_REST_BASE_URL,
   headers: {
     "Content-Type": "application/json",
