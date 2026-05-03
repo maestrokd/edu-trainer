@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button.tsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { useAuth } from "@/contexts/AuthContext.tsx";
-import { extractErrorCode } from "@/services/ApiService.ts";
 import { notifier } from "@/services/NotificationService.ts";
 import TenantInvitationService, {
   type TenantInvitationLocale,
@@ -19,6 +18,7 @@ import TenantInvitationService, {
   TenantInvitationLocale as TenantInvitationLocaleValues,
   TenantInvitationRole as TenantInvitationRoleValues,
 } from "@/services/TenantInvitationService.ts";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -56,6 +56,7 @@ const localeOptions: TenantInvitationLocale[] = [
 
 const CreateTenantInvitationPage: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { handleError } = useApiErrorHandler();
   const navigate = useNavigate();
   const { principal } = useAuth();
 
@@ -64,6 +65,7 @@ const CreateTenantInvitationPage: React.FC = () => {
   const [role, setRole] = useState<TenantInvitationRole>(TenantInvitationRoleValues.PARENT);
   const [locale, setLocale] = useState<TenantInvitationLocale>(() => resolveLocaleByLanguage(i18n.resolvedLanguage));
   const [createdInvitation, setCreatedInvitation] = useState<TenantInvitationResponse | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const tenantUuid = principal?.activeTenantUuid ?? null;
   const tenantName = principal?.activeTenantName ?? null;
@@ -79,6 +81,7 @@ const CreateTenantInvitationPage: React.FC = () => {
       }),
     onSuccess: (result) => {
       setCreatedInvitation(result);
+      setSubmitError(null);
       notifier.success(
         t("pages.tenantInvitationsCreate.notifications.success", {
           defaultValue: "Invitation sent successfully.",
@@ -86,14 +89,11 @@ const CreateTenantInvitationPage: React.FC = () => {
       );
     },
     onError: (error: unknown) => {
-      const errorCode = extractErrorCode(error);
-      const messageKey = errorCode
-        ? `errors.codes.${errorCode}`
-        : "pages.tenantInvitationsCreate.notifications.submitError";
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      handleError(error, {
+        fallbackKey: "pages.tenantInvitationsCreate.notifications.submitError",
+        fallbackMessage: "Failed to send invitation.",
+        setError: setSubmitError,
       });
-      notifier.error(message);
     },
   });
 
@@ -126,6 +126,7 @@ const CreateTenantInvitationPage: React.FC = () => {
     setEmail(trimmed);
     setEmailError(nextError);
     if (!trimmed || nextError) return;
+    setSubmitError(null);
     await createMutation.mutateAsync();
   };
 
@@ -155,6 +156,12 @@ const CreateTenantInvitationPage: React.FC = () => {
                   tenantName,
                 })}
               </AlertDescription>
+            </Alert>
+          )}
+
+          {submitError && (
+            <Alert variant="destructive">
+              <AlertDescription>{submitError}</AlertDescription>
             </Alert>
           )}
 

@@ -12,7 +12,7 @@ import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { NotoEmoji } from "../components/shared/NotoEmoji";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
 import { useFamilyContext } from "../hooks/useFamilyContext";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { ApiPageResponse, ChildProfileDto, StarLedgerEntryDto } from "../models/dto";
 
@@ -126,7 +126,7 @@ export function StarsAdjustmentsPage() {
   const { t, i18n } = useTranslation();
   const isSmallScreen = useIsSmallScreen();
   useTrackFamilyTaskPageView("stars_adjustments");
-  const { getErrorMessage } = useFamilyTaskErrorHandler();
+  const { getErrorMessage } = useApiErrorHandler();
 
   const { profiles, loading: familyLoading, error: familyError, refetch: refetchFamilyContext } = useFamilyContext();
 

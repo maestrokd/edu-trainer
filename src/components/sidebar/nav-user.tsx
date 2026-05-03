@@ -138,7 +138,7 @@ export function NavUser({
               {canManageProfiles && (
                 <DropdownMenuItem onClick={() => navigate("/settings/profiles")}>
                   <Users />
-                  {t("menu.user.profiles", "Profiles")}
+                  {t("menu.user.profiles", "Child Profiles")}
                 </DropdownMenuItem>
               )}
               {canViewTenantProfiles && (

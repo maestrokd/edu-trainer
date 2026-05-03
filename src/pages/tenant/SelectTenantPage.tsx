@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button.tsx";
 import { Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
 import { useAuth } from "@/contexts/AuthContext.tsx";
-import { extractErrorCode } from "@/services/ApiService.ts";
 import { notifier } from "@/services/NotificationService.ts";
 import TenantService, { type TenantListItem, type TenantListResponse } from "@/services/TenantService.ts";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
 
 const formatDateTime = (value: string | null | undefined): string => {
   if (!value) return "-";
@@ -20,8 +20,10 @@ const formatDateTime = (value: string | null | undefined): string => {
 
 const SelectTenantPage: React.FC = () => {
   const { t } = useTranslation();
+  const { getErrorMessage, handleError } = useApiErrorHandler();
   const { principal, doRefresh } = useAuth();
   const queryClient = useQueryClient();
+  const [switchErrorMessage, setSwitchErrorMessage] = useState<string | null>(null);
 
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery<TenantListResponse>({
     queryKey: ["tenantMemberships"],
@@ -35,6 +37,7 @@ const SelectTenantPage: React.FC = () => {
       return tenant;
     },
     onSuccess: async (tenant) => {
+      setSwitchErrorMessage(null);
       notifier.success(
         t("pages.tenantSelect.notifications.switchSuccess", {
           defaultValue: "Active tenant switched to {{tenantName}}.",
@@ -45,12 +48,11 @@ const SelectTenantPage: React.FC = () => {
       await refetch();
     },
     onError: (requestError: unknown) => {
-      const errorCode = extractErrorCode(requestError);
-      const messageKey = errorCode ? `errors.codes.${errorCode}` : "pages.tenantSelect.notifications.switchError";
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      handleError(requestError, {
+        fallbackKey: "pages.tenantSelect.notifications.switchError",
+        fallbackMessage: "Failed to switch tenant.",
+        setError: setSwitchErrorMessage,
       });
-      notifier.error(message);
     },
   });
 
@@ -60,15 +62,21 @@ const SelectTenantPage: React.FC = () => {
 
   const loadErrorMessage = useMemo(() => {
     if (!isError) return null;
-    const errorCode = extractErrorCode(error);
-    const messageKey = errorCode ? `errors.codes.${errorCode}` : "errors.codes.UNKNOWN";
-    return t(messageKey, {
-      defaultValue: t("errors.codes.UNKNOWN"),
+    return getErrorMessage(error, {
+      fallbackKey: "pages.tenantSelect.loadError",
+      fallbackMessage: "Failed to load tenant memberships.",
     });
-  }, [error, isError, t]);
+  }, [error, getErrorMessage, isError]);
+
+  useEffect(() => {
+    if (loadErrorMessage) {
+      notifier.error(loadErrorMessage);
+    }
+  }, [loadErrorMessage]);
 
   const handleSwitchTenant = async (tenant: TenantListItem) => {
     if (tenant.tenantUuid === activeTenantUuid || switchMutation.isPending) return;
+    setSwitchErrorMessage(null);
     await switchMutation.mutateAsync(tenant.tenantUuid);
   };
 
@@ -95,6 +103,12 @@ const SelectTenantPage: React.FC = () => {
       {loadErrorMessage && (
         <Alert variant="destructive">
           <AlertDescription>{loadErrorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {switchErrorMessage && (
+        <Alert variant="destructive">
+          <AlertDescription>{switchErrorMessage}</AlertDescription>
         </Alert>
       )}
 

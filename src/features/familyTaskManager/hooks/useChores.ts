@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { choresApi, type ChoreFilters } from "../api/choresApi";
-import { useFamilyTaskErrorHandler } from "./useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import type { ChoreDto, CreateChoreRequest, PatchChoreRequest } from "../models/dto";
 
 export function useChores(filters?: ChoreFilters) {
   const [chores, setChores] = useState<ChoreDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);

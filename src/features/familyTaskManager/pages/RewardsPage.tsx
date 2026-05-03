@@ -15,7 +15,7 @@ import { FAMILY_TASK_ROUTES } from "../constants/routes";
 import { canManageFamilyTask } from "../domain/access";
 import { PROFILE_FALLBACK_COLORS, hexToRgba } from "../domain/dashboard/color";
 import { useFamilyContext } from "../hooks/useFamilyContext";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import { useRewards, useStarsBalance } from "../hooks/useRewards";
 import type { ChildProfileDto, RewardDto, RewardLabelDto, RewardsQuery } from "../models/dto";
@@ -63,6 +63,12 @@ interface RewardCategoryGroup {
 }
 
 const UNASSIGNED_PROFILE_UUID = "__unassigned_rewards__";
+
+interface RedeemCandidate {
+  reward: RewardDto;
+  assigneeProfileUuid: string | null;
+  assigneeDisplayName: string | null;
+}
 
 function resolveRewardCategory(
   reward: RewardDto,
@@ -244,7 +250,7 @@ function createUnassignedRewardsProfile(label: string): ChildProfileDto {
 export function RewardsPage() {
   const { t, i18n } = useTranslation();
   useTrackFamilyTaskPageView("rewards");
-  const { getErrorMessage } = useFamilyTaskErrorHandler();
+  const { getErrorMessage } = useApiErrorHandler();
 
   const { principal } = useAuth();
   const canManage = canManageFamilyTask(principal);
@@ -293,7 +299,7 @@ export function RewardsPage() {
   const [balancesLoading, setBalancesLoading] = useState(false);
   const [balancesError, setBalancesError] = useState<string | null>(null);
   const [redeeming, setRedeeming] = useState<string | null>(null);
-  const [redeemCandidate, setRedeemCandidate] = useState<RewardDto | null>(null);
+  const [redeemCandidate, setRedeemCandidate] = useState<RedeemCandidate | null>(null);
   const [redeemError, setRedeemError] = useState<string | null>(null);
   const serializedUrlFilters = useMemo(() => serializeRewardsUrlFilters(urlFilters).toString(), [urlFilters]);
 
@@ -516,13 +522,21 @@ export function RewardsPage() {
     visibleProfiles,
   ]);
 
-  const requestRedeem = (reward: RewardDto) => {
+  const requestRedeem = (reward: RewardDto, assigneeProfileUuid: string | null, assigneeDisplayName: string | null) => {
     if (redeeming) {
       return;
     }
 
+    if (reward.availableQuantity !== null && reward.availableQuantity <= 0) {
+      return;
+    }
+
     setRedeemError(null);
-    setRedeemCandidate(reward);
+    setRedeemCandidate({
+      reward,
+      assigneeProfileUuid,
+      assigneeDisplayName,
+    });
   };
 
   const handleRedeem = async () => {
@@ -530,15 +544,29 @@ export function RewardsPage() {
       return;
     }
 
-    setRedeeming(redeemCandidate.uuid);
+    setRedeeming(redeemCandidate.reward.uuid);
 
     try {
-      await rewardRedemptionsApi.create({
-        rewardUuid: redeemCandidate.uuid,
-        note: t("familyTask.rewards.redeem", "Redeem"),
-      });
+      const note = t("familyTask.rewards.redeem", "Redeem");
+      if (canManage) {
+        if (!redeemCandidate.assigneeProfileUuid) {
+          setRedeemError("familyTask.errors.redemptionSave");
+          return;
+        }
 
-      await Promise.all([refetch(), refetchOwnBalance()]);
+        await rewardRedemptionsApi.createForChild(redeemCandidate.reward.uuid, {
+          assigneeProfileUuid: redeemCandidate.assigneeProfileUuid,
+          note,
+        });
+
+        await Promise.all([refetch(), loadParentBalances()]);
+      } else {
+        await rewardRedemptionsApi.createSelf(redeemCandidate.reward.uuid, {
+          note,
+        });
+        await Promise.all([refetch(), refetchOwnBalance()]);
+      }
+
       setRedeemCandidate(null);
       setRedeemError(null);
     } catch (reason: unknown) {
@@ -827,6 +855,8 @@ export function RewardsPage() {
                                 );
                                 const canAfford = starsBalance >= reward.starsCost;
                                 const showRedeemAction = canRedeem && canAfford;
+                                const noQuantityAvailable =
+                                  reward.availableQuantity !== null && reward.availableQuantity <= 0;
                                 const showProgressBar = !canAfford;
                                 const progressTrackColor = hexToRgba(profileColor, 0.24);
                                 const progressFillColor = hexToRgba(profileColor, 0.5);
@@ -902,8 +932,14 @@ export function RewardsPage() {
 
                                     {showRedeemAction ? (
                                       <button
-                                        disabled={redeeming === reward.uuid}
-                                        onClick={() => requestRedeem(reward)}
+                                        disabled={redeeming === reward.uuid || noQuantityAvailable}
+                                        onClick={() =>
+                                          requestRedeem(
+                                            reward,
+                                            canManage ? profile.profileUuid : null,
+                                            canManage ? profile.displayName : null
+                                          )
+                                        }
                                         className="mt-2 h-10 w-full rounded-full bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
                                       >
                                         {redeeming === reward.uuid
@@ -1087,18 +1123,25 @@ export function RewardsPage() {
         >
           <div className="space-y-4 text-center">
             <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-muted">
-              <NotoEmoji emoji={resolveRewardEmoji(redeemCandidate ?? undefined)} size={72} fallback="🎁" />
+              <NotoEmoji emoji={resolveRewardEmoji(redeemCandidate?.reward)} size={72} fallback="🎁" />
             </div>
 
             <div>
               <h3 className="text-3xl font-semibold leading-tight text-foreground">
                 {t("familyTask.rewards.confirmTitle", 'Redeem "{{title}}"?', {
-                  title: redeemCandidate?.title ?? t("familyTask.rewards.unknownReward", "Reward"),
+                  title: redeemCandidate?.reward.title ?? t("familyTask.rewards.unknownReward", "Reward"),
                 })}
               </h3>
+              {canManage && redeemCandidate?.assigneeDisplayName ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("familyTask.rewards.confirmForProfile", 'For "{{profile}}"', {
+                    profile: redeemCandidate.assigneeDisplayName,
+                  })}
+                </p>
+              ) : null}
               <p className="mt-2 text-base text-muted-foreground">
                 {t("familyTask.rewards.confirmBody", "This will spend {{cost}} stars.", {
-                  cost: redeemCandidate?.starsCost ?? 0,
+                  cost: redeemCandidate?.reward.starsCost ?? 0,
                 })}
               </p>
             </div>

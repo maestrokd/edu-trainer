@@ -114,7 +114,7 @@ const parentNavItems: FamilyNavItem[] = [
   {
     key: "profiles",
     labelKey: "familyTask.sidebar.profiles",
-    defaultLabel: "Profiles",
+    defaultLabel: "Child Profiles",
     path: FAMILY_TASK_ROUTES.profiles,
     icon: Users,
     parentOnly: true,

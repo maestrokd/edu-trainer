@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { rewardLabelsApi } from "../../api/rewardsApi";
-import { useFamilyTaskErrorHandler } from "../../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import type { RewardLabelDto } from "../../models/dto";
 import type { FamilyRewardLabelKind } from "../../models/enums";
 
@@ -51,7 +51,7 @@ export function RewardLabelDropdown({
   knownLabels,
   onLabelsLoaded,
 }: RewardLabelDropdownProps) {
-  const { getErrorMessage, handleError } = useFamilyTaskErrorHandler();
+  const { getErrorMessage, handleError } = useApiErrorHandler();
   const [open, setOpen] = useState(false);
   const [searchDraft, setSearchDraft] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

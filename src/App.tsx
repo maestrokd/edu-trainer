@@ -190,6 +190,7 @@ export default function App() {
               <Route path="family-tasks/rewards/stars" element={<StarsAdjustmentsPage />} />
               <Route path="family-tasks/rewards/:rewardUuid" element={<RewardDetailsPage />} />
               <Route path="family-tasks/profiles" element={<ProfilesPage />} />
+              <Route path="family-tasks/profiles/new" element={<Navigate to="/settings/profiles/create" replace />} />
               <Route path="family-tasks/profiles/:profileUuid" element={<ProfileDetailsPage />} />
               <Route path="family-tasks/template-collections" element={<TemplateCollectionsPage />} />
               <Route path="family-tasks/settings" element={<FamilyTaskSettingsPage />} />

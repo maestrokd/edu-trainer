@@ -1,10 +1,10 @@
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EmailVerificationType, useAuth } from "@/contexts/AuthContext.tsx";
-import { extractErrorCode } from "@/services/ApiService.ts";
 import { validatePassword } from "@/services/PasswordValidator.ts";
 import { useNavigate } from "react-router-dom";
 import { notifier } from "@/services/NotificationService.ts";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -44,6 +44,7 @@ interface UseVerificationFormReturn {
 
 export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVerificationFormReturn {
   const { t } = useTranslation();
+  const { handleError } = useApiErrorHandler();
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -119,14 +120,10 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
       notifier.success(t("pages.registrationPage.notifications.codeSentSuccess"));
       setSecondsLeft(60);
     } catch (error: unknown) {
-      const errorCode = extractErrorCode(error);
-      const messageKey = errorCode ? `errors.codes.${errorCode}` : "pages.registrationPage.notifications.codeSentError";
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      handleError(error, {
+        fallbackKey: "pages.registrationPage.notifications.codeSentError",
+        setError: setCodeError,
       });
-
-      setCodeError(message);
-      notifier.error(message);
     } finally {
       setSendCodeLoading(false);
     }
@@ -182,17 +179,13 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
     } catch (error: unknown) {
       const defaultMessageKey =
         FormMode.PASSWORD_RESET === mode
-          ? t("pages.resetPasswordPage.notifications.submitError")
-          : t("pages.registrationPage.notifications.submitError");
+          ? "pages.resetPasswordPage.notifications.submitError"
+          : "pages.registrationPage.notifications.submitError";
 
-      const errorCode = extractErrorCode(error);
-      const messageKey = errorCode ? `errors.codes.${errorCode}` : defaultMessageKey;
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      handleError(error, {
+        fallbackKey: defaultMessageKey,
+        setError: setSubmitError,
       });
-
-      setSubmitError(message);
-      notifier.error(message);
     } finally {
       setSubmitLoading(false);
     }

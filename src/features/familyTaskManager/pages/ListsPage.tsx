@@ -5,14 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { listItemsApi, listSectionsApi, listsApi } from "../api/listsApi";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { canManageFamilyTask } from "../domain/access";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { FamilyListDto, ListItemDto, ListSectionDto } from "../models/dto";
 
 export function ListsPage() {
   const { t } = useTranslation();
   useTrackFamilyTaskPageView("lists");
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const { principal } = useAuth();
   const canManage = canManageFamilyTask(principal);
@@ -168,7 +168,7 @@ interface SectionWithItems {
 export function ListDetailsPage() {
   const { t } = useTranslation();
   useTrackFamilyTaskPageView("list_details");
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const { principal } = useAuth();
   const canManage = canManageFamilyTask(principal);
