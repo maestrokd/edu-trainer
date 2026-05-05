@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
+import React, { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AlertCircleIcon, Loader2 } from "lucide-react";
@@ -13,10 +13,11 @@ import TenantInvitationService, {
   type ResolveTenantInvitationResponse,
   TenantInvitationStatus,
 } from "@/services/TenantInvitationService.ts";
-import { extractErrorCode } from "@/services/ApiService.ts";
 import { notifier } from "@/services/NotificationService.ts";
 import { validatePassword } from "@/services/PasswordValidator.ts";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
+import { extractErrorCode } from "@/services/ApiService.ts";
 
 const formatDateTime = (value: string): string => {
   const date = new Date(value);
@@ -26,6 +27,7 @@ const formatDateTime = (value: string): string => {
 
 const InvitationRegistrationPage: React.FC = () => {
   const { t } = useTranslation();
+  const { getErrorMessage, handleError } = useApiErrorHandler();
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const { sendConfirmationCode, doRegister, isAuthenticated, logout } = useAuth();
@@ -48,6 +50,52 @@ const InvitationRegistrationPage: React.FC = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const submitInFlightRef = useRef(false);
+
+  const navigateToSuccess = (data: ResolveTenantInvitationResponse) => {
+    if (!token) return;
+
+    navigate(`/auth/invitations/${token}/success`, {
+      replace: true,
+      state: {
+        tenantUuid: data.tenantUuid,
+        tenantName: data.tenantName,
+        role: data.role,
+      },
+    });
+  };
+
+  const recoverFromRegistrationError = async (): Promise<boolean> => {
+    if (!token) return false;
+
+    try {
+      const data = await TenantInvitationService.resolveTenantInvitation(token);
+      setInvitation(data);
+
+      if (data.status === TenantInvitationStatus.ACCEPTED) {
+        navigateToSuccess(data);
+        return true;
+      }
+      if (data.status === TenantInvitationStatus.EXPIRED) {
+        setInvitationError(t("pages.tenantInvitationRegistration.states.expired", "This invitation has expired."));
+        return true;
+      }
+      if (data.status !== TenantInvitationStatus.PENDING) {
+        setInvitationError(
+          t("pages.tenantInvitationRegistration.states.alreadyProcessed", "This invitation has already been processed.")
+        );
+        return true;
+      }
+      if (data.existingUser) {
+        navigate(`/auth/invitations/${token}`, { replace: true });
+        return true;
+      }
+    } catch {
+      return false;
+    }
+
+    return false;
+  };
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -96,13 +144,10 @@ const InvitationRegistrationPage: React.FC = () => {
         }
         setInvitation(data);
       } catch (error: unknown) {
-        const errorCode = extractErrorCode(error);
-        const messageKey = errorCode
-          ? `errors.codes.${errorCode}`
-          : "pages.tenantInvitationRegistration.states.invalidToken";
         setInvitationError(
-          t(messageKey, {
-            defaultValue: t("errors.codes.UNKNOWN"),
+          getErrorMessage(error, {
+            fallbackKey: "pages.tenantInvitationRegistration.states.invalidToken",
+            fallbackMessage: "Invitation link is invalid.",
           })
         );
       } finally {
@@ -111,7 +156,7 @@ const InvitationRegistrationPage: React.FC = () => {
     };
 
     void resolveInvitation();
-  }, [navigate, t, token]);
+  }, [getErrorMessage, navigate, t, token]);
 
   const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     setConfirmationCode(event.target.value);
@@ -155,13 +200,10 @@ const InvitationRegistrationPage: React.FC = () => {
       setSecondsLeft(60);
       notifier.success(t("pages.registrationPage.notifications.codeSentSuccess"));
     } catch (error: unknown) {
-      const errorCode = extractErrorCode(error);
-      const messageKey = errorCode ? `errors.codes.${errorCode}` : "pages.registrationPage.notifications.codeSentError";
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      handleError(error, {
+        fallbackKey: "pages.registrationPage.notifications.codeSentError",
+        setError: setCodeError,
       });
-      setCodeError(message);
-      notifier.error(message);
     } finally {
       setSendCodeLoading(false);
     }
@@ -169,9 +211,10 @@ const InvitationRegistrationPage: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!invitation || !token) return;
+    if (!invitation || !token || submitInFlightRef.current) return;
     if (!confirmationCode || codeError || passwordErrors.length > 0 || confirmError) return;
 
+    submitInFlightRef.current = true;
     setSubmitLoading(true);
     setSubmitError(null);
 
@@ -182,26 +225,27 @@ const InvitationRegistrationPage: React.FC = () => {
           defaultValue: "Your account was created and invitation accepted.",
         })
       );
-      navigate(`/auth/invitations/${token}/success`, {
-        replace: true,
-        state: {
-          tenantUuid: invitation.tenantUuid,
-          tenantName: invitation.tenantName,
-          role: invitation.role,
-        },
-      });
+      navigateToSuccess(invitation);
     } catch (error: unknown) {
       const errorCode = extractErrorCode(error);
-      const messageKey = errorCode
-        ? `errors.codes.${errorCode}`
-        : "pages.tenantInvitationRegistration.notifications.submitError";
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      if (
+        errorCode === "INVITATION_ALREADY_PROCESSED" ||
+        errorCode === "USER_ALREADY_TENANT_MEMBER" ||
+        errorCode === "IDEMPOTENCY_ERROR" ||
+        errorCode === "EMAIL_ALREADY_EXISTS"
+      ) {
+        const wasRecovered = await recoverFromRegistrationError();
+        if (wasRecovered) return;
+      }
+
+      handleError(error, {
+        fallbackKey: "pages.tenantInvitationRegistration.notifications.submitError",
+        fallbackMessage: "Failed to complete invited registration.",
+        setError: setSubmitError,
       });
-      setSubmitError(message);
-      notifier.error(message);
     } finally {
       setSubmitLoading(false);
+      submitInFlightRef.current = false;
     }
   };
 

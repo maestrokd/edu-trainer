@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { taskOccurrencesApi, type TaskHistoryFilters, type TaskOccurrenceFilters } from "../api/taskOccurrencesApi";
-import { useFamilyTaskErrorHandler } from "./useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import type {
   ReviewTaskCompletionRequest,
   SubmitTaskCompletionRequest,
@@ -12,7 +12,7 @@ export function useTodayTasks(profileUuid?: string) {
   const [tasks, setTasks] = useState<TaskOccurrenceDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,7 +61,7 @@ export function useTaskOccurrences(filters?: TaskOccurrenceFilters) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     const requestId = requestIdRef.current + 1;
@@ -120,7 +120,7 @@ export function useApprovalQueue(enabled = true) {
   const [queue, setQueue] = useState<TaskOccurrenceDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -190,7 +190,7 @@ export function useTaskHistory(filters?: TaskHistoryFilters) {
   const [events, setEvents] = useState<TaskCompletionEventDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -221,7 +221,7 @@ export function useOccurrenceHistory(occurrenceUuid?: string) {
   const [events, setEvents] = useState<TaskCompletionEventDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     if (!occurrenceUuid) {

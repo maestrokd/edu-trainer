@@ -11,7 +11,7 @@ import { AssigneeProfilesField } from "../components/tasks/AssigneeProfilesField
 import { TaskEmojiField } from "../components/tasks/TaskEmojiField";
 import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { ChoreDto, CreateChoreRequest, PatchChoreRequest } from "../models/dto";
 
@@ -22,7 +22,7 @@ function todayDateValue() {
 export function ChoreDetailsPage() {
   const { t } = useTranslation();
   useTrackFamilyTaskPageView("chore_details");
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const { principal } = useAuth();
   const canManage = canManageFamilyTask(principal);
@@ -223,11 +223,7 @@ export function ChoreDetailsPage() {
                   <Smile className="size-4 text-muted-foreground" />
                   {t("familyTask.tasks.emoji", "Emoji (optional)")}
                 </span>
-                <TaskEmojiField
-                  value={emoji}
-                  onChange={setEmoji}
-                  placeholder={t("familyTask.tasks.emojiPlaceholder", "Type or select emoji")}
-                />
+                <TaskEmojiField value={emoji} onChange={setEmoji} />
               </div>
 
               <label className="block space-y-2">

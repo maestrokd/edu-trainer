@@ -5,7 +5,8 @@ import type {
   ApiItemsResponse,
   CreateRewardLabelRequest,
   CreateStarAdjustmentRequest,
-  CreateRedemptionRequest,
+  CreateRewardRedemptionForChildRequest,
+  CreateRewardRedemptionSelfRequest,
   CreateRewardRequest,
   PatchRewardRequest,
   RewardLabelsQuery,
@@ -228,8 +229,17 @@ export const rewardRedemptionsApi = {
     return response.items;
   },
 
-  create(data: CreateRedemptionRequest): Promise<RewardRedemptionDto> {
-    return post(REDEMPTIONS_BASE, data);
+  createSelf(rewardUuid: string, data?: CreateRewardRedemptionSelfRequest): Promise<RewardRedemptionDto> {
+    const normalizedRewardUuid = rewardUuid.trim();
+    return post(`${BASE}/${normalizedRewardUuid}/redemptions/self`, data ?? {});
+  },
+
+  createForChild(rewardUuid: string, data: CreateRewardRedemptionForChildRequest): Promise<RewardRedemptionDto> {
+    const normalizedRewardUuid = rewardUuid.trim();
+    return post(`${BASE}/${normalizedRewardUuid}/redemptions`, {
+      ...data,
+      assigneeProfileUuid: data.assigneeProfileUuid.trim(),
+    });
   },
 
   approve(redemptionUuid: string, data?: ReviewRewardRedemptionRequest): Promise<RewardRedemptionDto> {

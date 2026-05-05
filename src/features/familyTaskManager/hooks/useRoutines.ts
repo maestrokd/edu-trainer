@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { routinesApi, type RoutineFilters } from "../api/routinesApi";
-import { useFamilyTaskErrorHandler } from "./useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import type { CreateRoutineRequest, PatchRoutineRequest, RoutineDto } from "../models/dto";
 
 export function useRoutines(filters?: RoutineFilters) {
   const [routines, setRoutines] = useState<RoutineDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);
