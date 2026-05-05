@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { FAMILY_CONTEXT_INCLUDE, familyFamiliesApi } from "../api/familyApi";
-import { useFamilyTaskErrorHandler } from "./useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import type { ChildProfileDto, FamilyInfoDto, HouseholdMemberDto } from "../models/dto";
 
 function is404(error: unknown): boolean {
@@ -30,7 +30,7 @@ export function useFamilyContext() {
   const [profiles, setProfiles] = useState<ChildProfileDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);

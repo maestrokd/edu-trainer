@@ -23,10 +23,18 @@ interface ProfileFormProps {
   mode: "create" | "edit";
   onSubmit: (data: ProfileFormData) => Promise<void>;
   isLoading: boolean;
+  submitError?: string | null;
   onCancel: () => void;
 }
 
-export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onSubmit, isLoading, onCancel }) => {
+export const ProfileForm: React.FC<ProfileFormProps> = ({
+  initialData,
+  mode,
+  onSubmit,
+  isLoading,
+  submitError,
+  onCancel,
+}) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState<ProfileFormData>({
     username: "",
@@ -99,11 +107,31 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {submitError && (
+              <Alert variant="destructive" role="alert" aria-live="assertive">
+                <AlertCircleIcon className="h-4 w-4" />
+                <AlertDescription>{submitError}</AlertDescription>
+              </Alert>
+            )}
+
+            {mode === "create" && (
+              <p className="text-xs text-muted-foreground">
+                {t("pages.profileForm.requiredHint", "* Required fields")}
+              </p>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="username">{t("pages.profileForm.username", "Username")}</Label>
+              <Label htmlFor="username">
+                <span>{t("pages.profileForm.username", "Username")}</span>
+                {mode === "create" && (
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                )}
+              </Label>
               <Input
                 id="username"
-                required
+                required={mode === "create"}
                 disabled={mode === "edit" || isLoading}
                 value={formData.username}
                 onChange={(e) => handleChange("username", e.target.value)}
@@ -153,9 +181,16 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, mode, onS
 
             <div className="space-y-2">
               <Label htmlFor="password">
-                {mode === "create"
-                  ? t("pages.profileForm.password", "Password")
-                  : t("pages.profileForm.newPassword", "New Password (Optional)")}
+                <span>
+                  {mode === "create"
+                    ? t("pages.profileForm.password", "Password")
+                    : t("pages.profileForm.newPassword", "New Password (Optional)")}
+                </span>
+                {mode === "create" && (
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                )}
               </Label>
               <Input
                 id="password"

@@ -11,7 +11,7 @@ import { AssigneeProfilesField } from "../components/tasks/AssigneeProfilesField
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
 import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useRoutines } from "../hooks/useRoutines";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { RoutineDto, RoutineExceptionDto } from "../models/dto";
@@ -75,7 +75,7 @@ function formatDateTime(value: string, locale: string, fallback: string): string
 export function RoutineExceptionDetailsPage() {
   const { t, i18n } = useTranslation();
   useTrackFamilyTaskPageView("routine_exception_details");
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
   const { profiles, members, error: familyError, refetch: refetchFamilyContext } = useFamilyContext();
   const { routines, loading: routinesLoading, error: routinesError, refetch: refetchRoutines } = useRoutines();
   const { principal } = useAuth();

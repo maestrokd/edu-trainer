@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { rewardRedemptionsApi, rewardsApi, starsApi } from "../api/rewardsApi";
-import { useFamilyTaskErrorHandler } from "./useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import type {
-  CreateRedemptionRequest,
+  CreateRewardRedemptionForChildRequest,
+  CreateRewardRedemptionSelfRequest,
   CreateRewardRequest,
   PatchRewardRequest,
   RewardDto,
@@ -64,7 +65,7 @@ export function useRewards(filtersOrActive?: UseRewardsInput) {
   const [rewards, setRewards] = useState<RewardDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
   const filtersSignature = useMemo(
     () => JSON.stringify(normalizeRewardsInput(filtersOrActive) ?? {}),
     [filtersOrActive]
@@ -153,7 +154,7 @@ export function useStarsBalance(secondaryProfileUuid?: string, enabled = true) {
   const [balance, setBalance] = useState<StarsBalanceDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     if (!enabled) {
@@ -204,7 +205,7 @@ export function useStarsHistory(secondaryProfileUuid?: string) {
   const [entries, setEntries] = useState<StarLedgerEntryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -235,7 +236,7 @@ export function useRewardRedemptions(queryOrStatus?: UseRewardRedemptionsInput) 
   const [redemptions, setRedemptions] = useState<RewardRedemptionDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
   const filtersSignature = useMemo(
     () => JSON.stringify(normalizeRewardRedemptionsInput(queryOrStatus) ?? {}),
     [queryOrStatus]
@@ -267,10 +268,27 @@ export function useRewardRedemptions(queryOrStatus?: UseRewardRedemptionsInput) 
     void load();
   }, [load]);
 
-  const create = useCallback(
-    async (data: CreateRedemptionRequest) => {
+  const createSelf = useCallback(
+    async (rewardUuid: string, data?: CreateRewardRedemptionSelfRequest) => {
       try {
-        const created = await rewardRedemptionsApi.create(data);
+        const created = await rewardRedemptionsApi.createSelf(rewardUuid, data);
+        setRedemptions((prev) => [created, ...prev]);
+        return created;
+      } catch (error: unknown) {
+        handleError(error, {
+          fallbackKey: "familyTask.errors.redemptionSave",
+          fallbackMessage: "Failed to create redemption.",
+          setError,
+        });
+      }
+    },
+    [handleError]
+  );
+
+  const createForChild = useCallback(
+    async (rewardUuid: string, data: CreateRewardRedemptionForChildRequest) => {
+      try {
+        const created = await rewardRedemptionsApi.createForChild(rewardUuid, data);
         setRedemptions((prev) => [created, ...prev]);
         return created;
       } catch (error: unknown) {
@@ -318,5 +336,5 @@ export function useRewardRedemptions(queryOrStatus?: UseRewardRedemptionsInput) 
     [handleError]
   );
 
-  return { redemptions, loading, error, refetch: load, create, approve, reject };
+  return { redemptions, loading, error, refetch: load, createSelf, createForChild, approve, reject };
 }

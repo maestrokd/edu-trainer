@@ -46,7 +46,7 @@
       "settings": "Settings",
       "billing": "Billing",
       "notifications": "Notifications",
-      "profiles": "Profiles",
+      "profiles": "Child Profiles",
       "tenantProfiles": "Tenant Profiles",
       "tenantInvitations": "Tenant Invitations",
       "selectTenant": "Select Tenant",
@@ -71,6 +71,11 @@
     "next": "Next",
     "retry": "Retry",
     "cancel": "Cancel",
+    "apply": "Apply",
+    "clear": "Clear",
+    "all": "All",
+    "search": "Search",
+    "filters": "Filters",
     "list": {
       "actions": "Actions",
       "input": {
@@ -508,15 +513,19 @@
   },
   "pages": {
     "secondaryProfiles": {
-      "title": "Secondary Profiles",
+      "title": "Child Profiles",
       "createButton": {
         "tooltip": "Create Profile"
       },
       "inviteButton": {
         "label": "Invite user"
       },
+      "filters": {
+        "status": "Status",
+        "hint": "Filter profiles by status."
+      },
       "loadError": "Failed to load profiles.",
-      "empty": "No secondary profiles found.",
+      "empty": "No child profiles found.",
       "confirmDelete": "Are you sure you want to delete this profile?",
       "columns": {
         "name": "Name",
@@ -545,6 +554,7 @@
       "newPassword": "New Password (Optional)",
       "showPasswordLabel": "Show password",
       "localePlaceholder": "Select locale",
+      "requiredHint": "* Required fields",
       "locales": {
         "en": "English (US)",
         "uk": "Ukrainian",
@@ -561,6 +571,7 @@
     "editProfile": {
       "success": "Profile updated successfully",
       "error": "Failed to update profile",
+      "loadError": "Failed to load profile.",
       "notFound": "Profile not found"
     },
     "tenantInvitationsCreate": {
@@ -661,6 +672,7 @@
         "joinedAt": "Joined at",
         "action": "Action"
       },
+      "loadError": "Failed to load tenant memberships.",
       "empty": "No tenant memberships found.",
       "notifications": {
         "switchSuccess": "Active tenant switched to {{tenantName}}.",
@@ -677,11 +689,27 @@
         "profileType": "Profile type",
         "role": "Role",
         "membershipStatus": "Membership status",
-        "active": "Active"
+        "active": "Active",
+        "hint": "Filter profiles by type, role, membership and activity."
       },
       "profileType": {
         "ADULT": "Adult",
         "CHILD": "Child"
+      },
+      "role": {
+        "OWNER": "Owner",
+        "PARENT": "Parent",
+        "CAREGIVER": "Caregiver",
+        "CHILD_DOER": "Child Doer",
+        "CHILD_VIEWER": "Child Viewer",
+        "MEMBER": "Member",
+        "VIEWER": "Viewer"
+      },
+      "membershipStatus": {
+        "INVITED": "Invited",
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "REMOVED": "Removed"
       },
       "activeValues": {
         "true": "Active",
@@ -697,6 +725,7 @@
         "active": "Active",
         "createdAt": "Created at"
       },
+      "loadError": "Failed to load tenant profiles.",
       "empty": "No tenant profiles found.",
       "errors": {
         "noActiveTenant": "No active tenant found. Switch tenant and try again."
@@ -711,7 +740,24 @@
         "search": "Search",
         "searchPlaceholder": "Email",
         "role": "Role",
-        "status": "Status"
+        "status": "Status",
+        "hint": "Filter invitations by role and status."
+      },
+      "role": {
+        "OWNER": "Owner",
+        "PARENT": "Parent",
+        "CAREGIVER": "Caregiver",
+        "CHILD_DOER": "Child Doer",
+        "CHILD_VIEWER": "Child Viewer",
+        "MEMBER": "Member",
+        "VIEWER": "Viewer"
+      },
+      "statusValues": {
+        "PENDING": "Pending",
+        "ACCEPTED": "Accepted",
+        "DECLINED": "Declined",
+        "CANCELED": "Canceled",
+        "EXPIRED": "Expired"
       },
       "columns": {
         "email": "Email",
@@ -721,6 +767,7 @@
         "acceptedAt": "Accepted at",
         "createdAt": "Created at"
       },
+      "loadError": "Failed to load tenant invitations.",
       "empty": "No tenant invitations found.",
       "errors": {
         "noActiveTenant": "No active tenant found. Switch tenant and try again."
@@ -880,7 +927,18 @@
       }
     },
     "menu": {
-      "loadError": "Failed to load menu items. Please try again later."
+      "loadError": "Failed to load menu items. Please try again later.",
+      "upgradeBanner": {
+        "title": "Unlock more apps and advanced tools",
+        "description": "Request a promo code to upgrade and get access to more applications, functions, and options.",
+        "loginPrompt": {
+          "title": "Log in to unlock more apps and advanced tools",
+          "description": "Log in to get access to more applications, functions, and options."
+        },
+        "actions": {
+          "openSubscriptions": "Open subscriptions"
+        }
+      }
     }
   },
   "errors": {
@@ -891,8 +949,11 @@
       "INVALID_CREDENTIALS": "We can't find that email or password. Try again.",
       "INVALID_VERIFICATION_CODE": "Invalid verification code. Please try again.",
       "PROFILE_NOT_FOUND": "We can't find that profile.",
+      "RESOURCE_NOT_FOUND": "Requested resource was not found.",
       "EMAIL_ALREADY_EXISTS": "Email already exists.",
       "USERNAME_ALREADY_EXISTS": "Username already exists.",
+      "WEAK_PASSWORD": "Password doesn't meet security requirements.",
+      "PASSWORDS_DO_NOT_MATCH": "Passwords do not match.",
       "MAX_SECONDARY_PROFILES_REACHED": "Limit of secondary profiles reached.",
       "PROFILE_OWNERSHIP_VIOLATION": "Profile ownership violation.",
       "RATE_LIMIT_EXCEEDED": "Too many attempts. Try again later.",
@@ -900,6 +961,7 @@
       "AUTHENTICATION_FAILED": "Authentication failed.",
       "TOKEN_NOT_VALID": "Token not valid.",
       "MISSING_COOKIE": "Invalid or absent cookie.",
+      "MISSING_REQUEST_HEADER": "Required request header is missing.",
       "TENANT_MEMBERSHIP_NOT_FOUND": "No tenant membership found for this user.",
       "FORBIDDEN": "You do not have access to this action in the active tenant.",
       "IDEMPOTENCY_ERROR": "This request was already processed.",
@@ -912,6 +974,14 @@
       "USER_ALREADY_TENANT_MEMBER": "User is already a tenant member.",
       "INVALID_PROMO_CODE": "Invalid or expired promo code.",
       "NOT_ACTIVE_PROLONGATION_WINDOW": "Not active prolongation window.",
+      "FAMILY_MEMBER_NOT_FOUND": "Family member was not found.",
+      "FAMILY_NOT_FOUND": "Family was not found.",
+      "FAMILY_MEMBER_ALREADY_EXISTS": "Family member already exists.",
+      "FAMILY_TASK_NOT_FOUND": "Family task was not found.",
+      "FAMILY_TASK_STATE_CONFLICT": "Task state changed. Please refresh and try again.",
+      "FAMILY_REWARD_NOT_FOUND": "Family reward was not found.",
+      "FAMILY_REDEMPTION_NOT_FOUND": "Family redemption was not found.",
+      "FAMILY_LIST_NOT_FOUND": "Family list was not found.",
       "ENGLISH_COACH_SESSIONS_LIMIT_REACHED": "You reached the maximum number of English Coach sessions. Delete an existing session to continue."
     }
   },
@@ -989,7 +1059,7 @@
       "rewards": "Rewards",
       "stars": "Stars",
       "redemptions": "Redemptions",
-      "profiles": "Profiles",
+      "profiles": "Child Profiles",
       "lists": "Lists",
       "templateCollections": "Template Collections",
       "settings": "Settings",
@@ -1072,6 +1142,17 @@
         "anytime": "Anytime"
       }
     },
+    "tasks": {
+      "addTask": "Add task",
+      "updateTask": "Update task template",
+      "emoji": "Emoji (optional)",
+      "changeEmoji": "Change emoji",
+      "chooseEmoji": "Choose emoji",
+      "clearEmoji": "Clear emoji",
+      "selectedEmoji": "Selected: {{emoji}}",
+      "noEmojiSelected": "No emoji selected",
+      "searchEmoji": "Search emoji"
+    },
     "approvals": {
       "title": "Approvals",
       "tasks": "Task Completions",
@@ -1087,7 +1168,7 @@
       "create": "Create Reward",
       "edit": "Edit Reward",
       "noRewards": "No rewards available.",
-      "cost": "Cost: {{points}} stars",
+      "cost": "Cost",
       "redeem": "Redeem",
       "redeemFor": "Redeem ⭐ {{cost}}",
       "balance": "Your Balance: {{points}} stars",
@@ -1106,6 +1187,7 @@
       "emptyBoardHint": "Create a reward in the app.",
       "confirmTitle": "Redeem \"{{title}}\"?",
       "confirmBody": "This will spend {{cost}} stars.",
+      "confirmForProfile": "For \"{{profile}}\"",
       "confirmRedeem": "Redeem \"{{title}}\" for {{cost}} stars?",
       "panelHint": "Assign profiles, set emoji and stars cost, then save so the reward appears in the dashboard."
     },
@@ -1152,7 +1234,21 @@
       "create": "Add Child Profile",
       "edit": "Edit Profile",
       "unknown": "Unknown",
-      "noProfiles": "No child profiles yet."
+      "noProfiles": "No child profiles yet.",
+      "ownerOnly": "Only tenant owner can manage child profiles.",
+      "manageProfiles": "Manage Profiles",
+      "statusFilter": "Status",
+      "filterHint": "Filter profiles by status.",
+      "confirmActivate": "Activate this profile?",
+      "confirmDeactivate": "Deactivate this profile?",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "commonProfileHint": "Use Settings > Profiles to edit username, password, first name, last name, and locale.",
+      "field": {
+        "displayName": "Display Name",
+        "emoji": "Emoji",
+        "color": "Color"
+      }
     },
     "lists": {
       "title": "Family Lists",

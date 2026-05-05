@@ -59,28 +59,6 @@ export interface ChildProfileDto {
   active: boolean;
 }
 
-export interface CreateChildProfileRequest {
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  locale: string;
-  displayName: string;
-  avatarEmoji?: string;
-  color?: string;
-}
-
-export interface PatchChildProfileRequest {
-  firstName?: string;
-  lastName?: string;
-  password?: string;
-  locale?: string;
-  displayName?: string;
-  avatarEmoji?: string;
-  color?: string;
-  active?: boolean;
-}
-
 /* Chores */
 export interface ChoreDto {
   uuid: string;
@@ -425,8 +403,12 @@ export interface RewardRedemptionsQuery {
   sort?: string[];
 }
 
-export interface CreateRedemptionRequest {
-  rewardUuid: string;
+export interface CreateRewardRedemptionSelfRequest {
+  note?: string;
+}
+
+export interface CreateRewardRedemptionForChildRequest {
+  assigneeProfileUuid: string;
   note?: string;
 }
 

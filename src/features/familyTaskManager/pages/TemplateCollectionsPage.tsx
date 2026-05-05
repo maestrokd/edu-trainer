@@ -25,7 +25,7 @@ import {
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { NotoEmoji } from "../components/shared/NotoEmoji";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import {
   TemplateSelectionMode,
@@ -241,7 +241,7 @@ function executeImportFile(collectionType: CollectionType, file: File): Promise<
 
 export function TemplateCollectionsPage() {
   const { t, i18n } = useTranslation();
-  const { getErrorMessage } = useFamilyTaskErrorHandler();
+  const { getErrorMessage } = useApiErrorHandler();
 
   useTrackFamilyTaskPageView("template_collections");
 

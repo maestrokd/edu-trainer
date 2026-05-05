@@ -11,7 +11,7 @@ import { ParentFeatureGate } from "../components/gates/ParentFeatureGate";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
 import { useFamilyContext } from "../hooks/useFamilyContext";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useRoutines } from "../hooks/useRoutines";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { ApiPagedItemsResponse, RoutineExceptionDto, RoutineExceptionsQuery } from "../models/dto";
@@ -146,7 +146,7 @@ function formatDateTime(value: string, locale: string, fallback: string): string
 export function RoutineExceptionsPage() {
   const { t, i18n } = useTranslation();
   useTrackFamilyTaskPageView("routine_exceptions");
-  const { getErrorMessage } = useFamilyTaskErrorHandler();
+  const { getErrorMessage } = useApiErrorHandler();
   const {
     profiles,
     members,

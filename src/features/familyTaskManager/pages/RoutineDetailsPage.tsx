@@ -22,7 +22,7 @@ import { TaskEmojiField } from "../components/tasks/TaskEmojiField";
 import { FAMILY_TASK_ROUTES } from "../constants/routes";
 import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "../hooks/useFamilyContext";
-import { useFamilyTaskErrorHandler } from "../hooks/useFamilyTaskErrorHandler";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { CreateRoutineRequest, PatchRoutineRequest } from "../models/dto";
 import { FamilyRoutineRecurrenceType, FamilyRoutineSlot } from "../models/enums";
@@ -32,7 +32,7 @@ const WEEK_DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATU
 export function RoutineDetailsPage() {
   const { t } = useTranslation();
   useTrackFamilyTaskPageView("routine_details");
-  const { handleError } = useFamilyTaskErrorHandler();
+  const { handleError } = useApiErrorHandler();
 
   const { principal } = useAuth();
   const canManage = canManageFamilyTask(principal);
@@ -274,11 +274,7 @@ export function RoutineDetailsPage() {
                   <Smile className="size-4 text-muted-foreground" />
                   {t("familyTask.tasks.emoji", "Emoji (optional)")}
                 </span>
-                <TaskEmojiField
-                  value={emoji}
-                  onChange={setEmoji}
-                  placeholder={t("familyTask.tasks.emojiPlaceholder", "Type or select emoji")}
-                />
+                <TaskEmojiField value={emoji} onChange={setEmoji} />
               </div>
 
               <label className="block space-y-2">

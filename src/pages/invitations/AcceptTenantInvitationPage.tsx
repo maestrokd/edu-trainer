@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
@@ -14,6 +14,7 @@ import TenantInvitationService, {
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { type TenantMembershipRole } from "@/services/AuthService.ts";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
+import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
 
 type InvitationPageState =
   | "loading"
@@ -31,6 +32,7 @@ const formatDateTime = (value: string): string => {
 
 const AcceptTenantInvitationPage: React.FC = () => {
   const { t } = useTranslation();
+  const { handleError } = useApiErrorHandler();
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useParams<{ token: string }>();
@@ -39,6 +41,7 @@ const AcceptTenantInvitationPage: React.FC = () => {
   const [pageState, setPageState] = useState<InvitationPageState>("loading");
   const [invitation, setInvitation] = useState<ResolveTenantInvitationResponse | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const acceptInFlightRef = useRef(false);
 
   const navigateToSuccess = (tenantUuid: string, tenantName: string, role: TenantMembershipRole) => {
     if (!token) return;
@@ -67,6 +70,41 @@ const AcceptTenantInvitationPage: React.FC = () => {
       return;
     }
     setPageState("invalid_token");
+  };
+
+  const refreshSessionBestEffort = async () => {
+    try {
+      await doRefresh();
+    } catch {
+      // Invitation accept can still be successful even if the refresh endpoint returns an error.
+    }
+  };
+
+  const resolveProcessedInvitation = async (): Promise<boolean> => {
+    if (!token) return false;
+
+    try {
+      const data = await TenantInvitationService.resolveTenantInvitation(token);
+      setInvitation(data);
+
+      if (data.status === TenantInvitationStatus.ACCEPTED) {
+        await refreshSessionBestEffort();
+        navigateToSuccess(data.tenantUuid, data.tenantName, data.role);
+        return true;
+      }
+      if (data.status === TenantInvitationStatus.EXPIRED) {
+        setPageState("expired");
+        return true;
+      }
+      if (data.status !== TenantInvitationStatus.PENDING) {
+        setPageState("already_processed");
+        return true;
+      }
+    } catch {
+      return false;
+    }
+
+    return false;
   };
 
   useEffect(() => {
@@ -107,7 +145,7 @@ const AcceptTenantInvitationPage: React.FC = () => {
   }, [navigate, token]);
 
   const handleAcceptInvitation = async () => {
-    if (!token || !invitation) return;
+    if (!token || !invitation || acceptInFlightRef.current) return;
 
     if (!isAuthenticated) {
       navigate("/login", {
@@ -117,12 +155,13 @@ const AcceptTenantInvitationPage: React.FC = () => {
       return;
     }
 
+    acceptInFlightRef.current = true;
     setPageState("accepting");
     setActionError(null);
 
     try {
       const result = await TenantInvitationService.acceptTenantInvitation(token);
-      await doRefresh();
+      await refreshSessionBestEffort();
       notifier.success(
         t("pages.tenantInvitationAccept.notifications.acceptSuccess", {
           defaultValue: "You joined the tenant successfully.",
@@ -132,9 +171,16 @@ const AcceptTenantInvitationPage: React.FC = () => {
     } catch (error: unknown) {
       const errorCode = extractErrorCode(error);
       if (errorCode === "USER_ALREADY_TENANT_MEMBER") {
-        await doRefresh();
+        const wasResolved = await resolveProcessedInvitation();
+        if (wasResolved) return;
+
+        await refreshSessionBestEffort();
         navigateToSuccess(invitation.tenantUuid, invitation.tenantName, invitation.role);
         return;
+      }
+      if (errorCode === "INVITATION_ALREADY_PROCESSED" || errorCode === "IDEMPOTENCY_ERROR") {
+        const wasResolved = await resolveProcessedInvitation();
+        if (wasResolved) return;
       }
       if (errorCode === "INVITATION_EXPIRED") {
         setPageState("expired");
@@ -149,15 +195,14 @@ const AcceptTenantInvitationPage: React.FC = () => {
         return;
       }
 
-      const messageKey = errorCode
-        ? `errors.codes.${errorCode}`
-        : "pages.tenantInvitationAccept.notifications.acceptError";
-      const message = t(messageKey, {
-        defaultValue: t("errors.codes.UNKNOWN"),
+      handleError(error, {
+        fallbackKey: "pages.tenantInvitationAccept.notifications.acceptError",
+        fallbackMessage: "Failed to accept invitation.",
+        setError: setActionError,
       });
-      setActionError(message);
-      notifier.error(message);
       setPageState("existing_user_ready_to_accept");
+    } finally {
+      acceptInFlightRef.current = false;
     }
   };
 

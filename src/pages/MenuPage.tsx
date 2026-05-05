@@ -18,6 +18,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { useSidebarContent } from "@/contexts/SidebarContext";
 import { MenuCard } from "@/components/MenuCard";
+import { SubscriptionUpgradeBanner } from "@/components/subscription/SubscriptionUpgradeBanner";
+import { Authority, useAuth } from "@/contexts/AuthContext";
+import { TenantMembershipRole } from "@/services/AuthService";
+import SubscriptionsApiClient from "@/services/SubscriptionsApiClient";
 
 const iconMap: Record<string, LucideIcon> = {
   Calculator,
@@ -30,6 +34,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 export default function MenuPage() {
   const { t, i18n } = useTranslation();
+  const { isAuthenticated, principal } = useAuth();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -43,6 +48,14 @@ export default function MenuPage() {
   }, [searchInput]);
 
   const locale = getLocale5(i18n);
+
+  const { data: entitlements } = useQuery({
+    queryKey: ["entitlements", "menu-upgrade-banner", principal?.id, principal?.activeTenantUuid],
+    queryFn: () => SubscriptionsApiClient.fetchEntitlements(),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
 
   const {
     data: menuData,
@@ -64,6 +77,22 @@ export default function MenuPage() {
   });
 
   const menuItems = menuData?.content || [];
+
+  const canManageSubscriptions = useMemo(() => {
+    if (!principal) return false;
+
+    return (
+      principal.activeTenantRole === TenantMembershipRole.OWNER &&
+      principal.authorities.includes(Authority.MANAGE_SUBSCRIPTIONS)
+    );
+  }, [principal]);
+
+  const shouldShowUpgradeBanner = useMemo(() => {
+    if (!entitlements?.planName) return false;
+    return entitlements.planName === "FREE_TIER" || entitlements.planName === "FREE";
+  }, [entitlements?.planName]);
+
+  const shouldShowLoginBanner = !isAuthenticated;
 
   const categories = useMemo(() => {
     return [
@@ -105,6 +134,32 @@ export default function MenuPage() {
   return (
     <div className="flex-1 overflow-auto p-4 md:p-8">
       <div className="mx-auto max-w-7xl space-y-4 sm:space-y-8">
+        {shouldShowLoginBanner ? (
+          <SubscriptionUpgradeBanner
+            title={t("pages.menu.upgradeBanner.loginPrompt.title", "Log in to unlock more apps and advanced tools")}
+            description={t(
+              "pages.menu.upgradeBanner.loginPrompt.description",
+              "Log in to get access to more applications, functions, and options."
+            )}
+            actionLabel={t("menu.user.login", "Log in")}
+            actionTo="/login"
+          />
+        ) : shouldShowUpgradeBanner ? (
+          <SubscriptionUpgradeBanner
+            title={t("pages.menu.upgradeBanner.title", "Unlock more apps and advanced tools")}
+            description={t(
+              "pages.menu.upgradeBanner.description",
+              "Request a promo code to upgrade and get access to more applications, functions, and options."
+            )}
+            actionLabel={
+              canManageSubscriptions
+                ? t("pages.menu.upgradeBanner.actions.openSubscriptions", "Open subscriptions")
+                : undefined
+            }
+            actionTo={canManageSubscriptions ? "/subscriptions" : undefined}
+          />
+        ) : null}
+
         <div className="relative group max-w-2xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
           <Input
