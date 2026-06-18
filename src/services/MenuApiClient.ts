@@ -1,5 +1,6 @@
 import { post } from "@/services/ApiService";
 import { type Locale5 } from "@/services/SettingsApiClient";
+import type { PageableResponse } from "@/types/api";
 
 export const MenuCategory = {
   MATH: "MATH",
@@ -18,52 +19,21 @@ export type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 export interface ApiMenuItem {
   id: string;
-  type: string | MenuType;
-  path: string;
-  name: string;
-  title: string;
-  description: string;
-  category: string | MenuCategory;
-  iconKey: string;
-  badge: string | null;
-  tags: string[];
+  type?: string | MenuType | null;
+  path?: string | null;
+  name?: string | null;
+  title?: string | null;
+  description?: string | null;
+  category?: string | MenuCategory | null;
+  iconKey?: string | null;
+  badge?: string | null;
+  tags?: string[] | null;
 }
 
 export interface MenuItemsFiltersRequest {
   searchString: string;
   category: string | MenuCategory;
   type: string | MenuType;
-}
-
-export interface Pageable {
-  offset: number;
-  pageNumber: number;
-  pageSize: number;
-  paged: boolean;
-  sort: {
-    empty: boolean;
-    sorted: boolean;
-    unsorted: boolean;
-  };
-  unpaged: boolean;
-}
-
-export interface Page<T> {
-  content: T[];
-  empty: boolean;
-  first: boolean;
-  last: boolean;
-  number: number;
-  numberOfElements: number;
-  pageable: Pageable;
-  size: number;
-  sort: {
-    empty: boolean;
-    sorted: boolean;
-    unsorted: boolean;
-  };
-  totalElements: number;
-  totalPages: number;
 }
 
 class MenuApiClient {
@@ -79,7 +49,7 @@ class MenuApiClient {
     page: number = 0,
     size: number = 20,
     locale?: Locale5
-  ): Promise<Page<ApiMenuItem>> {
+  ): Promise<PageableResponse<ApiMenuItem>> {
     const params = new URLSearchParams();
     params.append("page", page.toString());
     params.append("size", size.toString());
@@ -88,7 +58,7 @@ class MenuApiClient {
     }
 
     const url = `/api/v1/menu/filters?${params.toString()}`;
-    return post<Page<ApiMenuItem>>(url, filters);
+    return post<PageableResponse<ApiMenuItem>>(url, filters);
   }
 }
 

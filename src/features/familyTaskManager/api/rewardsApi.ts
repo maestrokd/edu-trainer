@@ -1,7 +1,6 @@
 import { del, get, patch, post } from "@/services/ApiService";
 import type {
   ApiPagedItemsResponse,
-  ApiPageResponse,
   ApiItemsResponse,
   CreateRewardLabelRequest,
   CreateStarAdjustmentRequest,
@@ -21,6 +20,7 @@ import type {
   StarsBalanceDto,
   StarsBalancesQuery,
 } from "../models/dto";
+import type { PageableResponse } from "@/types/api";
 
 const BASE = "/private/family/rewards";
 const REDEMPTIONS_BASE = "/private/family/reward-redemptions";
@@ -199,7 +199,7 @@ export const starsApi = {
     return post(`${BASE}/stars`, data);
   },
 
-  getEntries(params?: StarLedgerEntriesQuery): Promise<ApiPageResponse<StarLedgerEntryDto>> {
+  getEntries(params?: StarLedgerEntriesQuery): Promise<PageableResponse<StarLedgerEntryDto>> {
     return get(`${BASE}/stars`, params ? { params } : undefined);
   },
 

@@ -14,7 +14,8 @@ import { FAMILY_TASK_ROUTES } from "../constants/routes";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useApiErrorHandler } from "@/hooks/use-api-error-handler";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
-import type { ApiPageResponse, ChildProfileDto, StarLedgerEntryDto } from "../models/dto";
+import type { ChildProfileDto, StarLedgerEntryDto } from "../models/dto";
+import type { PageableResponse } from "@/types/api";
 
 const MAX_REASON_LENGTH = 255;
 const PAGE_SIZE = 20;
@@ -144,7 +145,7 @@ export function StarsAdjustmentsPage() {
   const [debouncedPageIndex, setDebouncedPageIndex] = useState(0);
 
   const [balance, setBalance] = useState<number | null>(null);
-  const [entriesPage, setEntriesPage] = useState<ApiPageResponse<StarLedgerEntryDto> | null>(null);
+  const [entriesPage, setEntriesPage] = useState<PageableResponse<StarLedgerEntryDto> | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [screenError, setScreenError] = useState<string | null>(null);
@@ -218,8 +219,7 @@ export function StarsAdjustmentsPage() {
         setBalance(asFiniteNumber(resolvedBalance));
         setEntriesPage(nextEntriesPage);
 
-        const serverPageable = (nextEntriesPage as { pageable?: { pageNumber?: unknown } }).pageable;
-        const resolvedServerPage = toNonNegativeInteger(nextEntriesPage.number ?? serverPageable?.pageNumber, nextPage);
+        const resolvedServerPage = toNonNegativeInteger(nextEntriesPage.page, nextPage);
         if (resolvedServerPage !== nextPage) {
           setPageIndex(resolvedServerPage);
           setDebouncedPageIndex(resolvedServerPage);
@@ -255,12 +255,11 @@ export function StarsAdjustmentsPage() {
   const effectiveAmount = Math.max(1, Math.trunc(starsAmount) || 1);
   const canSubmit = selectedProfileUuid.length > 0 && normalizedReason.length > 0 && effectiveAmount > 0 && !saving;
 
-  const entries = Array.isArray(entriesPage?.content) ? entriesPage.content : [];
-  const pageable = (entriesPage as { pageable?: { pageNumber?: unknown; pageSize?: unknown } } | null)?.pageable;
-  const resolvedPageSize = Math.max(1, toNonNegativeInteger(entriesPage?.size ?? pageable?.pageSize, PAGE_SIZE));
-  const resolvedPageNumber = toNonNegativeInteger(entriesPage?.number ?? pageable?.pageNumber, pageIndex);
-  const resolvedTotalElements = toNonNegativeInteger(entriesPage?.totalElements, entries.length);
-  const resolvedNumberOfElements = toNonNegativeInteger(entriesPage?.numberOfElements, entries.length);
+  const entries = Array.isArray(entriesPage?.items) ? entriesPage.items : [];
+  const resolvedPageSize = Math.max(1, toNonNegativeInteger(entriesPage?.requestedSize, PAGE_SIZE));
+  const resolvedPageNumber = toNonNegativeInteger(entriesPage?.page, pageIndex);
+  const resolvedTotalElements = toNonNegativeInteger(entriesPage?.totalItems, entries.length);
+  const resolvedNumberOfElements = toNonNegativeInteger(entriesPage?.actualPageSize, entries.length);
   const inferredTotalPages = resolvedTotalElements > 0 ? Math.ceil(resolvedTotalElements / resolvedPageSize) : 1;
   const resolvedTotalPages = Math.max(1, toNonNegativeInteger(entriesPage?.totalPages, inferredTotalPages));
   const safeCurrentPage = Math.min(resolvedPageNumber, Math.max(0, resolvedTotalPages - 1));
@@ -272,7 +271,7 @@ export function StarsAdjustmentsPage() {
       ? 0
       : Math.min(resolvedTotalElements, Math.max(pageStart, safeCurrentPage * resolvedPageSize + countOnPage));
   const canGoPrev = safeCurrentPage > 0;
-  const canGoNext = safeCurrentPage + 1 < resolvedTotalPages && pageEnd < resolvedTotalElements;
+  const canGoNext = safeCurrentPage + 1 < resolvedTotalPages;
   const renderedBalance = balance === null ? null : asFiniteNumber(balance);
   const hasProfiles = !familyLoading && activeProfiles.length > 0;
 
