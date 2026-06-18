@@ -2,6 +2,8 @@ import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } fro
 import { ArrowDownCircle, ArrowLeft, ArrowUpCircle, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInsetHeader } from "@/contexts/InsetHeaderContext";
 import { notifier } from "@/services/NotificationService";
@@ -137,7 +139,7 @@ export function StarsAdjustmentsPage() {
     [activeProfiles]
   );
 
-  const [selectedProfileUuid, setSelectedProfileUuid] = useState("");
+  const [selectedProfileUuid, setSelectedProfileUuid] = useState<string | null>(null);
   const [direction, setDirection] = useState<AdjustmentDirection>("ADD");
   const [starsAmount, setStarsAmount] = useState(1);
   const [reason, setReason] = useState("");
@@ -146,26 +148,65 @@ export function StarsAdjustmentsPage() {
 
   const [balance, setBalance] = useState<number | null>(null);
   const [entriesPage, setEntriesPage] = useState<PageableResponse<StarLedgerEntryDto> | null>(null);
+  const [loadedProfileUuid, setLoadedProfileUuid] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [screenError, setScreenError] = useState<string | null>(null);
 
   const requestIdRef = useRef(0);
 
+  const selectedProfile = selectedProfileUuid ? (profileByUuid.get(selectedProfileUuid) ?? null) : null;
+  const hasActiveProfiles = activeProfiles.length > 0;
+
+  const resetStarsState = useCallback(() => {
+    requestIdRef.current += 1;
+    setBalance(null);
+    setEntriesPage(null);
+    setLoadedProfileUuid(null);
+    setLoading(false);
+    setScreenError(null);
+  }, []);
+
+  const selectProfile = useCallback(
+    (nextProfileUuid: string | null) => {
+      if (selectedProfileUuid === nextProfileUuid) {
+        return;
+      }
+
+      setPageIndex(0);
+      setDebouncedPageIndex(0);
+      resetStarsState();
+      setSelectedProfileUuid(nextProfileUuid);
+    },
+    [resetStarsState, selectedProfileUuid]
+  );
+
   useEffect(() => {
-    if (activeProfiles.length === 0) {
-      setSelectedProfileUuid("");
+    if (familyLoading) {
       return;
     }
 
-    setSelectedProfileUuid((current) => {
-      if (current && activeProfiles.some((profile) => profile.profileUuid === current)) {
-        return current;
+    if (!hasActiveProfiles) {
+      if (selectedProfileUuid === null) {
+        resetStarsState();
+      } else {
+        selectProfile(null);
       }
+      return;
+    }
 
-      return activeProfiles[0].profileUuid;
-    });
-  }, [activeProfiles]);
+    if (!selectedProfile) {
+      selectProfile(activeProfiles[0].profileUuid);
+    }
+  }, [
+    activeProfiles,
+    familyLoading,
+    hasActiveProfiles,
+    resetStarsState,
+    selectProfile,
+    selectedProfile,
+    selectedProfileUuid,
+  ]);
 
   useEffect(() => {
     setPageIndex(0);
@@ -218,6 +259,7 @@ export function StarsAdjustmentsPage() {
           nextBalances.find((entry) => entry.secondaryProfileUuid === profileUuid)?.balance ?? nextBalances[0]?.balance;
         setBalance(asFiniteNumber(resolvedBalance));
         setEntriesPage(nextEntriesPage);
+        setLoadedProfileUuid(profileUuid);
 
         const resolvedServerPage = toNonNegativeInteger(nextEntriesPage.page, nextPage);
         if (resolvedServerPage !== nextPage) {
@@ -231,6 +273,7 @@ export function StarsAdjustmentsPage() {
 
         setBalance(null);
         setEntriesPage(null);
+        setLoadedProfileUuid(null);
         setScreenError(
           getErrorMessage(error, {
             fallbackKey: "familyTask.errors.starManagementLoad",
@@ -247,13 +290,36 @@ export function StarsAdjustmentsPage() {
   );
 
   useEffect(() => {
-    void loadStarsData(selectedProfileUuid, debouncedPageIndex, true);
-  }, [debouncedPageIndex, loadStarsData, selectedProfileUuid]);
+    if (familyLoading || !selectedProfileUuid || !selectedProfile) {
+      return;
+    }
 
-  const selectedProfileName = selectedProfileUuid ? (profileByUuid.get(selectedProfileUuid)?.displayName ?? "") : "";
+    void loadStarsData(selectedProfileUuid, debouncedPageIndex, true);
+  }, [debouncedPageIndex, familyLoading, loadStarsData, selectedProfile, selectedProfileUuid]);
+
   const normalizedReason = normalizeReason(reason);
   const effectiveAmount = Math.max(1, Math.trunc(starsAmount) || 1);
-  const canSubmit = selectedProfileUuid.length > 0 && normalizedReason.length > 0 && effectiveAmount > 0 && !saving;
+  const hasLoadedSelectedProfileData =
+    Boolean(selectedProfileUuid) && loadedProfileUuid === selectedProfileUuid && entriesPage !== null;
+  const hasProfiles = !familyLoading && hasActiveProfiles;
+  const isInitialDataReady = hasProfiles && Boolean(selectedProfile) && hasLoadedSelectedProfileData;
+  const isPageTransitionPending = pageIndex !== debouncedPageIndex;
+  const profileSelectDisabled =
+    familyLoading ||
+    !hasActiveProfiles ||
+    !selectedProfile ||
+    !isInitialDataReady ||
+    isPageTransitionPending ||
+    loading ||
+    saving;
+  const starsControlsDisabled = !isInitialDataReady || isPageTransitionPending || loading || saving;
+  const canSubmit =
+    Boolean(selectedProfileUuid) &&
+    isInitialDataReady &&
+    normalizedReason.length > 0 &&
+    effectiveAmount > 0 &&
+    !saving &&
+    !loading;
 
   const entries = Array.isArray(entriesPage?.items) ? entriesPage.items : [];
   const resolvedPageSize = Math.max(1, toNonNegativeInteger(entriesPage?.requestedSize, PAGE_SIZE));
@@ -273,7 +339,7 @@ export function StarsAdjustmentsPage() {
   const canGoPrev = safeCurrentPage > 0;
   const canGoNext = safeCurrentPage + 1 < resolvedTotalPages;
   const renderedBalance = balance === null ? null : asFiniteNumber(balance);
-  const hasProfiles = !familyLoading && activeProfiles.length > 0;
+  const showLedgerLoading = hasProfiles && !screenError && (!isInitialDataReady || loading) && entries.length === 0;
 
   const appHeaderContent = useMemo(
     () => (
@@ -292,6 +358,10 @@ export function StarsAdjustmentsPage() {
     event.preventDefault();
 
     if (!canSubmit) {
+      return;
+    }
+
+    if (!selectedProfileUuid) {
       return;
     }
 
@@ -336,9 +406,9 @@ export function StarsAdjustmentsPage() {
           {familyError ? (
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-destructive/40 dark:bg-destructive/15 dark:text-destructive">
               <span>{t(familyError, "Failed to load family context.")}</span>
-              <button type="button" className="font-medium underline" onClick={() => void refetchFamilyContext()}>
+              <Button type="button" variant="link" className="h-auto p-0" onClick={() => void refetchFamilyContext()}>
                 {t("common.retry", "Retry")}
-              </button>
+              </Button>
             </div>
           ) : null}
 
@@ -360,15 +430,24 @@ export function StarsAdjustmentsPage() {
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(150px,190px)] gap-3">
                   <div className={FIELD_BLOCK_CLASS}>
                     <span className={FIELD_LABEL_CLASS}>{t("familyTask.stars.child", "Child Profile")}</span>
-                    <Select value={selectedProfileUuid} onValueChange={setSelectedProfileUuid}>
-                      <SelectTrigger className="h-11 w-full rounded-xl border-input bg-background px-3 text-sm">
-                        <SelectValue placeholder={t("familyTask.stars.child", "Child Profile")}>
-                          {selectedProfileName || undefined}
-                        </SelectValue>
+                    <Select
+                      value={selectedProfileUuid ?? ""}
+                      onValueChange={selectProfile}
+                      disabled={profileSelectDisabled}
+                    >
+                      <SelectTrigger
+                        aria-label={t("familyTask.stars.child", "Child Profile")}
+                        className="h-11 w-full rounded-xl border-input bg-background px-3 text-sm"
+                      >
+                        <SelectValue placeholder={t("familyTask.stars.child", "Child Profile")} />
                       </SelectTrigger>
                       <SelectContent>
                         {activeProfiles.map((profile) => (
-                          <SelectItem key={profile.profileUuid} value={profile.profileUuid}>
+                          <SelectItem
+                            key={profile.profileUuid}
+                            value={profile.profileUuid}
+                            textValue={profile.displayName}
+                          >
                             <span className="inline-flex min-w-0 items-center gap-2">
                               <NotoEmoji emoji={resolveProfileBadge(profile)} size={18} fallback="👤" />
                               <span className="truncate">{profile.displayName}</span>
@@ -397,25 +476,28 @@ export function StarsAdjustmentsPage() {
                   <div className="grid grid-cols-[128px_1fr_1fr] gap-2">
                     <label className="inline-flex h-11 items-center gap-2 rounded-xl border border-input bg-background px-3">
                       <Star className="size-4 text-amber-500" />
-                      <input
+                      <Input
                         type="number"
                         min={1}
                         step={1}
+                        disabled={starsControlsDisabled}
                         value={effectiveAmount}
                         onChange={(event) => {
                           const nextValue = Math.trunc(Number(event.target.value));
                           setStarsAmount(Number.isFinite(nextValue) && nextValue > 0 ? nextValue : 1);
                         }}
-                        className="w-full bg-transparent text-center text-sm font-semibold text-foreground outline-none"
+                        className="h-auto w-full border-0 bg-transparent px-0 py-0 text-center text-sm font-semibold shadow-none focus-visible:ring-0"
                         aria-label={t("familyTask.stars.amount", "Stars Amount")}
                       />
                     </label>
 
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      disabled={starsControlsDisabled}
                       onClick={() => setDirection("ADD")}
                       className={cn(
-                        "inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-sm font-medium transition-colors",
+                        "h-11 rounded-xl",
                         direction === "ADD"
                           ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-900/30 dark:text-emerald-200"
                           : "border-border bg-background text-foreground hover:bg-accent"
@@ -423,13 +505,15 @@ export function StarsAdjustmentsPage() {
                     >
                       <ArrowUpCircle className="size-4" />
                       {t("familyTask.stars.add", "Add")}
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      disabled={starsControlsDisabled}
                       onClick={() => setDirection("SUBTRACT")}
                       className={cn(
-                        "inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-sm font-medium transition-colors",
+                        "h-11 rounded-xl",
                         direction === "SUBTRACT"
                           ? "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-900/30 dark:text-rose-200"
                           : "border-border bg-background text-foreground hover:bg-accent"
@@ -437,21 +521,22 @@ export function StarsAdjustmentsPage() {
                     >
                       <ArrowDownCircle className="size-4" />
                       {t("familyTask.stars.subtract", "Subtract")}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
                 <label className="block space-y-2">
                   <span className={FIELD_LABEL_CLASS}>{t("familyTask.stars.reason", "Reason")}</span>
-                  <input
+                  <Input
                     value={reason}
                     maxLength={MAX_REASON_LENGTH}
+                    disabled={starsControlsDisabled}
                     onChange={(event) => setReason(event.target.value)}
                     placeholder={t(
                       "familyTask.stars.reasonPlaceholder",
                       "MANUAL_BONUS_WEEKEND_HELP or MANUAL_CORRECTION"
                     )}
-                    className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground shadow-xs outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30"
+                    className="h-11 rounded-xl"
                   />
                   <span className="block text-xs text-muted-foreground">
                     {reason.length}/{MAX_REASON_LENGTH}
@@ -459,24 +544,23 @@ export function StarsAdjustmentsPage() {
                 </label>
 
                 <div className="flex items-center gap-2">
-                  <Link
-                    to={FAMILY_TASK_ROUTES.rewards}
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-                  >
-                    <ArrowLeft className="mr-1 size-4" />
-                    {t("common.back", "Back")}
-                  </Link>
-                  <button
+                  <Button asChild type="button" variant="outline" className="h-11 rounded-full px-5">
+                    <Link to={FAMILY_TASK_ROUTES.rewards}>
+                      <ArrowLeft className="mr-1 size-4" />
+                      {t("common.back", "Back")}
+                    </Link>
+                  </Button>
+                  <Button
                     type="submit"
                     disabled={!canSubmit}
-                    className="h-11 flex-1 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="h-11 flex-1 rounded-full px-4 text-sm font-semibold"
                   >
                     {saving
                       ? t("common.saving", "Saving...")
                       : direction === "ADD"
                         ? t("familyTask.stars.addStars", "Add Stars")
                         : t("familyTask.stars.subtractStars", "Subtract Stars")}
-                  </button>
+                  </Button>
                 </div>
               </form>
 
@@ -496,11 +580,11 @@ export function StarsAdjustmentsPage() {
                 </header>
 
                 <div className="min-h-0 flex-1 overflow-auto">
-                  {loading && entries.length === 0 ? (
+                  {showLedgerLoading ? (
                     <div className="px-4 py-6 text-sm text-muted-foreground">{t("common.loading", "Loading...")}</div>
                   ) : null}
 
-                  {!loading && entries.length === 0 ? (
+                  {!loading && isInitialDataReady && entries.length === 0 ? (
                     <div className="px-4 py-6 text-sm text-muted-foreground">
                       {t("familyTask.stars.noEntries", "No stars entries found.")}
                     </div>
@@ -582,32 +666,36 @@ export function StarsAdjustmentsPage() {
                     </p>
 
                     <div className="flex items-center gap-2">
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setPageIndex((current) => Math.max(0, current - 1))}
-                        disabled={!canGoPrev || loading}
-                        className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={!canGoPrev || starsControlsDisabled}
+                        className="h-8 rounded-full px-2.5 text-xs"
                       >
                         <ChevronLeft className="size-3.5" />
                         {t("common.previous", "Previous")}
-                      </button>
+                      </Button>
                       <span className="text-xs text-muted-foreground">
                         {t("familyTask.stars.pageNumber", "Page {{current}}/{{total}}", {
                           current: safeCurrentPage + 1,
                           total: resolvedTotalPages,
                         })}
                       </span>
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() =>
                           setPageIndex((current) => Math.min(Math.max(0, resolvedTotalPages - 1), current + 1))
                         }
-                        disabled={!canGoNext || loading}
-                        className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={!canGoNext || starsControlsDisabled}
+                        className="h-8 rounded-full px-2.5 text-xs"
                       >
                         {t("common.next", "Next")}
                         <ChevronRight className="size-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </footer>
                 ) : null}
