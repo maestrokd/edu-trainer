@@ -10,19 +10,15 @@ import type {
   FamilyTaskSourceType,
 } from "./enums";
 import type { TenantMembershipRole } from "@/services/AuthService";
+import type { PageableResponse } from "@/types/api";
+
+export type { PageableResponse } from "@/types/api";
 
 export interface ApiItemsResponse<T> {
   items: T[];
 }
 
-export interface ApiPagedItemsResponse<T> {
-  page: number;
-  requestedSize: number;
-  actualPageSize: number;
-  totalItems: number;
-  totalPages: number;
-  items: T[];
-}
+export type ApiPagedItemsResponse<T> = PageableResponse<T>;
 
 /* Household */
 export interface FamilyInfoDto {
@@ -330,10 +326,10 @@ export interface CreateStarAdjustmentRequest {
 
 export interface StarLedgerEntryDto {
   uuid: string;
-  occurrenceUuid: string | null;
+  occurrenceUuid?: string | null;
   secondaryProfileUuid: string;
   deltaStars: number;
-  reason: string;
+  reason?: string | null;
   createdDate: string;
 }
 
@@ -349,18 +345,6 @@ export interface StarLedgerEntriesQuery {
   page?: number;
   size?: number;
   sort?: string;
-}
-
-export interface ApiPageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-  first: boolean;
-  last: boolean;
-  numberOfElements: number;
-  empty: boolean;
 }
 
 export interface RewardRedemptionDto {

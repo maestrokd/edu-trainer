@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInsetHeader } from "@/contexts/InsetHeaderContext";
 import { DashboardAppHeader, DashboardHeader } from "../components/dashboard/DashboardHeader";
@@ -11,6 +11,7 @@ import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView"
 
 export function FamilyTaskDashboardPage() {
   const { t, i18n } = useTranslation();
+  const [showCompleted, setShowCompleted] = useState(false);
   const {
     family,
     familyError,
@@ -48,6 +49,8 @@ export function FamilyTaskDashboardPage() {
         onPreviousDay={() => shiftDate("prev")}
         onNextDay={() => shiftDate("next")}
         onToday={resetToToday}
+        showCompleted={showCompleted}
+        onShowCompletedChange={setShowCompleted}
       />
     ),
     [
@@ -61,6 +64,7 @@ export function FamilyTaskDashboardPage() {
       selectedDate,
       setProfileFilter,
       shiftDate,
+      showCompleted,
     ]
   );
 
@@ -78,6 +82,8 @@ export function FamilyTaskDashboardPage() {
           onPreviousDay={() => shiftDate("prev")}
           onNextDay={() => shiftDate("next")}
           onToday={resetToToday}
+          showCompleted={showCompleted}
+          onShowCompletedChange={setShowCompleted}
           className="hidden max-[560px]:flex"
         />
 
@@ -122,6 +128,7 @@ export function FamilyTaskDashboardPage() {
                   routineSlotByUuid={routineSlotByUuid}
                   submittingByTaskUuid={submittingByTaskUuid}
                   onComplete={handleComplete}
+                  showCompleted={showCompleted}
                 />
               ))}
             </div>

@@ -21,6 +21,18 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const titleLabel = item.title?.trim() || item.name?.trim() || t("menu.untitledItem", "Untitled item");
+  const descriptionLabel = item.description?.trim() || t("menu.noDescription", "No description available.");
+  const badgeLabel = item.badge?.trim();
+  const tags = item.tags?.map((tag) => tag.trim()).filter(Boolean) ?? [];
+  const navigationPath = item.path?.trim() ?? "";
+  const canNavigate = navigationPath.length > 0;
+
+  const navigateToItem = () => {
+    if (canNavigate) {
+      navigate(navigationPath);
+    }
+  };
 
   return (
     <Card
@@ -47,7 +59,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col gap-1">
-              {item.badge && (
+              {badgeLabel ? (
                 <div className="flex justify-end">
                   <Badge
                     variant="secondary"
@@ -56,17 +68,17 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                       !isMobile && "group-hover:bg-primary group-hover:text-primary-foreground"
                     )}
                   >
-                    {item.badge}
+                    {badgeLabel}
                   </Badge>
                 </div>
-              )}
+              ) : null}
               <CardTitle
                 className={cn(
                   "text-lg font-bold tracking-tight leading-snug transition-colors duration-300 break-words line-clamp-2",
                   !isMobile && "group-hover:text-primary"
                 )}
               >
-                {item.title}
+                {titleLabel}
               </CardTitle>
             </div>
           </div>
@@ -77,7 +89,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
         <div className="space-y-3">
           <div className={cn("relative", !isMobile && "group/info")}>
             <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed pr-7 font-medium">
-              {item.description}
+              {descriptionLabel}
             </p>
 
             {isMobile ? (
@@ -97,11 +109,11 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                       <div className="rounded-xl bg-primary/10 p-2.5">
                         <Icon className="size-6 text-primary" />
                       </div>
-                      <SheetTitle className="text-xl font-bold">{item.title}</SheetTitle>
+                      <SheetTitle className="text-xl font-bold">{titleLabel}</SheetTitle>
                     </div>
-                    {item.tags && item.tags.length > 0 && (
+                    {tags.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
-                        {item.tags.map((tag) => (
+                        {tags.map((tag) => (
                           <span
                             key={tag}
                             className="text-xs bg-secondary px-2.5 py-1 rounded-md text-secondary-foreground font-medium"
@@ -110,17 +122,16 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                           </span>
                         ))}
                       </div>
-                    )}
+                    ) : null}
                     <SheetDescription className="text-base text-foreground/80 leading-relaxed pt-2">
-                      {item.description}
+                      {descriptionLabel}
                     </SheetDescription>
                   </SheetHeader>
                   <div className="mt-8 mb-4">
                     <Button
                       className="menu-card__sheet-play-button w-full h-11 text-base font-bold shadow-lg shadow-primary/20"
-                      onClick={() => {
-                        navigate(item.path);
-                      }}
+                      disabled={!canNavigate}
+                      onClick={navigateToItem}
                     >
                       {t("menu.play", "Play Now")}
                     </Button>
@@ -142,7 +153,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[280px] p-3 text-sm font-medium bg-popover text-popover-foreground border border-border shadow-xl backdrop-blur-sm">
-                    <p className="leading-relaxed">{item.description}</p>
+                    <p className="leading-relaxed">{descriptionLabel}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -150,7 +161,7 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
           </div>
 
           <div className="flex flex-wrap gap-1.5 min-h-[1.25rem]">
-            {item.tags?.map((tag) => (
+            {tags.map((tag) => (
               <span
                 key={tag}
                 className={cn(
@@ -169,9 +180,10 @@ export function MenuCard({ item, Icon }: MenuCardProps) {
             "menu-card__play-button w-full mt-4 h-10 font-bold shadow-lg shadow-primary/10 flex items-center justify-center gap-2 rounded-xl transition-all duration-300",
             !isMobile && "group-hover:bg-primary group-hover:shadow-primary/25 group-hover:scale-[1.02] active:scale-95"
           )}
+          disabled={!canNavigate}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(item.path);
+            navigateToItem();
           }}
         >
           <div
