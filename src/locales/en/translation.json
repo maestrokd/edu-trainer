@@ -1076,6 +1076,8 @@
       "family": "Family",
       "familyName": "Show family name",
       "filtersEmpty": "No tasks in the enabled filters.",
+      "showCompleted": "Show completed tasks",
+      "hideCompleted": "Hide completed tasks",
       "stats": {
         "pendingApprovals": "Pending Approvals",
         "todayTasks": "Tasks Today",

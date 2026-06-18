@@ -76,7 +76,7 @@ export default function MenuPage() {
       ),
   });
 
-  const menuItems = menuData?.content || [];
+  const menuItems = menuData?.items ?? [];
 
   const canManageSubscriptions = useMemo(() => {
     if (!principal) return false;
@@ -207,7 +207,7 @@ export default function MenuPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {menuItems.map((item: ApiMenuItem) => {
-              const Icon = iconMap[item.iconKey] || Info;
+              const Icon = item.iconKey ? (iconMap[item.iconKey] ?? Info) : Info;
               return <MenuCard key={item.id} item={item} Icon={Icon} />;
             })}
           </div>

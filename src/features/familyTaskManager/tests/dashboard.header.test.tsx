@@ -58,6 +58,8 @@ describe("DashboardHeader profile filter", () => {
         onPreviousDay={vi.fn()}
         onNextDay={vi.fn()}
         onToday={vi.fn()}
+        showCompleted={false}
+        onShowCompletedChange={vi.fn()}
       />
     );
 
@@ -81,11 +83,38 @@ describe("DashboardHeader profile filter", () => {
         onPreviousDay={vi.fn()}
         onNextDay={vi.fn()}
         onToday={vi.fn()}
+        showCompleted={false}
+        onShowCompletedChange={vi.fn()}
       />
     );
 
     fireEvent.click(screen.getByRole("button", { name: /filter kids/i }));
     fireEvent.click(screen.getByRole("button", { name: /Kid One/i }));
     expect(onProfileFilterChange).toHaveBeenCalledWith([]);
+  });
+
+  it("toggles showCompleted state when toggle button is clicked", () => {
+    const onShowCompletedChange = vi.fn();
+
+    render(
+      <DashboardHeader
+        isToday
+        activeProfiles={buildProfiles()}
+        profileFilter={[]}
+        showProfileFilter
+        onProfileFilterChange={vi.fn()}
+        onPreviousDay={vi.fn()}
+        onNextDay={vi.fn()}
+        onToday={vi.fn()}
+        showCompleted={false}
+        onShowCompletedChange={onShowCompletedChange}
+      />
+    );
+
+    const toggleButton = screen.getByRole("button", { name: /show completed tasks/i });
+    expect(toggleButton).toBeInTheDocument();
+
+    fireEvent.click(toggleButton);
+    expect(onShowCompletedChange).toHaveBeenCalledWith(true);
   });
 });
