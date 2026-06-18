@@ -68,6 +68,7 @@ describe("DashboardProfileColumn filters", () => {
         routineSlotByUuid={{ "routine-morning": FamilyRoutineSlot.MORNING }}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
+        showCompleted={true}
       />
     );
 
@@ -100,6 +101,7 @@ describe("DashboardProfileColumn filters", () => {
         routineSlotByUuid={{ "routine-morning": FamilyRoutineSlot.MORNING }}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
+        showCompleted={true}
       />
     );
 
@@ -157,10 +159,66 @@ describe("DashboardProfileColumn filters", () => {
         }}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
+        showCompleted={true}
       />
     );
 
     const sectionTitles = screen.getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent?.trim());
     expect(sectionTitles).toEqual(["morning", "afternoon", "evening", "anytime", "chores"]);
+  });
+
+  it("filters out completed and submitted tasks when showCompleted is false", () => {
+    const tasks = [
+      buildTask({
+        uuid: "open-task",
+        title: "Open task",
+        status: FamilyTaskOccurrenceStatus.OPEN,
+      }),
+      buildTask({
+        uuid: "completed-task",
+        title: "Completed task",
+        status: FamilyTaskOccurrenceStatus.COMPLETED,
+      }),
+      buildTask({
+        uuid: "submitted-task",
+        title: "Submitted task",
+        status: FamilyTaskOccurrenceStatus.SUBMITTED,
+      }),
+    ];
+
+    const { rerender } = render(
+      <DashboardProfileColumn
+        profile={buildProfile()}
+        profileColor="#60a5fa"
+        profileTasks={tasks}
+        routineSlotByUuid={{}}
+        submittingByTaskUuid={{}}
+        onComplete={vi.fn()}
+        showCompleted={false}
+      />
+    );
+
+    // Completed and submitted tasks should be hidden
+    expect(screen.getByText("Open task")).toBeInTheDocument();
+    expect(screen.queryByText("Completed task")).not.toBeInTheDocument();
+    expect(screen.queryByText("Submitted task")).not.toBeInTheDocument();
+
+    // Rerender with showCompleted={true}
+    rerender(
+      <DashboardProfileColumn
+        profile={buildProfile()}
+        profileColor="#60a5fa"
+        profileTasks={tasks}
+        routineSlotByUuid={{}}
+        submittingByTaskUuid={{}}
+        onComplete={vi.fn()}
+        showCompleted={true}
+      />
+    );
+
+    // All tasks should be visible
+    expect(screen.getByText("Open task")).toBeInTheDocument();
+    expect(screen.getByText("Completed task")).toBeInTheDocument();
+    expect(screen.getByText("Submitted task")).toBeInTheDocument();
   });
 });

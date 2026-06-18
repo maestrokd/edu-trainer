@@ -20,6 +20,7 @@ interface DashboardProfileColumnProps {
   routineSlotByUuid: Record<string, FamilyRoutineSlot>;
   submittingByTaskUuid: Record<string, boolean>;
   onComplete: (task: TaskOccurrenceDto) => void;
+  showCompleted: boolean;
 }
 
 const TOP_SLOT_ICONS: Record<TopSlot, string> = {
@@ -53,6 +54,7 @@ export function DashboardProfileColumn({
   routineSlotByUuid,
   submittingByTaskUuid,
   onComplete,
+  showCompleted,
 }: DashboardProfileColumnProps) {
   const { t } = useTranslation();
   const [slotFilters, setSlotFilters] = useState<Record<TopSlot, boolean>>(() =>
@@ -111,7 +113,13 @@ export function DashboardProfileColumn({
   );
   const hasVisibleSections = SECTION_ORDER.some((section) => {
     const sectionTasks = groupedTasks.taskGroups[section] ?? [];
-    return sectionTasks.length > 0 && slotFilters[section];
+    const visibleTasks = showCompleted
+      ? sectionTasks
+      : sectionTasks.filter(
+          (task) =>
+            task.status !== FamilyTaskOccurrenceStatus.COMPLETED && task.status !== FamilyTaskOccurrenceStatus.SUBMITTED
+        );
+    return visibleTasks.length > 0 && slotFilters[section];
   });
 
   const handleSlotFilterToggle = (slot: TopSlot) => {
@@ -226,13 +234,25 @@ export function DashboardProfileColumn({
             return null;
           }
 
+          const visibleSectionTasks = showCompleted
+            ? sectionTasks
+            : sectionTasks.filter(
+                (task) =>
+                  task.status !== FamilyTaskOccurrenceStatus.COMPLETED &&
+                  task.status !== FamilyTaskOccurrenceStatus.SUBMITTED
+              );
+
+          if (!visibleSectionTasks.length) {
+            return null;
+          }
+
           return (
             <section key={section} className="space-y-1">
               <h3 className="text-xl font-semibold leading-tight text-foreground/80">
                 {t(`familyTask.today.slots.${section}`, section)}
               </h3>
               <div className="space-y-2">
-                {sectionTasks.map((task) => (
+                {visibleSectionTasks.map((task) => (
                   <DashboardTaskCard
                     key={task.uuid}
                     task={task}

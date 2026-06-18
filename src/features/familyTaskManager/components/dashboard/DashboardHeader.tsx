@@ -1,6 +1,7 @@
 import type { ChildProfileDto } from "../../models/dto";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronLeft, ChevronRight, Filter, Info, SunMedium } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Eye, EyeOff, Filter, Info, SunMedium } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { formatHeaderDate } from "../../domain/dashboard/date";
@@ -36,12 +37,16 @@ interface DashboardProfileFilterProps {
 
 interface DashboardHeaderProps extends DashboardSharedControlsProps {
   className?: string;
+  showCompleted: boolean;
+  onShowCompletedChange: (value: boolean) => void;
 }
 
 interface DashboardAppHeaderProps extends DashboardSharedControlsProps {
   familyName?: string | null;
   selectedDate: Date;
   locale: string;
+  showCompleted: boolean;
+  onShowCompletedChange: (value: boolean) => void;
 }
 
 function resolveProfileBadge(profile: ChildProfileDto): string {
@@ -203,16 +208,44 @@ export function DashboardHeader({
   onPreviousDay,
   onNextDay,
   onToday,
+  showCompleted,
+  onShowCompletedChange,
   className,
 }: DashboardHeaderProps) {
+  const { t } = useTranslation();
+
   return (
-    <header className={cn("flex items-center gap-2", showProfileFilter ? "justify-between" : "justify-end", className)}>
-      <DashboardProfileFilter
-        activeProfiles={activeProfiles}
-        profileFilter={profileFilter}
-        showProfileFilter={showProfileFilter}
-        onProfileFilterChange={onProfileFilterChange}
-      />
+    <header className={cn("flex items-center gap-2 justify-between", className)}>
+      <div className="flex items-center gap-1.5">
+        <DashboardProfileFilter
+          activeProfiles={activeProfiles}
+          profileFilter={profileFilter}
+          showProfileFilter={showProfileFilter}
+          onProfileFilterChange={onProfileFilterChange}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => onShowCompletedChange(!showCompleted)}
+          className={cn(
+            "rounded-full transition-colors",
+            showCompleted ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary" : ""
+          )}
+          aria-label={
+            showCompleted
+              ? t("familyTask.dashboard.hideCompleted", "Hide completed tasks")
+              : t("familyTask.dashboard.showCompleted", "Show completed tasks")
+          }
+          title={
+            showCompleted
+              ? t("familyTask.dashboard.hideCompleted", "Hide completed tasks")
+              : t("familyTask.dashboard.showCompleted", "Show completed tasks")
+          }
+        >
+          {showCompleted ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+        </Button>
+      </div>
       <DashboardDateControls isToday={isToday} onPreviousDay={onPreviousDay} onNextDay={onNextDay} onToday={onToday} />
     </header>
   );
@@ -230,6 +263,8 @@ export function DashboardAppHeader({
   onPreviousDay,
   onNextDay,
   onToday,
+  showCompleted,
+  onShowCompletedChange,
 }: DashboardAppHeaderProps) {
   const { t } = useTranslation();
   const resolvedFamilyName = familyName ?? t("familyTask.sidebar.title", "Family Tasks");
@@ -274,6 +309,28 @@ export function DashboardAppHeader({
           onProfileFilterChange={onProfileFilterChange}
           className="hidden min-[561px]:inline-flex"
         />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => onShowCompletedChange(!showCompleted)}
+          className={cn(
+            "rounded-full transition-colors hidden min-[561px]:inline-flex",
+            showCompleted ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary" : ""
+          )}
+          aria-label={
+            showCompleted
+              ? t("familyTask.dashboard.hideCompleted", "Hide completed tasks")
+              : t("familyTask.dashboard.showCompleted", "Show completed tasks")
+          }
+          title={
+            showCompleted
+              ? t("familyTask.dashboard.hideCompleted", "Hide completed tasks")
+              : t("familyTask.dashboard.showCompleted", "Show completed tasks")
+          }
+        >
+          {showCompleted ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+        </Button>
         <DashboardDateControls
           isToday={isToday}
           onPreviousDay={onPreviousDay}
