@@ -22,9 +22,13 @@ import {
   checkCheckpoint,
   collectPickups,
   performAttack,
+  spawnBoss,
+  updateBoss,
   updateCreatures,
+  updateDroppedScrolls,
   updateProjectiles,
 } from "./combat";
+import { BOSS_DYING_SECONDS } from "../model/game.constants";
 
 const STATION_TRIGGER_PAD = 6;
 const CREATURE_TRIGGER_PAD = 14;
@@ -120,6 +124,8 @@ function createWorld(plan: StagePlan, config: EngineConfig): World {
     bossGateEmitted: false,
     requestedStops: new Set<number>(),
     finale: false,
+    celebrationTimer: 0,
+    nextScrollId: 400,
   };
 }
 
@@ -249,6 +255,11 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
   }
 
   function updateAmbient(dt: number) {
+    // the calm practice mini-boss animates its flinch/growl outside updateBoss
+    if (config.mode === "practice" && world.boss && (world.boss.state === "flinch" || world.boss.state === "telegraph")) {
+      world.boss.stateTimer -= dt;
+      if (world.boss.stateTimer <= 0) world.boss.state = "waiting";
+    }
     for (const c of world.creatures) {
       c.hitFlash = Math.max(0, c.hitFlash - dt * 3);
       if (c.retreatTimer > 0) {
@@ -285,8 +296,48 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
       if (config.mode === "adventure") checkCheckpoint(world, events);
       checkBossGate(world, events);
     }
+    if (world.phase === "boss" && config.mode === "adventure") {
+      updateBoss(world, dt, events);
+      const scrollId = updateDroppedScrolls(world, dt);
+      if (scrollId !== null) {
+        freezeWorld();
+        events.onEncounterRequested?.({ kind: "boss-scroll", stationId: scrollId });
+      }
+    }
+    if (world.phase === "celebration") {
+      updateCelebration(dt);
+    }
     updateAmbient(dt);
     updateCamera(camera, world.knight.rect, world.plan.width, dt);
+  }
+
+  function spawnConfetti(count: number) {
+    const colors = ["#ff6b81", "#ffd700", "#38c172", "#3a7bd5", "#b28dff"];
+    for (let i = 0; i < count; i++) {
+      world.particles.push({
+        pos: { x: camera.x + Math.random() * camera.viewW, y: -10 - Math.random() * 60 },
+        vel: { x: (Math.random() - 0.5) * 60, y: 60 + Math.random() * 90 },
+        life: 2 + Math.random() * 1.5,
+        maxLife: 3.5,
+        color: colors[i % colors.length],
+        size: 4 + Math.random() * 4,
+        gravity: false,
+      });
+    }
+  }
+
+  function updateCelebration(dt: number) {
+    if (world.boss && world.boss.state === "dying") {
+      world.boss.stateTimer -= dt;
+      if (world.boss.stateTimer <= 0) world.boss.state = "dead";
+    }
+    if (world.celebrationTimer > 0) {
+      world.celebrationTimer -= dt;
+      // finale keeps the fireworks coming; a stage clear is a single shower
+      if (world.finale && !config.reducedMotion && Math.random() < dt * 2) {
+        spawnConfetti(30);
+      }
+    }
   }
 
   function draw() {
@@ -347,6 +398,22 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
       world.armor = armor;
     },
     resolveEncounter(stationId, success) {
+      // the practice mini-boss volley: strike lands on success, growl on a miss
+      if (stationId === -1 && world.boss) {
+        world.knight.attackTimer = success ? 0.25 : 0;
+        world.boss.state = success ? "flinch" : "telegraph";
+        world.boss.stateTimer = success ? 0.4 : 0.5;
+        if (success) {
+          spawnBurst(world.boss.rect.x + world.boss.rect.w / 2, world.boss.rect.y + world.boss.rect.h / 2, "#ffffff", 10, "💥");
+        }
+        return;
+      }
+      // a boss-fight scroll resolved: flash around the knight
+      if (stationId >= 400) {
+        const kx = world.knight.rect.x + world.knight.rect.w / 2;
+        spawnBurst(kx, world.knight.rect.y, success ? "#38c172" : "#e3342f", 8, success ? "✨" : undefined);
+        return;
+      }
       const station = world.stations.find((s) => s.id === stationId);
       if (station) {
         station.used = true;
@@ -372,10 +439,26 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
       }
     },
     enterBossArena() {
-      // boss fight arrives with the boss module
+      if (world.phase !== "run") return;
+      world.phase = "boss";
+      camera.lockMinX = world.plan.arenaMinX - 20;
+      camera.lockMaxX = world.plan.arenaMaxX + 20;
+      spawnBoss(world, config.mode === "practice");
+      if (config.mode === "practice" && world.boss) {
+        // the calm mini-boss never attacks — volleys of problems decide the fight
+        world.boss.state = "waiting";
+      }
     },
     defeatBoss(finale) {
       world.finale = finale;
+      world.phase = "celebration";
+      if (world.boss) {
+        world.boss.state = "dying";
+        world.boss.stateTimer = BOSS_DYING_SECONDS;
+      }
+      world.celebrationTimer = finale ? 6 : 2.5;
+      spawnConfetti(config.reducedMotion ? 20 : 80);
+      input.setEnabled(false);
     },
     stopWorld() {
       world.phase = "over";

@@ -141,6 +141,19 @@ export const KNOCKBACK_LIFT = 250;
 export const FIXED_DT = 1 / 60;
 export const MAX_FRAME_DT = 0.1;
 
+// --- Boss fight tuning (Adventure real-time fight, §5) -----------------------
+
+export const BOSS_IDLE_SECONDS = 1.1;
+/** telegraph: the visible wind-up before every boss attack — dodging is fair */
+export const BOSS_TELEGRAPH_SECONDS = 0.8;
+export const BOSS_RECOVER_SECONDS = 0.9;
+export const BOSS_FLINCH_SECONDS = 0.35;
+export const BOSS_DYING_SECONDS = 1.4;
+export const BOSS_CHARGE_SPEED = 300;
+export const BOSS_FIREBALL_SPEED = 240;
+export const BOSS_SIZE = 64;
+export const PRACTICE_BOSS_SIZE = 56;
+
 // --- UI pacing (corrective feedback display, §6.4 — NOT gameplay timers) ----
 
 /** how long the ✓ stays on screen before the volley advances */

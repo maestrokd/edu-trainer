@@ -181,4 +181,7 @@ export interface World {
   /** ids of stations/creatures whose encounter was requested (single-fire) */
   requestedStops: Set<number>;
   finale: boolean;
+  /** remaining seconds of celebration fireworks after a boss falls */
+  celebrationTimer: number;
+  nextScrollId: number;
 }

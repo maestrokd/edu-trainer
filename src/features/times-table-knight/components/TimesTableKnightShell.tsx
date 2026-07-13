@@ -8,12 +8,24 @@ import { SetupScreen } from "./Setup/SetupScreen";
 import { GameCanvas } from "./Play/GameCanvas";
 import { Hud } from "./Play/Hud";
 import { EncounterPanel } from "./Play/EncounterPanel";
+import { BossBar } from "./Play/BossBar";
 
 /** Orchestrates setup ↔ play ↔ results around the session controller (§10) */
 export function TimesTableKnightShell() {
   const { t } = useTranslation();
-  const { state, config, setConfig, sessionId, paused, practiceCreatureCount, seed, events, onEngineReady, actions } =
-    useTimesTableKnightController();
+  const {
+    state,
+    config,
+    setConfig,
+    sessionId,
+    paused,
+    practiceCreatureCount,
+    seed,
+    bossEmoji,
+    events,
+    onEngineReady,
+    actions,
+  } = useTimesTableKnightController();
 
   const inPlay = state.phase === "playing" || state.phase === "encounter" || state.phase === "boss";
   const summary = selectSummary(state);
@@ -56,6 +68,9 @@ export function TimesTableKnightShell() {
       {inPlay && (
         <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col gap-2">
           <Hud state={state} />
+          {state.bossMaxHp > 0 && (state.phase === "boss" || state.returnPhase === "boss") && (
+            <BossBar bossHp={state.bossHp} bossMaxHp={state.bossMaxHp} emoji={bossEmoji} />
+          )}
           <div className="relative">
             <GameCanvas
               key={sessionId}

@@ -271,6 +271,13 @@ export function useTimesTableKnightController() {
     engineRef.current = engine;
   }, []);
 
+  // the Adventure boss falls when engine strikes empty his HP bar
+  useEffect(() => {
+    if (state.phase === "boss" && state.config.mode === "adventure" && state.bossMaxHp > 0 && state.bossHp === 0) {
+      dispatch({ type: "BOSS_DEFEATED" });
+    }
+  }, [state.phase, state.bossHp, state.bossMaxHp, state.config.mode]);
+
   // ---- reducer state → engine commands ---------------------------------------
 
   useEffect(() => {
