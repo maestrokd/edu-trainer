@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTimesTableKnightController } from "../hooks/useTimesTableKnightController";
 import { ResultsCard } from "./Results/ResultsCard";
+import { WorldMap } from "./WorldMap/WorldMap";
+import { MAX_LEVEL } from "../model/game.constants";
 import { SetupScreen } from "./Setup/SetupScreen";
 import { GameCanvas } from "./Play/GameCanvas";
 import { Hud } from "./Play/Hud";
@@ -17,6 +19,7 @@ export function TimesTableKnightShell() {
     state,
     config,
     setConfig,
+    progress,
     sessionId,
     paused,
     practiceCreatureCount,
@@ -61,6 +64,14 @@ export function TimesTableKnightShell() {
           config={config}
           onConfigChange={(patch) => setConfig((prev) => ({ ...prev, ...patch }))}
           onStart={() => actions.start(config)}
+          worldMapSlot={
+            <WorldMap
+              stages={progress.stages}
+              selectedLevel={config.level}
+              onSelect={(level) => setConfig((prev) => ({ ...prev, level }))}
+              gameCompleted={progress.gameCompleted}
+            />
+          }
         />
       )}
 
@@ -103,7 +114,14 @@ export function TimesTableKnightShell() {
 
       {state.phase === "results" && (
         <div className="flex-1 w-full max-w-md mx-auto flex flex-col items-center justify-center gap-4">
-          <ResultsCard state={state} onRetry={actions.retry} onBackToSetup={actions.reset} />
+          <ResultsCard
+            state={state}
+            onRetry={actions.retry}
+            onBackToSetup={actions.reset}
+            onNextStage={
+              state.config.mode === "adventure" && state.config.level < MAX_LEVEL ? actions.nextStage : undefined
+            }
+          />
         </div>
       )}
     </div>

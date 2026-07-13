@@ -15,6 +15,13 @@ import { weightedPick, type Weighted } from "../lib/random";
 import type { EncounterRequest, Engine, GameEvents, HitCause, PowerUpKind } from "../game/events";
 import { bossEmoji } from "../game/spawner";
 import { useGameAudio } from "./useGameAudio";
+import {
+  bankSession,
+  buySkin as buySkinInProgress,
+  loadProgress,
+  saveProgress,
+  type KnightProgress,
+} from "../services/progress/knight-progress";
 
 interface SessionRefs {
   /** Practice: remaining creature volleys, all 12 facts exactly once (§3) */
@@ -39,7 +46,11 @@ interface ClosedEncounter {
  */
 export function useTimesTableKnightController() {
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
-  const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
+  const [progress, setProgress] = useState<KnightProgress>(() => loadProgress());
+  const [config, setConfig] = useState<GameConfig>(() => {
+    const saved = loadProgress();
+    return { ...DEFAULT_CONFIG, hero: saved.hero, skin: saved.skin };
+  });
   const [sessionId, setSessionId] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -182,8 +193,13 @@ export function useTimesTableKnightController() {
 
   // ---- user actions ----------------------------------------------------------
 
+  const progressRef = useRef(progress);
+  progressRef.current = progress;
+
   const start = useCallback(
     (startConfig: GameConfig) => {
+      const saved = progressRef.current;
+      if (startConfig.mode === "adventure" && !saved.stages[startConfig.level]?.unlocked) return;
       clearTimers();
       closedEncounterRef.current = null;
       const practiceQueue = startConfig.mode === "practice" ? practiceCreatureGroups(startConfig.level) : [];
@@ -196,11 +212,40 @@ export function useTimesTableKnightController() {
       };
       setConfig(startConfig);
       setPaused(false);
-      const s = stateRef.current;
-      dispatch({ type: "START", config: startConfig, troublePool: s.troublePool, leitnerClock: s.leitnerClock });
+      // hero & skin choices persist across visits
+      const nextProgress = { ...saved, hero: startConfig.hero, skin: startConfig.skin };
+      setProgress(nextProgress);
+      saveProgress(nextProgress);
+      dispatch({
+        type: "START",
+        config: startConfig,
+        troublePool: saved.troublePool,
+        leitnerClock: saved.leitnerClock,
+      });
       setSessionId((id) => id + 1);
     },
     [clearTimers]
+  );
+
+  const nextStage = useCallback(() => {
+    const s = stateRef.current;
+    start({ ...s.config, level: s.config.level + 1 });
+  }, [start]);
+
+  const buySkin = useCallback(
+    (skin: GameConfig["skin"]) => {
+      const bought = buySkinInProgress(progressRef.current, skin);
+      if (!bought) {
+        audio.buzz();
+        return false;
+      }
+      setProgress(bought);
+      saveProgress(bought);
+      setConfig((prev) => ({ ...prev, skin }));
+      audio.coin();
+      return true;
+    },
+    [audio]
   );
 
   const submitAnswer = useCallback(
@@ -339,6 +384,19 @@ export function useTimesTableKnightController() {
 
     if (state.phase === "results" && prev !== "results") {
       clearTimers();
+      const banked = bankSession(progressRef.current, {
+        mode: state.config.mode,
+        level: state.config.level,
+        victory: state.endReason === "boss-defeated",
+        stars: state.stars,
+        score: state.score,
+        coins: state.coins,
+        troublePool: state.troublePool,
+        leitnerClock: state.leitnerClock,
+        gameCompleted: state.gameCompleted,
+      });
+      setProgress(banked);
+      saveProgress(banked);
       if (state.endReason === "boss-defeated") {
         audio.fanfare();
         engine.defeatBoss(state.gameCompleted);
@@ -352,6 +410,7 @@ export function useTimesTableKnightController() {
     state,
     config,
     setConfig,
+    progress,
     sessionId,
     paused,
     practiceCreatureCount: sessionRef.current?.practiceCreatureCount ?? 0,
@@ -359,6 +418,6 @@ export function useTimesTableKnightController() {
     bossEmoji: bossEmoji(state.config.level),
     events,
     onEngineReady,
-    actions: { start, submitAnswer, retry, reset, togglePause },
+    actions: { start, submitAnswer, retry, reset, togglePause, nextStage, buySkin },
   };
 }
