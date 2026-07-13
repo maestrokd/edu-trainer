@@ -86,6 +86,8 @@ export interface SessionState {
   answered: number;
   correct: number;
   troublePool: LeitnerEntry[];
+  /** Leitner "clock": all-time answered-problem count (the game has no wall clock) */
+  leitnerClock: number;
   factLog: FactResult[];
   encounter: Encounter | null;
   /** phase to return to when the current volley closes */
