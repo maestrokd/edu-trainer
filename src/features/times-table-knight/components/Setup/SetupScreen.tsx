@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { GameConfig } from "../../model/game.types";
+import type { GameConfig, SkinId } from "../../model/game.types";
 import { ModeCard } from "./ModeCard";
 import { LevelPicker } from "./LevelPicker";
 import { HeroPicker } from "./HeroPicker";
@@ -13,10 +13,22 @@ interface SetupScreenProps {
   onStart: () => void;
   /** Adventure picks its stage on the world map instead of the level grid */
   worldMapSlot?: React.ReactNode;
+  ownedSkins: SkinId[];
+  wallet: number;
+  onBuySkin: (skin: SkinId) => boolean;
   disabled?: boolean;
 }
 
-export function SetupScreen({ config, onConfigChange, onStart, worldMapSlot, disabled }: SetupScreenProps) {
+export function SetupScreen({
+  config,
+  onConfigChange,
+  onStart,
+  worldMapSlot,
+  ownedSkins,
+  wallet,
+  onBuySkin,
+  disabled,
+}: SetupScreenProps) {
   const { t } = useTranslation();
 
   return (
@@ -40,7 +52,16 @@ export function SetupScreen({ config, onConfigChange, onStart, worldMapSlot, dis
 
       <section className="space-y-2">
         <Label className="text-base">{t("timesTableKnight.setup.hero")}</Label>
-        <HeroPicker hero={config.hero} onChange={(hero) => onConfigChange({ hero })} disabled={disabled} />
+        <HeroPicker
+          hero={config.hero}
+          skin={config.skin}
+          ownedSkins={ownedSkins}
+          wallet={wallet}
+          onHeroChange={(hero) => onConfigChange({ hero })}
+          onSkinSelect={(skin) => onConfigChange({ skin })}
+          onBuySkin={onBuySkin}
+          disabled={disabled}
+        />
       </section>
 
       <section className="space-y-2">

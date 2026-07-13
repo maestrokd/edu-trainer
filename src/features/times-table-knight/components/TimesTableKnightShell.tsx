@@ -64,6 +64,9 @@ export function TimesTableKnightShell() {
           config={config}
           onConfigChange={(patch) => setConfig((prev) => ({ ...prev, ...patch }))}
           onStart={() => actions.start(config)}
+          ownedSkins={progress.ownedSkins}
+          wallet={progress.wallet}
+          onBuySkin={actions.buySkin}
           worldMapSlot={
             <WorldMap
               stages={progress.stages}

@@ -229,7 +229,7 @@ function drawBoss(ctx: CanvasRenderingContext2D, boss: Boss, t: number) {
   ctx.restore();
 }
 
-function drawKnight(
+export function drawKnight(
   ctx: CanvasRenderingContext2D,
   knight: Knight,
   hero: Hero,
