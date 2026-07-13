@@ -1,0 +1,294 @@
+import {
+  ATTACK_COOLDOWN_SECONDS,
+  FIXED_DT,
+  GRAVITY,
+  INVULN_SECONDS,
+  JUMP_VELOCITY,
+  KNIGHT_HEIGHT,
+  KNIGHT_WIDTH,
+  MAX_FRAME_DT,
+  MOVE_SPEED,
+  VIEW_HEIGHT,
+} from "../model/game.constants";
+import type { Coin, Creature, Knight, PowerUp, StagePlan, Station, World } from "./entities";
+import type { Engine, EngineConfig, GameEvents } from "./events";
+import { createCamera, updateCamera } from "./camera";
+import { createInput } from "./input";
+import { moveAndCollide } from "./physics";
+import { buildStagePlan, GROUND_Y } from "./spawner";
+import { renderWorld } from "./render";
+
+const MAX_FALL_SPEED = 900;
+const BOOTS_SPEED_FACTOR = 1.35;
+const ATTACK_SWING_SECONDS = 0.25;
+const RESPAWN_FALL_MARGIN = 40;
+
+function createKnight(plan: StagePlan): Knight {
+  return {
+    rect: { x: plan.knightStartX, y: plan.groundY - KNIGHT_HEIGHT, w: KNIGHT_WIDTH, h: KNIGHT_HEIGHT },
+    vel: { x: 0, y: 0 },
+    facing: 1,
+    onGround: false,
+    attackTimer: 0,
+    attackCooldown: 0,
+    invulnTimer: 0,
+    bootsTimer: 0,
+    magnetTimer: 0,
+    walkPhase: 0,
+  };
+}
+
+function createWorld(plan: StagePlan, config: EngineConfig): World {
+  const creatures: Creature[] = plan.creatures.map((s) => {
+    const size = 34;
+    const baseY = s.behavior === "flyer" ? plan.groundY - 120 : plan.groundY - size;
+    return {
+      id: s.id,
+      rect: { x: s.x, y: baseY, w: size, h: size },
+      behavior: s.behavior,
+      emoji: s.emoji,
+      hp: s.hp,
+      maxHp: s.hp,
+      speed: s.speed,
+      dir: -1,
+      patrolMinX: s.x - s.patrolHalfSpan,
+      patrolMaxX: s.x + s.patrolHalfSpan,
+      baseY,
+      phase: s.id * 1.7,
+      slain: false,
+      hitFlash: 0,
+      questionDone: false,
+      retreatTimer: 0,
+    };
+  });
+
+  const stations: Station[] = plan.stations.map((s) => ({
+    id: s.id,
+    kind: s.kind,
+    rect: { x: s.x - 22, y: plan.groundY - 48, w: 44, h: 48 },
+    used: false,
+    flash: 0,
+    lastOutcome: null,
+  }));
+
+  const coins: Coin[] = plan.coins.map((pos, i) => ({
+    id: 300 + i,
+    rect: { x: pos.x - 8, y: pos.y - 8, w: 16, h: 16 },
+    taken: false,
+    phase: i * 0.9,
+  }));
+
+  const powerUps: PowerUp[] = plan.powerUps.map((p) => ({
+    id: p.id,
+    kind: p.kind,
+    rect: { x: p.pos.x - 12, y: p.pos.y - 12, w: 24, h: 24 },
+    taken: false,
+  }));
+
+  return {
+    t: 0,
+    phase: "run",
+    levelHint: config.level,
+    plan,
+    knight: createKnight(plan),
+    creatures,
+    stations,
+    coins,
+    powerUps,
+    projectiles: [],
+    boss: null,
+    droppedScrolls: [],
+    particles: [],
+    weapon: 0,
+    armor: 0,
+    hero: config.hero,
+    skin: config.skin,
+    respawnX: plan.knightStartX,
+    checkpointPassed: false,
+    bossGateEmitted: false,
+    requestedStops: new Set<number>(),
+    finale: false,
+  };
+}
+
+export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, events: Partial<GameEvents>): Engine {
+  let world = createWorld(buildStagePlan(config), config);
+  const camera = createCamera(640, VIEW_HEIGHT);
+  const input = createInput();
+
+  let rafId = 0;
+  let lastTs = 0;
+  let accumulator = 0;
+  let running = false;
+  let frozen = false;
+  let paused = false;
+  let destroyed = false;
+
+  function updateKnight(dt: number) {
+    const knight = world.knight;
+    const inp = input.state;
+
+    const dir = (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
+    const speed = MOVE_SPEED * (knight.bootsTimer > 0 ? BOOTS_SPEED_FACTOR : 1);
+    knight.vel.x = dir * speed;
+    if (dir !== 0) knight.facing = dir as 1 | -1;
+
+    if (inp.jumpPressed) {
+      if (knight.onGround) knight.vel.y = -JUMP_VELOCITY;
+      inp.jumpPressed = false;
+    }
+    if (inp.attackPressed) {
+      tryAttack();
+      inp.attackPressed = false;
+    }
+
+    knight.vel.y = Math.min(MAX_FALL_SPEED, knight.vel.y + GRAVITY * dt);
+    const moved = moveAndCollide(knight.rect, knight.vel, world.plan.platforms, dt);
+    knight.onGround = moved.onGround;
+
+    // world bounds (arena lock applies while fighting the boss)
+    const minX = camera.lockMinX ?? 0;
+    const maxX = (camera.lockMaxX ?? world.plan.width) - knight.rect.w;
+    knight.rect.x = Math.min(maxX, Math.max(minX, knight.rect.x));
+
+    knight.walkPhase += Math.abs(knight.vel.x) * dt * 0.09;
+    knight.attackTimer = Math.max(0, knight.attackTimer - dt);
+    knight.attackCooldown = Math.max(0, knight.attackCooldown - dt);
+    knight.invulnTimer = Math.max(0, knight.invulnTimer - dt);
+    knight.bootsTimer = Math.max(0, knight.bootsTimer - dt);
+    knight.magnetTimer = Math.max(0, knight.magnetTimer - dt);
+
+    if (knight.rect.y > VIEW_HEIGHT + RESPAWN_FALL_MARGIN) handlePitFall();
+  }
+
+  function tryAttack() {
+    const knight = world.knight;
+    if (knight.attackCooldown > 0) return;
+    knight.attackTimer = ATTACK_SWING_SECONDS;
+    knight.attackCooldown = ATTACK_COOLDOWN_SECONDS;
+    // strike resolution (creatures/boss) lands with the combat module
+  }
+
+  function handlePitFall() {
+    const knight = world.knight;
+    events.onKnightHit?.("pit");
+    knight.rect.x = world.respawnX;
+    knight.rect.y = GROUND_Y - KNIGHT_HEIGHT;
+    knight.vel.x = 0;
+    knight.vel.y = 0;
+    knight.invulnTimer = INVULN_SECONDS;
+  }
+
+  function updateAmbient(dt: number) {
+    for (const c of world.creatures) {
+      c.hitFlash = Math.max(0, c.hitFlash - dt * 3);
+      c.retreatTimer = Math.max(0, c.retreatTimer - dt);
+    }
+    for (const s of world.stations) {
+      s.flash = Math.max(0, s.flash - dt);
+    }
+    for (const p of world.particles) {
+      p.life -= dt;
+      if (p.gravity) p.vel.y += GRAVITY * 0.35 * dt;
+      p.pos.x += p.vel.x * dt;
+      p.pos.y += p.vel.y * dt;
+    }
+    world.particles = world.particles.filter((p) => p.life > 0);
+  }
+
+  function step(dt: number) {
+    world.t += dt;
+    if (world.phase === "run" || world.phase === "boss") {
+      updateKnight(dt);
+    }
+    updateAmbient(dt);
+    updateCamera(camera, world.knight.rect, world.plan.width, dt);
+  }
+
+  function draw() {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const scale = canvas.height / VIEW_HEIGHT;
+    camera.viewW = canvas.width / scale;
+    ctx.setTransform(scale, 0, 0, scale, -camera.x * scale, 0);
+    renderWorld(ctx, world, camera, config.reducedMotion);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  function frame(ts: number) {
+    if (destroyed) return;
+    rafId = requestAnimationFrame(frame);
+    const rawDt = Math.min(MAX_FRAME_DT, (ts - lastTs) / 1000 || 0);
+    lastTs = ts;
+    if (!frozen && !paused) {
+      accumulator += rawDt;
+      while (accumulator >= FIXED_DT) {
+        step(FIXED_DT);
+        accumulator -= FIXED_DT;
+      }
+    }
+    draw();
+  }
+
+  return {
+    start() {
+      if (running || destroyed) return;
+      running = true;
+      input.attach();
+      lastTs = performance.now();
+      rafId = requestAnimationFrame(frame);
+    },
+    destroy() {
+      destroyed = true;
+      running = false;
+      cancelAnimationFrame(rafId);
+      input.detach();
+    },
+    freeze() {
+      frozen = true;
+      input.setEnabled(false);
+    },
+    resume() {
+      frozen = false;
+      if (!paused) input.setEnabled(true);
+    },
+    setPaused(value: boolean) {
+      paused = value;
+      input.setEnabled(!value && !frozen);
+    },
+    setTouchControl(control, pressed) {
+      input.set(control, pressed);
+    },
+    applyEquipment(weapon, armor) {
+      world.weapon = weapon;
+      world.armor = armor;
+    },
+    resolveEncounter(stationId, success) {
+      const station = world.stations.find((s) => s.id === stationId);
+      if (station) {
+        station.used = true;
+        station.flash = 1;
+        station.lastOutcome = success ? "up" : "down";
+      }
+    },
+    enterBossArena() {
+      // boss fight arrives with the boss module
+    },
+    defeatBoss(finale) {
+      world.finale = finale;
+    },
+    stopWorld() {
+      world.phase = "over";
+      input.setEnabled(false);
+    },
+    retryStage() {
+      world = createWorld(buildStagePlan(config), config);
+      camera.x = 0;
+      camera.lockMinX = null;
+      camera.lockMaxX = null;
+      frozen = false;
+      paused = false;
+      input.setEnabled(true);
+    },
+  };
+}

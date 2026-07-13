@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import type { GameConfig } from "../model/game.types";
-import { DEFAULT_CONFIG } from "../model/game.constants";
+import { DEFAULT_CONFIG, densityTierFor, FACTS_PER_TABLE } from "../model/game.constants";
 import { SetupScreen } from "./Setup/SetupScreen";
+import { GameCanvas } from "./Play/GameCanvas";
 
 /**
  * Orchestrates setup ↔ play ↔ results.
- * The play/results screens arrive with the engine and session reducer commits;
- * until then starting a quest shows a placeholder.
+ * The session reducer + controller arrive in later commits; for now the play
+ * screen is the raw engine canvas (movement, jumping, attacking, camera).
  */
 export function TimesTableKnightShell() {
   const { t } = useTranslation();
@@ -26,10 +27,13 @@ export function TimesTableKnightShell() {
       </header>
 
       {started ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <p className="text-muted-foreground">{t("timesTableKnight.play.getReady")}</p>
-          <Button variant="outline" onClick={() => setStarted(false)}>
-            {t("timesTableKnight.backToMenu")}
+        <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col gap-3">
+          <GameCanvas
+            config={config}
+            practiceCreatureCount={FACTS_PER_TABLE / densityTierFor(config.level).problemsPerStop}
+          />
+          <Button variant="outline" className="self-center" onClick={() => setStarted(false)}>
+            {t("timesTableKnight.quit", t("timesTableKnight.backToMenu"))}
           </Button>
         </div>
       ) : (
