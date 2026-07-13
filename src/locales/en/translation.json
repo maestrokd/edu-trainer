@@ -232,6 +232,7 @@
       "factsMastered": "Facts mastered",
       "score": "Score",
       "retry": "Try again",
+      "nextStage": "Next stage",
       "backToMap": "World map",
       "backToSetup": "New quest",
       "starsAria": "{{count}} of 3 stars",

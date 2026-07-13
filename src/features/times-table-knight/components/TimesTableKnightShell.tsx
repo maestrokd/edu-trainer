@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTimesTableKnightController } from "../hooks/useTimesTableKnightController";
-import { selectSummary } from "../model/game.selectors";
+import { ResultsCard } from "./Results/ResultsCard";
 import { SetupScreen } from "./Setup/SetupScreen";
 import { GameCanvas } from "./Play/GameCanvas";
 import { Hud } from "./Play/Hud";
@@ -28,7 +28,6 @@ export function TimesTableKnightShell() {
   } = useTimesTableKnightController();
 
   const inPlay = state.phase === "playing" || state.phase === "encounter" || state.phase === "boss";
-  const summary = selectSummary(state);
 
   return (
     <div className="min-h-dvh w-full bg-background flex flex-col p-2 sm:p-4">
@@ -104,30 +103,7 @@ export function TimesTableKnightShell() {
 
       {state.phase === "results" && (
         <div className="flex-1 w-full max-w-md mx-auto flex flex-col items-center justify-center gap-4">
-          <Card className="w-full">
-            <CardContent className="p-6 flex flex-col items-center gap-3 text-center">
-              <div className="text-2xl font-bold">
-                {summary.victory ? `🏆 ${t("timesTableKnight.results.victory")}` : `💔 ${t("timesTableKnight.results.defeat")}`}
-              </div>
-              {!summary.victory && <p className="text-sm text-muted-foreground">{t("timesTableKnight.results.defeatHint")}</p>}
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.accuracy")}</dt>
-                <dd className="text-right font-semibold">{summary.accuracy}%</dd>
-                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.answered")}</dt>
-                <dd className="text-right font-semibold">{summary.answered}</dd>
-                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.bestStreak")}</dt>
-                <dd className="text-right font-semibold">{summary.bestStreak}</dd>
-                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.coins")}</dt>
-                <dd className="text-right font-semibold">🪙 {summary.coins}</dd>
-              </dl>
-              <div className="flex gap-2 mt-2">
-                {!summary.victory && <Button onClick={actions.retry}>{t("timesTableKnight.results.retry")}</Button>}
-                <Button variant={summary.victory ? "default" : "outline"} onClick={actions.reset}>
-                  {t("timesTableKnight.results.backToSetup")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ResultsCard state={state} onRetry={actions.retry} onBackToSetup={actions.reset} />
         </div>
       )}
     </div>

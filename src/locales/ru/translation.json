@@ -232,6 +232,7 @@
       "factsMastered": "Освоено примеров",
       "score": "Очки",
       "retry": "Попробовать ещё",
+      "nextStage": "Следующий этап",
       "backToMap": "Карта мира",
       "backToSetup": "Новый поход",
       "starsAria": "{{count}} из 3 звёзд",
