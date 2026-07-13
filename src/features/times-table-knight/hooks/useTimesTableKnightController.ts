@@ -5,16 +5,18 @@ import {
   FEEDBACK_CORRECT_MS,
   FEEDBACK_WRONG_MS,
   DEFAULT_CONFIG,
+  MAX_LEVEL,
   PRACTICE_BOSS_VOLLEY_GAP_MS,
 } from "../model/game.constants";
 import { gameReducer, initialGameState } from "../model/game.reducer";
-import { selectCurrentProblem, selectMissedFacts } from "../model/game.selectors";
+import { selectAccuracy, selectCurrentProblem, selectMissedFacts } from "../model/game.selectors";
 import { buildAdventurePool, practiceCreatureGroups, toProblem, toProblems, tableFacts } from "../lib/fact-pool";
 import { boostFor, factKey, findEntry } from "../lib/leitner";
 import { weightedPick, type Weighted } from "../lib/random";
 import type { EncounterRequest, Engine, GameEvents, HitCause, PowerUpKind } from "../game/events";
 import { bossEmoji } from "../game/spawner";
 import { useGameAudio } from "./useGameAudio";
+import { useTrainerAnalytics } from "./useTrainerAnalytics";
 import {
   bankSession,
   buySkin as buySkinInProgress,
@@ -55,6 +57,7 @@ export function useTimesTableKnightController() {
   const [paused, setPaused] = useState(false);
 
   const audio = useGameAudio(config.effects.sound, config.effects.haptics);
+  const analytics = useTrainerAnalytics();
 
   const stateRef = useRef<SessionState>(state);
   stateRef.current = state;
@@ -180,6 +183,7 @@ export function useTimesTableKnightController() {
       },
       onCheckpointReached: () => {
         audio.checkpoint();
+        analytics.trackCheckpointReached(stateRef.current.config);
         dispatch({ type: "CHECKPOINT_REACHED" });
       },
       onBossGateReached: handleBossGateReached,
@@ -188,7 +192,7 @@ export function useTimesTableKnightController() {
         dispatch({ type: "BOSS_DAMAGED", damage });
       },
     }),
-    [audio, handleEncounterRequested, handleBossGateReached]
+    [audio, analytics, handleEncounterRequested, handleBossGateReached]
   );
 
   // ---- user actions ----------------------------------------------------------
@@ -216,6 +220,7 @@ export function useTimesTableKnightController() {
       const nextProgress = { ...saved, hero: startConfig.hero, skin: startConfig.skin };
       setProgress(nextProgress);
       saveProgress(nextProgress);
+      analytics.trackSessionStart(startConfig);
       dispatch({
         type: "START",
         config: startConfig,
@@ -224,7 +229,7 @@ export function useTimesTableKnightController() {
       });
       setSessionId((id) => id + 1);
     },
-    [clearTimers]
+    [clearTimers, analytics]
   );
 
   const nextStage = useCallback(() => {
@@ -256,13 +261,19 @@ export function useTimesTableKnightController() {
       if (s.phase !== "encounter" || !problem || !enc || enc.results[enc.index] !== null) return;
 
       const isCorrect = value === problem.answer;
-      if (isCorrect) {
-        if (enc.kind === "forge-anvil" || enc.kind === "armor-scroll" || enc.kind === "boss-scroll") audio.forgeUp();
-        else audio.correct();
+      const isEquipmentStop = enc.kind === "forge-anvil" || enc.kind === "armor-scroll" || enc.kind === "boss-scroll";
+      if (isEquipmentStop) {
+        if (isCorrect) audio.forgeUp();
+        else audio.forgeDown();
+        const ladder = enc.kind === "armor-scroll" ? "armor" : "weapon";
+        const tierNow = ladder === "armor" ? s.armor : s.weapon;
+        analytics.trackEquipmentForged(s.config, ladder, tierNow, isCorrect ? "up" : "down");
+      } else if (isCorrect) {
+        audio.correct();
       } else {
-        if (enc.kind === "forge-anvil" || enc.kind === "armor-scroll" || enc.kind === "boss-scroll") audio.forgeDown();
-        else audio.wrong();
+        audio.wrong();
       }
+      analytics.trackProblemAnswered(s.config, problem.fact, isCorrect, enc.kind);
       dispatch({ type: "ANSWER", value });
 
       advanceTimerRef.current = window.setTimeout(
@@ -283,7 +294,7 @@ export function useTimesTableKnightController() {
         isCorrect ? FEEDBACK_CORRECT_MS : FEEDBACK_WRONG_MS
       );
     },
-    [audio]
+    [audio, analytics]
   );
 
   const retry = useCallback(() => {
@@ -397,14 +408,30 @@ export function useTimesTableKnightController() {
       });
       setProgress(banked);
       saveProgress(banked);
-      if (state.endReason === "boss-defeated") {
+      const victory = state.endReason === "boss-defeated";
+      const accuracy = selectAccuracy(state);
+      if (victory) {
+        analytics.trackBossDefeated(state.config, state.stars, accuracy);
+        if (state.config.mode === "adventure" && state.config.level < MAX_LEVEL) {
+          analytics.trackStageUnlocked(state.config, state.config.level + 1);
+        }
+      }
+      analytics.trackSessionEnd(state.config, {
+        victory,
+        accuracy,
+        stars: state.stars,
+        answered: state.answered,
+        coins: state.coins,
+        score: state.score,
+      });
+      if (victory) {
         audio.fanfare();
         engine.defeatBoss(state.gameCompleted);
       } else {
         engine.stopWorld();
       }
     }
-  }, [state, audio, clearTimers, drawPracticeBossProblem, enterBoss, serveReviewVolley]);
+  }, [state, audio, analytics, clearTimers, drawPracticeBossProblem, enterBoss, serveReviewVolley]);
 
   return {
     state,
