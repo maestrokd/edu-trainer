@@ -1,47 +1,119 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import type { GameConfig } from "../model/game.types";
-import { DEFAULT_CONFIG, densityTierFor, FACTS_PER_TABLE } from "../model/game.constants";
+import { Card, CardContent } from "@/components/ui/card";
+import { useTimesTableKnightController } from "../hooks/useTimesTableKnightController";
+import { selectSummary } from "../model/game.selectors";
 import { SetupScreen } from "./Setup/SetupScreen";
 import { GameCanvas } from "./Play/GameCanvas";
+import { Hud } from "./Play/Hud";
+import { EncounterPanel } from "./Play/EncounterPanel";
 
-/**
- * Orchestrates setup ↔ play ↔ results.
- * The session reducer + controller arrive in later commits; for now the play
- * screen is the raw engine canvas (movement, jumping, attacking, camera).
- */
+/** Orchestrates setup ↔ play ↔ results around the session controller (§10) */
 export function TimesTableKnightShell() {
   const { t } = useTranslation();
-  const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
-  const [started, setStarted] = useState(false);
+  const { state, config, setConfig, sessionId, paused, practiceCreatureCount, seed, events, onEngineReady, actions } =
+    useTimesTableKnightController();
+
+  const inPlay = state.phase === "playing" || state.phase === "encounter" || state.phase === "boss";
+  const summary = selectSummary(state);
 
   return (
     <div className="min-h-dvh w-full bg-background flex flex-col p-2 sm:p-4">
-      <header className="w-full max-w-2xl mx-auto flex items-center justify-between gap-2 py-2">
+      <header className="w-full max-w-4xl mx-auto flex items-center justify-between gap-2 py-2">
         <h1 className="text-xl sm:text-2xl font-bold">🏰 {t("timesTableKnight.title")}</h1>
-        <Button asChild variant="outline" size="sm" aria-label={t("timesTableKnight.backToMenu")}>
-          <Link to="/">{t("timesTableKnight.backToMenu")}</Link>
-        </Button>
-      </header>
-
-      {started ? (
-        <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col gap-3">
-          <GameCanvas
-            config={config}
-            practiceCreatureCount={FACTS_PER_TABLE / densityTierFor(config.level).problemsPerStop}
-          />
-          <Button variant="outline" className="self-center" onClick={() => setStarted(false)}>
-            {t("timesTableKnight.quit", t("timesTableKnight.backToMenu"))}
+        <div className="flex items-center gap-2">
+          {inPlay && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={actions.togglePause}
+                disabled={state.phase === "encounter"}
+                aria-pressed={paused}
+              >
+                {paused ? t("timesTableKnight.play.resume") : t("timesTableKnight.hud.pause")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={actions.reset}>
+                {t("timesTableKnight.play.quit")}
+              </Button>
+            </>
+          )}
+          <Button asChild variant="outline" size="sm" aria-label={t("timesTableKnight.backToMenu")}>
+            <Link to="/">{t("timesTableKnight.backToMenu")}</Link>
           </Button>
         </div>
-      ) : (
+      </header>
+
+      {state.phase === "setup" && (
         <SetupScreen
           config={config}
           onConfigChange={(patch) => setConfig((prev) => ({ ...prev, ...patch }))}
-          onStart={() => setStarted(true)}
+          onStart={() => actions.start(config)}
         />
+      )}
+
+      {inPlay && (
+        <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col gap-2">
+          <Hud state={state} />
+          <div className="relative">
+            <GameCanvas
+              key={sessionId}
+              config={state.config}
+              practiceCreatureCount={practiceCreatureCount}
+              seed={seed}
+              events={events}
+              onEngineReady={onEngineReady}
+            />
+            {state.phase === "encounter" && state.encounter && (
+              <EncounterPanel
+                encounter={state.encounter}
+                format={state.config.format}
+                onAnswer={actions.submitAnswer}
+                isReview={state.encounter.stationId === -2}
+              />
+            )}
+            {paused && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-xl">
+                <Card>
+                  <CardContent className="p-6 flex flex-col items-center gap-3">
+                    <span className="text-lg font-semibold">⏸ {t("timesTableKnight.play.paused")}</span>
+                    <Button onClick={actions.togglePause}>{t("timesTableKnight.play.resume")}</Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {state.phase === "results" && (
+        <div className="flex-1 w-full max-w-md mx-auto flex flex-col items-center justify-center gap-4">
+          <Card className="w-full">
+            <CardContent className="p-6 flex flex-col items-center gap-3 text-center">
+              <div className="text-2xl font-bold">
+                {summary.victory ? `🏆 ${t("timesTableKnight.results.victory")}` : `💔 ${t("timesTableKnight.results.defeat")}`}
+              </div>
+              {!summary.victory && <p className="text-sm text-muted-foreground">{t("timesTableKnight.results.defeatHint")}</p>}
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.accuracy")}</dt>
+                <dd className="text-right font-semibold">{summary.accuracy}%</dd>
+                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.answered")}</dt>
+                <dd className="text-right font-semibold">{summary.answered}</dd>
+                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.bestStreak")}</dt>
+                <dd className="text-right font-semibold">{summary.bestStreak}</dd>
+                <dt className="text-muted-foreground text-left">{t("timesTableKnight.results.coins")}</dt>
+                <dd className="text-right font-semibold">🪙 {summary.coins}</dd>
+              </dl>
+              <div className="flex gap-2 mt-2">
+                {!summary.victory && <Button onClick={actions.retry}>{t("timesTableKnight.results.retry")}</Button>}
+                <Button variant={summary.victory ? "default" : "outline"} onClick={actions.reset}>
+                  {t("timesTableKnight.results.backToSetup")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

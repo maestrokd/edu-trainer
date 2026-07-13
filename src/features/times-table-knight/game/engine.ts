@@ -14,9 +14,13 @@ import type { Coin, Creature, Knight, PowerUp, StagePlan, Station, World } from 
 import type { Engine, EngineConfig, GameEvents } from "./events";
 import { createCamera, updateCamera } from "./camera";
 import { createInput } from "./input";
-import { moveAndCollide } from "./physics";
+import { moveAndCollide, overlaps } from "./physics";
 import { buildStagePlan, GROUND_Y } from "./spawner";
 import { renderWorld } from "./render";
+
+const STATION_TRIGGER_PAD = 6;
+const CREATURE_TRIGGER_PAD = 14;
+const RETREAT_SECONDS = 0.9;
 
 const MAX_FALL_SPEED = 900;
 const BOOTS_SPEED_FACTOR = 1.35;
@@ -124,6 +128,53 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
   let paused = false;
   let destroyed = false;
 
+  function freezeWorld() {
+    frozen = true;
+    input.setEnabled(false);
+  }
+
+  function spawnBurst(x: number, y: number, color: string, count = 10, text?: string) {
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      const speed = 60 + Math.random() * 120;
+      world.particles.push({
+        pos: { x, y },
+        vel: { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed - 60 },
+        life: 0.6 + Math.random() * 0.4,
+        maxLife: 1,
+        color,
+        size: text ? 14 : 4 + Math.random() * 3,
+        text,
+        gravity: true,
+      });
+    }
+  }
+
+  /** question stops fire once, freeze the world FIRST, then notify (§1) */
+  function checkQuestionStops() {
+    const knight = world.knight;
+    for (const s of world.stations) {
+      if (s.used || world.requestedStops.has(s.id)) continue;
+      if (overlaps(knight.rect, s.rect, STATION_TRIGGER_PAD)) {
+        world.requestedStops.add(s.id);
+        freezeWorld();
+        events.onEncounterRequested?.({ kind: s.kind, stationId: s.id });
+        return;
+      }
+    }
+    if (config.mode === "practice") {
+      for (const c of world.creatures) {
+        if (c.slain || c.questionDone) continue;
+        if (overlaps(knight.rect, c.rect, CREATURE_TRIGGER_PAD)) {
+          world.requestedStops.add(c.id);
+          freezeWorld();
+          events.onEncounterRequested?.({ kind: "practice-creature", stationId: c.id });
+          return;
+        }
+      }
+    }
+  }
+
   function updateKnight(dt: number) {
     const knight = world.knight;
     const inp = input.state;
@@ -182,7 +233,12 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
   function updateAmbient(dt: number) {
     for (const c of world.creatures) {
       c.hitFlash = Math.max(0, c.hitFlash - dt * 3);
-      c.retreatTimer = Math.max(0, c.retreatTimer - dt);
+      if (c.retreatTimer > 0) {
+        // a practice creature that survived its volley backs away from the knight
+        c.retreatTimer = Math.max(0, c.retreatTimer - dt);
+        const away = c.rect.x >= world.knight.rect.x ? 1 : -1;
+        c.rect.x += away * 90 * dt;
+      }
     }
     for (const s of world.stations) {
       s.flash = Math.max(0, s.flash - dt);
@@ -200,6 +256,9 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
     world.t += dt;
     if (world.phase === "run" || world.phase === "boss") {
       updateKnight(dt);
+    }
+    if (world.phase === "run") {
+      checkQuestionStops();
     }
     updateAmbient(dt);
     updateCamera(camera, world.knight.rect, world.plan.width, dt);
@@ -245,8 +304,7 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
       input.detach();
     },
     freeze() {
-      frozen = true;
-      input.setEnabled(false);
+      freezeWorld();
     },
     resume() {
       frozen = false;
@@ -269,6 +327,23 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
         station.used = true;
         station.flash = 1;
         station.lastOutcome = success ? "up" : "down";
+        const cx = station.rect.x + station.rect.w / 2;
+        spawnBurst(cx, station.rect.y, success ? "#38c172" : "#e3342f", 8, success ? "✨" : undefined);
+        return;
+      }
+      const creature = world.creatures.find((c) => c.id === stationId);
+      if (creature) {
+        creature.questionDone = true;
+        const cx = creature.rect.x + creature.rect.w / 2;
+        const cy = creature.rect.y + creature.rect.h / 2;
+        if (success) {
+          // flawless volley: celebratory strike, creature defeated
+          world.knight.attackTimer = 0.25;
+          creature.slain = true;
+          spawnBurst(cx, cy, "#ffd700", 12, "✨");
+        } else {
+          creature.retreatTimer = RETREAT_SECONDS;
+        }
       }
     },
     enterBossArena() {

@@ -135,6 +135,15 @@ export const ARROW_SPEED = 520;
 export const FIXED_DT = 1 / 60;
 export const MAX_FRAME_DT = 0.1;
 
+// --- UI pacing (corrective feedback display, §6.4 — NOT gameplay timers) ----
+
+/** how long the ✓ stays on screen before the volley advances */
+export const FEEDBACK_CORRECT_MS = 700;
+/** wrong answers linger: the correct answer is always shown ~1s (§5) */
+export const FEEDBACK_WRONG_MS = 1700;
+/** pause between practice mini-boss volleys so the hit animation reads */
+export const PRACTICE_BOSS_VOLLEY_GAP_MS = 600;
+
 export const DEFAULT_CONFIG: GameConfig = {
   mode: "practice",
   level: 2,
