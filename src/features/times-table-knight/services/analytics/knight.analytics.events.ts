@@ -14,8 +14,10 @@ import type {
  * aggregate — appropriate for children (§13).
  */
 export const knightAnalyticsService = {
-  trackEvent(_eventName: KnightAnalyticsEventName, _payload?: unknown): void {
-    // intentionally empty
+  trackEvent(eventName: KnightAnalyticsEventName, payload?: unknown): void {
+    // intentionally empty — a real provider plugs in here
+    void eventName;
+    void payload;
   },
 
   trackSessionStart(payload: SessionStartPayload) {

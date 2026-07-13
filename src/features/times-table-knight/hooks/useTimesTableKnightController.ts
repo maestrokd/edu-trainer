@@ -13,7 +13,7 @@ import { selectAccuracy, selectCurrentProblem, selectMissedFacts } from "../mode
 import { buildAdventurePool, practiceCreatureGroups, toProblem, toProblems, tableFacts } from "../lib/fact-pool";
 import { boostFor, factKey, findEntry } from "../lib/leitner";
 import { weightedPick, type Weighted } from "../lib/random";
-import type { EncounterRequest, Engine, GameEvents, HitCause, PowerUpKind } from "../game/events";
+import type { EncounterRequest, Engine, GameEvents, HitCause } from "../game/events";
 import { bossEmoji } from "../game/spawner";
 import { useGameAudio } from "./useGameAudio";
 import { useTrainerAnalytics } from "./useTrainerAnalytics";
@@ -51,7 +51,15 @@ export function useTimesTableKnightController() {
   const [progress, setProgress] = useState<KnightProgress>(() => loadProgress());
   const [config, setConfig] = useState<GameConfig>(() => {
     const saved = loadProgress();
-    return { ...DEFAULT_CONFIG, hero: saved.hero, skin: saved.skin };
+    // the OS reduced-motion preference seeds the toggle (§13); the child can still override it
+    const osReducedMotion =
+      typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return {
+      ...DEFAULT_CONFIG,
+      hero: saved.hero,
+      skin: saved.skin,
+      effects: { ...DEFAULT_CONFIG.effects, reducedMotion: osReducedMotion },
+    };
   });
   const [sessionId, setSessionId] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -178,7 +186,7 @@ export function useTimesTableKnightController() {
         audio.coin();
         dispatch({ type: "COIN_COLLECTED", value });
       },
-      onPowerUpCollected: (_kind: PowerUpKind) => {
+      onPowerUpCollected: () => {
         audio.checkpoint();
       },
       onCheckpointReached: () => {
