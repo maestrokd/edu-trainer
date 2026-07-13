@@ -111,6 +111,145 @@
       "desc": "Organize chores, routines, and rewards for the whole family."
     }
   },
+  "timesTableKnight": {
+    "title": "Times Table Knight",
+    "backToMenu": "Main menu",
+    "setup": {
+      "mode": "Mode",
+      "level": "Times table",
+      "levelLabel": "Times {{level}} table",
+      "hero": "Your knight",
+      "options": "Options",
+      "start": "Start the quest"
+    },
+    "mode": {
+      "practice": "Practice Run",
+      "practiceDesc": "Calm training — nothing can hurt you. Clear all 12 facts of one table.",
+      "adventure": "Adventure Quest",
+      "adventureDesc": "A real platformer: creatures, pits and a boss. Forge your gear by solving problems!"
+    },
+    "hero": {
+      "dame": "Dame",
+      "sir": "Sir",
+      "skinTitle": "Armor color",
+      "coins": "{{count}} coins",
+      "buy": "Unlock for {{price}}",
+      "owned": "Owned",
+      "skin": {
+        "steel": "Steel",
+        "crimson": "Crimson",
+        "azure": "Azure",
+        "gold": "Gold"
+      }
+    },
+    "format": {
+      "label": "Answer format",
+      "mcq": "Multiple choice",
+      "typed": "Type the answer",
+      "typedHint": "Typing the answer is recommended for tables 11–15"
+    },
+    "effects": {
+      "sound": "Sound",
+      "haptics": "Vibration",
+      "reducedMotion": "Reduce motion"
+    },
+    "worldMap": {
+      "title": "World map",
+      "stage": "Stage {{level}}",
+      "locked": "Locked",
+      "lockedHint": "Defeat the previous boss to unlock this stage",
+      "starsAria": "{{count}} of 3 stars",
+      "completed": "Game complete — every table conquered!"
+    },
+    "hud": {
+      "hearts": "Hearts",
+      "armor": "Armor",
+      "weapon": "Weapon",
+      "score": "Score",
+      "coins": "Coins",
+      "streak": "Streak",
+      "progress": "Stage progress",
+      "level": "Table ×{{level}}",
+      "pause": "Pause"
+    },
+    "weapon": {
+      "dagger": "Dagger",
+      "sword": "Sword",
+      "longbow": "Longbow",
+      "holy": "Holy blade"
+    },
+    "armor": {
+      "cloth": "Cloth",
+      "leather": "Leather",
+      "chainmail": "Chainmail",
+      "plate": "Plate"
+    },
+    "encounter": {
+      "forge-anvil": "The forge awaits!",
+      "forge-anvilHint": "Answer to forge a stronger weapon. A wrong answer dulls it.",
+      "armor-scroll": "An enchanted scroll!",
+      "armor-scrollHint": "Answer to enchant your armor. A wrong answer weakens it.",
+      "practice-creature": "A creature blocks your path!",
+      "practice-creatureHint": "Answer to strike it down",
+      "boss-scroll": "A scroll drops from the sky!",
+      "boss-scrollHint": "Answer to power up right in the fight",
+      "practice-boss": "The mini-boss challenges you!",
+      "practice-bossHint": "Every correct answer lands a hit",
+      "review": "One more look at the tricky ones!",
+      "problemOf": "Problem {{current}} of {{total}}",
+      "submit": "Strike!",
+      "typedPlaceholder": "?",
+      "typedHint": "Type the answer and press Enter",
+      "answerAria": "Answer field",
+      "optionAria": "Answer {{option}}",
+      "correct": "Correct!",
+      "wrong": "The answer is {{answer}}"
+    },
+    "play": {
+      "getReady": "Get ready…",
+      "checkpoint": "Checkpoint!",
+      "bossTime": "Boss fight!",
+      "paused": "Paused",
+      "resume": "Resume",
+      "quit": "Leave the quest",
+      "canvasAria": "Game world. Use the arrow keys to move, Space to jump, F to attack.",
+      "touch": {
+        "left": "Move left",
+        "right": "Move right",
+        "jump": "Jump",
+        "attack": "Attack"
+      }
+    },
+    "results": {
+      "victory": "Stage cleared!",
+      "defeat": "Out of hearts!",
+      "defeatHint": "No worries — your stars and coins are safe. Try again!",
+      "gameComplete": "You conquered every table — the realm is saved!",
+      "accuracy": "Accuracy",
+      "answered": "Problems solved",
+      "bestStreak": "Best streak",
+      "coins": "Coins earned",
+      "factsMastered": "Facts mastered",
+      "score": "Score",
+      "retry": "Try again",
+      "backToMap": "World map",
+      "backToSetup": "New quest",
+      "starsAria": "{{count}} of 3 stars",
+      "factTable": {
+        "title": "Your facts",
+        "fact": "Fact",
+        "result": "Result",
+        "correct": "Correct",
+        "wrong": "Missed"
+      }
+    },
+    "gate": {
+      "premiumTitle": "A premium quest",
+      "premiumDesc": "Times Table Knight is part of the premium collection. Log in or upgrade to begin the adventure!",
+      "loginCta": "Log in",
+      "upgradeCta": "See subscriptions"
+    }
+  },
   "multiT": {
     "menu": "Menu",
     "title": "Multiplication Trainer",

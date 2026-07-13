@@ -1,7 +1,18 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Calculator, Info, Rabbit, Ruler, LayoutGrid, Loader2, AlertTriangle, Search, BookCopy } from "lucide-react";
+import {
+  Calculator,
+  Info,
+  Rabbit,
+  Ruler,
+  LayoutGrid,
+  Loader2,
+  AlertTriangle,
+  Search,
+  BookCopy,
+  Sword,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import MenuApiClient, { type ApiMenuItem, MenuCategory } from "@/services/MenuApiClient";
@@ -29,6 +40,7 @@ const iconMap: Record<string, LucideIcon> = {
   Rabbit,
   Ruler,
   BookCopy,
+  Sword,
   PlusMinus: Calculator, // Using Calculator for math operations as fallback
 };
 
