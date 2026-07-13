@@ -98,10 +98,12 @@ function buildPracticeStage(config: EngineConfig, rng: Rng): StagePlan {
     creatures.push({
       id: i + 1,
       x: firstCreatureX + i * spacing,
-      behavior: kind.behavior,
+      // practice creatures hold their post on the ground so every one is met —
+      // they pose problems, not threats
+      behavior: "walker",
       emoji: kind.emoji,
       hp: 1,
-      speed: 0, // practice creatures hold their post — they pose problems, not threats
+      speed: 0,
       patrolHalfSpan: 0,
     });
   }

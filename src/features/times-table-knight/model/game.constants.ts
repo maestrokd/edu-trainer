@@ -131,6 +131,12 @@ export const INVULN_SECONDS = 1.2;
 export const KNOCKBACK_SPEED = 260;
 export const ATTACK_COOLDOWN_SECONDS = 0.38;
 export const ARROW_SPEED = 520;
+/** longbow arrows pierce through up to this many creatures */
+export const ARROW_MAX_PIERCE = 3;
+export const BOOTS_SECONDS = 8;
+export const MAGNET_SECONDS = 10;
+export const MAGNET_RADIUS = 130;
+export const KNOCKBACK_LIFT = 250;
 /** fixed-timestep of the simulation; frame delta is clamped to avoid spiral-of-death */
 export const FIXED_DT = 1 / 60;
 export const MAX_FRAME_DT = 0.1;

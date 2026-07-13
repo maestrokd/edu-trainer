@@ -17,6 +17,14 @@ import { createInput } from "./input";
 import { moveAndCollide, overlaps } from "./physics";
 import { buildStagePlan, GROUND_Y } from "./spawner";
 import { renderWorld } from "./render";
+import {
+  checkBossGate,
+  checkCheckpoint,
+  collectPickups,
+  performAttack,
+  updateCreatures,
+  updateProjectiles,
+} from "./combat";
 
 const STATION_TRIGGER_PAD = 6;
 const CREATURE_TRIGGER_PAD = 14;
@@ -199,7 +207,16 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
 
     // world bounds (arena lock applies while fighting the boss)
     const minX = camera.lockMinX ?? 0;
-    const maxX = (camera.lockMaxX ?? world.plan.width) - knight.rect.w;
+    let maxX = (camera.lockMaxX ?? world.plan.width) - knight.rect.w;
+    if (config.mode === "practice") {
+      // a practice creature blocks the path until its volley is answered (§4);
+      // the proximity trigger fires well before this clamp is ever felt
+      for (const c of world.creatures) {
+        if (!c.slain && !c.questionDone) {
+          maxX = Math.min(maxX, c.rect.x - knight.rect.w - 2);
+        }
+      }
+    }
     knight.rect.x = Math.min(maxX, Math.max(minX, knight.rect.x));
 
     knight.walkPhase += Math.abs(knight.vel.x) * dt * 0.09;
@@ -217,7 +234,8 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
     if (knight.attackCooldown > 0) return;
     knight.attackTimer = ATTACK_SWING_SECONDS;
     knight.attackCooldown = ATTACK_COOLDOWN_SECONDS;
-    // strike resolution (creatures/boss) lands with the combat module
+    // real combat exists in Adventure only; the Practice swing is celebration
+    if (config.mode === "adventure") performAttack(world, events);
   }
 
   function handlePitFall() {
@@ -256,9 +274,16 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
     world.t += dt;
     if (world.phase === "run" || world.phase === "boss") {
       updateKnight(dt);
+      if (config.mode === "adventure") {
+        updateCreatures(world, dt, events);
+        updateProjectiles(world, dt, events);
+      }
+      collectPickups(world, dt, events);
     }
     if (world.phase === "run") {
       checkQuestionStops();
+      if (config.mode === "adventure") checkCheckpoint(world, events);
+      checkBossGate(world, events);
     }
     updateAmbient(dt);
     updateCamera(camera, world.knight.rect, world.plan.width, dt);
