@@ -1,9 +1,31 @@
 # Times Table Knight — Game Design & Implementation Plan
 
-> **Status:** Ready to implement. This document is the build spec — no code has been written yet.
+> **Status:** Implemented (2026-07) on `feature/GH-97-Knights-multiplication-game` — all build-order rows A–L (§12) are committed. Now in the playtest-and-tune phase that §12a predicted; defects found in real play are logged in [GAME-BUGS-Times-Table-Knight.md](GAME-BUGS-Times-Table-Knight.md), and post-launch design decisions continue in §15 (items 15+).
 > **Working title:** _Times Table Knight_ (a.k.a. "Knight's Multiplication Quest"). Rename freely.
 > **Type:** Arcade math platformer — an independent feature module at `src/features/times-table-knight/`, designed from clean-architecture principles (§8), not modeled on any existing game.
 > **Theme:** Medieval. Hero is a **knight** — the child picks **Dame (lady knight)** or **Sir (man knight)** at setup.
+
+---
+
+## 0. The game in simple words
+
+*A plain-English summary of the whole game (easy to read for English learners). The precise design starts at §1.*
+
+### Adventure mode — how one stage works
+
+1. **You run and jump** through the world. Watch out: animals hurt you if they touch you, and holes in the ground are dangerous. If you get hurt, you lose one heart ❤️.
+2. **You find an anvil ⚒️ or a scroll 📜 on the road.** When you step on it, the game stops. Nothing can hurt you now. You see a math question, for example 7 × 8. You have as much time as you need.
+   - **Right answer:** your equipment gets better. The anvil gives you a better weapon. The scroll gives you better armor.
+   - **Wrong answer:** your equipment gets one step worse. But you never lose a heart for a wrong answer.
+3. **You fight animals with your weapon.** A better weapon wins faster. Better armor protects your hearts.
+4. **At the end of the stage, you meet the boss.** You fight him with the weapon you made with math. Sometimes a scroll falls down during the fight — touch it, answer one question, and your weapon gets better right away.
+5. **You win the fight → you get stars ⭐ and the next stage opens.** If you lose all hearts, no problem — you can try the stage again.
+
+**The main idea:** good math makes a strong knight. Jumping mistakes cost hearts. Math mistakes cost equipment. The two never mix — math can never kill you.
+
+### Practice mode — the calm version
+
+Nothing can hurt you here. An animal stands on the road and shows you a math question. Right answer: the animal goes away, you get coins. Wrong answer: you lose one heart, and the game shows you the correct answer so you can learn it. At the end, you answer questions to beat a small boss. Then you see your results: how many answers were right, your stars, and your coins.
 
 ---
 
@@ -133,7 +155,7 @@ Two ladders. **Anvils forge the weapon ladder; scrolls enchant the armor ladder.
 | 2 | 🏹 Longbow — 3 dmg, ranged, pierces | Chainmail — absorbs 2 hits |
 | 3 | ✨ Holy blade — 5 dmg, screen-wide smite | Plate — absorbs 3 hits |
 
-Absorbed armor hits regenerate at the checkpoint and at the boss gate. Streaks still drive a **score multiplier** (×1 / ×1.5 / ×2 / ×3) and coin bonuses. Power-up collectibles: 👟 speed boots, 🧲 coin magnet. Coins → cosmetic unlocks (armor skins, helm plumes) — meta-reward.
+Absorbed armor hits regenerate at the checkpoint and at the boss gate. Streaks still drive a **score multiplier** (×1 / ×1.5 / ×2 / ×3) and coin bonuses. Power-up collectibles: 🐎 swift steed (speed boost), 🧲 coin magnet. Coins → cosmetic unlocks (armor skins, helm plumes) — meta-reward.
 
 In **Practice**, weapons remain pure celebration: the streak picks the strike *animation* (dagger → sword → bow → holy bolt); no real combat exists there.
 
@@ -239,7 +261,8 @@ src/features/times-table-knight/
 │   ├── spawner.ts                        # creature/coin/powerup/anvil/scroll placement by level & density
 │   ├── camera.ts                         # side-scroll follow
 │   ├── input.ts                          # keyboard + touch controls
-│   └── render.ts                         # draw routines (knight, creatures, boss, world, celebration)
+│   ├── render.ts                         # draw routines (knight, creatures, boss, world, celebration)
+│   └── worlds.ts                         # 15 world themes: palette + creature roster + boss per level (§15.15)
 │
 ├── hooks/
 │   ├── useTimesTableKnightController.ts  # top orchestrator: subscribes to GameEvents, dispatches reducer actions
@@ -276,7 +299,8 @@ src/features/times-table-knight/
     ├── leitner.test.ts
     ├── distractors.test.ts
     ├── scoring.test.ts
-    └── game.reducer.test.ts
+    ├── game.reducer.test.ts
+    └── worlds.test.ts
 ```
 
 **Reuse vs new**
@@ -453,3 +477,11 @@ Mechanics rethink (2026-07-12, second round) — Adventure became a real Mario-s
 12. **Math lives at forge anvils (weapon) and enchanted scrolls (armor), plus scroll drops during the boss fight** — see §4/§5. *(Rejected: stations only — the finale would contain zero math; questions dropped by slain creatures — interrupts combat rhythm.)*
 13. **A wrong answer costs one equipment tier, never hearts** — the two-axis model (§1/§5/§6.10). *(Rejected: wrong answers also costing a heart — a struggling child could die of not knowing 7×8.)*
 14. **Death model: 3 hearts + mid-stage checkpoint** — equipment survives respawn; 0 hearts = friendly stage retry with equipment reset. **Practice Run keeps its calm frozen mechanics unchanged.** *(Rejected: Mario-style armor-as-health power-down — entangles math with survival; one-hit death — too punishing for the age group.)*
+
+Post-launch decisions from the first real playtests (2026-07-19; defect details in [GAME-BUGS-Times-Table-Knight.md](GAME-BUGS-Times-Table-Knight.md)):
+
+15. **One distinct world per level.** The original three 5-level visual bands read as repetition ("levels 1, 4 and 5 are the same world"). `game/worlds.ts` now defines 15 themes — meadow, garden, forest, lake, farm, desert, beach, jungle, mountains, antarctica, city, building, cave, castle, volcano — each a pure-data entry (6-color palette + creature roster + boss); render/spawner look the theme up by level, and difficulty scaling stays world-agnostic. The three original palettes survive as levels 1, 6 and 14. *(Rejected: 5 bands of 3 levels — cheaper to curate, but the per-level "new world!" signal is stronger and each extra world costs only ~10 lines of data.)*
+16. **Creature rule: real, area-native animals only.** Stage creatures are never ghosts, zombies, or monsters — and not the comical 🐺 head emoji; fantasy figures (troll, witch, zombie, golem, snowman, robot, dragon) are **boss-only** — bosses may also be big real animals (boar, bear, crocodile, gorilla…). Decided assignments: desert = camel + kit fox with snake boss; city = raccoon + sparrow with rat boss; building = cat + mouse. Behaviors stay predictable across worlds (walkers walk, flyers fly) so a child's reflexes transfer. Enforced by `tests/worlds.test.ts`.
+17. **Level-geometry rule: open sky over every pit.** A platform above a gap is a head-bump trap — the jump apex (~131 px) always exceeds the clearance, knocking the knight into the chasm (bug #1). The "rescue platform" idea from §8's spawner is dead; brave-jump coins now trace the jump parabola over each gap.
+18. **Practice path-block and its question trigger are both horizontal-only.** The creature's invisible wall clamps X at any height, so the volley trigger must fire on X-proximity too — an AABB-overlap trigger strands a knight arriving on a platform above the creature (bug #4).
+19. **The Black Knight boss (levels 9 and 13 — replaces the mountain golem and the cave zombie).** Rendered as a scaled-up vector mirror of the hero — near-black plate, dark-red plume, glowing red visor — via the shared `drawKnightBody` routine, not an emoji; his world-map/boss-bar icon is ⚔️ (a knight's duel). Also: the speed power-up is a 🐎 swift steed, not sneakers — pickups stay medieval. *(Rejected: an emoji stand-in like 🤺 — the mirror-duel against "another knight" lands much stronger in the game's own art style.)*

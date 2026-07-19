@@ -179,7 +179,10 @@ export function createEngine(canvas: HTMLCanvasElement, config: EngineConfig, ev
     if (config.mode === "practice") {
       for (const c of world.creatures) {
         if (c.slain || c.questionDone) continue;
-        if (overlaps(knight.rect, c.rect, CREATURE_TRIGGER_PAD)) {
+        // horizontal-only, to mirror updateKnight's horizontal path block: an
+        // AABB overlap never fires for a knight arriving on a platform above
+        // the creature, stranding them at an invisible wall with no volley
+        if (knight.rect.x + knight.rect.w + CREATURE_TRIGGER_PAD >= c.rect.x) {
           world.requestedStops.add(c.id);
           freezeWorld();
           events.onEncounterRequested?.({ kind: "practice-creature", stationId: c.id });

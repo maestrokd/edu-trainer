@@ -1,7 +1,8 @@
 import type { ArmorTier, Hero, SkinId, WeaponTier } from "../model/game.types";
-import { VIEW_HEIGHT } from "../model/game.constants";
+import { KNIGHT_HEIGHT, KNIGHT_WIDTH, VIEW_HEIGHT } from "../model/game.constants";
 import type { Boss, Creature, Knight, Station, World } from "./entities";
 import type { Camera } from "./camera";
+import { worldFor } from "./worlds";
 
 const EMOJI_FONT = '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
 
@@ -17,49 +18,25 @@ const HERO_PLUME: Record<Hero, string> = {
   sir: "#38b6e0",
 };
 
-interface Band {
-  skyTop: string;
-  skyBottom: string;
-  hillFar: string;
-  hillNear: string;
-  ground: string;
-  groundTop: string;
+/** every level has its own world palette — see game/worlds.ts */
+function bandFor(level: number) {
+  return worldFor(level).palette;
 }
 
-function bandFor(level: number): Band {
-  if (level <= 5)
-    return {
-      skyTop: "#8ed8f8",
-      skyBottom: "#dff2c8",
-      hillFar: "#a5cf8f",
-      hillNear: "#7cb46a",
-      ground: "#6b4f35",
-      groundTop: "#8bc34a",
-    };
-  if (level <= 10)
-    return {
-      skyTop: "#f7b26b",
-      skyBottom: "#f8e3b0",
-      hillFar: "#c98d5a",
-      hillNear: "#8f6544",
-      ground: "#5d4030",
-      groundTop: "#a1793f",
-    };
-  return {
-    skyTop: "#3b3a63",
-    skyBottom: "#7a6a9c",
-    hillFar: "#57517d",
-    hillNear: "#3f3a5e",
-    ground: "#403148",
-    groundTop: "#6a5a80",
-  };
-}
-
-function drawEmoji(ctx: CanvasRenderingContext2D, emoji: string, x: number, y: number, size: number) {
+function drawEmoji(ctx: CanvasRenderingContext2D, emoji: string, x: number, y: number, size: number, shadow = false) {
+  ctx.save();
+  if (shadow) {
+    // pale emoji art (bats, parchment) washes out against the pastel sky;
+    // a soft drop shadow keeps creatures and stations reading at full opacity
+    ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 2;
+  }
   ctx.font = `${size}px ${EMOJI_FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(emoji, x, y);
+  ctx.restore();
 }
 
 function drawBackground(ctx: CanvasRenderingContext2D, cam: Camera, level: number, t: number, reducedMotion: boolean) {
@@ -155,10 +132,10 @@ function drawStation(ctx: CanvasRenderingContext2D, station: Station, t: number)
   if (station.kind === "forge-anvil") {
     ctx.fillStyle = "#4a4440";
     ctx.fillRect(rect.x + 4, rect.y + rect.h - 12, rect.w - 8, 12);
-    drawEmoji(ctx, "⚒️", rect.x + rect.w / 2, rect.y + rect.h - 26, 26);
+    drawEmoji(ctx, "⚒️", rect.x + rect.w / 2, rect.y + rect.h - 26, 26, true);
   } else {
     const bob = Math.sin(t * 2.4 + station.id) * 4;
-    drawEmoji(ctx, "📜", rect.x + rect.w / 2, rect.y + rect.h / 2 + bob, 26);
+    drawEmoji(ctx, "📜", rect.x + rect.w / 2, rect.y + rect.h / 2 + bob, 26, true);
   }
   ctx.restore();
   if (station.flash > 0) {
@@ -181,7 +158,7 @@ function drawCreature(ctx: CanvasRenderingContext2D, creature: Creature, t: numb
   const cy = rect.y + rect.h / 2 + bob;
   ctx.save();
   if (creature.questionDone) ctx.globalAlpha = 0.4;
-  drawEmoji(ctx, creature.emoji, cx, cy, rect.h);
+  drawEmoji(ctx, creature.emoji, cx, cy, rect.h, true);
   ctx.restore();
   if (creature.hitFlash > 0) {
     ctx.save();
@@ -200,7 +177,13 @@ function drawCreature(ctx: CanvasRenderingContext2D, creature: Creature, t: numb
   }
 }
 
-function drawBoss(ctx: CanvasRenderingContext2D, boss: Boss, t: number) {
+// the Black Knight boss: the hero's silhouette in near-black plate,
+// dark-red plume, glowing visor — a mirror duel instead of a monster
+const BLACK_KNIGHT_COLORS = { base: "#2f2f38", light: "#565662", dark: "#16161d" };
+const BLACK_KNIGHT_PLUME = "#8a1f2a";
+const BLACK_KNIGHT_VISOR = "#ff5040";
+
+function drawBoss(ctx: CanvasRenderingContext2D, boss: Boss, t: number, asKnight: boolean) {
   if (boss.state === "dead") return;
   const { rect } = boss;
   const cx = rect.x + rect.w / 2;
@@ -224,9 +207,43 @@ function drawBoss(ctx: CanvasRenderingContext2D, boss: Boss, t: number) {
     ctx.translate(-cx, -cy);
   }
   ctx.translate(cx + shakeX, cy);
-  ctx.scale(boss.facing === 1 ? -1 : 1, 1); // emoji face left by default
-  drawEmoji(ctx, boss.emoji, 0, 0, rect.h);
+  if (asKnight) {
+    const scale = rect.h / KNIGHT_HEIGHT;
+    ctx.scale(boss.facing * scale, scale); // body faces +x, like the hero
+    ctx.translate(0, -KNIGHT_HEIGHT / 2);
+    drawKnightBody(ctx, {
+      w: KNIGHT_WIDTH,
+      h: KNIGHT_HEIGHT,
+      colors: BLACK_KNIGHT_COLORS,
+      plume: BLACK_KNIGHT_PLUME,
+      hair: false,
+      visor: BLACK_KNIGHT_VISOR,
+      weapon: 1,
+      armor: 3,
+      legSwing: boss.state === "attack" ? Math.sin(t * 14) * 5 : 0,
+      airborne: false,
+      attackTimer: boss.state === "attack" ? 0.15 : 0,
+    });
+  } else {
+    ctx.scale(boss.facing === 1 ? -1 : 1, 1); // emoji face left by default
+    drawEmoji(ctx, boss.emoji, 0, 0, rect.h, true);
+  }
   ctx.restore();
+}
+
+interface KnightBodyOpts {
+  w: number;
+  h: number;
+  colors: { base: string; light: string; dark: string };
+  plume: string;
+  /** golden hair strand — the Dame's mark */
+  hair: boolean;
+  visor: string;
+  weapon: WeaponTier;
+  armor: ArmorTier;
+  legSwing: number;
+  airborne: boolean;
+  attackTimer: number;
 }
 
 export function drawKnight(
@@ -241,19 +258,31 @@ export function drawKnight(
   // invulnerability blink
   if (knight.invulnTimer > 0 && Math.floor(t * 12) % 2 === 0) return;
 
-  const colors = SKIN_COLORS[skin];
   const { rect } = knight;
-  const cx = rect.x + rect.w / 2;
+  const walking = knight.onGround && Math.abs(knight.vel.x) > 10;
 
   ctx.save();
-  ctx.translate(cx, rect.y);
+  ctx.translate(rect.x + rect.w / 2, rect.y);
   ctx.scale(knight.facing, 1);
+  drawKnightBody(ctx, {
+    w: rect.w,
+    h: rect.h,
+    colors: SKIN_COLORS[skin],
+    plume: HERO_PLUME[hero],
+    hair: hero === "dame",
+    visor: "#1f2430",
+    weapon,
+    armor,
+    legSwing: walking ? Math.sin(knight.walkPhase) * 5 : 0,
+    airborne: !knight.onGround,
+    attackTimer: knight.attackTimer,
+  });
+  ctx.restore();
+}
 
-  const w = rect.w;
-  const h = rect.h;
-  const walking = knight.onGround && Math.abs(knight.vel.x) > 10;
-  const legSwing = walking ? Math.sin(knight.walkPhase) * 5 : 0;
-  const airborne = !knight.onGround;
+/** the armored figure, facing +x, origin at the top-center of its rect */
+function drawKnightBody(ctx: CanvasRenderingContext2D, opts: KnightBodyOpts) {
+  const { w, h, colors, weapon, armor, legSwing, airborne } = opts;
 
   // legs
   ctx.fillStyle = colors.dark;
@@ -288,17 +317,17 @@ export function drawKnight(
   ctx.fillStyle = colors.light;
   roundRect(ctx, -8, -2, 16, 16, 5);
   ctx.fill();
-  ctx.fillStyle = "#1f2430";
+  ctx.fillStyle = opts.visor;
   ctx.fillRect(2, 4, 6, 3); // visor slit (faces +x before flip)
 
-  // hero identity: plume for both, hair for the Dame
-  ctx.strokeStyle = HERO_PLUME[hero];
+  // identity: plume for all, hair strand for the Dame
+  ctx.strokeStyle = opts.plume;
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(-2, -2);
   ctx.quadraticCurveTo(-10, -10, -14, -2);
   ctx.stroke();
-  if (hero === "dame") {
+  if (opts.hair) {
     ctx.strokeStyle = "#f4c430";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -308,8 +337,8 @@ export function drawKnight(
   }
 
   // weapon arm
-  const attacking = knight.attackTimer > 0;
-  const swing = attacking ? (1 - knight.attackTimer / 0.25) * 2.1 - 1.5 : -0.5;
+  const attacking = opts.attackTimer > 0;
+  const swing = attacking ? (1 - opts.attackTimer / 0.25) * 2.1 - 1.5 : -0.5;
   ctx.save();
   ctx.translate(torsoW / 2 - 1, 20);
   if (weapon === 2) {
@@ -348,8 +377,6 @@ export function drawKnight(
     }
   }
   ctx.restore();
-
-  ctx.restore();
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -382,14 +409,14 @@ export function renderWorld(ctx: CanvasRenderingContext2D, world: World, cam: Ca
     ctx.beginPath();
     ctx.arc(p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2, 15, 0, Math.PI * 2);
     ctx.fill();
-    drawEmoji(ctx, p.kind === "boots" ? "👟" : "🧲", p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2, 18);
+    drawEmoji(ctx, p.kind === "boots" ? "🐎" : "🧲", p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2, 18, true);
   }
 
   for (const c of world.creatures) drawCreature(ctx, c, world.t);
 
   for (const s of world.droppedScrolls) {
     if (s.taken) continue;
-    drawEmoji(ctx, "📜", s.rect.x + s.rect.w / 2, s.rect.y + s.rect.h / 2, 24);
+    drawEmoji(ctx, "📜", s.rect.x + s.rect.w / 2, s.rect.y + s.rect.h / 2, 24, true);
   }
 
   for (const pr of world.projectiles) {
@@ -403,11 +430,11 @@ export function renderWorld(ctx: CanvasRenderingContext2D, world: World, cam: Ca
       ctx.lineTo(pr.rect.x + pr.rect.w * Math.sign(pr.vel.x || 1), cy);
       ctx.stroke();
     } else {
-      drawEmoji(ctx, "🔥", pr.rect.x + pr.rect.w / 2, pr.rect.y + pr.rect.h / 2, 20);
+      drawEmoji(ctx, "🔥", pr.rect.x + pr.rect.w / 2, pr.rect.y + pr.rect.h / 2, 20, true);
     }
   }
 
-  if (world.boss) drawBoss(ctx, world.boss, world.t);
+  if (world.boss) drawBoss(ctx, world.boss, world.t, worldFor(world.levelHint).bossKind === "knight");
 
   drawKnight(ctx, world.knight, world.hero, world.skin, world.weapon, world.armor, world.t);
 

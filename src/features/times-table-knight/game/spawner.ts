@@ -7,6 +7,7 @@ import {
 } from "../model/game.constants";
 import type { CreatureSpawn, Rect, StagePlan, StationSpawn, Vec } from "./entities";
 import type { EngineConfig, PowerUpKind } from "./events";
+import { worldFor, type WorldCreature } from "./worlds";
 
 export const GROUND_Y = VIEW_HEIGHT - 60;
 const GROUND_THICKNESS = 80;
@@ -17,29 +18,13 @@ interface PitSpan {
   maxX: number;
 }
 
-/** creepy-creature roster by level band: tougher stages, scarier woods */
-function creatureRoster(level: number): { emoji: string; behavior: "walker" | "flyer" }[] {
-  if (level <= 5)
-    return [
-      { emoji: "🐌", behavior: "walker" },
-      { emoji: "🦇", behavior: "flyer" },
-    ];
-  if (level <= 10)
-    return [
-      { emoji: "🕷️", behavior: "walker" },
-      { emoji: "👻", behavior: "flyer" },
-    ];
-  return [
-    { emoji: "🐺", behavior: "walker" },
-    { emoji: "🧟", behavior: "walker" },
-    { emoji: "🦅", behavior: "flyer" },
-  ];
+/** every level is its own world: area-native creatures — see game/worlds.ts */
+function creatureRoster(level: number): readonly WorldCreature[] {
+  return worldFor(level).creatures;
 }
 
 export function bossEmoji(level: number): string {
-  if (level <= 5) return "🧌";
-  if (level <= 10) return "🐲";
-  return "🐉";
+  return worldFor(level).boss;
 }
 
 function groundSegments(width: number, pits: PitSpan[]): Rect[] {
@@ -71,13 +56,13 @@ function shiftOutOfPits(x: number, pits: PitSpan[]): number {
   return shifted;
 }
 
-function coinArc(centerX: number, topY: number, count: number): Vec[] {
+function coinArc(centerX: number, topY: number, count: number, lift = 26): Vec[] {
   const coins: Vec[] = [];
   const spread = 36;
   for (let i = 0; i < count; i++) {
     const t = count === 1 ? 0.5 : i / (count - 1);
     const x = centerX + (t - 0.5) * spread * (count - 1);
-    const y = topY + Math.sin(t * Math.PI) * -26;
+    const y = topY + Math.sin(t * Math.PI) * -lift;
     coins.push({ x, y });
   }
   return coins;
@@ -140,19 +125,20 @@ function buildAdventureStage(config: EngineConfig, rng: Rng): StagePlan {
 
   const pits: PitSpan[] = [0.24, 0.47, 0.7].map((f) => {
     const center = runLength * f + randInt(-60, 60, rng);
-    const half = randInt(50, 68, rng);
+    // gap a full running jump (~159px of air range) clears with room to spare
+    const half = randInt(38, 52, rng);
     return { minX: center - half, maxX: center + half };
   });
 
   const platforms = groundSegments(width, pits);
   const coins: Vec[] = [];
 
-  // a rescue platform above each pit + brave-jump coins over the gap
+  // brave-jump coins trace the jump parabola over each gap, always under open
+  // sky — any platform above a pit is a ceiling that a jumping knight bumps,
+  // dropping into the chasm exactly where the coins lured them
   for (const pit of pits) {
     const pitCenter = (pit.minX + pit.maxX) / 2;
-    const pitW = pit.maxX - pit.minX;
-    platforms.push({ x: pit.minX - 30, y: GROUND_Y - 120, w: pitW + 60, h: FLOAT_PLATFORM_H });
-    coins.push(...coinArc(pitCenter, GROUND_Y - 40, 5));
+    coins.push(...coinArc(pitCenter, GROUND_Y - 50, 5, 80));
   }
 
   // extra floating platforms with coin arcs between the pits

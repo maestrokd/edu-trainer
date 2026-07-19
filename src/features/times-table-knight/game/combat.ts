@@ -200,7 +200,7 @@ export function collectPickups(world: World, dt: number, events: Partial<GameEve
     pu.taken = true;
     if (pu.kind === "boots") knight.bootsTimer = BOOTS_SECONDS;
     else knight.magnetTimer = MAGNET_SECONDS;
-    burst(world, centerX(pu.rect), centerY(pu.rect), "#9be7ff", 8, pu.kind === "boots" ? "👟" : "🧲");
+    burst(world, centerX(pu.rect), centerY(pu.rect), "#9be7ff", 8, pu.kind === "boots" ? "🐎" : "🧲");
     events.onPowerUpCollected?.(pu.kind);
   }
 }

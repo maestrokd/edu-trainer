@@ -347,6 +347,50 @@ export function useTimesTableKnightController() {
   useEffect(() => {
     const prev = prevPhaseRef.current;
     prevPhaseRef.current = state.phase;
+
+    // Banking must NOT depend on the engine: entering results unmounts the
+    // canvas, whose cleanup nulls engineRef before this effect runs — progress
+    // (stage unlocks, stars, wallet) would silently never persist.
+    if (state.phase === "results" && prev !== "results") {
+      clearTimers();
+      const banked = bankSession(progressRef.current, {
+        mode: state.config.mode,
+        level: state.config.level,
+        victory: state.endReason === "boss-defeated",
+        stars: state.stars,
+        score: state.score,
+        coins: state.coins,
+        troublePool: state.troublePool,
+        leitnerClock: state.leitnerClock,
+        gameCompleted: state.gameCompleted,
+      });
+      setProgress(banked);
+      saveProgress(banked);
+      const victory = state.endReason === "boss-defeated";
+      const accuracy = selectAccuracy(state);
+      if (victory) {
+        analytics.trackBossDefeated(state.config, state.stars, accuracy);
+        if (state.config.mode === "adventure" && state.config.level < MAX_LEVEL) {
+          analytics.trackStageUnlocked(state.config, state.config.level + 1);
+        }
+      }
+      analytics.trackSessionEnd(state.config, {
+        victory,
+        accuracy,
+        stars: state.stars,
+        answered: state.answered,
+        coins: state.coins,
+        score: state.score,
+      });
+      if (victory) {
+        audio.fanfare();
+        engineRef.current?.defeatBoss(state.gameCompleted);
+      } else {
+        engineRef.current?.stopWorld();
+      }
+      return;
+    }
+
     const engine = engineRef.current;
     if (!engine) return;
 
@@ -399,45 +443,6 @@ export function useTimesTableKnightController() {
         });
       }, PRACTICE_BOSS_VOLLEY_GAP_MS);
       return;
-    }
-
-    if (state.phase === "results" && prev !== "results") {
-      clearTimers();
-      const banked = bankSession(progressRef.current, {
-        mode: state.config.mode,
-        level: state.config.level,
-        victory: state.endReason === "boss-defeated",
-        stars: state.stars,
-        score: state.score,
-        coins: state.coins,
-        troublePool: state.troublePool,
-        leitnerClock: state.leitnerClock,
-        gameCompleted: state.gameCompleted,
-      });
-      setProgress(banked);
-      saveProgress(banked);
-      const victory = state.endReason === "boss-defeated";
-      const accuracy = selectAccuracy(state);
-      if (victory) {
-        analytics.trackBossDefeated(state.config, state.stars, accuracy);
-        if (state.config.mode === "adventure" && state.config.level < MAX_LEVEL) {
-          analytics.trackStageUnlocked(state.config, state.config.level + 1);
-        }
-      }
-      analytics.trackSessionEnd(state.config, {
-        victory,
-        accuracy,
-        stars: state.stars,
-        answered: state.answered,
-        coins: state.coins,
-        score: state.score,
-      });
-      if (victory) {
-        audio.fanfare();
-        engine.defeatBoss(state.gameCompleted);
-      } else {
-        engine.stopWorld();
-      }
     }
   }, [state, audio, analytics, clearTimers, drawPracticeBossProblem, enterBoss, serveReviewVolley]);
 
