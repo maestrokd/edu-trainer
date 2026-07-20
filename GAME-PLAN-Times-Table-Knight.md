@@ -68,7 +68,7 @@ Guiding principle — **the world freezes for math**: the moment a multiplicatio
 ### Mode 1 — Practice Run (calm mode)
 - Child picks **one table**; the run is a **finite "clear the table" stage** — no duration setting.
 - **Nothing can hurt the knight here** — no pits, no contact damage, no real combat. Creatures pose problems; the strike is a celebration animation. Deliberately unchanged by the 2026-07-12 mechanics rethink: the gentle counterpart to Adventure.
-- The stage covers **all 12 facts of the table exactly once**, grouped into creatures by density tier (§2): levels 1–5 → **12 creatures × 1 problem**, 6–10 → **6 creatures × 2**, 11–15 → **4 creatures × 3** — then a **mini-boss finale** (HP per §2 boss-hits tier). Facts answered wrong are **re-asked once** before the mini-boss.
+- The stage covers **every fact of the table exactly once** (fact-range ladder, §15.20: ×1..×10 for tables 1–9, ×1..×12 for 10–12, ×1..×N for 13–15), grouped into creatures by density tier (§2): tables 1–5 → **10 creatures × 1 problem**, 6–9 → **5 creatures × 2**, 10 → **6 × 2**, 11–12 → **4 creatures × 3**, 13–15 → **5 creatures × 3** (the last volley runs short on tables 13–14) — then a **mini-boss finale** (HP per §2 boss-hits tier). Facts answered wrong are **re-asked once** before the mini-boss.
 - The run ends when the mini-boss is defeated (stage cleared — the whole table has been covered) or hearts run out → results card (accuracy, facts mastered, best streak, coins, stars).
 - Purpose: **focused, blocked drilling** of one table.
 
@@ -195,7 +195,7 @@ In **Practice**, weapons remain pure celebration: the streak picks the strike *a
 ## 7. Math domain model
 
 ### Fact pool per session
-- **Practice:** all facts `b × N` for `b ∈ [1..12]` (configurable), single table `N`.
+- **Practice:** all facts `b × N`, single table `N` — `b ∈ [1..10]` for tables 1–9, `[1..12]` for tables 10–12, `[1..N]` for tables 13–15 (§15.20).
 - **Adventure stage N:** weighted blend —
   - ~60% current table `N`,
   - ~25% interleaved review from tables `1..N-1`,
@@ -448,8 +448,8 @@ Honest scale, for the record:
 - Hearts: **3**. Density tiers: **1–5 / 6–10 / 11–15**. Practice mini-boss hits: **3 / 4 / 5**.
 - Adventure boss: HP **6 / 8 / 10 damage points** by tier; weapon damage **1 / 2 / 3 / 5**; scroll drop ~every **2** attack cycles.
 - Equipment: 2 ladders × 4 tiers (§5); armor absorbs **1 / 2 / 3** hits (tiers 1–3), refilled at checkpoint & boss gate; equipment resets to tier 0 on stage retry.
-- Stage length: Practice = **all 12 facts exactly once** (12×1 / 6×2 / 4×3 creatures by density tier) **+ mini-boss**; Adventure = **~8 creatures, 3 anvils + 3 scrolls, 1 mid-stage checkpoint, boss**.
-- Fact pool multiplier range: **1..12** (Practice). Adventure blend: **60 / 25 / 15**.
+- Stage length: Practice = **every fact exactly once**, creatures = facts ÷ density-tier volley size (last volley may run short) **+ mini-boss**; Adventure = **~8 creatures, 3 anvils + 3 scrolls, 1 mid-stage checkpoint, boss**.
+- Fact pool multiplier range (§15.20): **1..10 for tables 1–9, 1..12 for tables 10–12, 1..N for tables 13–15**. Adventure blend: **60 / 25 / 15**.
 - Streak thresholds: **3 / 6 / 10**. Streak score multipliers: **×1 / ×1.5 / ×2 / ×3**.
 - Star thresholds (both modes award stars): **3★ ≥ 90% acc & ≥2 hearts, 2★ ≥ 75%, 1★ = cleared**.
 - Skin prices: **50 / 150 / 300** coins.
@@ -458,7 +458,7 @@ Honest scale, for the record:
 
 ## 15. Open questions & decision log
 1. ~~Is this a **gated/premium** feature (wrap in `CapabilityGate`) or free?~~ **Decided (2026-07-09): gated/premium** — see §11.
-2. Confirm **fact range** — `1..12` per table, or include `×0`/beyond? *(Default in force: 1..12.)*
+2. ~~Confirm **fact range** — `1..12` per table, or include `×0`/beyond?~~ **Decided (2026-07-19): see item 20** — the fact-range ladder: ×1..×10 below table 10, ×1..×12 for 10–12, ×1..×N for 13–15.
 3. Star thresholds (§14) — accept proposed or adjust? *(Default in force: as listed in §14.)*
 4. Should Practice mode also feed the **shared trouble pool** used by Adventure, or keep pools separate per mode? *(Default in force: shared.)*
 
@@ -485,3 +485,4 @@ Post-launch decisions from the first real playtests (2026-07-19; defect details 
 17. **Level-geometry rule: open sky over every pit.** A platform above a gap is a head-bump trap — the jump apex (~131 px) always exceeds the clearance, knocking the knight into the chasm (bug #1). The "rescue platform" idea from §8's spawner is dead; brave-jump coins now trace the jump parabola over each gap.
 18. **Practice path-block and its question trigger are both horizontal-only.** The creature's invisible wall clamps X at any height, so the volley trigger must fire on X-proximity too — an AABB-overlap trigger strands a knight arriving on a platform above the creature (bug #4).
 19. **The Black Knight boss (levels 9 and 13 — replaces the mountain golem and the cave zombie).** Rendered as a scaled-up vector mirror of the hero — near-black plate, dark-red plume, glowing red visor — via the shared `drawKnightBody` routine, not an emoji; his world-map/boss-bar icon is ⚔️ (a knight's duel). Also: the speed power-up is a 🐎 swift steed, not sneakers — pickups stay medieval. *(Rejected: an emoji stand-in like 🤺 — the mirror-duel against "another knight" lands much stronger in the game's own art style.)*
+20. **The fact-range ladder** (extended the same day): tables 1–9 drill **×1..×10** only — no 4×11 or 8×12; tables 10–12 keep **×1..×12** (10×11, 10×12 stay); tables 13–15 extend to **×1..×N** — 13×13, 14×14, and the full 15×15 at the finale. **The cap follows the fact's own table (its first factor), never the level being played** — interleaved review of table 3 during level 12 still stops at 3×10, while a review fact from table 10 may be 10×12. Matches school progression: the classic 1–10 grid first, extensions at the advanced levels. Applies everywhere facts are served — Practice ("every fact exactly once"; creatures = facts ÷ density volley, last volley may run short, e.g. table 13 → 3+3+3+3+1), Adventure current-table and review shares, and the trouble pool (stale stored facts beyond a table's cap are filtered on serving). Resolves open question 2. Enforced in `model/game.constants.ts` `factMaxFor(table)` + `lib/fact-pool.ts`; covered by `tests/fact-pool.test.ts`.

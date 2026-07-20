@@ -8,10 +8,27 @@ import type { ArmorTier, GameConfig, SkinId, WeaponTier } from "./game.types";
 export const MIN_LEVEL = 1;
 export const MAX_LEVEL = 15;
 
-/** multiplier range of every table: b in FACT_MIN..FACT_MAX */
+/** multiplier range of a table: b in FACT_MIN..factMaxFor(table) */
 export const FACT_MIN = 1;
 export const FACT_MAX = 12;
-export const FACTS_PER_TABLE = FACT_MAX - FACT_MIN + 1;
+/**
+ * Fact-range ladder (decided 2026-07-19): the cap follows the fact's own
+ * table, not the level being played.
+ *   tables 1–9  → ×1..×10 (classic school grid — no 4×11 or 8×12)
+ *   tables 10–12 → ×1..×12 (the ×11/×12 extension)
+ *   tables 13–15 → ×1..×N  (13×13, 14×14, up to the full 15×15)
+ */
+export const BASIC_TABLE_FACT_MAX = 10;
+export const FULL_RANGE_MIN_TABLE = 10;
+
+export function factMaxFor(table: number): number {
+  if (table < FULL_RANGE_MIN_TABLE) return BASIC_TABLE_FACT_MAX;
+  return Math.max(FACT_MAX, table);
+}
+
+export function factsPerTable(table: number): number {
+  return factMaxFor(table) - FACT_MIN + 1;
+}
 
 export const HEARTS_START = 3;
 

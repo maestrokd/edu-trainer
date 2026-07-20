@@ -26,8 +26,6 @@ function bandFor(level: number) {
 function drawEmoji(ctx: CanvasRenderingContext2D, emoji: string, x: number, y: number, size: number, shadow = false) {
   ctx.save();
   if (shadow) {
-    // pale emoji art (bats, parchment) washes out against the pastel sky;
-    // a soft drop shadow keeps creatures and stations reading at full opacity
     ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
     ctx.shadowBlur = 3;
     ctx.shadowOffsetY = 2;
@@ -37,6 +35,64 @@ function drawEmoji(ctx: CanvasRenderingContext2D, emoji: string, x: number, y: n
   ctx.textBaseline = "middle";
   ctx.fillText(emoji, x, y);
   ctx.restore();
+}
+
+// --- emoji "stickers" --------------------------------------------------------
+// Pastel emoji art (badger, bat, parchment) melts into terrain of a similar
+// tone, reading as semi-transparent or "behind" whatever it overlaps. A crisp
+// white sticker outline separates the sprite from ANY background. Sprites are
+// rasterized once per emoji+size into an offscreen canvas, then stamped per
+// frame — cheaper than per-frame shadow blur.
+
+const SPRITE_RESOLUTION = 2; // supersample so the world-scale transform stays crisp
+const spriteCache = new Map<string, HTMLCanvasElement>();
+
+function emojiSticker(emoji: string, size: number): HTMLCanvasElement {
+  const key = `${emoji}@${size}`;
+  const cached = spriteCache.get(key);
+  if (cached) return cached;
+
+  const px = size * SPRITE_RESOLUTION;
+  const outline = Math.max(2, Math.round(px / 18));
+  const pad = outline + Math.ceil(px * 0.2); // emoji glyphs overflow their em box
+  const dim = px + pad * 2;
+
+  const glyph = document.createElement("canvas");
+  glyph.width = dim;
+  glyph.height = dim;
+  const sprite = document.createElement("canvas");
+  sprite.width = dim;
+  sprite.height = dim;
+  const glyphCtx = glyph.getContext("2d");
+  const spriteCtx = sprite.getContext("2d");
+  if (!glyphCtx || !spriteCtx) return sprite;
+
+  glyphCtx.font = `${px}px ${EMOJI_FONT}`;
+  glyphCtx.textAlign = "center";
+  glyphCtx.textBaseline = "middle";
+  glyphCtx.fillText(emoji, dim / 2, dim / 2);
+
+  // dilate the glyph in 8 directions, keep the union, tint it white → outline
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      if (dx !== 0 || dy !== 0) spriteCtx.drawImage(glyph, dx * outline, dy * outline);
+    }
+  }
+  spriteCtx.globalCompositeOperation = "source-in";
+  spriteCtx.fillStyle = "rgba(255, 255, 255, 0.92)";
+  spriteCtx.fillRect(0, 0, dim, dim);
+  spriteCtx.globalCompositeOperation = "source-over";
+  spriteCtx.drawImage(glyph, 0, 0);
+
+  spriteCache.set(key, sprite);
+  return sprite;
+}
+
+/** outlined emoji sticker centered at (x, y) — full-opacity presence anywhere */
+function drawSticker(ctx: CanvasRenderingContext2D, emoji: string, x: number, y: number, size: number) {
+  const sprite = emojiSticker(emoji, size);
+  const drawSize = sprite.width / SPRITE_RESOLUTION;
+  ctx.drawImage(sprite, x - drawSize / 2, y - drawSize / 2, drawSize, drawSize);
 }
 
 function drawBackground(ctx: CanvasRenderingContext2D, cam: Camera, level: number, t: number, reducedMotion: boolean) {
@@ -132,10 +188,10 @@ function drawStation(ctx: CanvasRenderingContext2D, station: Station, t: number)
   if (station.kind === "forge-anvil") {
     ctx.fillStyle = "#4a4440";
     ctx.fillRect(rect.x + 4, rect.y + rect.h - 12, rect.w - 8, 12);
-    drawEmoji(ctx, "⚒️", rect.x + rect.w / 2, rect.y + rect.h - 26, 26, true);
+    drawSticker(ctx, "⚒️", rect.x + rect.w / 2, rect.y + rect.h - 26, 26);
   } else {
     const bob = Math.sin(t * 2.4 + station.id) * 4;
-    drawEmoji(ctx, "📜", rect.x + rect.w / 2, rect.y + rect.h / 2 + bob, 26, true);
+    drawSticker(ctx, "📜", rect.x + rect.w / 2, rect.y + rect.h / 2 + bob, 26);
   }
   ctx.restore();
   if (station.flash > 0) {
@@ -158,7 +214,7 @@ function drawCreature(ctx: CanvasRenderingContext2D, creature: Creature, t: numb
   const cy = rect.y + rect.h / 2 + bob;
   ctx.save();
   if (creature.questionDone) ctx.globalAlpha = 0.4;
-  drawEmoji(ctx, creature.emoji, cx, cy, rect.h, true);
+  drawSticker(ctx, creature.emoji, cx, cy, rect.h);
   ctx.restore();
   if (creature.hitFlash > 0) {
     ctx.save();
@@ -226,7 +282,7 @@ function drawBoss(ctx: CanvasRenderingContext2D, boss: Boss, t: number, asKnight
     });
   } else {
     ctx.scale(boss.facing === 1 ? -1 : 1, 1); // emoji face left by default
-    drawEmoji(ctx, boss.emoji, 0, 0, rect.h, true);
+    drawSticker(ctx, boss.emoji, 0, 0, rect.h);
   }
   ctx.restore();
 }
@@ -409,14 +465,14 @@ export function renderWorld(ctx: CanvasRenderingContext2D, world: World, cam: Ca
     ctx.beginPath();
     ctx.arc(p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2, 15, 0, Math.PI * 2);
     ctx.fill();
-    drawEmoji(ctx, p.kind === "boots" ? "🐎" : "🧲", p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2, 18, true);
+    drawSticker(ctx, p.kind === "boots" ? "🐎" : "🧲", p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2, 18);
   }
 
   for (const c of world.creatures) drawCreature(ctx, c, world.t);
 
   for (const s of world.droppedScrolls) {
     if (s.taken) continue;
-    drawEmoji(ctx, "📜", s.rect.x + s.rect.w / 2, s.rect.y + s.rect.h / 2, 24, true);
+    drawSticker(ctx, "📜", s.rect.x + s.rect.w / 2, s.rect.y + s.rect.h / 2, 24);
   }
 
   for (const pr of world.projectiles) {

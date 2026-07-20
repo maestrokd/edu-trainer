@@ -1,21 +1,54 @@
 import { describe, it, expect } from "vitest";
 import { buildAdventurePool, drawFacts, practiceCreatureGroups, tableFacts, toProblems } from "../lib/fact-pool";
 import { factKey, demote } from "../lib/leitner";
-import { FACTS_PER_TABLE } from "../model/game.constants";
+import { factMaxFor } from "../model/game.constants";
 import type { LeitnerEntry } from "../model/game.types";
+
+describe("fact range ladder (×10 below table 10, ×12 for 10–12, ×N for 13–15)", () => {
+  it("caps each table at its own maximum multiplier", () => {
+    expect(tableFacts(4).map((f) => f.b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(Math.max(...tableFacts(9).map((f) => f.b))).toBe(10);
+    expect(Math.max(...tableFacts(10).map((f) => f.b))).toBe(12);
+    expect(Math.max(...tableFacts(12).map((f) => f.b))).toBe(12);
+    expect(Math.max(...tableFacts(13).map((f) => f.b))).toBe(13);
+    expect(Math.max(...tableFacts(14).map((f) => f.b))).toBe(14);
+    expect(Math.max(...tableFacts(15).map((f) => f.b))).toBe(15);
+  });
+
+  it("interleaved review always respects the reviewed table's own cap", () => {
+    for (const level of [12, 15]) {
+      const pool = buildAdventurePool(level, [], 0);
+      for (const { item } of pool) {
+        expect(item.b).toBeLessThanOrEqual(factMaxFor(item.a));
+      }
+    }
+  });
+
+  it("filters stale trouble facts that exceed their table's cap", () => {
+    const stale: LeitnerEntry[] = [{ fact: { a: 4, b: 12 }, box: 0, dueAt: 0 }];
+    const pool = buildAdventurePool(5, stale, 0);
+    expect(pool.some(({ item }) => item.a === 4 && item.b === 12)).toBe(false);
+  });
+});
 
 describe("practiceCreatureGroups", () => {
   it.each([
-    [3, 12, 1],
-    [8, 6, 2],
-    [13, 4, 3],
-  ])("level %i → %i creatures × %i problems", (level, creatures, perCreature) => {
+    [3, 10, 1],
+    [8, 5, 2],
+    [10, 6, 2],
+    [12, 4, 3],
+    [13, 5, 3],
+    [15, 5, 3],
+  ])("level %i → %i creatures × up to %i problems", (level, creatures, perCreature) => {
     const groups = practiceCreatureGroups(level);
     expect(groups).toHaveLength(creatures);
-    for (const g of groups) expect(g).toHaveLength(perCreature);
+    for (const g of groups) {
+      expect(g.length).toBeGreaterThanOrEqual(1);
+      expect(g.length).toBeLessThanOrEqual(perCreature);
+    }
   });
 
-  it("covers all 12 facts of the table exactly once", () => {
+  it("covers every fact of the table exactly once", () => {
     for (const level of [1, 7, 15]) {
       const keys = practiceCreatureGroups(level)
         .flat()
@@ -38,7 +71,7 @@ describe("buildAdventurePool", () => {
       pool.filter(({ item, weight }) => pred(item, weight)).reduce((s, { weight }) => s + weight, 0);
 
     const currentShare = pool
-      .slice(0, FACTS_PER_TABLE) // current-table entries are pushed first
+      .slice(0, tableFacts(5).length) // current-table entries are pushed first
       .reduce((s, { weight }) => s + weight, 0);
     const total = sum(() => true);
 
@@ -48,7 +81,7 @@ describe("buildAdventurePool", () => {
 
   it("level 1 with no trouble pool puts all weight on the current table", () => {
     const pool = buildAdventurePool(1, [], 0);
-    expect(pool).toHaveLength(FACTS_PER_TABLE);
+    expect(pool).toHaveLength(tableFacts(1).length);
     for (const { item } of pool) expect(item.a).toBe(1);
     expect(pool.reduce((s, { weight }) => s + weight, 0)).toBeCloseTo(0.6, 5);
   });

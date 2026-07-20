@@ -334,9 +334,14 @@ function finishAttackCycle(world: World, boss: Boss) {
 export function bossTakeHit(world: World, damage: number, events: Partial<GameEvents>) {
   const boss = world.boss;
   if (!boss || boss.state === "dying" || boss.state === "dead" || boss.state === "waiting") return;
-  boss.state = "flinch";
-  boss.stateTimer = BOSS_FLINCH_SECONDS;
-  boss.vel.x = 0;
+  // Stagger only out of idle/recover: a hit during telegraph or the attack
+  // itself still damages (burst + HP) but never interrupts — otherwise
+  // attack-spam stun-locks the boss and he never fights back (bug #6).
+  if (boss.state === "idle" || boss.state === "recover" || boss.state === "flinch") {
+    boss.state = "flinch";
+    boss.stateTimer = BOSS_FLINCH_SECONDS;
+    boss.vel.x = 0;
+  }
   burst(world, centerX(boss.rect), centerY(boss.rect), "#ffffff", 8, "💥");
   events.onBossDamaged?.(damage);
 }
