@@ -4,6 +4,7 @@ import { MultiplicationTrainerPage } from "@/features/multiplication-trainer";
 import { CompareNumbersTrainerPage } from "@/features/compare-numbers-trainer";
 import { RoundingTrainerPage } from "@/features/rounding-trainer";
 import { AddSubTrainerPage } from "@/features/add-sub-trainer";
+import { TimesTableKnightPage } from "@/features/times-table-knight";
 import CommonLayout from "@/layout/CommonLayout.tsx";
 import RegistrationPage from "@/pages/login/RegistrationPage.tsx";
 import DefaultLayout from "@/layout/DefaultLayout.tsx";
@@ -206,6 +207,7 @@ export default function App() {
         <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
         <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
         <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />
+        <Route path="/times-table-knight" element={<TimesTableKnightPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
