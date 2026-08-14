@@ -665,6 +665,9 @@
       "switchButton": "Перемкнути тенант",
       "switchButtonLoading": "Перемикання...",
       "currentButton": "Поточний тенант",
+      "defaultButton": "Зробити за замовчуванням",
+      "defaultButtonLoading": "Збереження...",
+      "defaultButtonCurrent": "Тенант за замовчуванням",
       "columns": {
         "name": "Тенант",
         "role": "Роль",
@@ -676,7 +679,9 @@
       "empty": "Членств у тенантах не знайдено.",
       "notifications": {
         "switchSuccess": "Активний тенант змінено на {{tenantName}}.",
-        "switchError": "Не вдалося перемкнути тенант."
+        "switchError": "Не вдалося перемкнути тенант.",
+        "defaultSuccess": "{{tenantName}} буде обрано під час нових входів за замовчуванням.",
+        "defaultError": "Не вдалося встановити тенант для входу за замовчуванням."
       }
     },
     "tenantProfiles": {

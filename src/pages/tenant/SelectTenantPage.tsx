@@ -21,19 +21,18 @@ const formatDateTime = (value: string | null | undefined): string => {
 const SelectTenantPage: React.FC = () => {
   const { t } = useTranslation();
   const { getErrorMessage, handleError } = useApiErrorHandler();
-  const { principal, doRefresh } = useAuth();
+  const { principal, switchTenant } = useAuth();
   const queryClient = useQueryClient();
   const [switchErrorMessage, setSwitchErrorMessage] = useState<string | null>(null);
 
-  const { data, isLoading, isFetching, isError, error, refetch } = useQuery<TenantListResponse>({
+  const { data, isLoading, isFetching, isError, error } = useQuery<TenantListResponse>({
     queryKey: ["tenantMemberships"],
     queryFn: TenantService.listMyTenants,
   });
 
   const switchMutation = useMutation({
-    mutationFn: async (tenantUuid: string) => {
-      const tenant = await TenantService.setDefaultTenant(tenantUuid);
-      await doRefresh();
+    mutationFn: async (tenant: TenantListItem) => {
+      await switchTenant(tenant.tenantUuid);
       return tenant;
     },
     onSuccess: async (tenant) => {
@@ -44,13 +43,34 @@ const SelectTenantPage: React.FC = () => {
           tenantName: tenant.name,
         })
       );
-      await queryClient.invalidateQueries();
-      await refetch();
     },
     onError: (requestError: unknown) => {
       handleError(requestError, {
         fallbackKey: "pages.tenantSelect.notifications.switchError",
         fallbackMessage: "Failed to switch tenant.",
+        setError: setSwitchErrorMessage,
+      });
+    },
+  });
+
+  const defaultMutation = useMutation({
+    mutationFn: async (tenant: TenantListItem) => {
+      return await TenantService.setDefaultTenant(tenant.tenantUuid);
+    },
+    onSuccess: async (tenant) => {
+      setSwitchErrorMessage(null);
+      notifier.success(
+        t("pages.tenantSelect.notifications.defaultSuccess", {
+          defaultValue: "{{tenantName}} will be selected for new logins.",
+          tenantName: tenant.name,
+        })
+      );
+      await queryClient.invalidateQueries({ queryKey: ["tenantMemberships"] });
+    },
+    onError: (requestError: unknown) => {
+      handleError(requestError, {
+        fallbackKey: "pages.tenantSelect.notifications.defaultError",
+        fallbackMessage: "Failed to set the default tenant.",
         setError: setSwitchErrorMessage,
       });
     },
@@ -74,17 +94,23 @@ const SelectTenantPage: React.FC = () => {
     }
   }, [loadErrorMessage]);
 
-  const handleSwitchTenant = async (tenant: TenantListItem) => {
+  const handleSwitchTenant = (tenant: TenantListItem) => {
     if (tenant.tenantUuid === activeTenantUuid || switchMutation.isPending) return;
     setSwitchErrorMessage(null);
-    await switchMutation.mutateAsync(tenant.tenantUuid);
+    switchMutation.mutate(tenant);
+  };
+
+  const handleSetDefaultTenant = (tenant: TenantListItem) => {
+    if (tenant.defaultTenant || defaultMutation.isPending) return;
+    setSwitchErrorMessage(null);
+    defaultMutation.mutate(tenant);
   };
 
   return (
     <div className="bg-background p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">{t("pages.tenantSelect.title", "Select tenant")}</h1>
-        {(isLoading || isFetching || switchMutation.isPending) && (
+        {(isLoading || isFetching || switchMutation.isPending || defaultMutation.isPending) && (
           <Loader2 className="animate-spin h-5 w-5 text-muted-foreground" />
         )}
       </div>
@@ -134,7 +160,10 @@ const SelectTenantPage: React.FC = () => {
               tenants.map((tenant) => {
                 const isActiveTenant = tenant.tenantUuid === activeTenantUuid;
                 const isSwitchingThisTenant =
-                  switchMutation.isPending && switchMutation.variables === tenant.tenantUuid;
+                  switchMutation.isPending && switchMutation.variables.tenantUuid === tenant.tenantUuid;
+                const isSettingThisDefault =
+                  defaultMutation.isPending && defaultMutation.variables.tenantUuid === tenant.tenantUuid;
+                const anyMutationPending = switchMutation.isPending || defaultMutation.isPending;
 
                 return (
                   <TableRow key={tenant.tenantUuid}>
@@ -149,11 +178,27 @@ const SelectTenantPage: React.FC = () => {
                     <TableCell>{tenant.membershipRole}</TableCell>
                     <TableCell>{tenant.tenantStatus}</TableCell>
                     <TableCell>{formatDateTime(tenant.joinedAt)}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
+                      <Button
+                        variant="outline"
+                        disabled={tenant.defaultTenant || anyMutationPending}
+                        onClick={() => handleSetDefaultTenant(tenant)}
+                      >
+                        {isSettingThisDefault ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {t("pages.tenantSelect.defaultButtonLoading", "Saving...")}
+                          </>
+                        ) : tenant.defaultTenant ? (
+                          t("pages.tenantSelect.defaultButtonCurrent", "Login default")
+                        ) : (
+                          t("pages.tenantSelect.defaultButton", "Set login default")
+                        )}
+                      </Button>
                       <Button
                         variant={isActiveTenant ? "secondary" : "default"}
-                        disabled={isActiveTenant || switchMutation.isPending}
-                        onClick={() => void handleSwitchTenant(tenant)}
+                        disabled={isActiveTenant || anyMutationPending}
+                        onClick={() => handleSwitchTenant(tenant)}
                       >
                         {isSwitchingThisTenant ? (
                           <>

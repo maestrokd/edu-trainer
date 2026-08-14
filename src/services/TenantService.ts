@@ -1,5 +1,5 @@
 import { get, post } from "@/services/ApiService.ts";
-import { type TenantMembershipRole } from "@/services/AuthService.ts";
+import { type LoginResponse, type TenantMembershipRole } from "@/services/AuthService.ts";
 
 export const TenantType = {
   FAMILY: "FAMILY",
@@ -50,7 +50,12 @@ export const setDefaultTenant = async (tenantUuid: string): Promise<TenantListIt
   return await post<TenantListItem>(`/private/tenants/${tenantUuid}/default`);
 };
 
+export const switchTenant = async (tenantUuid: string): Promise<LoginResponse> => {
+  return await post<LoginResponse>("/auth/tenants/switch", { tenantUuid });
+};
+
 export default {
   listMyTenants,
   setDefaultTenant,
+  switchTenant,
 };

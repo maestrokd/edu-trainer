@@ -665,6 +665,9 @@
       "switchButton": "Переключить тенант",
       "switchButtonLoading": "Переключение...",
       "currentButton": "Текущий тенант",
+      "defaultButton": "Сделать по умолчанию",
+      "defaultButtonLoading": "Сохранение...",
+      "defaultButtonCurrent": "Тенант по умолчанию",
       "columns": {
         "name": "Тенант",
         "role": "Роль",
@@ -676,7 +679,9 @@
       "empty": "Участий в тенантах не найдено.",
       "notifications": {
         "switchSuccess": "Активный тенант переключен на {{tenantName}}.",
-        "switchError": "Не удалось переключить тенант."
+        "switchError": "Не удалось переключить тенант.",
+        "defaultSuccess": "{{tenantName}} будет выбран при новых входах по умолчанию.",
+        "defaultError": "Не удалось задать тенант для входа по умолчанию."
       }
     },
     "tenantProfiles": {

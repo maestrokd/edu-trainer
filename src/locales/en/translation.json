@@ -665,6 +665,9 @@
       "switchButton": "Switch tenant",
       "switchButtonLoading": "Switching...",
       "currentButton": "Current tenant",
+      "defaultButton": "Set default",
+      "defaultButtonLoading": "Saving...",
+      "defaultButtonCurrent": "Default",
       "columns": {
         "name": "Tenant",
         "role": "Role",
@@ -676,7 +679,9 @@
       "empty": "No tenant memberships found.",
       "notifications": {
         "switchSuccess": "Active tenant switched to {{tenantName}}.",
-        "switchError": "Failed to switch tenant."
+        "switchError": "Failed to switch tenant.",
+        "defaultSuccess": "{{tenantName}} will be selected for new logins as default.",
+        "defaultError": "Failed to set the default tenant."
       }
     },
     "tenantProfiles": {

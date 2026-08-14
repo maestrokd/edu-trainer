@@ -1,6 +1,5 @@
 import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import axiosRetry from "axios-retry";
-import type { NavigateFunction } from "react-router-dom";
 
 export interface ApiErrorDetail {
   field: string;
@@ -37,22 +36,30 @@ export function extractErrorCode(error: unknown): string | null {
   if (error instanceof ApiError) {
     return error.errorCode;
   }
-  if (error && typeof error === "object" && "errorCode" in error && typeof (error as any).errorCode === "string") {
-    return (error as any).errorCode;
+  if (error && typeof error === "object" && "errorCode" in error && typeof error.errorCode === "string") {
+    return error.errorCode;
   }
   return null;
 }
 
-let navigateFn: NavigateFunction | null = null;
 let refreshFn: (() => Promise<string>) | null = null;
+let refreshPromise: Promise<string> | null = null;
 let logoutFn: (() => void) | null = null;
-
-export const registerNavigate = (fn: NavigateFunction) => {
-  navigateFn = fn;
-};
 
 export function registerRefreshFn(fn: () => Promise<string>) {
   refreshFn = fn;
+}
+
+export function refreshAccessToken(): Promise<string> {
+  if (!refreshFn) {
+    return Promise.reject(new Error("Refresh handler is not registered"));
+  }
+  if (!refreshPromise) {
+    refreshPromise = refreshFn().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
 }
 
 export function registerLogoutFn(fn: typeof logoutFn) {
@@ -104,7 +111,6 @@ apiClient.interceptors.response.use(
       // Avoid infinite loop: do not retry /auth/refresh
       if (originalConfig.url?.endsWith("/auth/refresh")) {
         logoutFn?.();
-        navigateFn?.("login", { replace: true });
         return Promise.reject(error);
       }
       if (
@@ -118,7 +124,7 @@ apiClient.interceptors.response.use(
 
       originalConfig._retry = true;
       try {
-        await refreshFn?.();
+        await refreshAccessToken();
         return apiClient.request(originalConfig);
       } catch (refreshError) {
         // Refresh failed: clear token and stop
@@ -145,13 +151,13 @@ apiClient.interceptors.response.use(
 export const get = async <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.get<T>(url, config)).data;
 
-export const post = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+export const post = async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.post<T>(url, data, config)).data;
 
-export const put = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+export const put = async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.put<T>(url, data, config)).data;
 
-export const patch = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+export const patch = async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.patch<T>(url, data, config)).data;
 
 export const del = async <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>

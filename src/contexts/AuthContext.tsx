@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { post, registerLogoutFn, registerRefreshFn } from "@/services/ApiService.ts";
 import {
   type LoginResponse,
@@ -7,6 +8,7 @@ import {
   logoutTelegram,
 } from "@/services/AuthService.ts";
 import { getMe, type UserProfileDto } from "@/services/ProfileService.ts";
+import TenantService from "@/services/TenantService.ts";
 import WebApp from "@twa-dev/sdk";
 import { jwtDecode } from "jwt-decode";
 
@@ -89,12 +91,14 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   loginWithTelegram: () => Promise<string>;
   doRefresh: () => Promise<string>;
+  switchTenant: (tenantUuid: string) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
   const didInit = useRef(false);
   const [initDone, setInitDone] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -107,18 +111,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const refreshFn = async (): Promise<string> => {
-    if (telegramInitDataString) {
-      return await loginWithTelegram();
-    } else {
+    try {
       return await refresh();
+    } catch (error) {
+      if (telegramInitDataString) {
+        return await loginWithTelegram();
+      }
+      throw error;
     }
   };
 
-  const logoutFn = async (): Promise<void> => {
-    apiLogout().catch((e) => console.error("Logout error", e));
+  const clearLocalSession = () => {
     setToken(null);
     setPrincipal(null);
     localStorage.removeItem("token");
+  };
+
+  const logoutFn = (): void => {
+    clearLocalSession();
   };
 
   const applyAuthenticatedSession = async (authResponse: LoginResponse): Promise<string> => {
@@ -198,6 +208,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return await applyAuthenticatedSession(authResponse);
   };
 
+  const switchTenant = async (tenantUuid: string): Promise<void> => {
+    const authResponse = await TenantService.switchTenant(tenantUuid);
+    await applyAuthenticatedSession(authResponse);
+    await queryClient.resetQueries();
+  };
+
   const logout = () => {
     // Call backend logout
     if (telegramInitDataString) {
@@ -206,9 +222,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       apiLogout().catch((e) => console.error("Logout error", e));
     }
 
-    setToken(null);
-    setPrincipal(null);
-    localStorage.removeItem("token");
+    clearLocalSession();
     // Close WebApp in Telegram
     /*if (window && window.Telegram && window.Telegram.WebApp) {
           WebApp.close();
@@ -230,9 +244,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (initDataString) {
           setTelegramInitDataString(initDataString);
           try {
-            await loginWithTelegram(initDataString);
-          } catch (e) {
-            console.error("AuthProvider useEffect - loginWithTelegram - error", e);
+            await refresh();
+          } catch {
+            try {
+              await loginWithTelegram(initDataString);
+            } catch (loginError) {
+              console.error("AuthProvider useEffect - loginWithTelegram - error", loginError);
+            }
           }
         }
       } else {
@@ -267,6 +285,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         loginWithTelegram,
         doRefresh: refreshFn,
+        switchTenant,
         logout,
       }}
     >
@@ -302,6 +321,7 @@ const fetchPrincipalData = async (token: string, authResponse?: LoginResponse): 
   };
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth should be used within AuthProvider");
