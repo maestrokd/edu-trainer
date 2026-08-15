@@ -362,6 +362,7 @@
       "timer": "Timer minutes",
       "maxExercises": "Maximum exercises",
       "sounds": "Enable sounds",
+      "moreInfo": "More information about {{field}}",
       "answerField": "Answer input field"
     }
   },
