@@ -41,23 +41,26 @@ export function OperationsCard({ controller }: { controller: any }) {
         </LabeledField>
 
         <LabeledField label={tr("setup.range")!} htmlFor="min-input">
-          <div className="grid grid-cols-2 gap-2">
-            <NumericInput
-              id="min-input"
-              value={config.minVal}
-              onChange={(val) => updateConfig({ minVal: val })}
-              allowNegative={true}
-              aria-label={tr("setup.min") || undefined}
-              className="rounded-xl"
-            />
-            <NumericInput
-              id="max-input"
-              value={config.maxVal}
-              onChange={(val) => updateConfig({ maxVal: val })}
-              allowNegative={true}
-              aria-label={tr("setup.max") || undefined}
-              className="rounded-xl"
-            />
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <NumericInput
+                id="min-input"
+                value={config.minVal}
+                onChange={(val) => updateConfig({ minVal: val })}
+                allowNegative={true}
+                aria-label={tr("setup.min") || undefined}
+                className="rounded-xl"
+              />
+              <NumericInput
+                id="max-input"
+                value={config.maxVal}
+                onChange={(val) => updateConfig({ maxVal: val })}
+                allowNegative={true}
+                aria-label={tr("setup.max") || undefined}
+                className="rounded-xl"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">{tr("setup.rangeHint")}</p>
           </div>
         </LabeledField>
 
