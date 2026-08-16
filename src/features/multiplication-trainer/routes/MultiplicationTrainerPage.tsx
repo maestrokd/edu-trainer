@@ -87,7 +87,7 @@ export function MultiplicationTrainerPage() {
             maxExercises: t("multiT.setup.maxExercises")!,
             maxExercisesHint: t("multiT.setup.maxExercisesHint"),
             start: t("multiT.start"),
-            menu: t("multiT.menu"),
+            menu: t("menu.mainMenuLabel"),
             ariaBackToMenu: t("multiT.aria.backToMenu")!,
             ariaMin: t("multiT.aria.minRange"),
             ariaMax: t("multiT.aria.maxRange"),

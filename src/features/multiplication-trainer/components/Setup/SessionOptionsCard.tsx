@@ -1,27 +1,25 @@
-import { Checkbox } from "@/components/ui/checkbox";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { LabeledField } from "@/components/ui/labeled-field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SetupHint } from "@/components/ui/setup-hint";
+import type { Mode } from "../../model/trainer.types";
 
 interface SessionOptionsCardProps {
-  includeMul: boolean;
-  includeDiv: boolean;
+  mode: Mode;
   timerMinutes: number;
   maxExercises: number;
-  onMulChange: (val: boolean) => void;
-  onDivChange: (val: boolean) => void;
+  onModeChange: (val: Mode) => void;
   onTimerChange: (val: number) => void;
   onMaxExercisesChange: (val: number) => void;
   labels: {
-    exercises: string;
-    mul: string;
-    div: string;
+    mode: string;
+    modeQuiz: string;
+    modeInput: string;
     timer: string;
     timerHint: string;
     maxExercises: string;
     maxExercisesHint: string;
-    ariaMul: string;
-    ariaDiv: string;
+    ariaMode: string;
     ariaTimer: string;
     ariaMaxExercises: string;
     moreInfo: (field: string) => string;
@@ -29,12 +27,10 @@ interface SessionOptionsCardProps {
 }
 
 export function SessionOptionsCard({
-  includeMul,
-  includeDiv,
+  mode,
   timerMinutes,
   maxExercises,
-  onMulChange,
-  onDivChange,
+  onModeChange,
   onTimerChange,
   onMaxExercisesChange,
   labels,
@@ -42,31 +38,19 @@ export function SessionOptionsCard({
   return (
     <section
       className="grid gap-3 border-t pt-4 sm:gap-4 md:border-t-0 md:border-l md:pt-0 md:pl-6"
-      aria-label={labels.exercises}
+      aria-label={labels.mode}
     >
-      <fieldset className="grid min-w-0 gap-2">
-        <legend className="text-sm leading-none font-medium">{labels.exercises}:</legend>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <label className="flex min-h-7 items-center gap-2 text-sm">
-            <Checkbox
-              id="mul-check"
-              checked={includeMul}
-              onCheckedChange={(v) => onMulChange(Boolean(v))}
-              aria-label={labels.ariaMul}
-            />
-            {labels.mul}
-          </label>
-          <label className="flex min-h-7 items-center gap-2 text-sm">
-            <Checkbox
-              id="div-check"
-              checked={includeDiv}
-              onCheckedChange={(v) => onDivChange(Boolean(v))}
-              aria-label={labels.ariaDiv}
-            />
-            {labels.div}
-          </label>
-        </div>
-      </fieldset>
+      <LabeledField label={labels.mode} htmlFor="mode-select">
+        <Select value={mode} onValueChange={(value) => onModeChange(value as Mode)}>
+          <SelectTrigger id="mode-select" className="h-9 w-full rounded-xl sm:h-10" aria-label={labels.ariaMode}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="quiz">{labels.modeQuiz}</SelectItem>
+            <SelectItem value="input">{labels.modeInput}</SelectItem>
+          </SelectContent>
+        </Select>
+      </LabeledField>
 
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <LabeledField

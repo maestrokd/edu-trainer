@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { Checkbox } from "@/components/ui/checkbox";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { SetupHint } from "@/components/ui/setup-hint";
+import { SetupToggleRow } from "@/components/ui/setup-toggle-row";
 import type { AddSubTrainerSetupController } from "./setup.types";
 
 export function SessionOptionsCard({ controller }: { controller: AddSubTrainerSetupController }) {
@@ -54,15 +54,14 @@ export function SessionOptionsCard({ controller }: { controller: AddSubTrainerSe
         </LabeledField>
       </div>
 
-      <label className="flex min-h-9 items-center gap-2 text-sm">
-        <Checkbox
-          id="sounds-toggle"
-          checked={config.enableSounds}
-          onCheckedChange={(v) => updateConfig({ enableSounds: Boolean(v) })}
-          aria-label={tr("aria.sounds")}
-        />
-        {tr("setup.soundsHint")}
-      </label>
+      <SetupToggleRow
+        id="sounds-toggle"
+        label={tr("setup.sounds")}
+        hint={tr("setup.soundsHint")}
+        hintAriaLabel={tr("aria.moreInfo", { field: tr("setup.sounds") })}
+        checked={config.enableSounds}
+        onCheckedChange={(enableSounds) => updateConfig({ enableSounds })}
+      />
     </section>
   );
 }

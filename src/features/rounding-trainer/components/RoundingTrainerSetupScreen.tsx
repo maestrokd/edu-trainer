@@ -2,12 +2,11 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SetupHint } from "@/components/ui/setup-hint";
-import { Switch } from "@/components/ui/switch";
+import { SetupToggleRow } from "@/components/ui/setup-toggle-row";
 import { DIGITS_CHOICES } from "../model/trainer.constants";
 import type { ConfigUpdate, Mode, SessionConfig } from "../model/trainer.types";
 import { LoginSuggestionSlot } from "../slots/LoginSuggestionSlot";
@@ -35,80 +34,7 @@ export function RoundingTrainerSetupScreen({
       <p className="hidden text-sm text-muted-foreground sm:block">{t("roundT.setup.intro")}</p>
 
       <div className="grid gap-4 sm:mt-5 md:grid-cols-2 md:gap-0">
-        <section className="grid gap-3 sm:gap-4 md:pr-6" aria-label={t("roundT.setup.mode")}>
-          <LabeledField label={t("roundT.setup.mode")} htmlFor="rounding-mode-select">
-            <Select
-              value={config.mode}
-              onValueChange={(value) => onConfigChange({ mode: value as Mode })}
-              disabled={setupLocked}
-            >
-              <SelectTrigger id="rounding-mode-select" className="h-9 w-full rounded-xl sm:h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="quiz">{t("roundT.mode.quiz")}</SelectItem>
-                <SelectItem value="input">{t("roundT.mode.input")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </LabeledField>
-
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <LabeledField
-              label={t("roundT.setup.timer")}
-              htmlFor="timer-minutes"
-              labelAction={
-                <SetupHint ariaLabel={moreInfoLabel(t("roundT.setup.timer"))}>{t("roundT.setup.timerHint")}</SetupHint>
-              }
-            >
-              <NumericInput
-                id="timer-minutes"
-                value={config.timerMinutes}
-                onChange={(timerMinutes) => onConfigChange({ timerMinutes })}
-                fallbackValue={0}
-                showInfinityWhenZero
-                disabled={setupLocked}
-                aria-label={t("roundT.aria.timerMinutes")}
-                className="rounded-xl"
-              />
-            </LabeledField>
-
-            <LabeledField
-              label={t("roundT.setup.maxExercises")}
-              htmlFor="max-exercises"
-              labelAction={
-                <SetupHint ariaLabel={moreInfoLabel(t("roundT.setup.maxExercises"))}>
-                  {t("roundT.setup.maxExercisesHint")}
-                </SetupHint>
-              }
-            >
-              <NumericInput
-                id="max-exercises"
-                value={config.maxExercises}
-                onChange={(maxExercises) => onConfigChange({ maxExercises })}
-                fallbackValue={0}
-                showInfinityWhenZero
-                disabled={setupLocked}
-                aria-label={t("roundT.aria.maxExercises")}
-                className="rounded-xl"
-              />
-            </LabeledField>
-          </div>
-
-          <div className="flex min-h-9 items-center gap-2 text-sm">
-            <Switch
-              id="rounding-sounds-switch"
-              checked={config.soundsEnabled}
-              disabled={setupLocked}
-              onCheckedChange={(checked) => onConfigChange({ soundsEnabled: checked })}
-            />
-            <Label htmlFor="rounding-sounds-switch">{t("roundT.setup.sounds")}</Label>
-          </div>
-        </section>
-
-        <section
-          className="grid gap-3 border-t pt-4 sm:gap-4 md:border-t-0 md:border-l md:pt-0 md:pl-6"
-          aria-label={t("roundT.setup.numberTypes")}
-        >
+        <section className="grid gap-3 sm:gap-4 md:pr-6" aria-label={t("roundT.setup.numberTypes")}>
           <div className="grid gap-2">
             <div className="flex items-center gap-1 text-sm font-medium">
               {t("roundT.setup.numberTypes")}:
@@ -142,25 +68,6 @@ export function RoundingTrainerSetupScreen({
             </div>
           </div>
 
-          <LabeledField label={t("roundT.setup.decimalPlaces")} htmlFor="decimal-places-select">
-            <Select
-              value={String(config.decimalPlaces)}
-              onValueChange={(value) => onConfigChange({ decimalPlaces: parseInt(value, 10) })}
-              disabled={!config.includeDecimals || setupLocked}
-            >
-              <SelectTrigger id="decimal-places-select" className="h-9 w-full rounded-xl sm:h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[0, 1, 2].map((option) => (
-                  <SelectItem key={option} value={String(option)}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </LabeledField>
-
           <div className="grid gap-2">
             <div className="text-sm font-medium">{t("roundT.setup.signs")}:</div>
             <div
@@ -188,10 +95,29 @@ export function RoundingTrainerSetupScreen({
               </label>
             </div>
           </div>
+
+          <LabeledField label={t("roundT.setup.decimalPlaces")} htmlFor="decimal-places-select">
+            <Select
+              value={String(config.decimalPlaces)}
+              onValueChange={(value) => onConfigChange({ decimalPlaces: parseInt(value, 10) })}
+              disabled={!config.includeDecimals || setupLocked}
+            >
+              <SelectTrigger id="decimal-places-select" className="h-9 w-full rounded-xl sm:h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[0, 1, 2].map((option) => (
+                  <SelectItem key={option} value={String(option)}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </LabeledField>
         </section>
 
         <section
-          className="grid gap-3 border-t pt-4 sm:gap-4 md:mt-6 md:pr-6 md:pt-6"
+          className="grid gap-3 border-t pt-4 sm:gap-4 md:border-t-0 md:border-l md:pt-0 md:pl-6"
           aria-label={t("roundT.setup.magnitude")}
         >
           <div className="grid gap-2">
@@ -288,8 +214,8 @@ export function RoundingTrainerSetupScreen({
         </section>
 
         <section
-          className="grid gap-3 border-t pt-4 sm:gap-4 md:mt-6 md:border-l md:pt-6 md:pl-6"
-          aria-label={t("roundT.setup.targets")}
+          className="grid gap-3 border-t pt-4 sm:gap-4 md:mt-6 md:pr-6 md:pt-6"
+          aria-label={t("roundT.setup.roundingOptions")}
         >
           <div className="grid gap-2">
             <div className="text-sm font-medium">{t("roundT.setup.targets")}:</div>
@@ -328,37 +254,97 @@ export function RoundingTrainerSetupScreen({
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <div className="flex min-h-8 items-center gap-1 text-sm">
-              <label className="flex items-center gap-2">
-                <Checkbox
-                  id="include-tie-case"
-                  checked={config.includeTieCase}
-                  disabled={setupLocked}
-                  onCheckedChange={(value) => onConfigChange({ includeTieCase: Boolean(value) })}
-                />
-                {t("roundT.setup.includeTie")}
-              </label>
-              <SetupHint ariaLabel={moreInfoLabel(t("roundT.setup.includeTie"))}>
-                {t("roundT.setup.includeTieHint")}
-              </SetupHint>
-            </div>
-
-            <div className="flex min-h-8 items-center gap-1 text-sm">
-              <label className="flex items-center gap-2">
-                <Checkbox
-                  id="show-place-hint"
-                  checked={config.showHint}
-                  disabled={setupLocked}
-                  onCheckedChange={(value) => onConfigChange({ showHint: Boolean(value) })}
-                />
-                {t("roundT.setup.showHint")}
-              </label>
-              <SetupHint ariaLabel={moreInfoLabel(t("roundT.setup.showHint"))}>
-                {t("roundT.setup.showHintHint")}
-              </SetupHint>
-            </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <SetupToggleRow
+              id="include-tie-case"
+              label={t("roundT.setup.includeTie")}
+              hint={t("roundT.setup.includeTieHint")}
+              hintAriaLabel={moreInfoLabel(t("roundT.setup.includeTie"))}
+              checked={config.includeTieCase}
+              disabled={setupLocked}
+              onCheckedChange={(includeTieCase) => onConfigChange({ includeTieCase })}
+            />
+            <SetupToggleRow
+              id="show-place-hint"
+              label={t("roundT.setup.showHint")}
+              hint={t("roundT.setup.showHintHint")}
+              hintAriaLabel={moreInfoLabel(t("roundT.setup.showHint"))}
+              checked={config.showHint}
+              disabled={setupLocked}
+              onCheckedChange={(showHint) => onConfigChange({ showHint })}
+            />
           </div>
+        </section>
+
+        <section
+          className="grid gap-3 border-t pt-4 sm:gap-4 md:mt-6 md:border-l md:pt-6 md:pl-6"
+          aria-label={t("roundT.setup.mode")}
+        >
+          <LabeledField label={t("roundT.setup.mode")} htmlFor="rounding-mode-select">
+            <Select
+              value={config.mode}
+              onValueChange={(value) => onConfigChange({ mode: value as Mode })}
+              disabled={setupLocked}
+            >
+              <SelectTrigger id="rounding-mode-select" className="h-9 w-full rounded-xl sm:h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="quiz">{t("roundT.mode.quiz")}</SelectItem>
+                <SelectItem value="input">{t("roundT.mode.input")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </LabeledField>
+
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <LabeledField
+              label={t("roundT.setup.timer")}
+              htmlFor="timer-minutes"
+              labelAction={
+                <SetupHint ariaLabel={moreInfoLabel(t("roundT.setup.timer"))}>{t("roundT.setup.timerHint")}</SetupHint>
+              }
+            >
+              <NumericInput
+                id="timer-minutes"
+                value={config.timerMinutes}
+                onChange={(timerMinutes) => onConfigChange({ timerMinutes })}
+                fallbackValue={0}
+                showInfinityWhenZero
+                disabled={setupLocked}
+                aria-label={t("roundT.aria.timerMinutes")}
+                className="rounded-xl"
+              />
+            </LabeledField>
+
+            <LabeledField
+              label={t("roundT.setup.maxExercises")}
+              htmlFor="max-exercises"
+              labelAction={
+                <SetupHint ariaLabel={moreInfoLabel(t("roundT.setup.maxExercises"))}>
+                  {t("roundT.setup.maxExercisesHint")}
+                </SetupHint>
+              }
+            >
+              <NumericInput
+                id="max-exercises"
+                value={config.maxExercises}
+                onChange={(maxExercises) => onConfigChange({ maxExercises })}
+                fallbackValue={0}
+                showInfinityWhenZero
+                disabled={setupLocked}
+                aria-label={t("roundT.aria.maxExercises")}
+                className="rounded-xl"
+              />
+            </LabeledField>
+          </div>
+
+          <SetupToggleRow
+            id="rounding-sounds-switch"
+            label={t("roundT.setup.sounds")}
+            checked={config.soundsEnabled}
+            disabled={setupLocked}
+            onCheckedChange={(soundsEnabled) => onConfigChange({ soundsEnabled })}
+          />
         </section>
       </div>
 

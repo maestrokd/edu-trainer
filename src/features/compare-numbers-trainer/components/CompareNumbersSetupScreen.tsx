@@ -6,10 +6,11 @@ import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SetupHint } from "@/components/ui/setup-hint";
+import { SetupToggleRow } from "@/components/ui/setup-toggle-row";
 import type { DecimalTypeConfig, FractionTypeConfig, IntegerTypeConfig } from "@/lib/compare-numbers/generator";
 import type { CompareNumbersSetupState, HistoryOrder, TypeAvailabilityMap } from "../model/trainer.types";
 import { PRECISION_OPTIONS } from "../model/trainer.constants";
-import { GapFields, ToggleRow, TypeCard, WeightField } from "./shared/SetupControls";
+import { GapFields, TypeCard, WeightField } from "./shared/SetupControls";
 import { LoginSuggestionSlot } from "../slots/LoginSuggestionSlot";
 import { UpgradeSuggestionSlot } from "../slots/UpgradeSuggestionSlot";
 
@@ -274,7 +275,7 @@ export function CompareNumbersSetupScreen({
             </LabeledField>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="grid gap-3">
             <LabeledField label={tr("precision.mode")} htmlFor="decimal-mode">
               <Select
                 value={setup.decimalConfig.precisionMode}
@@ -581,22 +582,22 @@ export function CompareNumbersSetupScreen({
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <ToggleRow
+            <SetupToggleRow
               id="feedback-sound"
               label={tr("feedback.sound")}
               hint={tr("feedback.soundDesc")}
               hintAriaLabel={moreInfoLabel(tr("feedback.sound"))}
               checked={setup.enableSound}
-              onChange={onEnableSoundChange}
+              onCheckedChange={onEnableSoundChange}
               disabled={setupLocked}
             />
-            <ToggleRow
+            <SetupToggleRow
               id="feedback-vibration"
               label={tr("feedback.vibration")}
               hint={tr("feedback.vibrationDesc")}
               hintAriaLabel={moreInfoLabel(tr("feedback.vibration"))}
               checked={setup.enableVibration}
-              onChange={onEnableVibrationChange}
+              onCheckedChange={onEnableVibrationChange}
               disabled={setupLocked}
             />
           </div>
@@ -611,7 +612,7 @@ export function CompareNumbersSetupScreen({
           {tr("setup.start")}
         </Button>
         <Button asChild variant="outline" className="h-10 w-full sm:w-auto">
-          <Link to="/">{tr("actions.toMenu")}</Link>
+          <Link to="/">{t("menu.mainMenuLabel")}</Link>
         </Button>
       </div>
     </div>

@@ -12,7 +12,7 @@ vi.mock("react-i18next", () => ({
         "cmpNmbrGm.setup.title": "Setup",
         "cmpNmbrGm.setup.intro": "Choose number types and practice settings.",
         "cmpNmbrGm.setup.start": "Start training",
-        "cmpNmbrGm.actions.toMenu": "Main menu",
+        "menu.mainMenuLabel": "Main Menu",
         "cmpNmbrGm.errors.unavailable": "Enable at least one valid number type.",
         "cmpNmbrGm.types.nonNegative.title": "Whole numbers",
         "cmpNmbrGm.types.nonNegative.desc": "Practice non-negative integers.",
@@ -40,6 +40,11 @@ vi.mock("react-i18next", () => ({
         "cmpNmbrGm.feedback.soundDesc": "Play a short tone after each answer.",
         "cmpNmbrGm.feedback.vibration": "Vibration feedback",
         "cmpNmbrGm.feedback.vibrationDesc": "Vibrate on supported devices.",
+        "cmpNmbrGm.precision.mode": "Precision mode",
+        "cmpNmbrGm.precision.exact": "Exact",
+        "cmpNmbrGm.precision.upTo": "Up to",
+        "cmpNmbrGm.precision.exactValue": "Decimal places",
+        "cmpNmbrGm.precision.maxValue": "Maximum decimal places",
       };
 
       if (key === "cmpNmbrGm.aria.moreInfo") return `More information about ${String(vars?.field)}`;
@@ -158,5 +163,31 @@ describe("CompareNumbersSetupScreen", () => {
     expect(screen.getByRole("button", { name: "Start training" })).toBeDisabled();
     expect(screen.getByRole("checkbox", { name: "Whole numbers" })).toBeDisabled();
     expect(screen.getByRole("switch", { name: "Sound feedback" })).toBeDisabled();
+  });
+
+  it("stacks decimal precision fields into separate rows", () => {
+    const setup = { ...DEFAULT_SETUP_STATE, openMode: "decimal" as const };
+    const { container } = renderSetup({ setup });
+    const precisionMode = container.querySelector<HTMLElement>("#decimal-mode");
+    const decimalPlaces = container.querySelector<HTMLElement>("#decimal-precision");
+    const precisionRows = precisionMode?.closest<HTMLElement>(".grid.gap-3");
+
+    expect(precisionRows).toContainElement(decimalPlaces);
+    expect(precisionRows).not.toHaveClass("grid-cols-2");
+  });
+
+  it("orders exercise preferences, limits, and feedback and uses the canonical menu label", () => {
+    const { container } = renderSetup();
+    const controls = ["#equal-ratio", "#history-order", "#timer-min", "#feedback-sound"].map((selector) =>
+      container.querySelector(selector)
+    );
+
+    expect(controls.every(Boolean)).toBe(true);
+    for (let index = 0; index < controls.length - 1; index += 1) {
+      expect(
+        controls[index]!.compareDocumentPosition(controls[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    }
+    expect(screen.getByRole("link", { name: "Main Menu" })).toHaveAttribute("href", "/");
   });
 });

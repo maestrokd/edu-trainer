@@ -153,7 +153,7 @@
     },
     "mode": {
       "input": "Keyboard input",
-      "quiz": "Quiz (4 options)"
+      "quiz": "Quiz"
     },
     "ex": {
       "mul": "Multiplication",
@@ -229,7 +229,8 @@
       "minValue": "Min value",
       "maxValue": "Max value",
       "targets": "Round to",
-      "sounds": "Sounds",
+      "sounds": "Sound feedback",
+      "roundingOptions": "Rounding options",
       "includeTie": "Include tie cases",
       "includeTieHint": "Guarantee at least one tie case ending in 5 per session.",
       "showHint": "Show place-value hints",
@@ -315,11 +316,11 @@
       "timerHint": "Leave empty for unlimited session time.",
       "maxExercises": "Max exercises",
       "maxExercisesHint": "Leave empty for unlimited number of questions.",
-      "sounds": "Sounds",
+      "sounds": "Sound feedback",
       "soundsHint": "Voice feedback for answers"
     },
     "mode": {
-      "quiz": "Multiple choice",
+      "quiz": "Quiz",
       "input": "Manual input",
       "result": "Type the result",
       "missing": "Find the missing number"

@@ -79,44 +79,44 @@ export function MultiplicationTrainerSetupScreen({
         <RangeSettingsCard
           minVal={minVal}
           maxVal={maxVal}
-          mode={mode}
+          includeMul={includeMul}
+          includeDiv={includeDiv}
           onMinChange={onMinChange}
           onMaxChange={onMaxChange}
-          onModeChange={onModeChange}
+          onMulChange={onMulChange}
+          onDivChange={onDivChange}
           labels={{
             range: labels.range,
             rangeHint: labels.rangeHint,
             min: labels.min,
             max: labels.max,
-            mode: labels.mode,
-            modeQuiz: labels.modeQuiz,
-            modeInput: labels.modeInput,
+            exercises: labels.exercises,
+            mul: labels.mul,
+            div: labels.div,
             ariaMin: labels.ariaMin,
             ariaMax: labels.ariaMax,
-            ariaMode: labels.ariaMode,
+            ariaMul: labels.ariaMul,
+            ariaDiv: labels.ariaDiv,
             moreInfo: labels.moreInfo,
           }}
         />
 
         <SessionOptionsCard
-          includeMul={includeMul}
-          includeDiv={includeDiv}
+          mode={mode}
           timerMinutes={timerMinutes}
           maxExercises={maxExercises}
-          onMulChange={onMulChange}
-          onDivChange={onDivChange}
+          onModeChange={onModeChange}
           onTimerChange={onTimerChange}
           onMaxExercisesChange={onMaxExercisesChange}
           labels={{
-            exercises: labels.exercises,
-            mul: labels.mul,
-            div: labels.div,
+            mode: labels.mode,
+            modeQuiz: labels.modeQuiz,
+            modeInput: labels.modeInput,
             timer: labels.timer,
             timerHint: labels.timerHint,
             maxExercises: labels.maxExercises,
             maxExercisesHint: labels.maxExercisesHint,
-            ariaMul: labels.ariaMul,
-            ariaDiv: labels.ariaDiv,
+            ariaMode: labels.ariaMode,
             ariaTimer: labels.ariaTimer,
             ariaMaxExercises: labels.ariaMaxExercises,
             moreInfo: labels.moreInfo,

@@ -37,7 +37,7 @@ function renderSetup(isInteractable = true) {
           min: "Minimum",
           max: "Maximum",
           mode: "Mode",
-          modeQuiz: "Quiz (4 options)",
+          modeQuiz: "Quiz",
           modeInput: "Keyboard input",
           exercises: "Exercises",
           mul: "Multiplication",
@@ -47,7 +47,7 @@ function renderSetup(isInteractable = true) {
           maxExercises: "Max exercises",
           maxExercisesHint: "Leave empty for unlimited number of exercises.",
           start: "Start",
-          menu: "Menu",
+          menu: "Main Menu",
           ariaBackToMenu: "Back to menu",
           ariaMin: "Minimum value of the range",
           ariaMax: "Maximum value of the range",
@@ -108,6 +108,22 @@ describe("MultiplicationTrainerSetupScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
     expect(callbacks.onStartClick).toHaveBeenCalledOnce();
     expect(screen.getByRole("link", { name: "Back to menu" })).toHaveAttribute("href", "/");
+    expect(screen.getByText("Main Menu")).toBeVisible();
+  });
+
+  it("orders ranges, exercise types, mode, and limits and selects quiz by default", () => {
+    const { container } = renderSetup();
+    const controls = ["#min-select", "#mul-check", "#mode-select", "#timer-min"].map((selector) =>
+      container.querySelector(selector)
+    );
+
+    expect(controls.every(Boolean)).toBe(true);
+    for (let index = 0; index < controls.length - 1; index += 1) {
+      expect(
+        controls[index]!.compareDocumentPosition(controls[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    }
+    expect(container.querySelector("#mode-select")).toHaveTextContent("Quiz");
   });
 
   it("disables starting when the configuration is not interactable", () => {

@@ -1,26 +1,29 @@
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { SetupHint } from "@/components/ui/setup-hint";
-import type { Mode } from "../../model/trainer.types";
 
 interface RangeSettingsCardProps {
   minVal: number;
   maxVal: number;
-  mode: Mode;
+  includeMul: boolean;
+  includeDiv: boolean;
   onMinChange: (val: number) => void;
   onMaxChange: (val: number) => void;
-  onModeChange: (val: Mode) => void;
+  onMulChange: (val: boolean) => void;
+  onDivChange: (val: boolean) => void;
   labels: {
     range: string;
     rangeHint: string;
     min: string;
     max: string;
-    mode: string;
-    modeQuiz: string;
-    modeInput: string;
+    exercises: string;
+    mul: string;
+    div: string;
     ariaMin: string;
     ariaMax: string;
-    ariaMode: string;
+    ariaMul: string;
+    ariaDiv: string;
     moreInfo: (field: string) => string;
   };
 }
@@ -28,10 +31,12 @@ interface RangeSettingsCardProps {
 export function RangeSettingsCard({
   minVal,
   maxVal,
-  mode,
+  includeMul,
+  includeDiv,
   onMinChange,
   onMaxChange,
-  onModeChange,
+  onMulChange,
+  onDivChange,
   labels,
 }: RangeSettingsCardProps) {
   return (
@@ -73,17 +78,29 @@ export function RangeSettingsCard({
         </LabeledField>
       </div>
 
-      <LabeledField label={labels.mode} htmlFor="mode-select">
-        <Select value={mode} onValueChange={(val) => onModeChange(val as Mode)}>
-          <SelectTrigger id="mode-select" className="h-9 w-full rounded-xl sm:h-10" aria-label={labels.ariaMode}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="quiz">{labels.modeQuiz}</SelectItem>
-            <SelectItem value="input">{labels.modeInput}</SelectItem>
-          </SelectContent>
-        </Select>
-      </LabeledField>
+      <fieldset className="grid min-w-0 gap-2">
+        <legend className="text-sm leading-none font-medium">{labels.exercises}:</legend>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <label className="flex min-h-7 items-center gap-2 text-sm">
+            <Checkbox
+              id="mul-check"
+              checked={includeMul}
+              onCheckedChange={(value) => onMulChange(Boolean(value))}
+              aria-label={labels.ariaMul}
+            />
+            {labels.mul}
+          </label>
+          <label className="flex min-h-7 items-center gap-2 text-sm">
+            <Checkbox
+              id="div-check"
+              checked={includeDiv}
+              onCheckedChange={(value) => onDivChange(Boolean(value))}
+              aria-label={labels.ariaDiv}
+            />
+            {labels.div}
+          </label>
+        </div>
+      </fieldset>
     </section>
   );
 }

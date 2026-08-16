@@ -15,7 +15,7 @@ vi.mock("react-i18next", () => ({
         "roundT.setup.timerHint": "Leave empty for unlimited session time.",
         "roundT.setup.maxExercises": "Max exercises",
         "roundT.setup.maxExercisesHint": "Leave empty for unlimited exercises.",
-        "roundT.setup.sounds": "Sounds",
+        "roundT.setup.sounds": "Sound feedback",
         "roundT.setup.numberTypes": "Number types",
         "roundT.setup.filtersHint": "Empty filters include every option in that group.",
         "roundT.setup.whole": "Whole numbers",
@@ -32,6 +32,7 @@ vi.mock("react-i18next", () => ({
         "roundT.setup.minValue": "Min value",
         "roundT.setup.maxValue": "Max value",
         "roundT.setup.targets": "Round to",
+        "roundT.setup.roundingOptions": "Rounding options",
         "roundT.setup.includeTie": "Include tie cases",
         "roundT.setup.includeTieHint": "Guarantee one tie case per session.",
         "roundT.setup.showHint": "Show place-value hints",
@@ -45,7 +46,7 @@ vi.mock("react-i18next", () => ({
         "roundT.aria.maxExercises": "Maximum exercises",
         "roundT.aria.backToMenu": "Back to menu",
         "roundT.start": "Start",
-        "menu.mainMenuLabel": "Main menu",
+        "menu.mainMenuLabel": "Main Menu",
       };
 
       if (key === "roundT.aria.moreInfo") return `More information about ${String(vars?.field)}`;
@@ -86,6 +87,7 @@ describe("RoundingTrainerSetupScreen", () => {
     expect(setup).not.toHaveClass("bg-muted/50", "p-5");
     expect(container.querySelector('[data-slot="card"]')).not.toBeInTheDocument();
     expect(screen.getByText("Choose numbers and rounding places.")).toHaveClass("hidden", "sm:block");
+    expect(screen.getByRole("region", { name: "Rounding options" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start" }).parentElement).toHaveClass("grid-cols-2");
   });
 
@@ -142,5 +144,45 @@ describe("RoundingTrainerSetupScreen", () => {
     expect(screen.getByRole("button", { name: "Start" })).toBeDisabled();
     expect(screen.getByRole("textbox", { name: "Timer minutes" })).toBeDisabled();
     expect(screen.getByRole("checkbox", { name: "Whole numbers" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Include tie cases" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Show place-value hints" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Sound feedback" })).toBeDisabled();
+  });
+
+  it("connects rounding-option and sound switches to configuration updates", () => {
+    const { onConfigChange } = renderSetup();
+
+    fireEvent.click(screen.getByRole("switch", { name: "Include tie cases" }));
+    expect(onConfigChange).toHaveBeenCalledWith({ includeTieCase: true });
+
+    fireEvent.click(screen.getByRole("switch", { name: "Show place-value hints" }));
+    expect(onConfigChange).toHaveBeenCalledWith({ showHint: true });
+
+    fireEvent.click(screen.getByRole("switch", { name: "Sound feedback" }));
+    expect(onConfigChange).toHaveBeenCalledWith({ soundsEnabled: true });
+  });
+
+  it("orders generation, targets, mode, limits, and feedback and selects quiz by default", () => {
+    const { container } = renderSetup();
+    const controls = [
+      "#rounding-whole",
+      "#rounding-positives",
+      "#min-digits-select",
+      "#target-10",
+      "#include-tie-case",
+      "#show-place-hint",
+      "#rounding-mode-select",
+      "#timer-minutes",
+      "#rounding-sounds-switch",
+    ].map((selector) => container.querySelector(selector));
+
+    expect(controls.every(Boolean)).toBe(true);
+    for (let index = 0; index < controls.length - 1; index += 1) {
+      expect(
+        controls[index]!.compareDocumentPosition(controls[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    }
+    expect(container.querySelector("#rounding-mode-select")).toHaveTextContent("Quiz");
+    expect(screen.getByText("Main Menu")).toBeVisible();
   });
 });

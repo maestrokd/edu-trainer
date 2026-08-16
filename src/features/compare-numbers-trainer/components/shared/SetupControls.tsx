@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
-import { SetupHint } from "@/components/ui/setup-hint";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { ModeKey } from "../../model/trainer.types";
 
@@ -173,30 +171,6 @@ export function WeightField({ idPrefix, value, onChange, label, disabled = false
           className="w-20 rounded-xl"
         />
       </div>
-    </div>
-  );
-}
-
-interface ToggleRowProps {
-  id: string;
-  label: string | null;
-  hint: string | null;
-  hintAriaLabel: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-  disabled?: boolean;
-}
-
-export function ToggleRow({ id, label, hint, hintAriaLabel, checked, onChange, disabled = false }: ToggleRowProps) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-sm sm:px-3 sm:py-2.5">
-      <div className="flex-1">
-        <div className="flex items-center gap-1 font-medium leading-tight">
-          <Label htmlFor={id}>{label}</Label>
-          {hint && <SetupHint ariaLabel={hintAriaLabel}>{hint}</SetupHint>}
-        </div>
-      </div>
-      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={(value) => onChange(Boolean(value))} />
     </div>
   );
 }

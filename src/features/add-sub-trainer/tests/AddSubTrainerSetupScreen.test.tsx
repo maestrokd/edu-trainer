@@ -24,8 +24,9 @@ vi.mock("react-i18next", () => ({
         "addSubT.setup.timerHint": "Leave empty for unlimited session time.",
         "addSubT.setup.maxExercises": "Max exercises",
         "addSubT.setup.maxExercisesHint": "Leave empty for unlimited questions.",
+        "addSubT.setup.sounds": "Sound feedback",
         "addSubT.setup.soundsHint": "Voice feedback for answers",
-        "addSubT.mode.quiz": "Multiple choice",
+        "addSubT.mode.quiz": "Quiz",
         "addSubT.mode.input": "Manual input",
         "addSubT.mode.result": "Type the result",
         "addSubT.mode.missing": "Find the missing number",
@@ -34,7 +35,7 @@ vi.mock("react-i18next", () => ({
         "addSubT.aria.timer": "Timer minutes",
         "addSubT.aria.maxExercises": "Maximum exercises",
         "addSubT.aria.sounds": "Enable sounds",
-        "multiT.menu": "Main menu",
+        "menu.mainMenuLabel": "Main Menu",
       };
 
       if (key === "addSubT.aria.moreInfo") return `More information about ${String(vars?.field)}`;
@@ -77,6 +78,7 @@ describe("AddSubTrainerSetupScreen", () => {
     ["Exercise range", "Addition sums stay within this range."],
     ["Timer (minutes)", "Leave empty for unlimited session time."],
     ["Max exercises", "Leave empty for unlimited questions."],
+    ["Sound feedback", "Voice feedback for answers"],
   ])("shows the %s hint from its info popup", (field, hint) => {
     renderSetup();
 
@@ -94,11 +96,26 @@ describe("AddSubTrainerSetupScreen", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Minimum" }), { target: { value: "-7" } });
     expect(updateConfig).toHaveBeenCalledWith({ minVal: -7 });
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Enable sounds" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Sound feedback" }));
     expect(updateConfig).toHaveBeenCalledWith({ enableSounds: true });
 
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
     expect(startGame).toHaveBeenCalledOnce();
-    expect(screen.getByRole("link", { name: "Main menu" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Main Menu" })).toHaveAttribute("href", "/");
+  });
+
+  it("orders generation, modes, limits, and feedback and selects quiz by default", () => {
+    const { container } = renderSetup();
+    const controls = ["#op-add", "#min-input", "#play-mode", "#timer-min", "#sounds-toggle"].map((selector) =>
+      container.querySelector(selector)
+    );
+
+    expect(controls.every(Boolean)).toBe(true);
+    for (let index = 0; index < controls.length - 1; index += 1) {
+      expect(
+        controls[index]!.compareDocumentPosition(controls[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    }
+    expect(container.querySelector("#play-mode")).toHaveTextContent("Quiz");
   });
 });

@@ -27,8 +27,8 @@ export function AddSubTrainerSetupScreen({ controller }: { controller: AddSubTra
           {tr("start")}
         </Button>
         <Button asChild variant="outline" className="h-10 w-full sm:w-auto">
-          <Link to="/" aria-label={t("multiT.menu") || undefined}>
-            {t("multiT.menu")}
+          <Link to="/" aria-label={t("menu.mainMenuLabel") || undefined}>
+            {t("menu.mainMenuLabel")}
           </Link>
         </Button>
       </div>
