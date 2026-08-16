@@ -114,6 +114,47 @@
       "desc": "Organize chores, routines, and rewards for the whole family."
     }
   },
+  "rabbitGame": {
+    "title": "Jumping Rabbit ×9",
+    "score": "Score: {{score}}",
+    "setup": {
+      "label": "Game setup",
+      "description": "Tap, click, or press Space to jump over flowers. If the rabbit hits one, solve ×9 questions to continue.",
+      "questions": "Questions after a hit",
+      "questionsHint": "Choose how many multiplication questions to answer after each collision.",
+      "askQuiz": "Ask a multiplication quiz after a hit",
+      "effects": "Sound and vibration effects",
+      "start": "Start game"
+    },
+    "menu": {
+      "title": "Game menu",
+      "resume": "Resume game",
+      "newGame": "New game",
+      "changeSettings": "Change settings"
+    },
+    "messages": {
+      "speedUp": "Speed up! 🚀",
+      "finishAhead": "Finish ahead! 🏁",
+      "ouch": "Ouch! Keep hopping.",
+      "tryAgain": "Try again! ✏️"
+    },
+    "quiz": {
+      "title": "Answer ×9 to continue ({{count}} total)",
+      "tip": "Choose the correct answer to keep hopping.",
+      "answerAria": "Answer {{answer}}"
+    },
+    "result": {
+      "title": "You finished! 🏁",
+      "finalScore": "Final score: {{score}}",
+      "playAgain": "Play again"
+    },
+    "aria": {
+      "menu": "Open game menu",
+      "canvas": "Jumping Rabbit game. Tap, click, or press Space to jump.",
+      "questions": "Number of questions after a hit",
+      "backToMenu": "Back to main menu"
+    }
+  },
   "multiT": {
     "menu": "Menu",
     "title": "Multiplication Trainer",
