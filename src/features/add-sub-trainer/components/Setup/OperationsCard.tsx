@@ -3,8 +3,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
+import { SetupHint } from "@/components/ui/setup-hint";
 import type { PlayMode, ProblemMode } from "../../model/trainer.types";
-import { SetupHint } from "./SetupHint";
 import type { AddSubTrainerSetupController } from "./setup.types";
 
 export function OperationsCard({ controller }: { controller: AddSubTrainerSetupController }) {

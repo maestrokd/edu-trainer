@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
-import { SetupHint } from "./SetupHint";
+import { SetupHint } from "@/components/ui/setup-hint";
 import type { AddSubTrainerSetupController } from "./setup.types";
 
 export function SessionOptionsCard({ controller }: { controller: AddSubTrainerSetupController }) {

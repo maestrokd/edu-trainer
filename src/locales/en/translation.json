@@ -135,17 +135,21 @@
       "correct": "Correct",
       "wrong": "Incorrect",
       "timerMinutes": "Timer minutes",
-      "maxExercises": "Maximum exercises"
+      "maxExercises": "Maximum exercises",
+      "moreInfo": "More information about {{field}}"
     },
     "setup": {
       "intro": "Choose the range of factors (min and max), e.g.",
+      "range": "Factor range",
+      "rangeHint": "The range will be automatically ordered (min ≤ max) and limited to 2…12.",
       "min": "Minimum",
       "max": "Maximum",
       "mode": "Mode",
       "exercises": "Exercises",
       "timer": "Timer (minutes)",
-      "maxExercises": "Max exercises (0 = unlimited)",
-      "note": "The range will be automatically ordered (min ≤ max) and limited to 2…12."
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited number of exercises."
     },
     "mode": {
       "input": "Keyboard input",
