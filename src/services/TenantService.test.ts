@@ -18,7 +18,7 @@ describe("TenantService", () => {
 
     await switchTenant("tenant-uuid");
 
-    expect(apiMock.post).toHaveBeenCalledWith("/auth/tenants/switch", { tenantUuid: "tenant-uuid" });
+    expect(apiMock.post).toHaveBeenCalledWith("/auth/session/tenant/switch", { tenantUuid: "tenant-uuid" });
   });
 
   it("updates the login default through the membership preference endpoint", async () => {

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "./AuthContext";
 
 const apiMock = vi.hoisted(() => ({
   post: vi.fn(),
+  refreshAccessToken: vi.fn(),
   registerRefreshFn: vi.fn(),
   registerLogoutFn: vi.fn(),
 }));
@@ -28,6 +29,7 @@ const webAppMock = vi.hoisted(() => ({
 
 vi.mock("@/services/ApiService.ts", () => ({
   post: apiMock.post,
+  refreshAccessToken: apiMock.refreshAccessToken,
   registerRefreshFn: apiMock.registerRefreshFn,
   registerLogoutFn: apiMock.registerLogoutFn,
 }));
@@ -47,6 +49,7 @@ vi.mock("@/services/AuthService.ts", () => ({
     VIEWER: "VIEWER",
   },
   logout: vi.fn(),
+  logoutAll: vi.fn(),
   logoutTelegram: vi.fn(),
 }));
 
@@ -94,12 +97,17 @@ describe("AuthContext tenant sessions", () => {
   beforeEach(() => {
     localStorage.clear();
     apiMock.post.mockReset();
+    apiMock.refreshAccessToken.mockReset();
     apiMock.registerRefreshFn.mockReset();
     apiMock.registerLogoutFn.mockReset();
     profileMock.getMe.mockReset();
     tenantServiceMock.switchTenant.mockReset();
     jwtMock.jwtDecode.mockReset();
     webAppMock.initData = "";
+    apiMock.refreshAccessToken.mockImplementation(async () => {
+      const registeredRefresh = apiMock.registerRefreshFn.mock.calls.at(-1)?.[0];
+      return await registeredRefresh();
+    });
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     profileMock.getMe.mockResolvedValue({
       username: "user@example.com",

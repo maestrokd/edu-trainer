@@ -45,21 +45,51 @@ export function extractErrorCode(error: unknown): string | null {
 let refreshFn: (() => Promise<string>) | null = null;
 let refreshPromise: Promise<string> | null = null;
 let logoutFn: (() => void) | null = null;
+const REFRESH_LOCK_NAME = "edu-trainer-auth-refresh";
 
 export function registerRefreshFn(fn: () => Promise<string>) {
   refreshFn = fn;
 }
 
-export function refreshAccessToken(): Promise<string> {
-  if (!refreshFn) {
-    return Promise.reject(new Error("Refresh handler is not registered"));
+async function performRefresh(rejectedAccessToken?: string | null): Promise<string> {
+  const registeredRefresh = refreshFn;
+  if (!registeredRefresh) {
+    throw new Error("Refresh handler is not registered");
   }
+
+  const lockManager = typeof navigator !== "undefined" && "locks" in navigator ? navigator.locks : null;
+  if (!lockManager) {
+    return await registeredRefresh();
+  }
+
+  return await lockManager.request(REFRESH_LOCK_NAME, async () => {
+    const currentAccessToken = localStorage.getItem("token");
+    if (rejectedAccessToken !== undefined && currentAccessToken && currentAccessToken !== rejectedAccessToken) {
+      return currentAccessToken;
+    }
+    return await registeredRefresh();
+  });
+}
+
+export function refreshAccessToken(rejectedAccessToken?: string | null): Promise<string> {
   if (!refreshPromise) {
-    refreshPromise = refreshFn().finally(() => {
+    refreshPromise = performRefresh(rejectedAccessToken).finally(() => {
       refreshPromise = null;
     });
   }
   return refreshPromise;
+}
+
+function extractBearerToken(config: AxiosRequestConfig): string | undefined {
+  const headers = config.headers as (Record<string, unknown> & { get?: (name: string) => unknown }) | undefined;
+  const authorization =
+    typeof headers?.get === "function"
+      ? headers.get("Authorization")
+      : (headers?.Authorization ?? headers?.authorization);
+  if (typeof authorization !== "string" || !authorization.startsWith("Bearer ")) {
+    return undefined;
+  }
+  return authorization.substring(7);
 }
 
 export function registerLogoutFn(fn: typeof logoutFn) {
@@ -108,8 +138,8 @@ apiClient.interceptors.response.use(
 
     // On 401, attempt refresh only once and skip if refresh endpoint itself
     if (status === 401 && !originalConfig._retry) {
-      // Avoid infinite loop: do not retry /auth/refresh
-      if (originalConfig.url?.endsWith("/auth/refresh")) {
+      // Avoid infinite loop: do not retry the refresh endpoint.
+      if (originalConfig.url?.endsWith("/auth/session/refresh")) {
         logoutFn?.();
         return Promise.reject(error);
       }
@@ -124,7 +154,7 @@ apiClient.interceptors.response.use(
 
       originalConfig._retry = true;
       try {
-        await refreshAccessToken();
+        await refreshAccessToken(extractBearerToken(originalConfig));
         return apiClient.request(originalConfig);
       } catch (refreshError) {
         // Refresh failed: clear token and stop

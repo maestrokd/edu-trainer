@@ -51,7 +51,7 @@ export const setDefaultTenant = async (tenantUuid: string): Promise<TenantListIt
 };
 
 export const switchTenant = async (tenantUuid: string): Promise<LoginResponse> => {
-  return await post<LoginResponse>("/auth/tenants/switch", { tenantUuid });
+  return await post<LoginResponse>("/auth/session/tenant/switch", { tenantUuid });
 };
 
 export default {
