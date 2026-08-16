@@ -42,7 +42,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const { logout } = useAuth();
+  const { logout, logoutAll } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -57,6 +57,18 @@ export function NavUser({
   const activeTenantMeta = user.activeTenantRole
     ? `${activeTenantTitle} (${user.activeTenantRole})`
     : activeTenantTitle;
+
+  const handleLogoutAll = async () => {
+    const confirmed = window.confirm(t("menu.user.logoutAllConfirm", "Log out from every device and browser?"));
+    if (!confirmed) return;
+
+    try {
+      await logoutAll();
+    } catch (error) {
+      console.error("Logout everywhere error", error);
+      window.alert(t("menu.user.logoutAllError", "Could not log out everywhere. Please try again."));
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -158,6 +170,10 @@ export function NavUser({
             <DropdownMenuItem onClick={logout}>
               <LogOut />
               {t("menu.user.logout", "Log out")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogoutAll}>
+              <LogOut />
+              {t("menu.user.logoutAll", "Log out everywhere")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
