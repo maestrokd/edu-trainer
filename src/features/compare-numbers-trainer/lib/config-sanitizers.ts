@@ -62,14 +62,3 @@ export function sanitizeFractionConfig(
     denominatorMax,
   };
 }
-
-export function parseOptionalLimitFromInput(rawValue: string): number | null {
-  if (rawValue === "") return null;
-  const value = parseInt(rawValue, 10);
-  return Number.isFinite(value) ? Math.max(0, value) : null;
-}
-
-export function normalizeOptionalLimit(value: number | null): number | null {
-  if (value === null) return null;
-  return value > 0 ? value : null;
-}

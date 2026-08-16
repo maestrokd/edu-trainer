@@ -200,15 +200,21 @@
     "aria": {
       "backToMenu": "Back to Menu",
       "correct": "correct",
-      "wrong": "wrong"
+      "wrong": "wrong",
+      "timerMinutes": "Timer minutes",
+      "maxExercises": "Maximum exercises",
+      "moreInfo": "More information about {{field}}"
     },
     "setup": {
       "label": "Settings",
       "intro": "Choose what kind of numbers and places to practice.",
       "mode": "Mode",
-      "timer": "Timer (minutes, 0 = unlimited)",
-      "maxExercises": "Max exercises (0 = unlimited)",
+      "timer": "Timer (minutes)",
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited number of exercises.",
       "numberTypes": "Number types",
+      "filtersHint": "If no number types or signs are selected, all options in that group are included.",
       "whole": "Whole numbers",
       "decimals": "Decimals",
       "decimalPlaces": "Decimal places",
@@ -222,11 +228,12 @@
       "maxDigits": "Max digits",
       "minValue": "Min value",
       "maxValue": "Max value",
-      "targets": "Round to (multi-select)",
-      "sounds": "Enable sounds",
-      "includeTie": "Guarantee at least one tie-case (5) per session",
-      "showHint": "Show place-value hint under the prompt",
-      "note": "Tip: leave filters empty to include everything."
+      "targets": "Round to",
+      "sounds": "Sounds",
+      "includeTie": "Include tie cases",
+      "includeTieHint": "Guarantee at least one tie case ending in 5 per session.",
+      "showHint": "Show place-value hints",
+      "showHintHint": "Show a place-value hint under the exercise."
     },
     "mode": {
       "input": "Input",
@@ -375,7 +382,8 @@
     "title": "Compare Numbers Trainer",
     "aria": {
       "backToMenu": "Back to menu",
-      "openMenu": "Open quick menu"
+      "openMenu": "Open quick menu",
+      "moreInfo": "More information about {{field}}"
     },
     "menuLabel": "Compare numbers menu",
     "actions": {
@@ -480,9 +488,9 @@
     },
     "session": {
       "timer": "Timer (minutes)",
-      "timerHint": "0 disables the timer.",
-      "maxExercises": "Max exercises (0 = unlimited)",
-      "maxExercisesHint": "Stop automatically after this many comparisons."
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited comparisons."
     },
     "feedback": {
       "sound": "Sound feedback",
@@ -491,9 +499,6 @@
       "vibrationDesc": "Vibrate on supported devices.",
       "correct": "Great! That comparison is correct.",
       "wrong": "You chose {{user}}, correct was {{correct}}."
-    },
-    "telemetry": {
-      "note": "Future telemetry could track streaks, average time per comparison, and most difficult number types."
     },
     "errors": {
       "unavailable": "Enable at least one valid number type to start."
