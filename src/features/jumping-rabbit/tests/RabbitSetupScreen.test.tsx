@@ -8,14 +8,20 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) =>
       ({
-        "rabbitGame.title": "Jumping Rabbit ×9",
+        "rabbitGame.title": "Jumping Rabbit",
         "rabbitGame.setup.description": "Jump over flowers and answer questions.",
+        "rabbitGame.setup.range": "Factor range",
+        "rabbitGame.setup.rangeHint": "The range is automatically ordered.",
+        "rabbitGame.setup.min": "Minimum",
+        "rabbitGame.setup.max": "Maximum",
         "rabbitGame.setup.questions": "Questions after a hit",
         "rabbitGame.setup.questionsHint": "Choose the question count.",
         "rabbitGame.setup.askQuiz": "Ask a multiplication quiz after a hit",
         "rabbitGame.setup.effects": "Sound and vibration effects",
         "rabbitGame.setup.start": "Start game",
         "rabbitGame.aria.questions": "Number of questions after a hit",
+        "rabbitGame.aria.minFactor": "Minimum multiplication factor",
+        "rabbitGame.aria.maxFactor": "Maximum multiplication factor",
         "rabbitGame.aria.backToMenu": "Back to main menu",
         "menu.mainMenuLabel": "Main Menu",
       })[key] ?? key,
@@ -31,7 +37,9 @@ describe("RabbitSetupScreen", () => {
     );
 
     expect(container.firstElementChild).toHaveClass("flex-1", "overflow-y-auto", "sm:bg-muted/50");
-    expect(screen.getByRole("heading", { name: "Jumping Rabbit ×9" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Jumping Rabbit" })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: "Minimum multiplication factor" })).toHaveTextContent("4");
+    expect(screen.getByRole("combobox", { name: "Maximum multiplication factor" })).toHaveTextContent("9");
     expect(screen.getByRole("combobox", { name: "Number of questions after a hit" })).toHaveTextContent("3");
     expect(screen.getByRole("link", { name: "Back to main menu" })).toHaveAttribute("href", "/");
   });

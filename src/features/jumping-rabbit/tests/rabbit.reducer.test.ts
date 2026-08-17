@@ -27,6 +27,16 @@ describe("jumping rabbit state", () => {
     expect(state.runId).toBe(firstRunId + 1);
   });
 
+  it("clamps factor values and orders the range when a run starts", () => {
+    let state = getInitialRabbitState();
+    state = rabbitGameReducer(state, { type: "configUpdated", payload: { minVal: 15, maxVal: 3 } });
+
+    expect(state.config).toMatchObject({ minVal: 12, maxVal: 3 });
+
+    state = rabbitGameReducer(state, { type: "runStarted" });
+    expect(state.config).toMatchObject({ minVal: 3, maxVal: 12 });
+  });
+
   it("keeps the current run intact while the pause menu is open", () => {
     let state = rabbitGameReducer(getInitialRabbitState(), { type: "runStarted" });
     state = rabbitGameReducer(state, { type: "scoreChanged", payload: 6 });

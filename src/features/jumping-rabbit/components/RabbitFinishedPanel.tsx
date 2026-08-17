@@ -11,9 +11,9 @@ export function RabbitFinishedPanel({ score, onPlayAgain, onChangeSettings }: Ra
   const { t } = useTranslation();
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/75 p-4 backdrop-blur-sm">
+    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/75 p-2 backdrop-blur-sm sm:p-4">
       <section
-        className="w-full max-w-sm space-y-4 rounded-2xl border bg-card p-6 text-center text-card-foreground shadow-xl"
+        className="max-h-full w-full max-w-sm space-y-4 overflow-y-auto rounded-2xl border bg-card p-4 text-center text-card-foreground shadow-xl sm:p-6"
         role="dialog"
         aria-labelledby="rabbit-finished-title"
       >

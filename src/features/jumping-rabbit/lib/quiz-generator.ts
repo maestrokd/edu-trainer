@@ -1,4 +1,4 @@
-import { clampQuizCount } from "../model/rabbit.constants";
+import { clampQuizCount, normalizeFactorRange } from "../model/rabbit.constants";
 import type { RabbitQuizQuestion } from "../model/rabbit.types";
 
 function shuffled<T>(values: T[], random: () => number): T[] {
@@ -23,15 +23,26 @@ export function generateQuizOptions(correct: number, random: () => number = Math
   return shuffled([correct, ...distractors], random);
 }
 
-export function generateRabbitQuiz(count: number, random: () => number = Math.random): RabbitQuizQuestion[] {
-  const factors = shuffled(
-    Array.from({ length: 11 }, (_, index) => index + 2),
-    random
-  ).slice(0, clampQuizCount(count));
+interface RabbitQuizGenerationConfig {
+  count: number;
+  minVal: number;
+  maxVal: number;
+}
 
-  return factors.map((b) => ({
-    a: 9,
-    b,
-    options: generateQuizOptions(9 * b, random),
-  }));
+export function generateRabbitQuiz(
+  config: RabbitQuizGenerationConfig,
+  random: () => number = Math.random
+): RabbitQuizQuestion[] {
+  const { minVal, maxVal } = normalizeFactorRange(config.minVal, config.maxVal);
+  const factorPairs = Array.from({ length: maxVal - minVal + 1 }, (_, index) => minVal + index).flatMap((a) =>
+    Array.from({ length: 12 }, (_, index) => ({ a, b: index + 1 }))
+  );
+
+  return shuffled(factorPairs, random)
+    .slice(0, clampQuizCount(config.count))
+    .map(({ a, b }) => ({
+      a,
+      b,
+      options: generateQuizOptions(a * b, random),
+    }));
 }

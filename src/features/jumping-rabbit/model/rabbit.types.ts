@@ -1,4 +1,6 @@
 export interface RabbitConfig {
+  minVal: number;
+  maxVal: number;
   quizCount: number;
   askOnHit: boolean;
   effectsEnabled: boolean;

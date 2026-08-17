@@ -19,8 +19,8 @@ interface RabbitSettingsMenuProps {
   phase: RabbitGamePhase;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onRestart: () => void;
-  onChangeSettings: () => void;
+  onRestart?: () => void;
+  onChangeSettings?: () => void;
 }
 
 export function RabbitSettingsMenu({
@@ -37,7 +37,12 @@ export function RabbitSettingsMenu({
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={t("rabbitGame.aria.menu")} className="size-8">
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={t("rabbitGame.aria.menu")}
+          className="size-9 bg-background/85 shadow-sm backdrop-blur"
+        >
           <Settings className="size-6" />
         </Button>
       </DropdownMenuTrigger>
@@ -59,8 +64,10 @@ export function RabbitSettingsMenu({
             {runInProgress && (
               <DropdownMenuItem onSelect={() => onOpenChange(false)}>{t("rabbitGame.menu.resume")}</DropdownMenuItem>
             )}
-            <DropdownMenuItem onSelect={onRestart}>{t("rabbitGame.menu.newGame")}</DropdownMenuItem>
-            <DropdownMenuItem onSelect={onChangeSettings}>{t("rabbitGame.menu.changeSettings")}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onRestart?.()}>{t("rabbitGame.menu.newGame")}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onChangeSettings?.()}>
+              {t("rabbitGame.menu.changeSettings")}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
           </DropdownMenuGroup>
         )}

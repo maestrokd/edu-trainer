@@ -1,4 +1,4 @@
-import { DEFAULT_RABBIT_CONFIG, clampQuizCount } from "./rabbit.constants";
+import { DEFAULT_RABBIT_CONFIG, clampFactor, clampQuizCount, normalizeFactorRange } from "./rabbit.constants";
 import type { RabbitGameAction, RabbitGameState } from "./rabbit.types";
 
 export function getInitialRabbitState(): RabbitGameState {
@@ -23,6 +23,8 @@ export function rabbitGameReducer(state: RabbitGameState, action: RabbitGameActi
         config: {
           ...state.config,
           ...action.payload,
+          ...(action.payload.minVal == null ? {} : { minVal: clampFactor(action.payload.minVal) }),
+          ...(action.payload.maxVal == null ? {} : { maxVal: clampFactor(action.payload.maxVal) }),
           ...(action.payload.quizCount == null ? {} : { quizCount: clampQuizCount(action.payload.quizCount) }),
         },
       };
@@ -30,6 +32,10 @@ export function rabbitGameReducer(state: RabbitGameState, action: RabbitGameActi
     case "runStarted":
       return {
         ...state,
+        config: {
+          ...state.config,
+          ...normalizeFactorRange(state.config.minVal, state.config.maxVal),
+        },
         phase: "playing",
         score: 0,
         quiz: null,

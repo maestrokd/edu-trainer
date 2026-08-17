@@ -47,8 +47,15 @@ export function useRabbitGameController() {
   }, []);
 
   const startQuiz = useCallback(() => {
-    dispatch({ type: "quizStarted", payload: generateRabbitQuiz(state.config.quizCount) });
-  }, [state.config.quizCount]);
+    dispatch({
+      type: "quizStarted",
+      payload: generateRabbitQuiz({
+        count: state.config.quizCount,
+        minVal: state.config.minVal,
+        maxVal: state.config.maxVal,
+      }),
+    });
+  }, [state.config.maxVal, state.config.minVal, state.config.quizCount]);
 
   const submitAnswer = useCallback(
     (value: number): RabbitAnswerOutcome => {

@@ -14,15 +14,15 @@ export function RabbitQuizPanel({ quiz, quizIndex, onAnswer }: RabbitQuizPanelPr
   if (!question) return null;
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/75 p-4 backdrop-blur-sm">
+    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/75 p-2 backdrop-blur-sm sm:p-4">
       <section
-        className="w-full max-w-sm space-y-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-xl"
+        className="max-h-full w-full max-w-xl space-y-3 overflow-y-auto rounded-2xl border bg-card p-3 text-card-foreground shadow-xl sm:p-5"
         role="dialog"
-        aria-labelledby="rabbit-quiz-title"
+        aria-labelledby="rabbit-quiz-equation"
       >
-        <h2 id="rabbit-quiz-title" className="text-xl font-bold">
-          {t("rabbitGame.quiz.title", { count: quiz.length })}
-        </h2>
+        <p className="text-center text-xs font-medium text-muted-foreground sm:text-sm">
+          {t("rabbitGame.quiz.progress", { current: quizIndex + 1, total: quiz.length })}
+        </p>
 
         <div className="flex gap-1" aria-hidden>
           {quiz.map((item, index) => (
@@ -41,10 +41,10 @@ export function RabbitQuizPanel({ quiz, quizIndex, onAnswer }: RabbitQuizPanelPr
           ))}
         </div>
 
-        <p className="text-lg font-medium">
+        <h2 id="rabbit-quiz-equation" className="text-center text-2xl font-bold sm:text-3xl">
           {question.a} × {question.b} = ?
-        </p>
-        <div className="grid grid-cols-2 gap-2">
+        </h2>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {question.options.map((option) => {
             const selected = question.answer === option;
             const correct = selected && question.correct === true;
@@ -71,7 +71,7 @@ export function RabbitQuizPanel({ quiz, quizIndex, onAnswer }: RabbitQuizPanelPr
           })}
         </div>
 
-        <p className="text-sm text-muted-foreground">{t("rabbitGame.quiz.tip")}</p>
+        <p className="text-center text-xs text-muted-foreground sm:text-sm">{t("rabbitGame.quiz.tip")}</p>
       </section>
     </div>
   );

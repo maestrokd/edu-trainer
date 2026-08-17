@@ -4,6 +4,7 @@ import { useRabbitGameEngine } from "../hooks/useRabbitGameEngine";
 import type { RabbitAnswerOutcome, RabbitGameState } from "../model/rabbit.types";
 import { RabbitFinishedPanel } from "./RabbitFinishedPanel";
 import { RabbitQuizPanel } from "./RabbitQuizPanel";
+import { RabbitSettingsMenu } from "./RabbitSettingsMenu";
 
 interface RabbitPlayScreenProps {
   state: RabbitGameState;
@@ -14,6 +15,7 @@ interface RabbitPlayScreenProps {
   onMessage: (message: string, duration?: number) => void;
   onPlayAgain: () => void;
   onChangeSettings: () => void;
+  onMenuOpenChange: (open: boolean) => void;
 }
 
 export function RabbitPlayScreen({
@@ -25,6 +27,7 @@ export function RabbitPlayScreen({
   onMessage,
   onPlayAgain,
   onChangeSettings,
+  onMenuOpenChange,
 }: RabbitPlayScreenProps) {
   const { t } = useTranslation();
   const engine = useRabbitGameEngine({
@@ -58,7 +61,7 @@ export function RabbitPlayScreen({
   };
 
   return (
-    <main className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border bg-card shadow-lg">
+    <main className="fixed inset-0 z-40 h-dvh w-screen overflow-hidden overscroll-none bg-card">
       <div ref={engine.gameAreaRef} className="absolute inset-0 overflow-hidden">
         <canvas
           ref={engine.canvasRef}
@@ -68,9 +71,32 @@ export function RabbitPlayScreen({
         />
       </div>
 
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-between gap-2 p-2"
+        style={{
+          paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+          paddingLeft: "max(0.5rem, env(safe-area-inset-left))",
+          paddingRight: "max(0.5rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="rounded-xl border bg-background/85 px-3 py-1.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur">
+          {t("rabbitGame.score", { score: state.score })}
+        </div>
+        <div className="pointer-events-auto">
+          <RabbitSettingsMenu
+            phase={state.phase}
+            open={state.menuOpen}
+            onOpenChange={onMenuOpenChange}
+            onRestart={onPlayAgain}
+            onChangeSettings={onChangeSettings}
+          />
+        </div>
+      </div>
+
       {state.message && (
         <div
-          className="absolute left-1/2 top-3 z-40 -translate-x-1/2 rounded-full bg-foreground/85 px-3 py-1.5 text-sm text-background shadow"
+          className="absolute left-1/2 top-2 z-30 max-w-[calc(100%_-_9rem)] -translate-x-1/2 rounded-full bg-foreground/85 px-3 py-1.5 text-center text-sm text-background shadow"
+          style={{ marginTop: "env(safe-area-inset-top)" }}
           role="status"
         >
           {state.message}

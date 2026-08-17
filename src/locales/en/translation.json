@@ -115,11 +115,15 @@
     }
   },
   "rabbitGame": {
-    "title": "Jumping Rabbit ×9",
+    "title": "Jumping Rabbit",
     "score": "Score: {{score}}",
     "setup": {
       "label": "Game setup",
-      "description": "Tap, click, or press Space to jump over flowers. If the rabbit hits one, solve ×9 questions to continue.",
+      "description": "Tap, click, or press Space to jump over flowers. If the rabbit hits one, solve multiplication questions to continue.",
+      "range": "Factor range",
+      "rangeHint": "The range is automatically ordered and limited to 2–12.",
+      "min": "Minimum",
+      "max": "Maximum",
       "questions": "Questions after a hit",
       "questionsHint": "Choose how many multiplication questions to answer after each collision.",
       "askQuiz": "Ask a multiplication quiz after a hit",
@@ -139,7 +143,7 @@
       "tryAgain": "Try again! ✏️"
     },
     "quiz": {
-      "title": "Answer ×9 to continue ({{count}} total)",
+      "progress": "Question {{current}} of {{total}}",
       "tip": "Choose the correct answer to keep hopping.",
       "answerAria": "Answer {{answer}}"
     },
@@ -151,6 +155,8 @@
     "aria": {
       "menu": "Open game menu",
       "canvas": "Jumping Rabbit game. Tap, click, or press Space to jump.",
+      "minFactor": "Minimum multiplication factor",
+      "maxFactor": "Maximum multiplication factor",
       "questions": "Number of questions after a hit",
       "backToMenu": "Back to main menu"
     }
