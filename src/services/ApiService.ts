@@ -1,6 +1,5 @@
 import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import axiosRetry from "axios-retry";
-import type { NavigateFunction } from "react-router-dom";
 
 export interface ApiErrorDetail {
   field: string;
@@ -37,22 +36,60 @@ export function extractErrorCode(error: unknown): string | null {
   if (error instanceof ApiError) {
     return error.errorCode;
   }
-  if (error && typeof error === "object" && "errorCode" in error && typeof (error as any).errorCode === "string") {
-    return (error as any).errorCode;
+  if (error && typeof error === "object" && "errorCode" in error && typeof error.errorCode === "string") {
+    return error.errorCode;
   }
   return null;
 }
 
-let navigateFn: NavigateFunction | null = null;
 let refreshFn: (() => Promise<string>) | null = null;
+let refreshPromise: Promise<string> | null = null;
 let logoutFn: (() => void) | null = null;
-
-export const registerNavigate = (fn: NavigateFunction) => {
-  navigateFn = fn;
-};
+const REFRESH_LOCK_NAME = "edu-trainer-auth-refresh";
 
 export function registerRefreshFn(fn: () => Promise<string>) {
   refreshFn = fn;
+}
+
+async function performRefresh(rejectedAccessToken?: string | null): Promise<string> {
+  const registeredRefresh = refreshFn;
+  if (!registeredRefresh) {
+    throw new Error("Refresh handler is not registered");
+  }
+
+  const lockManager = typeof navigator !== "undefined" && "locks" in navigator ? navigator.locks : null;
+  if (!lockManager) {
+    return await registeredRefresh();
+  }
+
+  return await lockManager.request(REFRESH_LOCK_NAME, async () => {
+    const currentAccessToken = localStorage.getItem("token");
+    if (rejectedAccessToken !== undefined && currentAccessToken && currentAccessToken !== rejectedAccessToken) {
+      return currentAccessToken;
+    }
+    return await registeredRefresh();
+  });
+}
+
+export function refreshAccessToken(rejectedAccessToken?: string | null): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = performRefresh(rejectedAccessToken).finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+function extractBearerToken(config: AxiosRequestConfig): string | undefined {
+  const headers = config.headers as (Record<string, unknown> & { get?: (name: string) => unknown }) | undefined;
+  const authorization =
+    typeof headers?.get === "function"
+      ? headers.get("Authorization")
+      : (headers?.Authorization ?? headers?.authorization);
+  if (typeof authorization !== "string" || !authorization.startsWith("Bearer ")) {
+    return undefined;
+  }
+  return authorization.substring(7);
 }
 
 export function registerLogoutFn(fn: typeof logoutFn) {
@@ -101,10 +138,9 @@ apiClient.interceptors.response.use(
 
     // On 401, attempt refresh only once and skip if refresh endpoint itself
     if (status === 401 && !originalConfig._retry) {
-      // Avoid infinite loop: do not retry /auth/refresh
-      if (originalConfig.url?.endsWith("/auth/refresh")) {
+      // Avoid infinite loop: do not retry the refresh endpoint.
+      if (originalConfig.url?.endsWith("/auth/session/refresh")) {
         logoutFn?.();
-        navigateFn?.("login", { replace: true });
         return Promise.reject(error);
       }
       if (
@@ -118,7 +154,7 @@ apiClient.interceptors.response.use(
 
       originalConfig._retry = true;
       try {
-        await refreshFn?.();
+        await refreshAccessToken(extractBearerToken(originalConfig));
         return apiClient.request(originalConfig);
       } catch (refreshError) {
         // Refresh failed: clear token and stop
@@ -145,13 +181,13 @@ apiClient.interceptors.response.use(
 export const get = async <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.get<T>(url, config)).data;
 
-export const post = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+export const post = async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.post<T>(url, data, config)).data;
 
-export const put = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+export const put = async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.put<T>(url, data, config)).data;
 
-export const patch = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+export const patch = async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> =>
   (await apiClient.patch<T>(url, data, config)).data;
 
 export const del = async <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>

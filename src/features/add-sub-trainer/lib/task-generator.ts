@@ -22,10 +22,17 @@ export function generateTask(config: SessionConfig, currentTaskId: number): Task
   const min = Math.min(config.minVal, config.maxVal);
   const max = Math.max(config.minVal, config.maxVal);
 
-  const a = randInt(min, max);
-  const b = randInt(min, max);
+  let x: number;
+  let y: number;
 
-  const [x, y] = op === "sub" && a < b ? [b, a] : [a, b];
+  if (op === "add") {
+    const result = randInt(min, max);
+    x = randInt(Math.min(0, result), Math.max(0, result));
+    y = result - x;
+  } else {
+    x = randInt(min, max);
+    y = randInt(Math.min(0, min), x);
+  }
 
   const missing: MissingPart = config.problemMode === "result" ? "result" : randInt(0, 1) === 0 ? "a" : "b";
 

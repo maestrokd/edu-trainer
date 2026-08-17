@@ -36,10 +36,20 @@ export function useAddSubTrainerController(forcedInitialState?: any) {
 
   const startGame = useCallback(() => {
     if (!isInteractable || !canStart) return;
-    dispatch({ type: "sessionStarted" });
-    track({ name: "add_sub_trainer_session_started", payload: { config: state.config } });
+    const activeConfig: SessionConfig = {
+      ...state.config,
+      minVal: Math.min(state.config.minVal, state.config.maxVal),
+      maxVal: Math.max(state.config.minVal, state.config.maxVal),
+    };
 
-    const newTask = generateTask(state.config, 0);
+    dispatch({
+      type: "configUpdated",
+      payload: { minVal: activeConfig.minVal, maxVal: activeConfig.maxVal },
+    });
+    dispatch({ type: "sessionStarted" });
+    track({ name: "add_sub_trainer_session_started", payload: { config: activeConfig } });
+
+    const newTask = generateTask(activeConfig, 0);
     dispatch({ type: "taskPrepared", payload: newTask });
   }, [canStart, isInteractable, state.config, track]);
 

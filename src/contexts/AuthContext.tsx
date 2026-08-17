@@ -1,12 +1,15 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
-import { post, registerLogoutFn, registerRefreshFn } from "@/services/ApiService.ts";
+import { useQueryClient } from "@tanstack/react-query";
+import { post, refreshAccessToken, registerLogoutFn, registerRefreshFn } from "@/services/ApiService.ts";
 import {
   type LoginResponse,
   TenantMembershipRole,
   logout as apiLogout,
+  logoutAll as apiLogoutAll,
   logoutTelegram,
 } from "@/services/AuthService.ts";
 import { getMe, type UserProfileDto } from "@/services/ProfileService.ts";
+import TenantService from "@/services/TenantService.ts";
 import WebApp from "@twa-dev/sdk";
 import { jwtDecode } from "jwt-decode";
 
@@ -89,12 +92,15 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   loginWithTelegram: () => Promise<string>;
   doRefresh: () => Promise<string>;
+  switchTenant: (tenantUuid: string) => Promise<void>;
   logout: () => void;
+  logoutAll: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
   const didInit = useRef(false);
   const [initDone, setInitDone] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -107,18 +113,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const refreshFn = async (): Promise<string> => {
-    if (telegramInitDataString) {
-      return await loginWithTelegram();
-    } else {
+    try {
       return await refresh();
+    } catch (error) {
+      if (telegramInitDataString) {
+        return await loginWithTelegram();
+      }
+      throw error;
     }
   };
 
-  const logoutFn = async (): Promise<void> => {
-    apiLogout().catch((e) => console.error("Logout error", e));
+  const clearLocalSession = () => {
     setToken(null);
     setPrincipal(null);
     localStorage.removeItem("token");
+  };
+
+  const logoutFn = (): void => {
+    clearLocalSession();
   };
 
   const applyAuthenticatedSession = async (authResponse: LoginResponse): Promise<string> => {
@@ -132,12 +144,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refresh = async (): Promise<string> => {
     try {
-      const authResponse = await post<LoginResponse>("/auth/refresh", undefined, { withCredentials: true });
+      const authResponse = await post<LoginResponse>("/auth/session/refresh", undefined, { withCredentials: true });
       return await applyAuthenticatedSession(authResponse);
     } catch (e) {
       console.error("AuthProvider Refresh - error", e);
       throw e;
     }
+  };
+
+  const coordinatedRefresh = async (): Promise<string> => {
+    return await refreshAccessToken(localStorage.getItem("token"));
   };
 
   const sendConfirmationCode = async (email: string, verificationCodeType: EmailVerificationType): Promise<void> => {
@@ -198,6 +214,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return await applyAuthenticatedSession(authResponse);
   };
 
+  const switchTenant = async (tenantUuid: string): Promise<void> => {
+    const authResponse = await TenantService.switchTenant(tenantUuid);
+    await applyAuthenticatedSession(authResponse);
+    await queryClient.resetQueries();
+  };
+
   const logout = () => {
     // Call backend logout
     if (telegramInitDataString) {
@@ -206,13 +228,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       apiLogout().catch((e) => console.error("Logout error", e));
     }
 
-    setToken(null);
-    setPrincipal(null);
-    localStorage.removeItem("token");
+    clearLocalSession();
     // Close WebApp in Telegram
     /*if (window && window.Telegram && window.Telegram.WebApp) {
           WebApp.close();
         }*/
+  };
+
+  const logoutAll = async (): Promise<void> => {
+    try {
+      await apiLogoutAll();
+      clearLocalSession();
+    } catch (error) {
+      if (!localStorage.getItem("token")) {
+        clearLocalSession();
+        return;
+      }
+      throw error;
+    }
   };
 
   useEffect(() => {
@@ -230,16 +263,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (initDataString) {
           setTelegramInitDataString(initDataString);
           try {
-            await loginWithTelegram(initDataString);
-          } catch (e) {
-            console.error("AuthProvider useEffect - loginWithTelegram - error", e);
+            await coordinatedRefresh();
+          } catch {
+            try {
+              await loginWithTelegram(initDataString);
+            } catch (loginError) {
+              console.error("AuthProvider useEffect - loginWithTelegram - error", loginError);
+            }
           }
         }
       } else {
         const savedJwt = localStorage.getItem("token");
         if (savedJwt) {
           try {
-            await refresh();
+            await coordinatedRefresh();
           } catch (e) {
             console.error("AuthProvider useEffect - refresh savedJwt - error", e);
           }
@@ -266,8 +303,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         doResetPassword,
         login,
         loginWithTelegram,
-        doRefresh: refreshFn,
+        doRefresh: coordinatedRefresh,
+        switchTenant,
         logout,
+        logoutAll,
       }}
     >
       {children}
@@ -302,6 +341,7 @@ const fetchPrincipalData = async (token: string, authResponse?: LoginResponse): 
   };
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth should be used within AuthProvider");

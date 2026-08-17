@@ -1,5 +1,5 @@
 import { Outlet, Route, Routes } from "react-router";
-import RabbitJumpX9 from "./pages/jumping-rabbit/JumpingRabbit.tsx";
+import { JumpingRabbitPage } from "@/features/jumping-rabbit";
 import { MultiplicationTrainerPage } from "@/features/multiplication-trainer";
 import { CompareNumbersTrainerPage } from "@/features/compare-numbers-trainer";
 import { RoundingTrainerPage } from "@/features/rounding-trainer";
@@ -202,7 +202,7 @@ export default function App() {
       <Route element={<CommonLayout />}>
         <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
         <Route path="/multiplication-trainer" element={<MultiplicationTrainerPage />} />
-        <Route path="/multiplication-rabbit" element={<RabbitJumpX9 />} />
+        <Route path="/multiplication-rabbit" element={<JumpingRabbitPage />} />
         <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
         <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
         <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Coverage"
+  short_description: "Apply minimal high-value frontend tests"
+  default_prompt: "Use $test-coverage to select the smallest useful Vitest test set for this change."

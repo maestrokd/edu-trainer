@@ -1,20 +1,27 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { LabeledField } from "@/components/ui/labeled-field";
 import { NumericInput } from "@/components/ui/numeric-input";
+import { SetupHint } from "@/components/ui/setup-hint";
+import { SetupToggleRow } from "@/components/ui/setup-toggle-row";
+import type { AddSubTrainerSetupController } from "./setup.types";
 
-export function SessionOptionsCard({ controller }: { controller: any }) {
+export function SessionOptionsCard({ controller }: { controller: AddSubTrainerSetupController }) {
   const { t } = useTranslation();
-  const tr = (key: string, vars?: Record<string, unknown>) => t(`addSubT.${key}`, vars);
+  const tr = (key: string, vars?: Record<string, unknown>) => t(`addSubT.${key}`, vars) as string;
 
   const { config } = controller.state;
   const { updateConfig } = controller.actions;
 
   return (
-    <Card>
-      <CardContent className="p-4 sm:p-6 grid gap-4">
-        <LabeledField label={tr("setup.timer")!} htmlFor="timer-min">
+    <section className="grid gap-3 border-t pt-4 sm:gap-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <LabeledField
+          label={tr("setup.timer")}
+          htmlFor="timer-min"
+          labelAction={
+            <SetupHint ariaLabel={tr("aria.moreInfo", { field: tr("setup.timer") })}>{tr("setup.timerHint")}</SetupHint>
+          }
+        >
           <NumericInput
             id="timer-min"
             value={config.timerMinutes}
@@ -24,10 +31,17 @@ export function SessionOptionsCard({ controller }: { controller: any }) {
             aria-label={tr("aria.timer") || undefined}
             className="rounded-xl"
           />
-          <p className="text-xs text-muted-foreground">{tr("setup.timerHint")}</p>
         </LabeledField>
 
-        <LabeledField label={tr("setup.maxExercises")!} htmlFor="max-ex">
+        <LabeledField
+          label={tr("setup.maxExercises")}
+          htmlFor="max-ex"
+          labelAction={
+            <SetupHint ariaLabel={tr("aria.moreInfo", { field: tr("setup.maxExercises") })}>
+              {tr("setup.maxExercisesHint")}
+            </SetupHint>
+          }
+        >
           <NumericInput
             id="max-ex"
             value={config.maxExercises}
@@ -37,21 +51,17 @@ export function SessionOptionsCard({ controller }: { controller: any }) {
             aria-label={tr("aria.maxExercises") || undefined}
             className="rounded-xl"
           />
-          <p className="text-xs text-muted-foreground">{tr("setup.maxExercisesHint")}</p>
         </LabeledField>
+      </div>
 
-        <LabeledField label={tr("setup.sounds")!} htmlFor="sounds-toggle">
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox
-              id="sounds-toggle"
-              checked={config.enableSounds}
-              onCheckedChange={(v) => updateConfig({ enableSounds: Boolean(v) })}
-              aria-label={tr("aria.sounds")}
-            />
-            {tr("setup.soundsHint")}
-          </label>
-        </LabeledField>
-      </CardContent>
-    </Card>
+      <SetupToggleRow
+        id="sounds-toggle"
+        label={tr("setup.sounds")}
+        hint={tr("setup.soundsHint")}
+        hintAriaLabel={tr("aria.moreInfo", { field: tr("setup.sounds") })}
+        checked={config.enableSounds}
+        onCheckedChange={(enableSounds) => updateConfig({ enableSounds })}
+      />
+    </section>
   );
 }

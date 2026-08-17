@@ -2,16 +2,15 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { LabeledField } from "@/components/ui/labeled-field";
+import { NumericInput } from "@/components/ui/numeric-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { SetupHint } from "@/components/ui/setup-hint";
+import { SetupToggleRow } from "@/components/ui/setup-toggle-row";
 import type { DecimalTypeConfig, FractionTypeConfig, IntegerTypeConfig } from "@/lib/compare-numbers/generator";
 import type { CompareNumbersSetupState, HistoryOrder, TypeAvailabilityMap } from "../model/trainer.types";
 import { PRECISION_OPTIONS } from "../model/trainer.constants";
-import { normalizeOptionalLimit, parseOptionalLimitFromInput } from "../lib/config-sanitizers";
-import { NotificationBanner } from "./shared/NotificationBanner";
-import { GapFields, LabeledField, ToggleRow, TypeCard, WeightField } from "./shared/SetupControls";
+import { GapFields, TypeCard, WeightField } from "./shared/SetupControls";
 import { LoginSuggestionSlot } from "../slots/LoginSuggestionSlot";
 import { UpgradeSuggestionSlot } from "../slots/UpgradeSuggestionSlot";
 
@@ -56,22 +55,22 @@ export function CompareNumbersSetupScreen({
   const tr = (key: string, options?: Record<string, unknown>) => t(`cmpNmbrGm.${key}`, options);
 
   const setupLocked = !canUseCoreFeature;
+  const moreInfoLabel = (field: string) => tr("aria.moreInfo", { field });
 
   return (
-    <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-6xl mx-auto w-full sm:mt-6 overflow-auto">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg sm:text-xl font-semibold">{tr("setup.title")}</h2>
-        {!canStart && <span className="text-sm font-medium text-destructive">{tr("errors.unavailable")}</span>}
-      </div>
-
-      <p className="mt-3 text-sm text-muted-foreground">{tr("setup.intro")}</p>
+    <div
+      className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col overflow-y-auto sm:rounded-2xl sm:bg-muted/50 sm:p-5 sm:shadow-lg sm:backdrop-blur md:p-8"
+      aria-label={tr("setup.title")}
+    >
+      {!canStart && <p className="text-sm font-medium text-destructive">{tr("errors.unavailable")}</p>}
+      <p className="hidden text-sm text-muted-foreground sm:block">{tr("setup.intro")}</p>
 
       <Accordion
         type="single"
         collapsible
         value={setup.openMode}
         onValueChange={onOpenModeChange}
-        className="mt-6 space-y-3"
+        className="mt-3 space-y-2 sm:mt-5 sm:space-y-3"
       >
         <TypeCard
           id="non-negative"
@@ -84,39 +83,40 @@ export function CompareNumbersSetupScreen({
           }}
           showAvailabilityError={setup.nonNegativeConfig.enabled && !typeAvailableMap.nonNegativeInt}
           availabilityText={tr("types.messages.unavailable")}
+          disabled={setupLocked}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <LabeledField label={tr("ranges.min")} htmlFor="non-negative-min">
-              <Input
+              <NumericInput
                 id="non-negative-min"
-                type="number"
                 min={0}
                 value={setup.nonNegativeConfig.min}
                 disabled={!setup.nonNegativeConfig.enabled || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const min = Number.isFinite(value) ? Math.max(0, value) : 0;
+                onChange={(min) => {
                   onNonNegativeConfigChange({
                     min,
                     max: Math.max(min, setup.nonNegativeConfig.max),
                   });
                 }}
+                fallbackValue={0}
+                aria-label={tr("ranges.min")}
+                className="rounded-xl"
               />
             </LabeledField>
             <LabeledField label={tr("ranges.max")} htmlFor="non-negative-max">
-              <Input
+              <NumericInput
                 id="non-negative-max"
-                type="number"
-                min={0}
+                min={setup.nonNegativeConfig.min}
                 value={setup.nonNegativeConfig.max}
                 disabled={!setup.nonNegativeConfig.enabled || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const max = Number.isFinite(value) ? Math.max(0, value) : setup.nonNegativeConfig.min;
+                onChange={(max) => {
                   onNonNegativeConfigChange({
                     max: Math.max(setup.nonNegativeConfig.min, max),
                   });
                 }}
+                fallbackValue={setup.nonNegativeConfig.min}
+                aria-label={tr("ranges.max")}
+                className="rounded-xl"
               />
             </LabeledField>
           </div>
@@ -139,6 +139,7 @@ export function CompareNumbersSetupScreen({
             disabled={!setup.nonNegativeConfig.enabled || setupLocked}
           />
           <WeightField
+            idPrefix="non-negative"
             value={setup.nonNegativeConfig.weight}
             onChange={(value) => onNonNegativeConfigChange({ weight: value })}
             label={tr("weights.label")}
@@ -157,37 +158,41 @@ export function CompareNumbersSetupScreen({
           }}
           showAvailabilityError={setup.signedConfig.enabled && !typeAvailableMap.signedInt}
           availabilityText={tr("types.messages.unavailable")}
+          disabled={setupLocked}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <LabeledField label={tr("ranges.min")} htmlFor="signed-min">
-              <Input
+              <NumericInput
                 id="signed-min"
-                type="number"
                 value={setup.signedConfig.min}
                 disabled={!setup.signedConfig.enabled || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const min = Number.isFinite(value) ? value : setup.signedConfig.min;
+                onChange={(min) => {
                   onSignedConfigChange({
                     min,
                     max: Math.max(min, setup.signedConfig.max),
                   });
                 }}
+                allowNegative
+                fallbackValue={0}
+                aria-label={tr("ranges.min")}
+                className="rounded-xl"
               />
             </LabeledField>
             <LabeledField label={tr("ranges.max")} htmlFor="signed-max">
-              <Input
+              <NumericInput
                 id="signed-max"
-                type="number"
+                min={setup.signedConfig.min}
                 value={setup.signedConfig.max}
                 disabled={!setup.signedConfig.enabled || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const max = Number.isFinite(value) ? value : setup.signedConfig.max;
+                onChange={(max) => {
                   onSignedConfigChange({
                     max: Math.max(setup.signedConfig.min, max),
                   });
                 }}
+                allowNegative
+                fallbackValue={setup.signedConfig.min}
+                aria-label={tr("ranges.max")}
+                className="rounded-xl"
               />
             </LabeledField>
           </div>
@@ -210,6 +215,7 @@ export function CompareNumbersSetupScreen({
             disabled={!setup.signedConfig.enabled || setupLocked}
           />
           <WeightField
+            idPrefix="signed"
             value={setup.signedConfig.weight}
             onChange={(value) => onSignedConfigChange({ weight: value })}
             label={tr("weights.label")}
@@ -228,44 +234,48 @@ export function CompareNumbersSetupScreen({
           }}
           showAvailabilityError={setup.decimalConfig.enabled && !typeAvailableMap.decimal}
           availabilityText={tr("types.messages.decimalRange")}
+          disabled={setupLocked}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <LabeledField label={tr("ranges.min")} htmlFor="decimal-min">
-              <Input
+              <NumericInput
                 id="decimal-min"
-                type="number"
-                step="0.1"
                 value={setup.decimalConfig.min}
                 disabled={!setup.decimalConfig.enabled || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const min = Number.isFinite(value) ? value : setup.decimalConfig.min;
+                onChange={(min) => {
                   onDecimalConfigChange({
                     min,
                     max: Math.max(min, setup.decimalConfig.max),
                   });
                 }}
+                allowNegative
+                allowDecimal
+                fallbackValue={0}
+                aria-label={tr("ranges.min")}
+                className="rounded-xl"
               />
             </LabeledField>
             <LabeledField label={tr("ranges.max")} htmlFor="decimal-max">
-              <Input
+              <NumericInput
                 id="decimal-max"
-                type="number"
-                step="0.1"
+                min={setup.decimalConfig.min}
                 value={setup.decimalConfig.max}
                 disabled={!setup.decimalConfig.enabled || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const max = Number.isFinite(value) ? value : setup.decimalConfig.max;
+                onChange={(max) => {
                   onDecimalConfigChange({
                     max: Math.max(setup.decimalConfig.min, max),
                   });
                 }}
+                allowNegative
+                allowDecimal
+                fallbackValue={setup.decimalConfig.min}
+                aria-label={tr("ranges.max")}
+                className="rounded-xl"
               />
             </LabeledField>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3">
             <LabeledField label={tr("precision.mode")} htmlFor="decimal-mode">
               <Select
                 value={setup.decimalConfig.precisionMode}
@@ -342,6 +352,7 @@ export function CompareNumbersSetupScreen({
             disabled={!setup.decimalConfig.enabled || setupLocked}
           />
           <WeightField
+            idPrefix="decimal"
             value={setup.decimalConfig.weight}
             onChange={(value) => onDecimalConfigChange({ weight: value })}
             label={tr("weights.label")}
@@ -360,8 +371,9 @@ export function CompareNumbersSetupScreen({
           }}
           showAvailabilityError={setup.fractionConfig.enabled && !typeAvailableMap.fraction}
           availabilityText={tr("types.messages.unavailable")}
+          disabled={setupLocked}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <LabeledField label={tr("fractions.mode")} htmlFor="fraction-mode">
               <Select
                 value={setup.fractionConfig.preset}
@@ -384,72 +396,72 @@ export function CompareNumbersSetupScreen({
             </LabeledField>
 
             <LabeledField label={tr("fractions.numerator")} htmlFor="fraction-num-min">
-              <Input
+              <NumericInput
                 id="fraction-num-min"
-                type="number"
                 min={1}
                 value={setup.fractionConfig.numeratorMin}
                 disabled={!setup.fractionConfig.enabled || setup.fractionConfig.preset !== "custom" || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const min = Number.isFinite(value) ? Math.max(1, value) : setup.fractionConfig.numeratorMin;
+                onChange={(min) => {
                   onFractionConfigChange({
                     numeratorMin: min,
                     numeratorMax: Math.max(min, setup.fractionConfig.numeratorMax),
                   });
                 }}
+                fallbackValue={1}
+                aria-label={tr("fractions.numerator")}
+                className="rounded-xl"
               />
             </LabeledField>
 
             <LabeledField label={tr("fractions.numeratorMax")} htmlFor="fraction-num-max">
-              <Input
+              <NumericInput
                 id="fraction-num-max"
-                type="number"
-                min={1}
+                min={setup.fractionConfig.numeratorMin}
                 value={setup.fractionConfig.numeratorMax}
                 disabled={!setup.fractionConfig.enabled || setup.fractionConfig.preset !== "custom" || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const max = Number.isFinite(value) ? Math.max(1, value) : setup.fractionConfig.numeratorMax;
+                onChange={(max) => {
                   onFractionConfigChange({
                     numeratorMax: Math.max(setup.fractionConfig.numeratorMin, max),
                   });
                 }}
+                fallbackValue={setup.fractionConfig.numeratorMin}
+                aria-label={tr("fractions.numeratorMax")}
+                className="rounded-xl"
               />
             </LabeledField>
 
             <LabeledField label={tr("fractions.denominator")} htmlFor="fraction-den-min">
-              <Input
+              <NumericInput
                 id="fraction-den-min"
-                type="number"
                 min={1}
                 value={setup.fractionConfig.denominatorMin}
                 disabled={!setup.fractionConfig.enabled || setup.fractionConfig.preset !== "custom" || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const min = Number.isFinite(value) ? Math.max(1, value) : setup.fractionConfig.denominatorMin;
+                onChange={(min) => {
                   onFractionConfigChange({
                     denominatorMin: min,
                     denominatorMax: Math.max(min, setup.fractionConfig.denominatorMax),
                   });
                 }}
+                fallbackValue={1}
+                aria-label={tr("fractions.denominator")}
+                className="rounded-xl"
               />
             </LabeledField>
 
             <LabeledField label={tr("fractions.denominatorMax")} htmlFor="fraction-den-max">
-              <Input
+              <NumericInput
                 id="fraction-den-max"
-                type="number"
-                min={1}
+                min={setup.fractionConfig.denominatorMin}
                 value={setup.fractionConfig.denominatorMax}
                 disabled={!setup.fractionConfig.enabled || setup.fractionConfig.preset !== "custom" || setupLocked}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  const max = Number.isFinite(value) ? Math.max(1, value) : setup.fractionConfig.denominatorMax;
+                onChange={(max) => {
                   onFractionConfigChange({
                     denominatorMax: Math.max(setup.fractionConfig.denominatorMin, max),
                   });
                 }}
+                fallbackValue={setup.fractionConfig.denominatorMin}
+                aria-label={tr("fractions.denominatorMax")}
+                className="rounded-xl"
               />
             </LabeledField>
           </div>
@@ -473,6 +485,7 @@ export function CompareNumbersSetupScreen({
             disabled={!setup.fractionConfig.enabled || setupLocked}
           />
           <WeightField
+            idPrefix="fraction"
             value={setup.fractionConfig.weight}
             onChange={(value) => onFractionConfigChange({ weight: value })}
             label={tr("weights.label")}
@@ -481,105 +494,125 @@ export function CompareNumbersSetupScreen({
         </TypeCard>
       </Accordion>
 
-      <Separator className="my-6" />
+      <div className="mt-4 grid gap-4 border-t pt-4 md:grid-cols-2 md:gap-0">
+        <section className="grid grid-cols-2 gap-2 sm:gap-3 md:pr-6">
+          <LabeledField
+            label={tr("equal.label")}
+            htmlFor="equal-ratio"
+            labelAction={<SetupHint ariaLabel={moreInfoLabel(tr("equal.label"))}>{tr("equal.hint")}</SetupHint>}
+          >
+            <div className="flex min-h-9 items-center gap-2">
+              <input
+                id="equal-ratio"
+                type="range"
+                min={0}
+                max={50}
+                value={setup.equalRatio}
+                onChange={(event) => onEqualRatioChange(Number(event.target.value))}
+                className="min-w-0 flex-1"
+                disabled={setupLocked}
+              />
+              <span className="w-10 text-right text-sm font-medium">{setup.equalRatio}%</span>
+            </div>
+          </LabeledField>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="grid gap-3">
-          <Label htmlFor="equal-ratio">{tr("equal.label")}</Label>
-          <div className="flex items-center gap-4">
-            <input
-              id="equal-ratio"
-              type="range"
-              min={0}
-              max={50}
-              value={setup.equalRatio}
-              onChange={(event) => onEqualRatioChange(Number(event.target.value))}
-              className="w-full"
+          <LabeledField
+            label={tr("history.order.label")}
+            htmlFor="history-order"
+            labelAction={
+              <SetupHint ariaLabel={moreInfoLabel(tr("history.order.label"))}>{tr("history.order.hint")}</SetupHint>
+            }
+          >
+            <Select
+              value={setup.historyOrder}
+              onValueChange={(value) => onHistoryOrderChange(value as HistoryOrder)}
+              disabled={setupLocked}
+            >
+              <SelectTrigger id="history-order" className="h-9 rounded-xl sm:h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asc">{tr("history.order.oldest")}</SelectItem>
+                <SelectItem value="desc">{tr("history.order.newest")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </LabeledField>
+        </section>
+
+        <section className="grid gap-3 border-t pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <LabeledField
+              label={tr("session.timer")}
+              htmlFor="timer-min"
+              labelAction={
+                <SetupHint ariaLabel={moreInfoLabel(tr("session.timer"))}>{tr("session.timerHint")}</SetupHint>
+              }
+            >
+              <NumericInput
+                id="timer-min"
+                value={setup.timerMinutes ?? 0}
+                onChange={(value) => onTimerMinutesChange(value > 0 ? value : null)}
+                fallbackValue={0}
+                showInfinityWhenZero
+                disabled={setupLocked}
+                aria-label={tr("session.timer")}
+                className="rounded-xl"
+              />
+            </LabeledField>
+            <LabeledField
+              label={tr("session.maxExercises")}
+              htmlFor="max-exercises"
+              labelAction={
+                <SetupHint ariaLabel={moreInfoLabel(tr("session.maxExercises"))}>
+                  {tr("session.maxExercisesHint")}
+                </SetupHint>
+              }
+            >
+              <NumericInput
+                id="max-exercises"
+                value={setup.maxExercises ?? 0}
+                onChange={(value) => onMaxExercisesChange(value > 0 ? value : null)}
+                fallbackValue={0}
+                showInfinityWhenZero
+                disabled={setupLocked}
+                aria-label={tr("session.maxExercises")}
+                className="rounded-xl"
+              />
+            </LabeledField>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <SetupToggleRow
+              id="feedback-sound"
+              label={tr("feedback.sound")}
+              hint={tr("feedback.soundDesc")}
+              hintAriaLabel={moreInfoLabel(tr("feedback.sound"))}
+              checked={setup.enableSound}
+              onCheckedChange={onEnableSoundChange}
               disabled={setupLocked}
             />
-            <span className="w-14 text-right text-sm font-medium">{setup.equalRatio}%</span>
+            <SetupToggleRow
+              id="feedback-vibration"
+              label={tr("feedback.vibration")}
+              hint={tr("feedback.vibrationDesc")}
+              hintAriaLabel={moreInfoLabel(tr("feedback.vibration"))}
+              checked={setup.enableVibration}
+              onCheckedChange={onEnableVibrationChange}
+              disabled={setupLocked}
+            />
           </div>
-          <p className="text-xs text-muted-foreground">{tr("equal.hint")}</p>
-        </div>
-
-        <div className="grid gap-3">
-          <Label>{tr("history.order.label")}</Label>
-          <Select
-            value={setup.historyOrder}
-            onValueChange={(value) => onHistoryOrderChange(value as HistoryOrder)}
-            disabled={setupLocked}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asc">{tr("history.order.oldest")}</SelectItem>
-              <SelectItem value="desc">{tr("history.order.newest")}</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">{tr("history.order.hint")}</p>
-        </div>
+        </section>
       </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <LabeledField label={tr("session.timer")} htmlFor="timer-min">
-          <Input
-            id="timer-min"
-            type="number"
-            min={0}
-            value={setup.timerMinutes ?? ""}
-            placeholder="∞"
-            onChange={(event) => onTimerMinutesChange(parseOptionalLimitFromInput(event.target.value))}
-            onBlur={() => onTimerMinutesChange(normalizeOptionalLimit(setup.timerMinutes))}
-            disabled={setupLocked}
-          />
-          <p className="text-xs text-muted-foreground">{tr("session.timerHint")}</p>
-        </LabeledField>
-        <LabeledField label={tr("session.maxExercises")} htmlFor="max-exercises">
-          <Input
-            id="max-exercises"
-            type="number"
-            min={0}
-            value={setup.maxExercises ?? ""}
-            placeholder="∞"
-            onChange={(event) => onMaxExercisesChange(parseOptionalLimitFromInput(event.target.value))}
-            onBlur={() => onMaxExercisesChange(normalizeOptionalLimit(setup.maxExercises))}
-            disabled={setupLocked}
-          />
-          <p className="text-xs text-muted-foreground">{tr("session.maxExercisesHint")}</p>
-        </LabeledField>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <ToggleRow
-          id="feedback-sound"
-          label={tr("feedback.sound")}
-          description={tr("feedback.soundDesc")}
-          checked={setup.enableSound}
-          onChange={onEnableSoundChange}
-        />
-        <ToggleRow
-          id="feedback-vibration"
-          label={tr("feedback.vibration")}
-          description={tr("feedback.vibrationDesc")}
-          checked={setup.enableVibration}
-          onChange={onEnableVibrationChange}
-        />
-      </div>
-
-      <NotificationBanner variant="muted" className="mt-6">
-        {tr("telemetry.note")}
-      </NotificationBanner>
 
       <LoginSuggestionSlot placement="compare_numbers_setup_footer" />
       <UpgradeSuggestionSlot placement="compare_numbers_setup_footer" />
 
-      <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2">
-        <Button onClick={() => onStartSession()} disabled={!canStart || setupLocked} className="w-full sm:w-auto">
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:justify-end">
+        <Button onClick={() => onStartSession()} disabled={!canStart || setupLocked} className="h-10 w-full sm:w-auto">
           {tr("setup.start")}
         </Button>
-        <Button asChild variant="outline" className="w-full sm:w-auto">
-          <Link to="/">{tr("actions.toMenu")}</Link>
+        <Button asChild variant="outline" className="h-10 w-full sm:w-auto">
+          <Link to="/">{t("menu.mainMenuLabel")}</Link>
         </Button>
       </div>
     </div>

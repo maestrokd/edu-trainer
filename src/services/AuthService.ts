@@ -48,11 +48,15 @@ export const useLoginWithTelegram = async (initData: string): Promise<void> => {
 };
 
 export const logout = async (): Promise<void> => {
-  await post("/auth/logout");
+  await post("/auth/session/logout");
 };
 
 export const logoutTelegram = async (initData: string): Promise<void> => {
-  await post("/auth/logout/telegram", {
+  await post("/auth/session/logout/telegram", {
     initData,
   });
+};
+
+export const logoutAll = async (): Promise<void> => {
+  await post("/auth/session/logout/all");
 };
