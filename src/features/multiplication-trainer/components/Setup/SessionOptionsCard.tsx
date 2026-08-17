@@ -1,52 +1,63 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { LabeledField } from "@/components/ui/labeled-field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SetupHint } from "@/components/ui/setup-hint";
+import type { Mode } from "../../model/trainer.types";
 
 interface SessionOptionsCardProps {
-  includeMul: boolean;
-  includeDiv: boolean;
+  mode: Mode;
   timerMinutes: number;
   maxExercises: number;
-  onMulChange: (val: boolean) => void;
-  onDivChange: (val: boolean) => void;
+  onModeChange: (val: Mode) => void;
   onTimerChange: (val: number) => void;
   onMaxExercisesChange: (val: number) => void;
   labels: {
-    mul: string;
-    div: string;
+    mode: string;
+    modeQuiz: string;
+    modeInput: string;
     timer: string;
+    timerHint: string;
     maxExercises: string;
+    maxExercisesHint: string;
+    ariaMode: string;
+    ariaTimer: string;
+    ariaMaxExercises: string;
+    moreInfo: (field: string) => string;
   };
 }
 
 export function SessionOptionsCard({
-  includeMul,
-  includeDiv,
+  mode,
   timerMinutes,
   maxExercises,
-  onMulChange,
-  onDivChange,
+  onModeChange,
   onTimerChange,
   onMaxExercisesChange,
   labels,
 }: SessionOptionsCardProps) {
   return (
-    <Card>
-      <CardContent className="p-4 sm:p-6 grid gap-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="inline-flex items-center gap-2">
-            <Checkbox id="mul-check" checked={includeMul} onCheckedChange={(v) => onMulChange(Boolean(v))} />
-            <Label htmlFor="mul-check">{labels.mul}</Label>
-          </div>
-          <div className="inline-flex items-center gap-2">
-            <Checkbox id="div-check" checked={includeDiv} onCheckedChange={(v) => onDivChange(Boolean(v))} />
-            <Label htmlFor="div-check">{labels.div}</Label>
-          </div>
-        </div>
+    <section
+      className="grid gap-3 border-t pt-4 sm:gap-4 md:border-t-0 md:border-l md:pt-0 md:pl-6"
+      aria-label={labels.mode}
+    >
+      <LabeledField label={labels.mode} htmlFor="mode-select">
+        <Select value={mode} onValueChange={(value) => onModeChange(value as Mode)}>
+          <SelectTrigger id="mode-select" className="h-9 w-full rounded-xl sm:h-10" aria-label={labels.ariaMode}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="quiz">{labels.modeQuiz}</SelectItem>
+            <SelectItem value="input">{labels.modeInput}</SelectItem>
+          </SelectContent>
+        </Select>
+      </LabeledField>
 
-        <LabeledField label={labels.timer} htmlFor="timer-min">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <LabeledField
+          label={labels.timer}
+          htmlFor="timer-min"
+          labelAction={<SetupHint ariaLabel={labels.moreInfo(labels.timer)}>{labels.timerHint}</SetupHint>}
+        >
           <NumericInput
             id="timer-min"
             value={timerMinutes}
@@ -54,11 +65,18 @@ export function SessionOptionsCard({
             min={0}
             fallbackValue={0}
             showInfinityWhenZero
+            aria-label={labels.ariaTimer}
             className="rounded-xl"
           />
         </LabeledField>
 
-        <LabeledField label={labels.maxExercises} htmlFor="max-ex">
+        <LabeledField
+          label={labels.maxExercises}
+          htmlFor="max-ex"
+          labelAction={
+            <SetupHint ariaLabel={labels.moreInfo(labels.maxExercises)}>{labels.maxExercisesHint}</SetupHint>
+          }
+        >
           <NumericInput
             id="max-ex"
             value={maxExercises}
@@ -66,10 +84,11 @@ export function SessionOptionsCard({
             min={0}
             fallbackValue={0}
             showInfinityWhenZero
+            aria-label={labels.ariaMaxExercises}
             className="rounded-xl"
           />
         </LabeledField>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -114,6 +114,53 @@
       "desc": "Organize chores, routines, and rewards for the whole family."
     }
   },
+  "rabbitGame": {
+    "title": "Jumping Rabbit",
+    "score": "Score: {{score}}",
+    "setup": {
+      "label": "Game setup",
+      "description": "Tap, click, or press Space to jump over flowers. If the rabbit hits one, solve multiplication questions to continue.",
+      "range": "Factor range",
+      "rangeHint": "The range is automatically ordered and limited to 2–12.",
+      "min": "Minimum",
+      "max": "Maximum",
+      "questions": "Questions after a hit",
+      "questionsHint": "Choose how many multiplication questions to answer after each collision.",
+      "askQuiz": "Ask a multiplication quiz after a hit",
+      "effects": "Sound and vibration effects",
+      "start": "Start game"
+    },
+    "menu": {
+      "title": "Game menu",
+      "resume": "Resume game",
+      "newGame": "New game",
+      "changeSettings": "Change settings"
+    },
+    "messages": {
+      "speedUp": "Speed up! 🚀",
+      "finishAhead": "Finish ahead! 🏁",
+      "ouch": "Ouch! Keep hopping.",
+      "tryAgain": "Try again! ✏️"
+    },
+    "quiz": {
+      "progress": "Question {{current}} of {{total}}",
+      "tip": "Choose the correct answer to keep hopping.",
+      "answerAria": "Answer {{answer}}"
+    },
+    "result": {
+      "title": "You finished! 🏁",
+      "finalScore": "Final score: {{score}}",
+      "playAgain": "Play again"
+    },
+    "aria": {
+      "menu": "Open game menu",
+      "canvas": "Jumping Rabbit game. Tap, click, or press Space to jump.",
+      "minFactor": "Minimum multiplication factor",
+      "maxFactor": "Maximum multiplication factor",
+      "questions": "Number of questions after a hit",
+      "backToMenu": "Back to main menu"
+    }
+  },
   "multiT": {
     "menu": "Menu",
     "title": "Multiplication Trainer",
@@ -135,21 +182,25 @@
       "correct": "Correct",
       "wrong": "Incorrect",
       "timerMinutes": "Timer minutes",
-      "maxExercises": "Maximum exercises"
+      "maxExercises": "Maximum exercises",
+      "moreInfo": "More information about {{field}}"
     },
     "setup": {
       "intro": "Choose the range of factors (min and max), e.g.",
+      "range": "Factor range",
+      "rangeHint": "The range will be automatically ordered (min ≤ max) and limited to 2…12.",
       "min": "Minimum",
       "max": "Maximum",
       "mode": "Mode",
       "exercises": "Exercises",
       "timer": "Timer (minutes)",
-      "maxExercises": "Max exercises (0 = unlimited)",
-      "note": "The range will be automatically ordered (min ≤ max) and limited to 2…12."
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited number of exercises."
     },
     "mode": {
       "input": "Keyboard input",
-      "quiz": "Quiz (4 options)"
+      "quiz": "Quiz"
     },
     "ex": {
       "mul": "Multiplication",
@@ -196,15 +247,21 @@
     "aria": {
       "backToMenu": "Back to Menu",
       "correct": "correct",
-      "wrong": "wrong"
+      "wrong": "wrong",
+      "timerMinutes": "Timer minutes",
+      "maxExercises": "Maximum exercises",
+      "moreInfo": "More information about {{field}}"
     },
     "setup": {
       "label": "Settings",
       "intro": "Choose what kind of numbers and places to practice.",
       "mode": "Mode",
-      "timer": "Timer (minutes, 0 = unlimited)",
-      "maxExercises": "Max exercises (0 = unlimited)",
+      "timer": "Timer (minutes)",
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited number of exercises.",
       "numberTypes": "Number types",
+      "filtersHint": "If no number types or signs are selected, all options in that group are included.",
       "whole": "Whole numbers",
       "decimals": "Decimals",
       "decimalPlaces": "Decimal places",
@@ -218,11 +275,13 @@
       "maxDigits": "Max digits",
       "minValue": "Min value",
       "maxValue": "Max value",
-      "targets": "Round to (multi-select)",
-      "sounds": "Enable sounds",
-      "includeTie": "Guarantee at least one tie-case (5) per session",
-      "showHint": "Show place-value hint under the prompt",
-      "note": "Tip: leave filters empty to include everything."
+      "targets": "Round to",
+      "sounds": "Sound feedback",
+      "roundingOptions": "Rounding options",
+      "includeTie": "Include tie cases",
+      "includeTieHint": "Guarantee at least one tie case ending in 5 per session.",
+      "showHint": "Show place-value hints",
+      "showHintHint": "Show a place-value hint under the exercise."
     },
     "mode": {
       "input": "Input",
@@ -294,7 +353,8 @@
       "addition": "Addition",
       "subtraction": "Subtraction",
       "oneRequired": "Select at least one operation.",
-      "range": "Number range",
+      "range": "Exercise range",
+      "rangeHint": "Addition sums and the first (larger) number in subtraction stay within this range.",
       "min": "Minimum",
       "max": "Maximum",
       "answerMode": "Answer mode",
@@ -303,11 +363,11 @@
       "timerHint": "Leave empty for unlimited session time.",
       "maxExercises": "Max exercises",
       "maxExercisesHint": "Leave empty for unlimited number of questions.",
-      "sounds": "Sounds",
+      "sounds": "Sound feedback",
       "soundsHint": "Voice feedback for answers"
     },
     "mode": {
-      "quiz": "Multiple choice",
+      "quiz": "Quiz",
       "input": "Manual input",
       "result": "Type the result",
       "missing": "Find the missing number"
@@ -361,6 +421,7 @@
       "timer": "Timer minutes",
       "maxExercises": "Maximum exercises",
       "sounds": "Enable sounds",
+      "moreInfo": "More information about {{field}}",
       "answerField": "Answer input field"
     }
   },
@@ -369,7 +430,8 @@
     "title": "Compare Numbers Trainer",
     "aria": {
       "backToMenu": "Back to menu",
-      "openMenu": "Open quick menu"
+      "openMenu": "Open quick menu",
+      "moreInfo": "More information about {{field}}"
     },
     "menuLabel": "Compare numbers menu",
     "actions": {
@@ -474,9 +536,9 @@
     },
     "session": {
       "timer": "Timer (minutes)",
-      "timerHint": "0 disables the timer.",
-      "maxExercises": "Max exercises (0 = unlimited)",
-      "maxExercisesHint": "Stop automatically after this many comparisons."
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for unlimited comparisons."
     },
     "feedback": {
       "sound": "Sound feedback",
@@ -485,9 +547,6 @@
       "vibrationDesc": "Vibrate on supported devices.",
       "correct": "Great! That comparison is correct.",
       "wrong": "You chose {{user}}, correct was {{correct}}."
-    },
-    "telemetry": {
-      "note": "Future telemetry could track streaks, average time per comparison, and most difficult number types."
     },
     "errors": {
       "unavailable": "Enable at least one valid number type to start."

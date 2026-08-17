@@ -23,19 +23,31 @@ interface MultiplicationTrainerSetupScreenProps {
   onStartClick: () => void;
   labels: {
     introText: React.ReactNode;
+    range: string;
+    rangeHint: string;
     min: string;
     max: string;
     mode: string;
     modeQuiz: string;
     modeInput: string;
+    exercises: string;
     mul: string;
     div: string;
     timer: string;
+    timerHint: string;
     maxExercises: string;
+    maxExercisesHint: string;
     start: string;
     menu: string;
-    note: string;
     ariaBackToMenu: string;
+    ariaMin: string;
+    ariaMax: string;
+    ariaMode: string;
+    ariaMul: string;
+    ariaDiv: string;
+    ariaTimer: string;
+    ariaMaxExercises: string;
+    moreInfo: (field: string) => string;
   };
   isInteractable: boolean;
 }
@@ -60,56 +72,68 @@ export function MultiplicationTrainerSetupScreen({
   isInteractable,
 }: MultiplicationTrainerSetupScreenProps) {
   return (
-    <div className="bg-muted/50 backdrop-blur rounded-2xl shadow-lg p-5 sm:p-8 max-w-4xl mx-auto w-full">
-      <p className="text-muted-foreground mb-4">{labels.introText}</p>
+    <div className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col overflow-y-auto sm:rounded-2xl sm:bg-muted/50 sm:p-5 sm:shadow-lg sm:backdrop-blur md:p-8">
+      <p className="hidden text-sm text-muted-foreground sm:block">{labels.introText}</p>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:mt-5 md:grid-cols-2 md:gap-0">
         <RangeSettingsCard
           minVal={minVal}
           maxVal={maxVal}
-          mode={mode}
+          includeMul={includeMul}
+          includeDiv={includeDiv}
           onMinChange={onMinChange}
           onMaxChange={onMaxChange}
-          onModeChange={onModeChange}
+          onMulChange={onMulChange}
+          onDivChange={onDivChange}
           labels={{
+            range: labels.range,
+            rangeHint: labels.rangeHint,
             min: labels.min,
             max: labels.max,
-            mode: labels.mode,
-            modeQuiz: labels.modeQuiz,
-            modeInput: labels.modeInput,
+            exercises: labels.exercises,
+            mul: labels.mul,
+            div: labels.div,
+            ariaMin: labels.ariaMin,
+            ariaMax: labels.ariaMax,
+            ariaMul: labels.ariaMul,
+            ariaDiv: labels.ariaDiv,
+            moreInfo: labels.moreInfo,
           }}
         />
 
         <SessionOptionsCard
-          includeMul={includeMul}
-          includeDiv={includeDiv}
+          mode={mode}
           timerMinutes={timerMinutes}
           maxExercises={maxExercises}
-          onMulChange={onMulChange}
-          onDivChange={onDivChange}
+          onModeChange={onModeChange}
           onTimerChange={onTimerChange}
           onMaxExercisesChange={onMaxExercisesChange}
           labels={{
-            mul: labels.mul,
-            div: labels.div,
+            mode: labels.mode,
+            modeQuiz: labels.modeQuiz,
+            modeInput: labels.modeInput,
             timer: labels.timer,
+            timerHint: labels.timerHint,
             maxExercises: labels.maxExercises,
+            maxExercisesHint: labels.maxExercisesHint,
+            ariaMode: labels.ariaMode,
+            ariaTimer: labels.ariaTimer,
+            ariaMaxExercises: labels.ariaMaxExercises,
+            moreInfo: labels.moreInfo,
           }}
         />
       </div>
 
-      <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2">
-        <Button onClick={onStartClick} className="w-full sm:w-auto" disabled={!isInteractable}>
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:justify-end">
+        <Button onClick={onStartClick} className="h-10 w-full sm:w-auto" disabled={!isInteractable}>
           {labels.start}
         </Button>
-        <Button asChild variant="outline" className="w-full sm:w-auto">
+        <Button asChild variant="outline" className="h-10 w-full sm:w-auto">
           <Link to="/" aria-label={labels.ariaBackToMenu}>
             {labels.menu}
           </Link>
         </Button>
       </div>
-
-      <p className="text-xs text-muted-foreground mt-3">{labels.note}</p>
     </div>
   );
 }
