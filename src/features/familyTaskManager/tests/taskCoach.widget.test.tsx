@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TaskCoachWidget } from "../components/taskCoach/TaskCoachWidget";
 import { taskCoachApi } from "../api/taskCoachApi";
@@ -215,6 +215,37 @@ describe("TaskCoachWidget", () => {
     expect(screen.getByRole("radio", { name: /Second Kid/ })).toHaveAttribute("aria-checked", "true");
   });
 
+  it("shows a long child picker as a bounded vertical list and closes it after selection", () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    const children = Array.from({ length: 12 }, (_, index) => ({
+      ...child,
+      profileUuid: `child-${index + 1}`,
+      memberUuid: `member-${index + 1}`,
+      displayName: `Kid ${index + 1}`,
+    }));
+
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={children}
+        profileFilter={children.map((profile) => profile.profileUuid)}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+
+    const selector = screen.getByRole("radiogroup", { name: "Choose a child for Task Coach" });
+    const choices = within(selector).getAllByRole("radio");
+    expect(choices).toHaveLength(12);
+    expect(choices[0]).toHaveClass("w-full", "justify-start");
+    expect(choices[0].parentElement).toHaveClass("max-h-[min(18rem,40vh)]", "overflow-y-auto", "overscroll-contain");
+
+    fireEvent.click(within(selector).getByRole("radio", { name: /Kid 12/ }));
+    expect(screen.queryByRole("radiogroup", { name: "Choose a child for Task Coach" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose or change child" })).toHaveTextContent("🧒");
+  });
+
   it("can disable automatic calls while preserving explicit cat refresh", async () => {
     localStorage.setItem("family-task-coach:preferences:auto-request", "false");
     localStorage.setItem("family-task-coach:preferences:autoplay", "false");
@@ -293,6 +324,106 @@ describe("TaskCoachWidget", () => {
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     fireEvent.click(screen.getByRole("button", { name: "Show latest response" }));
     expect(screen.getByText("Start with your book.")).toBeVisible();
+  });
+
+  it("minimizes to a restore button, preserves settled advice, and defaults to visible after remount", async () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    const onVisibilityChange = vi.fn();
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValue(advice);
+    const { unmount } = render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+        onVisibilityChange={onVisibilityChange}
+      />
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Ask the cat for fresh advice" }));
+    expect(await screen.findByText("Start with your book.")).toBeVisible();
+
+    const actionRail = document.querySelector('[data-slot="task-coach-actions"]');
+    expect(actionRail).toHaveClass("bottom-0", "right-0", "flex-col");
+    expect(
+      within(actionRail as HTMLElement)
+        .getAllByRole("button")
+        .map((button) => button.getAttribute("aria-label"))
+    ).toEqual(["Hide latest response", "Choose or change child", "Task Coach settings", "Hide Task Coach"]);
+    expect(document.querySelectorAll('[data-slot="task-coach-actions"]')).toHaveLength(1);
+
+    const visibilityToggle = screen.getByRole("button", { name: "Hide Task Coach" });
+    fireEvent.click(visibilityToggle);
+    expect(onVisibilityChange).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByTestId("task-coach-character")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Task Coach settings" })).not.toBeInTheDocument();
+    const restoreToggle = screen.getByRole("button", { name: "Show Task Coach" });
+    expect(restoreToggle).toBeVisible();
+    expect(restoreToggle).toBe(visibilityToggle);
+    expect(document.querySelector('[data-slot="task-coach-actions"]')).toBe(actionRail);
+    expect(within(actionRail as HTMLElement).getAllByRole("button")).toEqual([restoreToggle]);
+
+    fireEvent.click(restoreToggle);
+    expect(onVisibilityChange).toHaveBeenLastCalledWith(true);
+    expect(screen.getByTestId("task-coach-character")).toBeVisible();
+    expect(screen.queryByText("Start with your book.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show latest response" }));
+    expect(screen.getByText("Start with your book.")).toBeVisible();
+    expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide Task Coach" }));
+    unmount();
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId("task-coach-character")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Show Task Coach" })).not.toBeInTheDocument();
+  });
+
+  it("discards in-flight advice while hidden and retries only after the coach is restored", async () => {
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    const firstRequest = deferred<TaskCoachAdviceDto>();
+    const retryRequest = deferred<TaskCoachAdviceDto>();
+    vi.mocked(taskCoachApi.getAdvice)
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(retryRequest.promise);
+
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "Hide Task Coach" }));
+    await act(async () => {
+      firstRequest.resolve({ ...advice, displayText: "Hidden stale advice." });
+    });
+    expect(screen.queryByText("Hidden stale advice.")).not.toBeInTheDocument();
+    expect(taskCoachApi.synthesizeSpeech).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Show Task Coach" }));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      retryRequest.resolve({ ...advice, displayText: "Fresh restored advice." });
+    });
+    expect(await screen.findByText("Fresh restored advice.")).toBeVisible();
+    expect(taskCoachApi.synthesizeSpeech).not.toHaveBeenCalled();
   });
 
   it("turns a successful task event into a transient character celebration", () => {

@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, MessageCircle, RefreshCw, Settings2, Sparkles, Users, Volume2 } from "lucide-react";
+import {
+  Check,
+  Eye,
+  EyeOff,
+  Loader2,
+  MessageCircle,
+  RefreshCw,
+  Settings2,
+  Sparkles,
+  Users,
+  Volume2,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import AudioPlayerBubble from "@/components/english-coach/AudioPlayerBubble";
 import { Button } from "@/components/ui/button";
@@ -44,6 +55,7 @@ interface TaskCoachWidgetProps {
   ownProfileUuid: string | null;
   successEvent?: TaskCoachSuccessEvent | null;
   onRecommendation: (taskUuid: string | null) => void;
+  onVisibilityChange?: (visible: boolean) => void;
 }
 
 const SUCCESS_DURATION_MS = 2_500;
@@ -56,11 +68,13 @@ export function TaskCoachWidget({
   ownProfileUuid,
   successEvent,
   onRecommendation,
+  onVisibilityChange,
 }: TaskCoachWidgetProps) {
   const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [childSelectorOpen, setChildSelectorOpen] = useState(false);
   const [responseOpen, setResponseOpen] = useState(false);
+  const [coachVisible, setCoachVisible] = useState(true);
   const [selectedProfileUuid, setSelectedProfileUuid] = useState<string | null>(null);
   const [advice, setAdvice] = useState<TaskCoachAdviceDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -174,6 +188,10 @@ export function TaskCoachWidget({
   }, [automaticProfileUuid, resetCoachResult, selectableProfiles, selectedProfileUuid]);
 
   useEffect(() => {
+    if (!coachVisible) {
+      return;
+    }
+
     if (selectableProfiles.length === 0) {
       setChildSelectorOpen(false);
       setResponseOpen(true);
@@ -184,7 +202,7 @@ export function TaskCoachWidget({
       setChildSelectorOpen(true);
       setResponseOpen(false);
     }
-  }, [automaticProfileUuid, isToday, selectableProfiles.length, selectedProfileUuid]);
+  }, [automaticProfileUuid, coachVisible, isToday, selectableProfiles.length, selectedProfileUuid]);
 
   useEffect(() => {
     if (isToday) {
@@ -276,6 +294,9 @@ export function TaskCoachWidget({
   );
 
   useEffect(() => {
+    if (!coachVisible) {
+      return;
+    }
     if (!isToday) {
       lastAutoRequestProfileRef.current = null;
       return;
@@ -294,7 +315,7 @@ export function TaskCoachWidget({
 
     lastAutoRequestProfileRef.current = selectedProfileUuid;
     void requestAdvice(selectedProfileUuid);
-  }, [autoRequestAdvice, isToday, requestAdvice, selectedProfileUuid]);
+  }, [autoRequestAdvice, coachVisible, isToday, requestAdvice, selectedProfileUuid]);
 
   useEffect(() => {
     if (successEvent && isToday) {
@@ -383,6 +404,33 @@ export function TaskCoachWidget({
     saveTaskCoachCharacter(characterId);
   };
 
+  const hideCoach = () => {
+    const adviceWasLoading = loading;
+    adviceRequestIdRef.current += 1;
+    speechRequestIdRef.current += 1;
+    if (adviceWasLoading) {
+      lastAutoRequestProfileRef.current = null;
+    }
+    setLoading(false);
+    setAudioLoading(false);
+    setSpeaking(false);
+    setInteracting(false);
+    setAutoPlayLoadedAudio(false);
+    setResponseOpen(false);
+    setChildSelectorOpen(false);
+    setSettingsOpen(false);
+    setCoachVisible(false);
+    onVisibilityChange?.(false);
+  };
+
+  const showCoach = () => {
+    setCoachVisible(true);
+    onVisibilityChange?.(true);
+    if (advice && autoplay && !audioUrl && !audioLoading) {
+      void requestSpeech(advice, false);
+    }
+  };
+
   const characterState: AssistantCharacterState = !isToday
     ? "SLEEPING"
     : loading
@@ -417,10 +465,13 @@ export function TaskCoachWidget({
   const responseToggleLabel = responseOpen
     ? t("familyTask.taskCoach.hideResponse", "Hide latest response")
     : t("familyTask.taskCoach.showResponse", "Show latest response");
+  const visibilityToggleLabel = coachVisible
+    ? t("familyTask.taskCoach.hideCoach", "Hide Task Coach")
+    : t("familyTask.taskCoach.showCoach", "Show Task Coach");
 
   return (
     <div className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 flex w-[min(22rem,calc(100vw-2rem))] flex-col items-end gap-2">
-      {responseOpen ? (
+      {coachVisible && responseOpen ? (
         <div
           id="task-coach-response"
           className="pointer-events-auto w-full rounded-2xl border border-border/80 bg-card/95 p-3 shadow-xl backdrop-blur"
@@ -501,7 +552,7 @@ export function TaskCoachWidget({
         </div>
       ) : null}
 
-      {childSelectorOpen && selectableProfiles.length > 0 ? (
+      {coachVisible && childSelectorOpen && selectableProfiles.length > 0 ? (
         <div
           id="task-coach-child-selector"
           className="pointer-events-auto w-full rounded-2xl border bg-card/95 p-2 shadow-lg backdrop-blur"
@@ -511,7 +562,7 @@ export function TaskCoachWidget({
           <p className="px-1 pb-1.5 text-xs font-medium text-muted-foreground">
             {t("familyTask.taskCoach.chooseChild", "Who would like coaching?")}
           </p>
-          <div className="flex max-w-full gap-1.5 overflow-x-auto">
+          <div className="max-h-[min(18rem,40vh)] space-y-1 overflow-y-auto overscroll-contain pr-1">
             {selectableProfiles.map((profile) => {
               const selected = profile.profileUuid === selectedProfileUuid;
               return (
@@ -523,11 +574,12 @@ export function TaskCoachWidget({
                   variant={selected ? "default" : "ghost"}
                   size="sm"
                   disabled={!isToday}
-                  className="shrink-0 rounded-full px-2.5"
+                  className="w-full justify-start rounded-xl px-3"
                   onClick={() => handleProfileChange(profile.profileUuid)}
                 >
                   <span aria-hidden="true">{profile.avatarEmoji ?? "🧒"}</span>
-                  <span className="max-w-24 truncate">{profile.displayName}</span>
+                  <span className="min-w-0 flex-1 truncate text-left">{profile.displayName}</span>
+                  {selected ? <Check className="ml-auto size-4" aria-hidden="true" /> : null}
                 </Button>
               );
             })}
@@ -535,201 +587,226 @@ export function TaskCoachWidget({
         </div>
       ) : null}
 
-      <div className="pointer-events-auto relative mr-1">
-        <div className="absolute right-0 top-0 z-10 flex flex-col gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant={responseOpen ? "default" : "secondary"}
-            className="relative size-9 rounded-full shadow-md"
-            aria-label={responseToggleLabel}
-            title={responseToggleLabel}
-            aria-expanded={responseOpen}
-            aria-controls="task-coach-response"
-            onClick={handleResponseToggle}
-          >
-            <MessageCircle className="size-4" />
-            {showBubble && !responseOpen ? (
-              <span
-                className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-card bg-primary"
-                aria-hidden="true"
-              />
-            ) : null}
-          </Button>
-
-          {selectableProfiles.length > 0 ? (
-            <Button
-              type="button"
-              size="icon"
-              variant={childSelectorOpen ? "default" : "secondary"}
-              className="size-9 rounded-full shadow-md"
-              aria-label={childSelectorLabel}
-              title={childSelectorLabel}
-              aria-expanded={childSelectorOpen}
-              aria-controls="task-coach-child-selector"
-              onClick={handleChildSelectorToggle}
-            >
-              {selectedProfile ? (
-                <span className="text-base leading-none" aria-hidden="true">
-                  {selectedProfile.avatarEmoji ?? "🧒"}
-                </span>
-              ) : (
-                <Users className="size-4" />
-              )}
-            </Button>
-          ) : null}
-
-          <Dialog open={settingsOpen} onOpenChange={handleSettingsOpenChange}>
-            <DialogTrigger asChild>
+      <div className={coachVisible ? "relative h-[10.5rem] w-28 sm:w-32" : "relative size-9"}>
+        <div
+          data-slot="task-coach-actions"
+          className="pointer-events-auto absolute bottom-0 right-0 z-10 flex flex-col gap-2"
+        >
+          {coachVisible ? (
+            <>
               <Button
                 type="button"
                 size="icon"
-                variant="secondary"
-                className="size-9 rounded-full shadow-md"
-                aria-label={t("familyTask.taskCoach.settings", "Task Coach settings")}
-                title={t("familyTask.taskCoach.settings", "Task Coach settings")}
+                variant={responseOpen ? "default" : "secondary"}
+                className="relative size-9 rounded-full shadow-md"
+                aria-label={responseToggleLabel}
+                title={responseToggleLabel}
+                aria-expanded={responseOpen}
+                aria-controls="task-coach-response"
+                onClick={handleResponseToggle}
               >
-                <Settings2 className="size-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Sparkles className="size-5 text-primary" />
-                  {t("familyTask.taskCoach.settings", "Task Coach settings")}
-                </DialogTitle>
-                <DialogDescription>
-                  {t(
-                    "familyTask.taskCoach.settingsDescription",
-                    "Choose your character and when advice and voice are generated."
-                  )}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-3">
-                <div className="space-y-2 rounded-xl border bg-muted/35 px-3 py-2">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="task-coach-character">{t("familyTask.taskCoach.character", "Character")}</Label>
-                    <p className="text-xs text-muted-foreground">
-                      {t(
-                        "familyTask.taskCoach.characterHint",
-                        "Choose the character that stays with you on the task calendar."
-                      )}
-                    </p>
-                  </div>
-                  <Select
-                    value={selectedCharacterId}
-                    onValueChange={(value) => handleCharacterChange(value as TaskCoachCharacterId)}
-                  >
-                    <SelectTrigger id="task-coach-character" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TASK_COACH_CHARACTER_IDS.map((characterId) => {
-                        const character = getTaskCoachCharacter(characterId);
-                        return (
-                          <SelectItem key={characterId} value={characterId}>
-                            {t(character.nameTranslationKey, character.nameFallback)}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/35 px-3 py-2">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="task-coach-auto-request" className="cursor-pointer">
-                      {t("familyTask.taskCoach.autoRequest", "Automatically get advice")}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {t(
-                        "familyTask.taskCoach.autoRequestHint",
-                        "Runs once when Task Coach activates or you change children. The cat always supports manual refresh."
-                      )}
-                    </p>
-                  </div>
-                  <Switch
-                    id="task-coach-auto-request"
-                    checked={autoRequestAdvice}
-                    onCheckedChange={handleAutoRequestChange}
+                <MessageCircle className="size-4" />
+                {showBubble && !responseOpen ? (
+                  <span
+                    className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-card bg-primary"
+                    aria-hidden="true"
                   />
-                </div>
+                ) : null}
+              </Button>
 
-                <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/35 px-3 py-2">
-                  <Label htmlFor="task-coach-autoplay" className="cursor-pointer">
-                    {t("familyTask.taskCoach.autoplay", "Play voice automatically")}
-                  </Label>
-                  <Switch id="task-coach-autoplay" checked={autoplay} onCheckedChange={handleAutoplayChange} />
-                </div>
-              </div>
+              {selectableProfiles.length > 0 ? (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={childSelectorOpen ? "default" : "secondary"}
+                  className="size-9 rounded-full shadow-md"
+                  aria-label={childSelectorLabel}
+                  title={childSelectorLabel}
+                  aria-expanded={childSelectorOpen}
+                  aria-controls="task-coach-child-selector"
+                  onClick={handleChildSelectorToggle}
+                >
+                  {selectedProfile ? (
+                    <span className="text-base leading-none" aria-hidden="true">
+                      {selectedProfile.avatarEmoji ?? "🧒"}
+                    </span>
+                  ) : (
+                    <Users className="size-4" />
+                  )}
+                </Button>
+              ) : null}
 
-              <div className="space-y-1.5 rounded-xl border px-3 py-2 text-xs text-muted-foreground">
-                <p className="font-medium text-foreground">
-                  {t("familyTask.taskCoach.characterCredit", "Character credit")}
-                </p>
-                <p>{selectedCharacter.attribution.title}</p>
-                <p>
-                  {t("familyTask.taskCoach.createdBy", "Created by")} {selectedCharacter.attribution.creator}
-                </p>
-                <p>
-                  <a
-                    className="underline"
-                    href={selectedCharacter.attribution.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
+              <Dialog open={settingsOpen} onOpenChange={handleSettingsOpenChange}>
+                <DialogTrigger asChild>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="size-9 rounded-full shadow-md"
+                    aria-label={t("familyTask.taskCoach.settings", "Task Coach settings")}
+                    title={t("familyTask.taskCoach.settings", "Task Coach settings")}
                   >
-                    {t("familyTask.taskCoach.marketplaceSource", "Character listing on the Rive Marketplace")}
-                  </a>
-                </p>
-                {selectedCharacter.attribution.remix ? (
-                  <>
+                    <Settings2 className="size-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Sparkles className="size-5 text-primary" />
+                      {t("familyTask.taskCoach.settings", "Task Coach settings")}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {t(
+                        "familyTask.taskCoach.settingsDescription",
+                        "Choose your character and when advice and voice are generated."
+                      )}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2 rounded-xl border bg-muted/35 px-3 py-2">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="task-coach-character">{t("familyTask.taskCoach.character", "Character")}</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            "familyTask.taskCoach.characterHint",
+                            "Choose the character that stays with you on the task calendar."
+                          )}
+                        </p>
+                      </div>
+                      <Select
+                        value={selectedCharacterId}
+                        onValueChange={(value) => handleCharacterChange(value as TaskCoachCharacterId)}
+                      >
+                        <SelectTrigger id="task-coach-character" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TASK_COACH_CHARACTER_IDS.map((characterId) => {
+                            const character = getTaskCoachCharacter(characterId);
+                            return (
+                              <SelectItem key={characterId} value={characterId}>
+                                {t(character.nameTranslationKey, character.nameFallback)}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/35 px-3 py-2">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="task-coach-auto-request" className="cursor-pointer">
+                          {t("familyTask.taskCoach.autoRequest", "Automatically get advice")}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            "familyTask.taskCoach.autoRequestHint",
+                            "Runs once when Task Coach activates or you change children. The cat always supports manual refresh."
+                          )}
+                        </p>
+                      </div>
+                      <Switch
+                        id="task-coach-auto-request"
+                        checked={autoRequestAdvice}
+                        onCheckedChange={handleAutoRequestChange}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/35 px-3 py-2">
+                      <Label htmlFor="task-coach-autoplay" className="cursor-pointer">
+                        {t("familyTask.taskCoach.autoplay", "Play voice automatically")}
+                      </Label>
+                      <Switch id="task-coach-autoplay" checked={autoplay} onCheckedChange={handleAutoplayChange} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 rounded-xl border px-3 py-2 text-xs text-muted-foreground">
+                    <p className="font-medium text-foreground">
+                      {t("familyTask.taskCoach.characterCredit", "Character credit")}
+                    </p>
+                    <p>{selectedCharacter.attribution.title}</p>
                     <p>
-                      {t("familyTask.taskCoach.remixOf", "Remix of")} {selectedCharacter.attribution.remix.title}{" "}
-                      {t("familyTask.taskCoach.byCreator", "by")} {selectedCharacter.attribution.remix.creator}
+                      {t("familyTask.taskCoach.createdBy", "Created by")} {selectedCharacter.attribution.creator}
                     </p>
                     <p>
                       <a
                         className="underline"
-                        href={selectedCharacter.attribution.remix.sourceUrl}
+                        href={selectedCharacter.attribution.sourceUrl}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {t("familyTask.taskCoach.remixSource", "Original character source")}
+                        {t("familyTask.taskCoach.marketplaceSource", "Character listing on the Rive Marketplace")}
                       </a>
                     </p>
-                  </>
-                ) : null}
-                <p>
-                  <a className="underline" href={TASK_COACH_CHARACTER_LICENSE_URL} target="_blank" rel="noreferrer">
-                    {t(
-                      "familyTask.taskCoach.characterLicense",
-                      "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)"
-                    )}
-                  </a>
-                </p>
-                <p>{t("familyTask.taskCoach.characterAdapted", "Adapted for use in Kids Task Calendar.")}</p>
-                <p>
-                  {t("familyTask.taskCoach.noEndorsement", "The character creators do not endorse Kids Task Calendar.")}
-                </p>
-              </div>
-            </DialogContent>
-          </Dialog>
+                    {selectedCharacter.attribution.remix ? (
+                      <>
+                        <p>
+                          {t("familyTask.taskCoach.remixOf", "Remix of")} {selectedCharacter.attribution.remix.title}{" "}
+                          {t("familyTask.taskCoach.byCreator", "by")} {selectedCharacter.attribution.remix.creator}
+                        </p>
+                        <p>
+                          <a
+                            className="underline"
+                            href={selectedCharacter.attribution.remix.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {t("familyTask.taskCoach.remixSource", "Original character source")}
+                          </a>
+                        </p>
+                      </>
+                    ) : null}
+                    <p>
+                      <a className="underline" href={TASK_COACH_CHARACTER_LICENSE_URL} target="_blank" rel="noreferrer">
+                        {t(
+                          "familyTask.taskCoach.characterLicense",
+                          "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)"
+                        )}
+                      </a>
+                    </p>
+                    <p>{t("familyTask.taskCoach.characterAdapted", "Adapted for use in Kids Task Calendar.")}</p>
+                    <p>
+                      {t(
+                        "familyTask.taskCoach.noEndorsement",
+                        "The character creators do not endorse Kids Task Calendar."
+                      )}
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : null}
+
+          <Button
+            data-slot="task-coach-visibility-toggle"
+            type="button"
+            size="icon"
+            variant="secondary"
+            className="size-9 rounded-full shadow-md"
+            aria-label={visibilityToggleLabel}
+            title={visibilityToggleLabel}
+            onClick={coachVisible ? hideCoach : showCoach}
+          >
+            {coachVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </Button>
         </div>
 
-        <button
-          type="button"
-          className="block rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label={characterActionLabel}
-          aria-busy={loading}
-          onClick={handleCharacterClick}
-          onPointerEnter={() => setInteracting(true)}
-          onPointerLeave={() => setInteracting(false)}
-          onPointerDown={() => setInteracting(true)}
-          onPointerUp={() => setInteracting(false)}
-        >
-          <TaskCoachCharacterLoader state={characterState} characterId={selectedCharacterId} />
-        </button>
+        {coachVisible ? (
+          <button
+            type="button"
+            className="pointer-events-auto absolute bottom-0 right-0 block rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={characterActionLabel}
+            aria-busy={loading}
+            onClick={handleCharacterClick}
+            onPointerEnter={() => setInteracting(true)}
+            onPointerLeave={() => setInteracting(false)}
+            onPointerDown={() => setInteracting(true)}
+            onPointerUp={() => setInteracting(false)}
+          >
+            <TaskCoachCharacterLoader state={characterState} characterId={selectedCharacterId} />
+          </button>
+        ) : null}
       </div>
     </div>
   );

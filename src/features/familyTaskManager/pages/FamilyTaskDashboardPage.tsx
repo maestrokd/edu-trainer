@@ -14,6 +14,7 @@ import type { TaskOccurrenceDto } from "../models/dto";
 export function FamilyTaskDashboardPage() {
   const { t, i18n } = useTranslation();
   const [showCompleted, setShowCompleted] = useState(false);
+  const [coachVisible, setCoachVisible] = useState(true);
   const [recommendedTaskUuid, setRecommendedTaskUuid] = useState<string | null>(null);
   const [coachSuccessEvent, setCoachSuccessEvent] = useState<TaskCoachSuccessEvent | null>(null);
   const {
@@ -141,7 +142,10 @@ export function FamilyTaskDashboardPage() {
 
         {!loading && !error && visibleProfiles.length > 0 ? (
           <section className="min-h-0 min-w-0 flex-1 overflow-x-auto pb-2">
-            <div className="flex h-full w-max min-w-full snap-x gap-4 pr-32 sm:pr-40">
+            <div
+              data-slot="family-task-profile-strip"
+              className={`flex h-full w-max min-w-full snap-x gap-4 ${coachVisible ? "pr-32 sm:pr-40" : "pr-14"}`}
+            >
               {visibleProfiles.map((profile, index) => (
                 <DashboardProfileColumn
                   key={profile.profileUuid}
@@ -166,6 +170,7 @@ export function FamilyTaskDashboardPage() {
           ownProfileUuid={ownProfileUuid}
           successEvent={coachSuccessEvent}
           onRecommendation={setRecommendedTaskUuid}
+          onVisibilityChange={setCoachVisible}
         />
       </div>
     </FamilyTaskPageShell>

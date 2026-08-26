@@ -1176,6 +1176,8 @@
       "hideChildSelector": "Hide child selector",
       "showResponse": "Show latest response",
       "hideResponse": "Hide latest response",
+      "showCoach": "Show Task Coach",
+      "hideCoach": "Hide Task Coach",
       "noResponse": "Ask the cat when you’re ready for a new suggestion.",
       "character": "Character",
       "characterHint": "Choose the character that stays with you on the task calendar.",
