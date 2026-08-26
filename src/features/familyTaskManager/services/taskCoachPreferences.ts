@@ -7,6 +7,15 @@ import {
 const AUTOPLAY_STORAGE_KEY = "family-task-coach:preferences:autoplay";
 const AUTO_REQUEST_STORAGE_KEY = "family-task-coach:preferences:auto-request";
 const CHARACTER_STORAGE_KEY = "family-task-coach:preferences:character";
+const COMPLETION_REFRESH_STORAGE_KEY = "family-task-coach:preferences:completion-refresh";
+
+export const TASK_COACH_COMPLETION_REFRESH_MODES = ["AUTO", "PROMPT", "MANUAL"] as const;
+export type TaskCoachCompletionRefreshMode = (typeof TASK_COACH_COMPLETION_REFRESH_MODES)[number];
+export const DEFAULT_TASK_COACH_COMPLETION_REFRESH_MODE: TaskCoachCompletionRefreshMode = "PROMPT";
+
+function isTaskCoachCompletionRefreshMode(value: string | null): value is TaskCoachCompletionRefreshMode {
+  return TASK_COACH_COMPLETION_REFRESH_MODES.some((mode) => mode === value);
+}
 
 export function loadTaskCoachAutoplay(): boolean {
   try {
@@ -54,6 +63,23 @@ export function loadTaskCoachCharacter(): TaskCoachCharacterId {
 export function saveTaskCoachCharacter(characterId: TaskCoachCharacterId): void {
   try {
     localStorage.setItem(CHARACTER_STORAGE_KEY, characterId);
+  } catch {
+    // Local storage can be unavailable in privacy-restricted browser contexts.
+  }
+}
+
+export function loadTaskCoachCompletionRefreshMode(): TaskCoachCompletionRefreshMode {
+  try {
+    const stored = localStorage.getItem(COMPLETION_REFRESH_STORAGE_KEY);
+    return isTaskCoachCompletionRefreshMode(stored) ? stored : DEFAULT_TASK_COACH_COMPLETION_REFRESH_MODE;
+  } catch {
+    return DEFAULT_TASK_COACH_COMPLETION_REFRESH_MODE;
+  }
+}
+
+export function saveTaskCoachCompletionRefreshMode(mode: TaskCoachCompletionRefreshMode): void {
+  try {
+    localStorage.setItem(COMPLETION_REFRESH_STORAGE_KEY, mode);
   } catch {
     // Local storage can be unavailable in privacy-restricted browser contexts.
   }

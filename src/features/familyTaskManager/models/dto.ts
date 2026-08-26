@@ -251,9 +251,17 @@ export interface TaskCoachAdviceDto {
   responseLocale: string;
   state: TaskCoachState;
   recommendedTaskUuids: string[];
+  appreciationText: string | null;
+  planItems: TaskCoachPlanItemDto[];
   displayText: string;
   speechText: string;
   mascotCue: TaskCoachMascotCue;
+}
+
+export interface TaskCoachPlanItemDto {
+  taskUuid: string;
+  title: string;
+  guidanceText: string;
 }
 
 /* Rewards */

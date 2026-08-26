@@ -3,9 +3,11 @@ import {
   loadTaskCoachAutoplay,
   loadTaskCoachAutoRequest,
   loadTaskCoachCharacter,
+  loadTaskCoachCompletionRefreshMode,
   saveTaskCoachAutoplay,
   saveTaskCoachAutoRequest,
   saveTaskCoachCharacter,
+  saveTaskCoachCompletionRefreshMode,
 } from "../services/taskCoachPreferences";
 
 describe("Task Coach preferences", () => {
@@ -37,5 +39,15 @@ describe("Task Coach preferences", () => {
 
     localStorage.setItem("family-task-coach:preferences:character", "unknown-character");
     expect(loadTaskCoachCharacter()).toBe("simple-cat");
+  });
+
+  it("defaults completion refresh to a prompt and restores only recognized modes", () => {
+    expect(loadTaskCoachCompletionRefreshMode()).toBe("PROMPT");
+
+    saveTaskCoachCompletionRefreshMode("AUTO");
+    expect(loadTaskCoachCompletionRefreshMode()).toBe("AUTO");
+
+    localStorage.setItem("family-task-coach:preferences:completion-refresh", "UNKNOWN");
+    expect(loadTaskCoachCompletionRefreshMode()).toBe("PROMPT");
   });
 });

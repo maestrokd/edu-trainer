@@ -33,9 +33,13 @@ import {
   loadTaskCoachAutoplay,
   loadTaskCoachAutoRequest,
   loadTaskCoachCharacter,
+  loadTaskCoachCompletionRefreshMode,
   saveTaskCoachAutoplay,
   saveTaskCoachAutoRequest,
   saveTaskCoachCharacter,
+  saveTaskCoachCompletionRefreshMode,
+  TASK_COACH_COMPLETION_REFRESH_MODES,
+  type TaskCoachCompletionRefreshMode,
 } from "../../services/taskCoachPreferences";
 import type { AssistantCharacterState } from "./TaskCoachCharacter";
 import { TaskCoachCharacterLoader } from "./TaskCoachCharacterLoader";
@@ -59,6 +63,14 @@ interface TaskCoachWidgetProps {
 }
 
 const SUCCESS_DURATION_MS = 2_500;
+const COMPLETION_REFRESH_OPTION_COPY: Record<
+  TaskCoachCompletionRefreshMode,
+  { translationKey: string; fallback: string }
+> = {
+  AUTO: { translationKey: "familyTask.taskCoach.completionRefreshAuto", fallback: "Refresh automatically" },
+  PROMPT: { translationKey: "familyTask.taskCoach.completionRefreshPrompt", fallback: "Offer a refresh button" },
+  MANUAL: { translationKey: "familyTask.taskCoach.completionRefreshManual", fallback: "Wait for character click" },
+};
 
 export function TaskCoachWidget({
   isToday,
@@ -85,6 +97,9 @@ export function TaskCoachWidget({
   const [autoplay, setAutoplay] = useState(loadTaskCoachAutoplay);
   const [autoRequestAdvice, setAutoRequestAdvice] = useState(loadTaskCoachAutoRequest);
   const [selectedCharacterId, setSelectedCharacterId] = useState(loadTaskCoachCharacter);
+  const [completionRefreshMode, setCompletionRefreshMode] = useState(loadTaskCoachCompletionRefreshMode);
+  const [selectedPlanTaskUuid, setSelectedPlanTaskUuid] = useState<string | null>(null);
+  const [refreshPlanAvailable, setRefreshPlanAvailable] = useState(false);
   const [autoPlayLoadedAudio, setAutoPlayLoadedAudio] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [interacting, setInteracting] = useState(false);
@@ -95,6 +110,9 @@ export function TaskCoachWidget({
   const speechRequestIdRef = useRef(0);
   const lastAutoRequestProfileRef = useRef<string | null>(null);
   const celebrationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handledSuccessEventIdRef = useRef<number | null>(null);
+  const pendingCompletionActionRef = useRef<"AUTO" | "PROMPT" | null>(null);
+  const completionRefreshInFlightRef = useRef(false);
 
   const automaticProfileUuid = useMemo(() => {
     if (isSecondary) {
@@ -156,6 +174,10 @@ export function TaskCoachWidget({
     setAudioError(false);
     setSpeaking(false);
     setAutoPlayLoadedAudio(false);
+    setSelectedPlanTaskUuid(null);
+    setRefreshPlanAvailable(false);
+    pendingCompletionActionRef.current = null;
+    completionRefreshInFlightRef.current = false;
     replaceAudioUrl(null);
     stopCelebrating();
     onRecommendation(null);
@@ -240,6 +262,25 @@ export function TaskCoachWidget({
     [replaceAudioUrl]
   );
 
+  const focusPlanTask = useCallback(
+    (taskUuid: string | null) => {
+      setSelectedPlanTaskUuid(taskUuid);
+      onRecommendation(taskUuid);
+      if (!taskUuid) {
+        return;
+      }
+      requestAnimationFrame(() => {
+        const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+        document.getElementById(`family-task-${taskUuid}`)?.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "center",
+          inline: "center",
+        });
+      });
+    },
+    [onRecommendation]
+  );
+
   const requestAdvice = useCallback(
     async (profileUuid: string) => {
       const requestId = adviceRequestIdRef.current + 1;
@@ -253,9 +294,11 @@ export function TaskCoachWidget({
       setSpeaking(false);
       setAudioLoading(false);
       setAudioError(false);
+      setRefreshPlanAvailable(false);
+      pendingCompletionActionRef.current = null;
       replaceAudioUrl(null);
       stopCelebrating();
-      onRecommendation(null);
+      focusPlanTask(null);
       try {
         const nextAdvice = await taskCoachApi.getAdvice(profileUuid);
         if (adviceRequestIdRef.current !== requestId) {
@@ -263,17 +306,7 @@ export function TaskCoachWidget({
         }
         setAdvice(nextAdvice);
         const recommendedTaskUuid = nextAdvice.recommendedTaskUuids[0] ?? null;
-        onRecommendation(recommendedTaskUuid);
-        if (recommendedTaskUuid) {
-          requestAnimationFrame(() => {
-            const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-            document.getElementById(`family-task-${recommendedTaskUuid}`)?.scrollIntoView({
-              behavior: prefersReducedMotion ? "auto" : "smooth",
-              block: "center",
-              inline: "center",
-            });
-          });
-        }
+        focusPlanTask(recommendedTaskUuid);
         if (nextAdvice.state === TaskCoachState.ALL_DONE || nextAdvice.mascotCue === TaskCoachMascotCue.CELEBRATING) {
           celebrate();
         }
@@ -287,10 +320,11 @@ export function TaskCoachWidget({
       } finally {
         if (adviceRequestIdRef.current === requestId) {
           setLoading(false);
+          completionRefreshInFlightRef.current = false;
         }
       }
     },
-    [autoplay, celebrate, onRecommendation, replaceAudioUrl, requestSpeech, stopCelebrating]
+    [autoplay, celebrate, focusPlanTask, replaceAudioUrl, requestSpeech, stopCelebrating]
   );
 
   useEffect(() => {
@@ -318,10 +352,39 @@ export function TaskCoachWidget({
   }, [autoRequestAdvice, coachVisible, isToday, requestAdvice, selectedProfileUuid]);
 
   useEffect(() => {
-    if (successEvent && isToday) {
-      celebrate();
+    if (!successEvent || handledSuccessEventIdRef.current === successEvent.id) {
+      return;
     }
-  }, [celebrate, isToday, successEvent]);
+    handledSuccessEventIdRef.current = successEvent.id;
+    if (!isToday) {
+      return;
+    }
+    celebrate();
+    if (!selectedProfileUuid || successEvent.profileUuid !== selectedProfileUuid) {
+      return;
+    }
+
+    if (completionRefreshMode === "AUTO") {
+      setRefreshPlanAvailable(false);
+      if (coachVisible) {
+        completionRefreshInFlightRef.current = true;
+        void requestAdvice(selectedProfileUuid);
+      } else {
+        pendingCompletionActionRef.current = "AUTO";
+      }
+      return;
+    }
+
+    if (completionRefreshMode === "PROMPT") {
+      if (coachVisible) {
+        setRefreshPlanAvailable(true);
+        setResponseOpen(true);
+        setChildSelectorOpen(false);
+      } else {
+        pendingCompletionActionRef.current = "PROMPT";
+      }
+    }
+  }, [celebrate, coachVisible, completionRefreshMode, isToday, requestAdvice, selectedProfileUuid, successEvent]);
 
   const handleProfileChange = (profileUuid: string) => {
     setChildSelectorOpen(false);
@@ -404,12 +467,21 @@ export function TaskCoachWidget({
     saveTaskCoachCharacter(characterId);
   };
 
+  const handleCompletionRefreshModeChange = (mode: TaskCoachCompletionRefreshMode) => {
+    setCompletionRefreshMode(mode);
+    saveTaskCoachCompletionRefreshMode(mode);
+  };
+
   const hideCoach = () => {
     const adviceWasLoading = loading;
     adviceRequestIdRef.current += 1;
     speechRequestIdRef.current += 1;
     if (adviceWasLoading) {
       lastAutoRequestProfileRef.current = null;
+    }
+    if (completionRefreshInFlightRef.current) {
+      pendingCompletionActionRef.current = "AUTO";
+      completionRefreshInFlightRef.current = false;
     }
     setLoading(false);
     setAudioLoading(false);
@@ -426,6 +498,20 @@ export function TaskCoachWidget({
   const showCoach = () => {
     setCoachVisible(true);
     onVisibilityChange?.(true);
+    const pendingCompletionAction = pendingCompletionActionRef.current;
+    pendingCompletionActionRef.current = null;
+    if (pendingCompletionAction === "AUTO" && selectedProfileUuid) {
+      lastAutoRequestProfileRef.current = selectedProfileUuid;
+      completionRefreshInFlightRef.current = true;
+      void requestAdvice(selectedProfileUuid);
+      return;
+    }
+    if (pendingCompletionAction === "PROMPT") {
+      setRefreshPlanAvailable(true);
+      setResponseOpen(true);
+      setChildSelectorOpen(false);
+      return;
+    }
     if (advice && autoplay && !audioUrl && !audioLoading) {
       void requestSpeech(advice, false);
     }
@@ -455,6 +541,7 @@ export function TaskCoachWidget({
   const showBubble =
     loading ||
     Boolean(advice) ||
+    refreshPlanAvailable ||
     error ||
     inactiveHintVisible ||
     (isToday && selectableProfiles.length > 0 && !selectedProfileUuid) ||
@@ -474,7 +561,7 @@ export function TaskCoachWidget({
       {coachVisible && responseOpen ? (
         <div
           id="task-coach-response"
-          className="pointer-events-auto w-full rounded-2xl border border-border/80 bg-card/95 p-3 shadow-xl backdrop-blur"
+          className="pointer-events-auto max-h-[min(30rem,calc(100vh-13rem))] w-full overflow-y-auto overscroll-contain rounded-2xl border border-border/80 bg-card/95 p-3 shadow-xl backdrop-blur"
           aria-live="polite"
         >
           {inactiveHintVisible ? <p className="text-sm font-medium">{disabledHint}</p> : null}
@@ -492,7 +579,75 @@ export function TaskCoachWidget({
               {t("familyTask.taskCoach.thinking", "Choosing a good next step...")}
             </p>
           ) : null}
-          {advice ? <p className="text-base font-medium leading-relaxed">{advice.displayText}</p> : null}
+          {advice ? (
+            advice.planItems.length > 0 ? (
+              <div className="space-y-2.5">
+                {advice.appreciationText ? (
+                  <p className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium leading-relaxed text-primary">
+                    {advice.appreciationText}
+                  </p>
+                ) : null}
+                <div
+                  className="space-y-1.5"
+                  role="list"
+                  aria-label={t("familyTask.taskCoach.plan", {
+                    lng: advice.responseLocale,
+                    defaultValue: "Your task plan",
+                  })}
+                >
+                  {advice.planItems.map((item, index) => {
+                    const selected = item.taskUuid === selectedPlanTaskUuid;
+                    const label = t(
+                      index === 0
+                        ? "familyTask.taskCoach.planNow"
+                        : index === 1
+                          ? "familyTask.taskCoach.planNext"
+                          : "familyTask.taskCoach.planAfterThat",
+                      {
+                        lng: advice.responseLocale,
+                        defaultValue: index === 0 ? "Now" : index === 1 ? "Next" : "After that",
+                      }
+                    );
+                    return (
+                      <div key={item.taskUuid} role="listitem">
+                        <button
+                          type="button"
+                          className={`w-full rounded-xl border px-3 py-2 text-left transition ${
+                            selected
+                              ? "border-primary bg-primary/10 ring-1 ring-primary"
+                              : "border-border/70 bg-background/65 hover:border-primary/60 hover:bg-primary/5"
+                          }`}
+                          aria-current={selected ? "step" : undefined}
+                          onClick={() => focusPlanTask(item.taskUuid)}
+                        >
+                          <span className="block text-[11px] font-semibold uppercase tracking-wide text-primary">
+                            {label}
+                          </span>
+                          <span className="block font-semibold leading-tight text-foreground">{item.title}</span>
+                          <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                            {item.guidanceText}
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <p className="text-base font-medium leading-relaxed">{advice.displayText}</p>
+            )
+          ) : null}
+          {refreshPlanAvailable && selectedProfileUuid ? (
+            <div className="mt-2 space-y-2 rounded-xl border border-primary/30 bg-primary/5 p-2.5">
+              <p className="text-sm font-medium">
+                {t("familyTask.taskCoach.refreshPlanAvailable", "Nice work! Ready for an updated plan?")}
+              </p>
+              <Button size="sm" onClick={() => void requestAdvice(selectedProfileUuid)}>
+                <RefreshCw className="size-3.5" />
+                {t("familyTask.taskCoach.updatePlan", "Update my plan")}
+              </Button>
+            </div>
+          ) : null}
           {error ? (
             <div className="flex flex-wrap items-center gap-2 text-sm text-destructive">
               <span>{t("familyTask.taskCoach.adviceError", "I couldn’t choose a task right now.")}</span>
@@ -711,6 +866,40 @@ export function TaskCoachWidget({
                         checked={autoRequestAdvice}
                         onCheckedChange={handleAutoRequestChange}
                       />
+                    </div>
+
+                    <div className="space-y-2 rounded-xl border bg-muted/35 px-3 py-2">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="task-coach-completion-refresh">
+                          {t("familyTask.taskCoach.completionRefresh", "After task completion")}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            "familyTask.taskCoach.completionRefreshHint",
+                            "Choose when the coach updates appreciation and the next plan."
+                          )}
+                        </p>
+                      </div>
+                      <Select
+                        value={completionRefreshMode}
+                        onValueChange={(value) =>
+                          handleCompletionRefreshModeChange(value as TaskCoachCompletionRefreshMode)
+                        }
+                      >
+                        <SelectTrigger id="task-coach-completion-refresh" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TASK_COACH_COMPLETION_REFRESH_MODES.map((mode) => {
+                            const copy = COMPLETION_REFRESH_OPTION_COPY[mode];
+                            return (
+                              <SelectItem key={mode} value={mode}>
+                                {t(copy.translationKey, copy.fallback)}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/35 px-3 py-2">

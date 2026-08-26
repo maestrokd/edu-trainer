@@ -6,7 +6,10 @@ import { TaskCoachMascotCue, TaskCoachState } from "../models/enums";
 import type { ChildProfileDto, TaskCoachAdviceDto } from "../models/dto";
 
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (_key: string, fallback?: string) => fallback ?? _key }),
+  useTranslation: () => ({
+    t: (_key: string, fallbackOrOptions?: string | { defaultValue?: string }) =>
+      typeof fallbackOrOptions === "string" ? fallbackOrOptions : (fallbackOrOptions?.defaultValue ?? _key),
+  }),
 }));
 vi.mock("../api/taskCoachApi", () => ({
   taskCoachApi: { getAdvice: vi.fn(), synthesizeSpeech: vi.fn() },
@@ -38,6 +41,8 @@ const advice: TaskCoachAdviceDto = {
   responseLocale: "en-US",
   state: TaskCoachState.RECOMMENDATION,
   recommendedTaskUuids: ["task-1"],
+  appreciationText: null,
+  planItems: [{ taskUuid: "task-1", title: "Read a book", guidanceText: "Start with your book." }],
   displayText: "Start with your book.",
   speechText: "Start with your book.",
   mascotCue: TaskCoachMascotCue.ENCOURAGING,
@@ -131,6 +136,60 @@ describe("TaskCoachWidget", () => {
     await waitFor(() => expect(onRecommendation).toHaveBeenCalledWith("task-1"));
   });
 
+  it("renders an appreciated three-step plan and lets each item become the dashboard recommendation", async () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    const onRecommendation = vi.fn();
+    const planAdvice: TaskCoachAdviceDto = {
+      ...advice,
+      recommendedTaskUuids: ["task-1", "task-2", "task-3"],
+      appreciationText: "Great work finishing Make the bed!",
+      planItems: [
+        { taskUuid: "task-1", title: "Read a book", guidanceText: "Read one page to get started." },
+        { taskUuid: "task-2", title: "Pack school bag", guidanceText: "Pack the important things next." },
+        { taskUuid: "task-3", title: "Feed the cat", guidanceText: "Ask for help if you need it." },
+      ],
+      speechText: "Great work. First read a book, next pack your school bag, then feed the cat.",
+    };
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(planAdvice);
+    vi.mocked(taskCoachApi.synthesizeSpeech).mockResolvedValueOnce(new Blob(["audio"], { type: "audio/mpeg" }));
+
+    render(
+      <>
+        <TaskCoachWidget
+          isToday
+          activeProfiles={[child]}
+          profileFilter={[]}
+          isSecondary={false}
+          ownProfileUuid={null}
+          onRecommendation={onRecommendation}
+        />
+        <div id="family-task-task-1" />
+        <div id="family-task-task-2" />
+        <div id="family-task-task-3" />
+      </>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Ask the cat for fresh advice" }));
+    expect(await screen.findByText("Great work finishing Make the bed!")).toBeVisible();
+    expect(screen.getByText("Now")).toBeVisible();
+    expect(screen.getByText("Next")).toBeVisible();
+    expect(screen.getByText("After that")).toBeVisible();
+    const firstPlanItem = screen.getByRole("button", { name: /Now Read a book Read one page/ });
+    const secondPlanItem = screen.getByRole("button", { name: /Next Pack school bag Pack the important/ });
+    expect(firstPlanItem).toHaveAttribute("aria-current", "step");
+    expect(onRecommendation).toHaveBeenLastCalledWith("task-1");
+
+    fireEvent.click(secondPlanItem);
+    expect(secondPlanItem).toHaveAttribute("aria-current", "step");
+    expect(firstPlanItem).not.toHaveAttribute("aria-current");
+    expect(onRecommendation).toHaveBeenLastCalledWith("task-2");
+    await waitFor(() => expect(document.getElementById("family-task-task-2")?.scrollIntoView).toHaveBeenCalled());
+
+    fireEvent.click(screen.getByRole("button", { name: "Play voice" }));
+    await waitFor(() => expect(taskCoachApi.synthesizeSpeech).toHaveBeenCalledWith("child-1", planAdvice.speechText));
+  });
+
   it("keeps localized advice visible when speech generation fails", async () => {
     vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(advice);
     vi.mocked(taskCoachApi.synthesizeSpeech).mockRejectedValueOnce(new Error("tts unavailable"));
@@ -203,12 +262,21 @@ describe("TaskCoachWidget", () => {
     expect(screen.queryByRole("radio", { name: /Second Kid/ })).not.toBeInTheDocument();
 
     await act(async () => {
-      secondRequest.resolve({ ...advice, profileUuid: "child-2", displayText: "Second child advice." });
+      secondRequest.resolve({
+        ...advice,
+        profileUuid: "child-2",
+        displayText: "Second child advice.",
+        planItems: [{ ...advice.planItems[0], guidanceText: "Second child advice." }],
+      });
     });
     expect(await screen.findByText("Second child advice.")).toBeVisible();
 
     await act(async () => {
-      firstRequest.resolve({ ...advice, displayText: "Stale first child advice." });
+      firstRequest.resolve({
+        ...advice,
+        displayText: "Stale first child advice.",
+        planItems: [{ ...advice.planItems[0], guidanceText: "Stale first child advice." }],
+      });
     });
     expect(screen.queryByText("Stale first child advice.")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Choose or change child" }));
@@ -326,6 +394,127 @@ describe("TaskCoachWidget", () => {
     expect(screen.getByText("Start with your book.")).toBeVisible();
   });
 
+  it("persists the completion refresh mode from Task Coach settings", async () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Task Coach settings" }));
+    const completionMode = screen.getByRole("combobox", { name: "After task completion" });
+    expect(completionMode).toHaveTextContent("Offer a refresh button");
+    fireEvent.click(completionMode);
+    fireEvent.click(await screen.findByRole("option", { name: "Refresh automatically" }));
+
+    expect(localStorage.getItem("family-task-coach:preferences:completion-refresh")).toBe("AUTO");
+  });
+
+  it("offers the default plan refresh after a selected child completes a task", async () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(advice);
+    const { rerender } = render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+    expect(await screen.findByRole("button", { name: "Ask the cat for fresh advice" })).toBeVisible();
+
+    rerender(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        successEvent={{ id: 1, profileUuid: "child-1", starsAwarded: 2 }}
+        onRecommendation={vi.fn()}
+      />
+    );
+
+    expect(await screen.findByText("Nice work! Ready for an updated plan?")).toBeVisible();
+    expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Update my plan" }));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1"));
+  });
+
+  it("defers automatic completion refresh while hidden and keeps manual mode quiet", async () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    localStorage.setItem("family-task-coach:preferences:completion-refresh", "AUTO");
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValue(advice);
+    const props = {
+      isToday: true,
+      activeProfiles: [child],
+      profileFilter: [] as string[],
+      isSecondary: false,
+      ownProfileUuid: null,
+      onRecommendation: vi.fn(),
+    };
+    const { rerender, unmount } = render(<TaskCoachWidget {...props} />);
+    expect(await screen.findByRole("button", { name: "Ask the cat for fresh advice" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Hide Task Coach" }));
+
+    rerender(<TaskCoachWidget {...props} successEvent={{ id: 1, profileUuid: "child-1", starsAwarded: 2 }} />);
+    expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Show Task Coach" }));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1"));
+
+    unmount();
+    vi.clearAllMocks();
+    localStorage.setItem("family-task-coach:preferences:completion-refresh", "MANUAL");
+    const manual = render(<TaskCoachWidget {...props} />);
+    expect(await screen.findByRole("button", { name: "Ask the cat for fresh advice" })).toBeVisible();
+    manual.rerender(<TaskCoachWidget {...props} successEvent={{ id: 2, profileUuid: "child-1", starsAwarded: 2 }} />);
+    expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Update my plan" })).not.toBeInTheDocument();
+  });
+
+  it("restarts an interrupted completion refresh only once after restore", async () => {
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    localStorage.setItem("family-task-coach:preferences:completion-refresh", "AUTO");
+    const initialRequest = deferred<TaskCoachAdviceDto>();
+    const completionRequest = deferred<TaskCoachAdviceDto>();
+    const restoredRequest = deferred<TaskCoachAdviceDto>();
+    vi.mocked(taskCoachApi.getAdvice)
+      .mockReturnValueOnce(initialRequest.promise)
+      .mockReturnValueOnce(completionRequest.promise)
+      .mockReturnValueOnce(restoredRequest.promise);
+    const props = {
+      isToday: true,
+      activeProfiles: [child],
+      profileFilter: [] as string[],
+      isSecondary: false,
+      ownProfileUuid: null,
+      onRecommendation: vi.fn(),
+    };
+    const { rerender } = render(<TaskCoachWidget {...props} />);
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(1));
+    await act(async () => initialRequest.resolve(advice));
+
+    rerender(<TaskCoachWidget {...props} successEvent={{ id: 1, profileUuid: "child-1", starsAwarded: 2 }} />);
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole("button", { name: "Hide Task Coach" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show Task Coach" }));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(3));
+
+    await act(async () => completionRequest.resolve({ ...advice, displayText: "Stale completion plan." }));
+    await act(async () => restoredRequest.resolve(advice));
+    expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(3);
+  });
+
   it("minimizes to a restore button, preserves settled advice, and defaults to visible after remount", async () => {
     localStorage.setItem("family-task-coach:preferences:auto-request", "false");
     localStorage.setItem("family-task-coach:preferences:autoplay", "false");
@@ -412,7 +601,11 @@ describe("TaskCoachWidget", () => {
     await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole("button", { name: "Hide Task Coach" }));
     await act(async () => {
-      firstRequest.resolve({ ...advice, displayText: "Hidden stale advice." });
+      firstRequest.resolve({
+        ...advice,
+        displayText: "Hidden stale advice.",
+        planItems: [{ ...advice.planItems[0], guidanceText: "Hidden stale advice." }],
+      });
     });
     expect(screen.queryByText("Hidden stale advice.")).not.toBeInTheDocument();
     expect(taskCoachApi.synthesizeSpeech).not.toHaveBeenCalled();
@@ -420,7 +613,11 @@ describe("TaskCoachWidget", () => {
     fireEvent.click(screen.getByRole("button", { name: "Show Task Coach" }));
     await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(2));
     await act(async () => {
-      retryRequest.resolve({ ...advice, displayText: "Fresh restored advice." });
+      retryRequest.resolve({
+        ...advice,
+        displayText: "Fresh restored advice.",
+        planItems: [{ ...advice.planItems[0], guidanceText: "Fresh restored advice." }],
+      });
     });
     expect(await screen.findByText("Fresh restored advice.")).toBeVisible();
     expect(taskCoachApi.synthesizeSpeech).not.toHaveBeenCalled();
