@@ -8,6 +8,8 @@ import type {
   FamilyTaskCompletionEventType,
   FamilyTaskOccurrenceStatus,
   FamilyTaskSourceType,
+  TaskCoachMascotCue,
+  TaskCoachState,
 } from "./enums";
 import type { TenantMembershipRole } from "@/services/AuthService";
 import type { PageableResponse } from "@/types/api";
@@ -214,6 +216,7 @@ export interface TaskOccurrenceDto {
   uuid: string;
   sourceType: FamilyTaskSourceType;
   sourceUuid: string;
+  routineSlot: FamilyRoutineSlot | null;
   assigneeProfileUuid: string;
   title: string;
   emoji: string | null;
@@ -241,6 +244,24 @@ export interface TaskCompletionEventDto {
   eventType: FamilyTaskCompletionEventType;
   note: string | null;
   createdDate: string;
+}
+
+export interface TaskCoachAdviceDto {
+  profileUuid: string;
+  responseLocale: string;
+  state: TaskCoachState;
+  recommendedTaskUuids: string[];
+  appreciationText: string | null;
+  planItems: TaskCoachPlanItemDto[];
+  displayText: string;
+  speechText: string;
+  mascotCue: TaskCoachMascotCue;
+}
+
+export interface TaskCoachPlanItemDto {
+  taskUuid: string;
+  title: string;
+  guidanceText: string;
 }
 
 /* Rewards */
