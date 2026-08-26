@@ -54,6 +54,14 @@ export const TaskCoachMascotCue = {
 
 export type TaskCoachMascotCue = (typeof TaskCoachMascotCue)[keyof typeof TaskCoachMascotCue];
 
+export const TaskCoachStyle = {
+  GENTLE: "GENTLE",
+  CHEERFUL: "CHEERFUL",
+  SILLY: "SILLY",
+} as const;
+
+export type TaskCoachStyle = (typeof TaskCoachStyle)[keyof typeof TaskCoachStyle];
+
 export const FamilyTaskCompletionEventType = {
   SUBMITTED: "SUBMITTED",
   APPROVED: "APPROVED",

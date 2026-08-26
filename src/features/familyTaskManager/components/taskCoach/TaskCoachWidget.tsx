@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { taskCoachApi } from "../../api/taskCoachApi";
-import { TaskCoachMascotCue, TaskCoachState } from "../../models/enums";
+import { TaskCoachMascotCue, TaskCoachState, type TaskCoachStyle } from "../../models/enums";
 import type { ChildProfileDto, TaskCoachAdviceDto } from "../../models/dto";
 import { TASK_COACH_CHARACTER_IDS, type TaskCoachCharacterId } from "../../models/taskCoachCharacter";
 import {
@@ -34,11 +34,14 @@ import {
   loadTaskCoachAutoRequest,
   loadTaskCoachCharacter,
   loadTaskCoachCompletionRefreshMode,
+  loadTaskCoachStyle,
   saveTaskCoachAutoplay,
   saveTaskCoachAutoRequest,
   saveTaskCoachCharacter,
   saveTaskCoachCompletionRefreshMode,
+  saveTaskCoachStyle,
   TASK_COACH_COMPLETION_REFRESH_MODES,
+  TASK_COACH_STYLES,
   type TaskCoachCompletionRefreshMode,
 } from "../../services/taskCoachPreferences";
 import type { AssistantCharacterState } from "./TaskCoachCharacter";
@@ -71,6 +74,11 @@ const COMPLETION_REFRESH_OPTION_COPY: Record<
   PROMPT: { translationKey: "familyTask.taskCoach.completionRefreshPrompt", fallback: "Offer a refresh button" },
   MANUAL: { translationKey: "familyTask.taskCoach.completionRefreshManual", fallback: "Wait for character click" },
 };
+const COACH_STYLE_OPTION_COPY: Record<TaskCoachStyle, { translationKey: string; fallback: string }> = {
+  GENTLE: { translationKey: "familyTask.taskCoach.coachStyleGentle", fallback: "Gentle" },
+  CHEERFUL: { translationKey: "familyTask.taskCoach.coachStyleCheerful", fallback: "Cheerful" },
+  SILLY: { translationKey: "familyTask.taskCoach.coachStyleSilly", fallback: "Silly" },
+};
 
 export function TaskCoachWidget({
   isToday,
@@ -98,6 +106,7 @@ export function TaskCoachWidget({
   const [autoRequestAdvice, setAutoRequestAdvice] = useState(loadTaskCoachAutoRequest);
   const [selectedCharacterId, setSelectedCharacterId] = useState(loadTaskCoachCharacter);
   const [completionRefreshMode, setCompletionRefreshMode] = useState(loadTaskCoachCompletionRefreshMode);
+  const [coachStyle, setCoachStyle] = useState(loadTaskCoachStyle);
   const [selectedPlanTaskUuid, setSelectedPlanTaskUuid] = useState<string | null>(null);
   const [refreshPlanAvailable, setRefreshPlanAvailable] = useState(false);
   const [autoPlayLoadedAudio, setAutoPlayLoadedAudio] = useState(false);
@@ -300,7 +309,7 @@ export function TaskCoachWidget({
       stopCelebrating();
       focusPlanTask(null);
       try {
-        const nextAdvice = await taskCoachApi.getAdvice(profileUuid);
+        const nextAdvice = await taskCoachApi.getAdvice(profileUuid, coachStyle);
         if (adviceRequestIdRef.current !== requestId) {
           return;
         }
@@ -324,7 +333,7 @@ export function TaskCoachWidget({
         }
       }
     },
-    [autoplay, celebrate, focusPlanTask, replaceAudioUrl, requestSpeech, stopCelebrating]
+    [autoplay, celebrate, coachStyle, focusPlanTask, replaceAudioUrl, requestSpeech, stopCelebrating]
   );
 
   useEffect(() => {
@@ -470,6 +479,11 @@ export function TaskCoachWidget({
   const handleCompletionRefreshModeChange = (mode: TaskCoachCompletionRefreshMode) => {
     setCompletionRefreshMode(mode);
     saveTaskCoachCompletionRefreshMode(mode);
+  };
+
+  const handleCoachStyleChange = (style: TaskCoachStyle) => {
+    setCoachStyle(style);
+    saveTaskCoachStyle(style);
   };
 
   const hideCoach = () => {
@@ -804,7 +818,7 @@ export function TaskCoachWidget({
                     <Settings2 className="size-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <Sparkles className="size-5 text-primary" />
@@ -813,7 +827,7 @@ export function TaskCoachWidget({
                     <DialogDescription>
                       {t(
                         "familyTask.taskCoach.settingsDescription",
-                        "Choose your character and when advice and voice are generated."
+                        "Choose your character, coaching style, and when advice and voice are generated."
                       )}
                     </DialogDescription>
                   </DialogHeader>
@@ -842,6 +856,36 @@ export function TaskCoachWidget({
                             return (
                               <SelectItem key={characterId} value={characterId}>
                                 {t(character.nameTranslationKey, character.nameFallback)}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2 rounded-xl border bg-muted/35 px-3 py-2">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="task-coach-style">{t("familyTask.taskCoach.coachStyle", "Coach style")}</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            "familyTask.taskCoach.coachStyleHint",
+                            "Choose how calm, cheerful, or silly the character sounds."
+                          )}
+                        </p>
+                      </div>
+                      <Select
+                        value={coachStyle}
+                        onValueChange={(value) => handleCoachStyleChange(value as TaskCoachStyle)}
+                      >
+                        <SelectTrigger id="task-coach-style" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TASK_COACH_STYLES.map((style) => {
+                            const copy = COACH_STYLE_OPTION_COPY[style];
+                            return (
+                              <SelectItem key={style} value={style}>
+                                {t(copy.translationKey, copy.fallback)}
                               </SelectItem>
                             );
                           })}

@@ -4,10 +4,12 @@ import {
   loadTaskCoachAutoRequest,
   loadTaskCoachCharacter,
   loadTaskCoachCompletionRefreshMode,
+  loadTaskCoachStyle,
   saveTaskCoachAutoplay,
   saveTaskCoachAutoRequest,
   saveTaskCoachCharacter,
   saveTaskCoachCompletionRefreshMode,
+  saveTaskCoachStyle,
 } from "../services/taskCoachPreferences";
 
 describe("Task Coach preferences", () => {
@@ -49,5 +51,15 @@ describe("Task Coach preferences", () => {
 
     localStorage.setItem("family-task-coach:preferences:completion-refresh", "UNKNOWN");
     expect(loadTaskCoachCompletionRefreshMode()).toBe("PROMPT");
+  });
+
+  it("defaults coach style to cheerful and restores only recognized styles", () => {
+    expect(loadTaskCoachStyle()).toBe("CHEERFUL");
+
+    saveTaskCoachStyle("SILLY");
+    expect(loadTaskCoachStyle()).toBe("SILLY");
+
+    localStorage.setItem("family-task-coach:preferences:coach-style", "LOUD");
+    expect(loadTaskCoachStyle()).toBe("CHEERFUL");
   });
 });

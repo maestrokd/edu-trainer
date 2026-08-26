@@ -253,12 +253,12 @@ describe("TaskCoachWidget", () => {
     );
 
     fireEvent.click(screen.getByRole("radio", { name: /^Kid$/ }));
-    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1"));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1", "CHEERFUL"));
     expect(screen.queryByRole("radio", { name: /Second Kid/ })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Choose or change child" }));
     fireEvent.click(screen.getByRole("radio", { name: /Second Kid/ }));
-    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-2"));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-2", "CHEERFUL"));
     expect(screen.queryByRole("radio", { name: /Second Kid/ })).not.toBeInTheDocument();
 
     await act(async () => {
@@ -416,6 +416,37 @@ describe("TaskCoachWidget", () => {
     expect(localStorage.getItem("family-task-coach:preferences:completion-refresh")).toBe("AUTO");
   });
 
+  it("persists coach style and applies it on the next advice request", async () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(advice);
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Task Coach settings" }));
+    const styleSelect = screen.getByRole("combobox", { name: "Coach style" });
+    expect(styleSelect).toHaveTextContent("Cheerful");
+    fireEvent.click(styleSelect);
+    expect(await screen.findByRole("option", { name: "Gentle" })).toBeVisible();
+    expect(screen.getByRole("option", { name: "Cheerful" })).toBeVisible();
+    fireEvent.click(await screen.findByRole("option", { name: "Silly" }));
+
+    expect(localStorage.getItem("family-task-coach:preferences:coach-style")).toBe("SILLY");
+    expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ask the cat for fresh advice" }));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1", "SILLY"));
+  });
+
   it("offers the default plan refresh after a selected child completes a task", async () => {
     localStorage.setItem("family-task-coach:preferences:auto-request", "false");
     localStorage.setItem("family-task-coach:preferences:autoplay", "false");
@@ -447,7 +478,7 @@ describe("TaskCoachWidget", () => {
     expect(await screen.findByText("Nice work! Ready for an updated plan?")).toBeVisible();
     expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Update my plan" }));
-    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1"));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1", "CHEERFUL"));
   });
 
   it("defers automatic completion refresh while hidden and keeps manual mode quiet", async () => {
@@ -470,7 +501,7 @@ describe("TaskCoachWidget", () => {
     rerender(<TaskCoachWidget {...props} successEvent={{ id: 1, profileUuid: "child-1", starsAwarded: 2 }} />);
     expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Show Task Coach" }));
-    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1"));
+    await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledWith("child-1", "CHEERFUL"));
 
     unmount();
     vi.clearAllMocks();

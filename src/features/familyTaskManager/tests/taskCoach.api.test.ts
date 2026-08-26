@@ -15,7 +15,7 @@ describe("taskCoachApi", () => {
 
     expect(post).toHaveBeenCalledWith(
       "/private/family/task-coach/advice",
-      { profileUuid: "child-1" },
+      { profileUuid: "child-1", coachStyle: "CHEERFUL" },
       { headers: { "X-Timezone": "Europe/Kyiv" } }
     );
   });
