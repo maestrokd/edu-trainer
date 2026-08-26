@@ -1,5 +1,4 @@
 import type { TaskOccurrenceDto } from "../../models/dto";
-import type { FamilyRoutineSlot } from "../../models/enums";
 import { resolveTaskBucket } from "./tasks";
 import type { SlotBucket } from "./types";
 
@@ -63,7 +62,6 @@ export function isKnownApprovalDateKey(dateKey: string): boolean {
 
 export function groupApprovalsByProfileDateAndSlot(
   tasks: TaskOccurrenceDto[],
-  routineSlotByUuid: Record<string, FamilyRoutineSlot>,
   sectionOrder: SlotBucket[]
 ): Record<string, ApprovalDateGroup[]> {
   const groupedByProfile: Record<string, Record<string, Partial<Record<SlotBucket, TaskOccurrenceDto[]>>>> = {};
@@ -71,7 +69,7 @@ export function groupApprovalsByProfileDateAndSlot(
   for (const task of tasks) {
     const profileUuid = task.assigneeProfileUuid;
     const dateKey = normalizeDateKey(task.scheduledFor);
-    const bucket = resolveTaskBucket(task, routineSlotByUuid);
+    const bucket = resolveTaskBucket(task);
 
     const profileGroups = groupedByProfile[profileUuid] ?? {};
     const dateGroups = profileGroups[dateKey] ?? {};

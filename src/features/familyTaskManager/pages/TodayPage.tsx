@@ -5,7 +5,6 @@ import { AssigneeProfileBadge } from "../components/shared/AssigneeProfileBadge"
 import { PROFILE_FALLBACK_COLORS } from "../domain/dashboard/color";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
-import { useRoutines } from "../hooks/useRoutines";
 import { useTodayTasks } from "../hooks/useTaskOccurrences";
 import type { TaskOccurrenceDto } from "../models/dto";
 import { FamilyRoutineSlot, FamilyTaskOccurrenceStatus, FamilyTaskSourceType } from "../models/enums";
@@ -26,12 +25,12 @@ function statusClasses(status: string): string {
   return "bg-muted text-muted-foreground";
 }
 
-function resolveGroup(task: TaskOccurrenceDto, routineSlotByUuid: Record<string, FamilyRoutineSlot>): TodayGroupKey {
+function resolveGroup(task: TaskOccurrenceDto): TodayGroupKey {
   if (task.sourceType !== FamilyTaskSourceType.ROUTINE) {
     return "chore";
   }
 
-  const slot = routineSlotByUuid[task.sourceUuid] ?? FamilyRoutineSlot.ANYTIME;
+  const slot = task.routineSlot ?? FamilyRoutineSlot.ANYTIME;
   return slot.toLowerCase() as Lowercase<FamilyRoutineSlot>;
 }
 
@@ -41,7 +40,6 @@ export function TodayPage() {
 
   const { tasks, loading, error, refetch, submit } = useTodayTasks();
   const { profiles } = useFamilyContext();
-  const { routines } = useRoutines();
   const [submitting, setSubmitting] = useState<string | null>(null);
 
   const profileByUuid = useMemo(() => {
@@ -56,26 +54,16 @@ export function TodayPage() {
     );
   }, [profiles]);
 
-  const routineSlotByUuid = useMemo(() => {
-    const map: Record<string, FamilyRoutineSlot> = {};
-
-    for (const routine of routines) {
-      map[routine.uuid] = routine.routineSlot;
-    }
-
-    return map;
-  }, [routines]);
-
   const grouped = useMemo(() => {
     const map: Partial<Record<TodayGroupKey, TaskOccurrenceDto[]>> = {};
 
     for (const task of tasks) {
-      const groupKey = resolveGroup(task, routineSlotByUuid);
+      const groupKey = resolveGroup(task);
       map[groupKey] = [...(map[groupKey] ?? []), task];
     }
 
     return map;
-  }, [tasks, routineSlotByUuid]);
+  }, [tasks]);
 
   const handleSubmit = async (occurrenceUuid: string) => {
     setSubmitting(occurrenceUuid);

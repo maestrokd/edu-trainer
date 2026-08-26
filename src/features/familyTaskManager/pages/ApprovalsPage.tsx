@@ -11,11 +11,10 @@ import { groupApprovalsByProfileDateAndSlot } from "../domain/dashboard/approval
 import { SECTION_ORDER } from "../domain/dashboard/types";
 import { useFamilyContext } from "../hooks/useFamilyContext";
 import { useRewardRedemptions } from "../hooks/useRewards";
-import { useRoutines } from "../hooks/useRoutines";
 import { useApprovalQueue } from "../hooks/useTaskOccurrences";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { ChildProfileDto, RewardRedemptionDto, TaskOccurrenceDto } from "../models/dto";
-import { FamilyRewardRedemptionStatus, FamilyRoutineSlot } from "../models/enums";
+import { FamilyRewardRedemptionStatus } from "../models/enums";
 
 function createUnknownProfile(profileUuid: string, label: string): ChildProfileDto {
   return {
@@ -48,7 +47,6 @@ export function ApprovalsPage() {
   const { principal } = useAuth();
   const canManage = canManageFamilyTask(principal);
   const { profiles, loading: familyLoading, error: familyError, refetch: refetchFamily } = useFamilyContext();
-  const routineFilters = useMemo(() => ({ active: true }), []);
   const redemptionFilters = useMemo(
     () => ({
       status: FamilyRewardRedemptionStatus.PENDING,
@@ -58,8 +56,6 @@ export function ApprovalsPage() {
     }),
     []
   );
-  const { routines, loading: routinesLoading } = useRoutines(routineFilters);
-
   const {
     queue,
     loading: taskLoading,
@@ -111,16 +107,6 @@ export function ApprovalsPage() {
     return [...activeProfiles, ...extraProfiles];
   }, [activeProfiles, pendingRedemptions, profiles, queue, t]);
 
-  const routineSlotByUuid = useMemo(() => {
-    const map: Record<string, FamilyRoutineSlot> = {};
-
-    for (const routine of routines) {
-      map[routine.uuid] = routine.routineSlot;
-    }
-
-    return map;
-  }, [routines]);
-
   const taskQueueByProfile = useMemo(() => {
     const grouped: Record<string, TaskOccurrenceDto[]> = {};
 
@@ -167,8 +153,8 @@ export function ApprovalsPage() {
   }, [pendingRedemptions, visibleProfiles]);
 
   const dateGroupsByProfile = useMemo(
-    () => groupApprovalsByProfileDateAndSlot(queue, routineSlotByUuid, SECTION_ORDER),
-    [queue, routineSlotByUuid]
+    () => groupApprovalsByProfileDateAndSlot(queue, SECTION_ORDER),
+    [queue]
   );
 
   const profileColumns = useMemo(
@@ -183,7 +169,7 @@ export function ApprovalsPage() {
     [dateGroupsByProfile, pendingRedemptionsByProfile, taskQueueByProfile, visibleProfiles]
   );
 
-  const pageLoading = taskLoading || redeemLoading || familyLoading || routinesLoading;
+  const pageLoading = taskLoading || redeemLoading || familyLoading;
 
   const handleApproveTask = async (task: TaskOccurrenceDto) => {
     setTaskActionByTaskUuid((prev) => ({ ...prev, [task.uuid]: "approve" }));

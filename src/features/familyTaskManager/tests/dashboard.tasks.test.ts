@@ -8,6 +8,7 @@ function buildTask(task: Partial<TaskOccurrenceDto>): TaskOccurrenceDto {
     uuid: task.uuid ?? "task-1",
     sourceType: task.sourceType ?? FamilyTaskSourceType.ROUTINE,
     sourceUuid: task.sourceUuid ?? "routine-1",
+    routineSlot: task.routineSlot ?? null,
     assigneeProfileUuid: task.assigneeProfileUuid ?? "profile-1",
     title: task.title ?? "Task",
     emoji: task.emoji ?? null,
@@ -23,34 +24,22 @@ function buildTask(task: Partial<TaskOccurrenceDto>): TaskOccurrenceDto {
 
 describe("dashboard task domain helpers", () => {
   it("resolves chore tasks into chore bucket", () => {
-    const bucket = resolveTaskBucket(
-      buildTask({
-        sourceType: FamilyTaskSourceType.CHORE,
-      }),
-      {}
-    );
+    const bucket = resolveTaskBucket(buildTask({ sourceType: FamilyTaskSourceType.CHORE }));
 
     expect(bucket).toBe("chores");
   });
 
   it("groups and sorts tasks by section order and title", () => {
-    const routineSlotByUuid = {
-      "routine-morning": FamilyRoutineSlot.MORNING,
-      "routine-afternoon": FamilyRoutineSlot.AFTERNOON,
-      "routine-evening": FamilyRoutineSlot.EVENING,
-      "routine-anytime": FamilyRoutineSlot.ANYTIME,
-    };
-
     const tasks = [
-      buildTask({ uuid: "3", title: "Zoo", sourceUuid: "routine-evening" }),
-      buildTask({ uuid: "2", title: "Brush teeth", sourceUuid: "routine-morning" }),
+      buildTask({ uuid: "3", title: "Zoo", routineSlot: FamilyRoutineSlot.EVENING }),
+      buildTask({ uuid: "2", title: "Brush teeth", routineSlot: FamilyRoutineSlot.MORNING }),
       buildTask({ uuid: "1", title: "Clean room", sourceType: FamilyTaskSourceType.CHORE, sourceUuid: "chore-1" }),
-      buildTask({ uuid: "5", title: "Read book", sourceUuid: "routine-anytime" }),
-      buildTask({ uuid: "6", title: "Math practice", sourceUuid: "routine-afternoon" }),
-      buildTask({ uuid: "4", title: "Arrange books", sourceUuid: "routine-morning" }),
+      buildTask({ uuid: "5", title: "Read book", routineSlot: FamilyRoutineSlot.ANYTIME }),
+      buildTask({ uuid: "6", title: "Math practice", routineSlot: FamilyRoutineSlot.AFTERNOON }),
+      buildTask({ uuid: "4", title: "Arrange books", routineSlot: FamilyRoutineSlot.MORNING }),
     ];
 
-    const grouped = groupTasksByProfile(tasks, routineSlotByUuid);
+    const grouped = groupTasksByProfile(tasks);
     const sortedTitles = grouped["profile-1"].map((task) => task.title);
 
     expect(sortedTitles).toEqual(["Arrange books", "Brush teeth", "Math practice", "Zoo", "Read book", "Clean room"]);

@@ -7,13 +7,30 @@ interface AudioPlayerBubbleProps {
   audioUrl: string;
   autoPlay?: boolean;
   onRetry?: () => void;
+  onPlay?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
+  onPlaybackError?: () => void;
 }
 
-const AudioPlayerBubble: React.FC<AudioPlayerBubbleProps> = ({ audioUrl, autoPlay = false, onRetry }) => {
+const AudioPlayerBubble: React.FC<AudioPlayerBubbleProps> = ({
+  audioUrl,
+  autoPlay = false,
+  onRetry,
+  onPlay: onPlayCallback,
+  onPause: onPauseCallback,
+  onEnded: onEndedCallback,
+  onPlaybackError,
+}) => {
   const { t } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const callbacksRef = useRef({ onPlayCallback, onPauseCallback, onEndedCallback, onPlaybackError });
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    callbacksRef.current = { onPlayCallback, onPauseCallback, onEndedCallback, onPlaybackError };
+  }, [onEndedCallback, onPauseCallback, onPlayCallback, onPlaybackError]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -22,9 +39,7 @@ const AudioPlayerBubble: React.FC<AudioPlayerBubbleProps> = ({ audioUrl, autoPla
     if (isPlaying) {
       audio.pause();
     } else {
-      audio.play().catch(() => {
-        /* autoplay blocked */
-      });
+      audio.play().catch(() => callbacksRef.current.onPlaybackError?.());
     }
   }, [isPlaying]);
 
@@ -32,11 +47,18 @@ const AudioPlayerBubble: React.FC<AudioPlayerBubbleProps> = ({ audioUrl, autoPla
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
+    const onPlay = () => {
+      setIsPlaying(true);
+      callbacksRef.current.onPlayCallback?.();
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+      callbacksRef.current.onPauseCallback?.();
+    };
     const onEnded = () => {
       setIsPlaying(false);
       setProgress(0);
+      callbacksRef.current.onEndedCallback?.();
     };
     const onTimeUpdate = () => {
       if (audio.duration) {
@@ -48,10 +70,12 @@ const AudioPlayerBubble: React.FC<AudioPlayerBubbleProps> = ({ audioUrl, autoPla
     audio.addEventListener("pause", onPause);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("timeupdate", onTimeUpdate);
+    const onError = () => callbacksRef.current.onPlaybackError?.();
+    audio.addEventListener("error", onError);
 
     if (autoPlay) {
       audio.play().catch(() => {
-        /* browser blocked autoplay */
+        // Browser autoplay policy may require a user gesture; manual playback remains available.
       });
     }
 
@@ -60,8 +84,8 @@ const AudioPlayerBubble: React.FC<AudioPlayerBubbleProps> = ({ audioUrl, autoPla
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("ended", onEnded);
-      audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("error", onError);
       // removing URL.revokeObjectURL(audioUrl) because it kills the URL
       // if the component unmounts/remounts (Strict Mode) while the parent still holds the ref.
     };

@@ -36,6 +36,24 @@ export const FamilyTaskOccurrenceStatus = {
 
 export type FamilyTaskOccurrenceStatus = (typeof FamilyTaskOccurrenceStatus)[keyof typeof FamilyTaskOccurrenceStatus];
 
+export const TaskCoachState = {
+  RECOMMENDATION: "RECOMMENDATION",
+  ALL_DONE: "ALL_DONE",
+  WAITING_FOR_APPROVAL: "WAITING_FOR_APPROVAL",
+  NO_TASKS: "NO_TASKS",
+} as const;
+
+export type TaskCoachState = (typeof TaskCoachState)[keyof typeof TaskCoachState];
+
+export const TaskCoachMascotCue = {
+  ENCOURAGING: "ENCOURAGING",
+  CELEBRATING: "CELEBRATING",
+  WAITING: "WAITING",
+  NEUTRAL: "NEUTRAL",
+} as const;
+
+export type TaskCoachMascotCue = (typeof TaskCoachMascotCue)[keyof typeof TaskCoachMascotCue];
+
 export const FamilyTaskCompletionEventType = {
   SUBMITTED: "SUBMITTED",
   APPROVED: "APPROVED",

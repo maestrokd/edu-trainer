@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { hexToRgba } from "../../domain/dashboard/color";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../domain/dashboard/tasks";
 import { SECTION_ORDER, TOP_SLOT_ORDER, type SlotBucket, type TopSlot } from "../../domain/dashboard/types";
 import type { ChildProfileDto, TaskOccurrenceDto } from "../../models/dto";
-import { FamilyTaskOccurrenceStatus, type FamilyRoutineSlot } from "../../models/enums";
+import { FamilyTaskOccurrenceStatus } from "../../models/enums";
 import { DashboardTaskCard } from "./DashboardTaskCard";
 import { NotoEmoji } from "../shared/NotoEmoji";
 
@@ -17,7 +17,7 @@ interface DashboardProfileColumnProps {
   profile: ChildProfileDto;
   profileColor: string;
   profileTasks: TaskOccurrenceDto[];
-  routineSlotByUuid: Record<string, FamilyRoutineSlot>;
+  recommendedTaskUuid?: string | null;
   submittingByTaskUuid: Record<string, boolean>;
   onComplete: (task: TaskOccurrenceDto) => void;
   showCompleted: boolean;
@@ -51,7 +51,7 @@ export function DashboardProfileColumn({
   profile,
   profileColor,
   profileTasks,
-  routineSlotByUuid,
+  recommendedTaskUuid,
   submittingByTaskUuid,
   onComplete,
   showCompleted,
@@ -78,7 +78,7 @@ export function DashboardProfileColumn({
     );
 
     for (const task of profileTasks) {
-      const bucket = resolveTaskBucket(task, routineSlotByUuid);
+      const bucket = resolveTaskBucket(task);
       taskGroups[bucket] = [...(taskGroups[bucket] ?? []), task];
 
       const topSlot = toTopSlot(bucket);
@@ -90,7 +90,16 @@ export function DashboardProfileColumn({
     }
 
     return { taskGroups, slotProgress };
-  }, [profileTasks, routineSlotByUuid]);
+  }, [profileTasks]);
+
+  useEffect(() => {
+    const recommendedTask = profileTasks.find((task) => task.uuid === recommendedTaskUuid);
+    if (!recommendedTask) {
+      return;
+    }
+    const slot = toTopSlot(resolveTaskBucket(recommendedTask));
+    setSlotFilters((current) => (current[slot] ? current : { ...current, [slot]: true }));
+  }, [profileTasks, recommendedTaskUuid]);
 
   const totalCount = profileTasks.length;
   const completedCount = calculateCompletedCount(profileTasks);
@@ -262,6 +271,7 @@ export function DashboardProfileColumn({
                     statusBadgeColor={statusBadgeColor}
                     isSubmitting={Boolean(submittingByTaskUuid[task.uuid])}
                     onComplete={onComplete}
+                    isRecommended={task.uuid === recommendedTaskUuid}
                   />
                 ))}
               </div>

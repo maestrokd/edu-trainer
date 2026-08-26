@@ -1,17 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInsetHeader } from "@/contexts/InsetHeaderContext";
 import { DashboardAppHeader, DashboardHeader } from "../components/dashboard/DashboardHeader";
 import { DashboardProfileColumn } from "../components/dashboard/DashboardProfileColumn";
+import { TaskCoachWidget, type TaskCoachSuccessEvent } from "../components/taskCoach/TaskCoachWidget";
 import { CapabilitySuggestions } from "../components/gates/CapabilitySuggestions";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { PROFILE_FALLBACK_COLORS } from "../domain/dashboard/color";
 import { useFamilyTaskDashboardController } from "../hooks/useFamilyTaskDashboardController";
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
+import type { TaskOccurrenceDto } from "../models/dto";
 
 export function FamilyTaskDashboardPage() {
   const { t, i18n } = useTranslation();
   const [showCompleted, setShowCompleted] = useState(false);
+  const [recommendedTaskUuid, setRecommendedTaskUuid] = useState<string | null>(null);
+  const [coachSuccessEvent, setCoachSuccessEvent] = useState<TaskCoachSuccessEvent | null>(null);
   const {
     family,
     familyError,
@@ -22,8 +26,8 @@ export function FamilyTaskDashboardPage() {
     profileFilter,
     setProfileFilter,
     isSecondaryWithoutManageProfiles,
+    ownProfileUuid,
     tasksByProfile,
-    routineSlotByUuid,
     submittingByTaskUuid,
     loading,
     error,
@@ -34,6 +38,25 @@ export function FamilyTaskDashboardPage() {
   } = useFamilyTaskDashboardController();
 
   useTrackFamilyTaskPageView("dashboard");
+
+  useEffect(() => {
+    if (!isToday) {
+      setRecommendedTaskUuid(null);
+    }
+  }, [isToday]);
+
+  const handleDashboardComplete = async (task: TaskOccurrenceDto) => {
+    const updatedTask = await handleComplete(task);
+    if (!updatedTask) {
+      return;
+    }
+
+    setCoachSuccessEvent((current) => ({
+      id: (current?.id ?? 0) + 1,
+      profileUuid: updatedTask.assigneeProfileUuid,
+      starsAwarded: updatedTask.starsAwarded,
+    }));
+  };
 
   const appHeaderContent = useMemo(
     () => (
@@ -118,22 +141,32 @@ export function FamilyTaskDashboardPage() {
 
         {!loading && !error && visibleProfiles.length > 0 ? (
           <section className="min-h-0 min-w-0 flex-1 overflow-x-auto pb-2">
-            <div className="flex h-full w-max min-w-full snap-x gap-4 pr-4">
+            <div className="flex h-full w-max min-w-full snap-x gap-4 pr-32 sm:pr-40">
               {visibleProfiles.map((profile, index) => (
                 <DashboardProfileColumn
                   key={profile.profileUuid}
                   profile={profile}
                   profileColor={profile.color ?? PROFILE_FALLBACK_COLORS[index % PROFILE_FALLBACK_COLORS.length]}
                   profileTasks={tasksByProfile[profile.profileUuid] ?? []}
-                  routineSlotByUuid={routineSlotByUuid}
+                  recommendedTaskUuid={recommendedTaskUuid}
                   submittingByTaskUuid={submittingByTaskUuid}
-                  onComplete={handleComplete}
+                  onComplete={handleDashboardComplete}
                   showCompleted={showCompleted}
                 />
               ))}
             </div>
           </section>
         ) : null}
+
+        <TaskCoachWidget
+          isToday={isToday}
+          activeProfiles={activeProfiles}
+          profileFilter={profileFilter}
+          isSecondary={isSecondaryWithoutManageProfiles}
+          ownProfileUuid={ownProfileUuid}
+          successEvent={coachSuccessEvent}
+          onRecommendation={setRecommendedTaskUuid}
+        />
       </div>
     </FamilyTaskPageShell>
   );

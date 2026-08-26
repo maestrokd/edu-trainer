@@ -30,6 +30,7 @@ function buildTask(task: Partial<TaskOccurrenceDto>): TaskOccurrenceDto {
     uuid: task.uuid ?? "task-1",
     sourceType: task.sourceType ?? FamilyTaskSourceType.ROUTINE,
     sourceUuid: task.sourceUuid ?? "routine-morning",
+    routineSlot: task.routineSlot ?? FamilyRoutineSlot.MORNING,
     assigneeProfileUuid: task.assigneeProfileUuid ?? "profile-1",
     title: task.title ?? "Task",
     emoji: task.emoji ?? null,
@@ -65,7 +66,6 @@ describe("DashboardProfileColumn filters", () => {
         profile={buildProfile()}
         profileColor="#60a5fa"
         profileTasks={tasks}
-        routineSlotByUuid={{ "routine-morning": FamilyRoutineSlot.MORNING }}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
         showCompleted={true}
@@ -98,7 +98,6 @@ describe("DashboardProfileColumn filters", () => {
         profile={buildProfile()}
         profileColor="#60a5fa"
         profileTasks={tasks}
-        routineSlotByUuid={{ "routine-morning": FamilyRoutineSlot.MORNING }}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
         showCompleted={true}
@@ -119,18 +118,21 @@ describe("DashboardProfileColumn filters", () => {
         title: "Evening task",
         sourceType: FamilyTaskSourceType.ROUTINE,
         sourceUuid: "routine-evening",
+        routineSlot: FamilyRoutineSlot.EVENING,
       }),
       buildTask({
         uuid: "anytime-1",
         title: "Anytime task",
         sourceType: FamilyTaskSourceType.ROUTINE,
         sourceUuid: "routine-anytime",
+        routineSlot: FamilyRoutineSlot.ANYTIME,
       }),
       buildTask({
         uuid: "morning-1",
         title: "Morning task",
         sourceType: FamilyTaskSourceType.ROUTINE,
         sourceUuid: "routine-morning",
+        routineSlot: FamilyRoutineSlot.MORNING,
       }),
       buildTask({
         uuid: "chore-1",
@@ -143,6 +145,7 @@ describe("DashboardProfileColumn filters", () => {
         title: "Afternoon task",
         sourceType: FamilyTaskSourceType.ROUTINE,
         sourceUuid: "routine-afternoon",
+        routineSlot: FamilyRoutineSlot.AFTERNOON,
       }),
     ];
 
@@ -151,12 +154,6 @@ describe("DashboardProfileColumn filters", () => {
         profile={buildProfile()}
         profileColor="#60a5fa"
         profileTasks={tasks}
-        routineSlotByUuid={{
-          "routine-morning": FamilyRoutineSlot.MORNING,
-          "routine-afternoon": FamilyRoutineSlot.AFTERNOON,
-          "routine-evening": FamilyRoutineSlot.EVENING,
-          "routine-anytime": FamilyRoutineSlot.ANYTIME,
-        }}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
         showCompleted={true}
@@ -191,7 +188,6 @@ describe("DashboardProfileColumn filters", () => {
         profile={buildProfile()}
         profileColor="#60a5fa"
         profileTasks={tasks}
-        routineSlotByUuid={{}}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
         showCompleted={false}
@@ -209,7 +205,6 @@ describe("DashboardProfileColumn filters", () => {
         profile={buildProfile()}
         profileColor="#60a5fa"
         profileTasks={tasks}
-        routineSlotByUuid={{}}
         submittingByTaskUuid={{}}
         onComplete={vi.fn()}
         showCompleted={true}
@@ -220,5 +215,38 @@ describe("DashboardProfileColumn filters", () => {
     expect(screen.getByText("Open task")).toBeInTheDocument();
     expect(screen.getByText("Completed task")).toBeInTheDocument();
     expect(screen.getByText("Submitted task")).toBeInTheDocument();
+  });
+
+  it("re-enables and highlights a slot selected by Task Coach", () => {
+    const tasks = [buildTask({ uuid: "recommended", title: "Morning task" })];
+    const { rerender } = render(
+      <DashboardProfileColumn
+        profile={buildProfile()}
+        profileColor="#60a5fa"
+        profileTasks={tasks}
+        submittingByTaskUuid={{}}
+        onComplete={vi.fn()}
+        showCompleted={true}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /morning/i }));
+    expect(screen.queryByText("Morning task")).not.toBeInTheDocument();
+
+    rerender(
+      <DashboardProfileColumn
+        profile={buildProfile()}
+        profileColor="#60a5fa"
+        profileTasks={tasks}
+        recommendedTaskUuid="recommended"
+        submittingByTaskUuid={{}}
+        onComplete={vi.fn()}
+        showCompleted={true}
+      />
+    );
+
+    const card = screen.getByText("Morning task").closest("article");
+    expect(card).toHaveAttribute("data-task-uuid", "recommended");
+    expect(card).toHaveClass("ring-primary");
   });
 });
