@@ -12,18 +12,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { taskCoachApi } from "../../api/taskCoachApi";
 import { TaskCoachMascotCue, TaskCoachState } from "../../models/enums";
 import type { ChildProfileDto, TaskCoachAdviceDto } from "../../models/dto";
+import { TASK_COACH_CHARACTER_IDS, type TaskCoachCharacterId } from "../../models/taskCoachCharacter";
 import {
   loadTaskCoachAutoplay,
   loadTaskCoachAutoRequest,
+  loadTaskCoachCharacter,
   saveTaskCoachAutoplay,
   saveTaskCoachAutoRequest,
+  saveTaskCoachCharacter,
 } from "../../services/taskCoachPreferences";
 import type { AssistantCharacterState } from "./TaskCoachCharacter";
 import { TaskCoachCharacterLoader } from "./TaskCoachCharacterLoader";
+import { getTaskCoachCharacter, TASK_COACH_CHARACTER_LICENSE_URL } from "./taskCoachCharacters";
 
 export interface TaskCoachSuccessEvent {
   id: number;
@@ -41,8 +46,6 @@ interface TaskCoachWidgetProps {
   onRecommendation: (taskUuid: string | null) => void;
 }
 
-const CHARACTER_CREDIT_URL = "https://rive.app/marketplace/27883-52700-cute-character-cat/";
-const CHARACTER_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/";
 const SUCCESS_DURATION_MS = 2_500;
 
 export function TaskCoachWidget({
@@ -67,6 +70,7 @@ export function TaskCoachWidget({
   const [audioError, setAudioError] = useState(false);
   const [autoplay, setAutoplay] = useState(loadTaskCoachAutoplay);
   const [autoRequestAdvice, setAutoRequestAdvice] = useState(loadTaskCoachAutoRequest);
+  const [selectedCharacterId, setSelectedCharacterId] = useState(loadTaskCoachCharacter);
   const [autoPlayLoadedAudio, setAutoPlayLoadedAudio] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [interacting, setInteracting] = useState(false);
@@ -99,6 +103,7 @@ export function TaskCoachWidget({
     return activeProfiles;
   }, [activeProfiles, isSecondary, ownProfileUuid, profileFilter]);
   const selectedProfile = selectableProfiles.find((profile) => profile.profileUuid === selectedProfileUuid);
+  const selectedCharacter = getTaskCoachCharacter(selectedCharacterId);
 
   const replaceAudioUrl = useCallback((nextUrl: string | null) => {
     if (audioUrlRef.current) {
@@ -373,6 +378,11 @@ export function TaskCoachWidget({
     saveTaskCoachAutoRequest(enabled);
   };
 
+  const handleCharacterChange = (characterId: TaskCoachCharacterId) => {
+    setSelectedCharacterId(characterId);
+    saveTaskCoachCharacter(characterId);
+  };
+
   const characterState: AssistantCharacterState = !isToday
     ? "SLEEPING"
     : loading
@@ -540,7 +550,10 @@ export function TaskCoachWidget({
           >
             <MessageCircle className="size-4" />
             {showBubble && !responseOpen ? (
-              <span className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-card bg-primary" aria-hidden="true" />
+              <span
+                className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-card bg-primary"
+                aria-hidden="true"
+              />
             ) : null}
           </Button>
 
@@ -586,11 +599,44 @@ export function TaskCoachWidget({
                   {t("familyTask.taskCoach.settings", "Task Coach settings")}
                 </DialogTitle>
                 <DialogDescription>
-                  {t("familyTask.taskCoach.settingsDescription", "Choose when advice and voice are generated.")}
+                  {t(
+                    "familyTask.taskCoach.settingsDescription",
+                    "Choose your character and when advice and voice are generated."
+                  )}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-3">
+                <div className="space-y-2 rounded-xl border bg-muted/35 px-3 py-2">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="task-coach-character">{t("familyTask.taskCoach.character", "Character")}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        "familyTask.taskCoach.characterHint",
+                        "Choose the character that stays with you on the task calendar."
+                      )}
+                    </p>
+                  </div>
+                  <Select
+                    value={selectedCharacterId}
+                    onValueChange={(value) => handleCharacterChange(value as TaskCoachCharacterId)}
+                  >
+                    <SelectTrigger id="task-coach-character" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TASK_COACH_CHARACTER_IDS.map((characterId) => {
+                        const character = getTaskCoachCharacter(characterId);
+                        return (
+                          <SelectItem key={characterId} value={characterId}>
+                            {t(character.nameTranslationKey, character.nameFallback)}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="flex items-center justify-between gap-4 rounded-xl border bg-muted/35 px-3 py-2">
                   <div className="space-y-0.5">
                     <Label htmlFor="task-coach-auto-request" className="cursor-pointer">
@@ -622,15 +668,40 @@ export function TaskCoachWidget({
                 <p className="font-medium text-foreground">
                   {t("familyTask.taskCoach.characterCredit", "Character credit")}
                 </p>
-                <p>Cute Character Cat</p>
-                <p>{t("familyTask.taskCoach.createdBy", "Created by kikkojinji1")}</p>
+                <p>{selectedCharacter.attribution.title}</p>
                 <p>
-                  <a className="underline" href={CHARACTER_CREDIT_URL} target="_blank" rel="noreferrer">
-                    {t("familyTask.taskCoach.marketplaceSource", "Original asset from the Rive Marketplace")}
-                  </a>
+                  {t("familyTask.taskCoach.createdBy", "Created by")} {selectedCharacter.attribution.creator}
                 </p>
                 <p>
-                  <a className="underline" href={CHARACTER_LICENSE_URL} target="_blank" rel="noreferrer">
+                  <a
+                    className="underline"
+                    href={selectedCharacter.attribution.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("familyTask.taskCoach.marketplaceSource", "Character listing on the Rive Marketplace")}
+                  </a>
+                </p>
+                {selectedCharacter.attribution.remix ? (
+                  <>
+                    <p>
+                      {t("familyTask.taskCoach.remixOf", "Remix of")} {selectedCharacter.attribution.remix.title}{" "}
+                      {t("familyTask.taskCoach.byCreator", "by")} {selectedCharacter.attribution.remix.creator}
+                    </p>
+                    <p>
+                      <a
+                        className="underline"
+                        href={selectedCharacter.attribution.remix.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("familyTask.taskCoach.remixSource", "Original character source")}
+                      </a>
+                    </p>
+                  </>
+                ) : null}
+                <p>
+                  <a className="underline" href={TASK_COACH_CHARACTER_LICENSE_URL} target="_blank" rel="noreferrer">
                     {t(
                       "familyTask.taskCoach.characterLicense",
                       "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)"
@@ -639,7 +710,7 @@ export function TaskCoachWidget({
                 </p>
                 <p>{t("familyTask.taskCoach.characterAdapted", "Adapted for use in Kids Task Calendar.")}</p>
                 <p>
-                  {t("familyTask.taskCoach.noEndorsement", "The creator does not endorse Kids Task Calendar.")}
+                  {t("familyTask.taskCoach.noEndorsement", "The character creators do not endorse Kids Task Calendar.")}
                 </p>
               </div>
             </DialogContent>
@@ -657,7 +728,7 @@ export function TaskCoachWidget({
           onPointerDown={() => setInteracting(true)}
           onPointerUp={() => setInteracting(false)}
         >
-          <TaskCoachCharacterLoader state={characterState} />
+          <TaskCoachCharacterLoader state={characterState} characterId={selectedCharacterId} />
         </button>
       </div>
     </div>

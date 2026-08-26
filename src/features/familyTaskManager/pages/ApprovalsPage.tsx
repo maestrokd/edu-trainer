@@ -152,10 +152,7 @@ export function ApprovalsPage() {
     return grouped;
   }, [pendingRedemptions, visibleProfiles]);
 
-  const dateGroupsByProfile = useMemo(
-    () => groupApprovalsByProfileDateAndSlot(queue, SECTION_ORDER),
-    [queue]
-  );
+  const dateGroupsByProfile = useMemo(() => groupApprovalsByProfileDateAndSlot(queue, SECTION_ORDER), [queue]);
 
   const profileColumns = useMemo(
     () =>

@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   loadTaskCoachAutoplay,
   loadTaskCoachAutoRequest,
+  loadTaskCoachCharacter,
   saveTaskCoachAutoplay,
   saveTaskCoachAutoRequest,
+  saveTaskCoachCharacter,
 } from "../services/taskCoachPreferences";
 
 describe("Task Coach preferences", () => {
@@ -25,5 +27,15 @@ describe("Task Coach preferences", () => {
 
     expect(loadTaskCoachAutoRequest()).toBe(false);
     expect(localStorage.getItem("family-task-coach:preferences:auto-request")).toBe("false");
+  });
+
+  it("defaults to Simple Cat and only restores recognized character ids", () => {
+    expect(loadTaskCoachCharacter()).toBe("simple-cat");
+
+    saveTaskCoachCharacter("cute-character-cat");
+    expect(loadTaskCoachCharacter()).toBe("cute-character-cat");
+
+    localStorage.setItem("family-task-coach:preferences:character", "unknown-character");
+    expect(loadTaskCoachCharacter()).toBe("simple-cat");
   });
 });

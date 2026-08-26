@@ -13,7 +13,11 @@ vi.mock("../api/taskCoachApi", () => ({
 }));
 vi.mock("@/components/english-coach/AudioPlayerBubble", () => ({ default: () => <div>audio player</div> }));
 vi.mock("../components/taskCoach/TaskCoachCharacterLoader", () => ({
-  TaskCoachCharacterLoader: ({ state }: { state: string }) => <div data-testid="task-coach-character">{state}</div>,
+  TaskCoachCharacterLoader: ({ state, characterId }: { state: string; characterId: string }) => (
+    <div data-testid="task-coach-character" data-character-id={characterId}>
+      {state}
+    </div>
+  ),
 }));
 
 const child: ChildProfileDto = {
@@ -59,6 +63,10 @@ describe("TaskCoachWidget", () => {
       configurable: true,
       value: vi.fn(),
     });
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -78,6 +86,7 @@ describe("TaskCoachWidget", () => {
     );
 
     expect(screen.getByTestId("task-coach-character")).toHaveTextContent("SLEEPING");
+    expect(screen.getByTestId("task-coach-character")).toHaveAttribute("data-character-id", "simple-cat");
     expect(screen.getByRole("button", { name: "Task Coach settings" })).toBeVisible();
     expect(taskCoachApi.getAdvice).not.toHaveBeenCalled();
 
@@ -236,8 +245,10 @@ describe("TaskCoachWidget", () => {
     await waitFor(() => expect(taskCoachApi.getAdvice).toHaveBeenCalledOnce());
   });
 
-  it("shows required character attribution in settings", () => {
+  it("switches characters without resetting or re-requesting advice and shows matching attribution", async () => {
     localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(advice);
     render(
       <TaskCoachWidget
         isToday
@@ -249,17 +260,39 @@ describe("TaskCoachWidget", () => {
       />
     );
 
+    fireEvent.click(await screen.findByRole("button", { name: "Ask the cat for fresh advice" }));
+    expect(await screen.findByText("Start with your book.")).toBeVisible();
+
     fireEvent.click(screen.getByRole("button", { name: "Task Coach settings" }));
-    expect(screen.getByText("Created by kikkojinji1")).toBeVisible();
-    expect(screen.getByRole("link", { name: "Original asset from the Rive Marketplace" })).toHaveAttribute(
+    expect(screen.getByRole("combobox", { name: "Character" })).toHaveTextContent("Simple Cat (transparent)");
+    expect(screen.getByText("Created by nvr")).toBeVisible();
+    expect(screen.getByText("Remix of Cat following the mouse by Pedro Alpera")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Character listing on the Rive Marketplace" })).toHaveAttribute(
       "href",
-      "https://rive.app/marketplace/27883-52700-cute-character-cat/"
+      "https://rive.app/marketplace/8999-17412-cat-simple-edit/"
+    );
+    expect(screen.getByRole("link", { name: "Original character source" })).toHaveAttribute(
+      "href",
+      "https://rive.app/marketplace/3920-8202-cat-following-the-mouse/"
     );
     expect(
       screen.getByRole("link", {
         name: "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)",
       })
     ).toHaveAttribute("href", "https://creativecommons.org/licenses/by/4.0/");
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Character" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Cute Character Cat" }));
+
+    expect(screen.getByTestId("task-coach-character")).toHaveAttribute("data-character-id", "cute-character-cat");
+    expect(localStorage.getItem("family-task-coach:preferences:character")).toBe("cute-character-cat");
+    expect(screen.getByText("Created by kikkojinji1")).toBeVisible();
+    expect(screen.queryByText("Remix of Cat following the mouse by Pedro Alpera")).not.toBeInTheDocument();
+    expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show latest response" }));
+    expect(screen.getByText("Start with your book.")).toBeVisible();
   });
 
   it("turns a successful task event into a transient character celebration", () => {

@@ -1,31 +1,17 @@
 import { useEffect, useState } from "react";
 import { Alignment, Fit, Layout, RuntimeLoader, useRive, useStateMachineInput } from "@rive-app/react-canvas";
 import { NotoEmoji } from "../shared/NotoEmoji";
+import type { TaskCoachCharacterId } from "../../models/taskCoachCharacter";
+import { getTaskCoachCharacter, type AssistantCharacterState } from "./taskCoachCharacters";
 
-export type AssistantCharacterState = "IDLE" | "LISTENING" | "THINKING" | "SPEAKING" | "SUCCESS" | "ERROR" | "SLEEPING";
+export type { AssistantCharacterState } from "./taskCoachCharacters";
 
 interface TaskCoachCharacterProps {
   state: AssistantCharacterState;
+  characterId: TaskCoachCharacterId;
 }
 
 const TASK_COACH_ASSET_PATH = `${import.meta.env.BASE_URL}assets/task-coach`;
-const CAT_ASSET_PATH = `${TASK_COACH_ASSET_PATH}/cute-character-cat.riv`;
-const CAT_ARTBOARD = "Artboard";
-const CAT_STATE_MACHINE = "State Machine 1";
-const CAT_STATE_INPUT = "Number 1";
-
-// Keep runtime and asset-specific details in this adapter. The Task Coach itself
-// works only with semantic AssistantCharacterState values so the character can
-// be replaced without changing advice, TTS, or task-selection flows.
-const CAT_INPUT_BY_STATE: Record<AssistantCharacterState, number> = {
-  IDLE: 0,
-  LISTENING: 1,
-  THINKING: 0,
-  SPEAKING: 1,
-  SUCCESS: 2,
-  ERROR: 0,
-  SLEEPING: 0,
-};
 
 const PRESENTATION_BY_STATE: Record<AssistantCharacterState, string> = {
   IDLE: "",
@@ -40,26 +26,32 @@ const PRESENTATION_BY_STATE: Record<AssistantCharacterState, string> = {
 RuntimeLoader.setWasmUrl(`${TASK_COACH_ASSET_PATH}/rive.wasm`);
 RuntimeLoader.setWasmFallbackUrl(null);
 
-export function TaskCoachCharacter({ state }: TaskCoachCharacterProps) {
+export function TaskCoachCharacter({ state, characterId }: TaskCoachCharacterProps) {
+  const character = getTaskCoachCharacter(characterId);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const { rive, RiveComponent } = useRive({
-    src: CAT_ASSET_PATH,
-    artboard: CAT_ARTBOARD,
-    stateMachines: CAT_STATE_MACHINE,
+    src: `${TASK_COACH_ASSET_PATH}/${character.assetFileName}`,
+    artboard: character.artboard,
+    stateMachines: character.stateMachine,
     autoplay: true,
     enableRiveAssetCDN: false,
     layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
     onLoad: () => setLoaded(true),
     onLoadError: () => setFailed(true),
   });
-  const stateInput = useStateMachineInput(rive, CAT_STATE_MACHINE, CAT_STATE_INPUT, 0);
+  const stateInput = useStateMachineInput(
+    rive,
+    character.stateMachine,
+    character.stateInput?.name ?? "",
+    character.stateInput?.valueByState.IDLE
+  );
 
   useEffect(() => {
-    if (stateInput) {
-      stateInput.value = CAT_INPUT_BY_STATE[state];
+    if (stateInput && character.stateInput) {
+      stateInput.value = character.stateInput.valueByState[state];
     }
-  }, [state, stateInput]);
+  }, [character.stateInput, state, stateInput]);
 
   useEffect(() => {
     if (!rive) {
@@ -68,12 +60,12 @@ export function TaskCoachCharacter({ state }: TaskCoachCharacterProps) {
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     if (reducedMotion || state === "SLEEPING") {
-      const frameId = requestAnimationFrame(() => rive.pause(CAT_STATE_MACHINE));
+      const frameId = requestAnimationFrame(() => rive.pause(character.stateMachine));
       return () => cancelAnimationFrame(frameId);
     }
 
-    rive.play(CAT_STATE_MACHINE);
-  }, [rive, state]);
+    rive.play(character.stateMachine);
+  }, [character.stateMachine, rive, state]);
 
   return (
     <div
@@ -82,11 +74,17 @@ export function TaskCoachCharacter({ state }: TaskCoachCharacterProps) {
       data-character-state={state}
     >
       {!failed ? (
-        <RiveComponent className={`size-full transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`} />
+        <RiveComponent
+          className={`size-full bg-transparent transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+        />
       ) : null}
       {!loaded || failed ? (
-        <span className="absolute inset-0 flex items-center justify-center rounded-full bg-amber-50 shadow-inner dark:bg-amber-950">
-          <NotoEmoji emoji="🐱" size={82} fallback="🐱" />
+        <span
+          className={`absolute inset-0 flex items-center justify-center ${
+            character.transparent ? "bg-transparent" : "rounded-full bg-amber-50 shadow-inner dark:bg-amber-950"
+          }`}
+        >
+          <NotoEmoji emoji={character.fallbackEmoji} size={82} fallback={character.fallbackEmoji} />
         </span>
       ) : null}
       {state === "SLEEPING" ? (
