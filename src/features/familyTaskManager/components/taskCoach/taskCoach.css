@@ -1,0 +1,61 @@
+.task-coach-widget {
+  --coach-dock-height: 13rem;
+  --coach-available-height: calc(
+    100dvh - var(--coach-dock-height) - 3rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+}
+.task-coach-response {
+  max-height: min(32rem, var(--coach-available-height));
+}
+.task-coach-kids-scroll {
+  max-height: min(14rem, calc(100dvh - 6rem - env(safe-area-inset-bottom)));
+}
+.task-coach-child-rail {
+  right: 3.25rem;
+  bottom: 6.125rem;
+}
+.task-coach-character {
+  width: 8rem;
+  height: 8rem;
+}
+@media (max-height: 540px) {
+  .task-coach-widget {
+    --coach-dock-height: 5rem;
+  }
+  .task-coach-dock {
+    height: 5rem;
+    width: 18rem;
+  }
+  .task-coach-dock [data-slot="task-coach-actions"] {
+    flex-direction: row;
+  }
+  .task-coach-character-button {
+    right: 13rem;
+  }
+  .task-coach-character {
+    width: 5rem;
+    height: 5rem;
+  }
+  .task-coach-child-rail {
+    bottom: 3.5rem;
+    right: 0;
+  }
+}
+@media (max-width: 639px) and (min-height: 541px) {
+  .task-coach-kids-scroll {
+    max-height: min(14rem, calc(100dvh - 15rem - env(safe-area-inset-bottom)));
+  }
+}
+
+@media (max-height: 540px) {
+  .task-coach-widget:has(.task-coach-play-actions) {
+    --coach-dock-height: 8.5rem;
+  }
+  .task-coach-widget:has(.task-coach-play-actions) .task-coach-dock {
+    height: 8.5rem;
+  }
+  .task-coach-play-actions {
+    left: 0;
+    right: auto;
+  }
+}

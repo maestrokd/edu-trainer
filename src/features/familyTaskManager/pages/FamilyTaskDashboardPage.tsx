@@ -56,6 +56,10 @@ export function FamilyTaskDashboardPage() {
       id: (current?.id ?? 0) + 1,
       profileUuid: updatedTask.assigneeProfileUuid,
       starsAwarded: updatedTask.starsAwarded,
+      revisions: {
+        ...current?.revisions,
+        [updatedTask.assigneeProfileUuid]: (current?.revisions?.[updatedTask.assigneeProfileUuid] ?? 0) + 1,
+      },
     }));
   };
 

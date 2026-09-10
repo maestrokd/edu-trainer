@@ -2,9 +2,21 @@ import type { TaskCoachCharacterId } from "../../models/taskCoachCharacter";
 
 export type AssistantCharacterState = "IDLE" | "LISTENING" | "THINKING" | "SPEAKING" | "SUCCESS" | "ERROR" | "SLEEPING";
 
-interface TaskCoachCharacterInput {
-  name: string;
-  valueByState: Record<AssistantCharacterState, number>;
+export type CharacterAction = "wave" | "play";
+export interface CharacterReaction {
+  value: number;
+  statePrefix: string;
+  maxSeconds: number;
+}
+
+interface CharacterCapabilities {
+  nativePointer: boolean;
+  startup: "native" | "greeting";
+  idle: { inputName?: string; value: number };
+  reactions: Partial<Record<CharacterAction, CharacterReaction>>;
+  semantic: Partial<Record<AssistantCharacterState, CharacterAction>>;
+  // Normalized coordinates in the original square artboard (Fit.Contain).
+  hitAreas: Array<{ action: CharacterAction; x: number; y: number; radius: number }>;
 }
 
 interface TaskCoachCharacterAttribution {
@@ -23,9 +35,10 @@ export interface TaskCoachCharacterDefinition {
   nameTranslationKey: string;
   nameFallback: string;
   assetFileName: string;
+  posterFileName: string;
   artboard: string;
   stateMachine: string;
-  stateInput?: TaskCoachCharacterInput;
+  capabilities: CharacterCapabilities;
   transparent: boolean;
   fallbackEmoji: string;
   attribution: TaskCoachCharacterAttribution;
@@ -41,8 +54,17 @@ export const TASK_COACH_CHARACTERS: Record<TaskCoachCharacterId, TaskCoachCharac
     nameTranslationKey: "familyTask.taskCoach.simpleCat",
     nameFallback: "Simple Cat (transparent)",
     assetFileName: "cat-simple-edit.riv",
+    posterFileName: "cat-simple-edit.png",
     artboard: "Cat",
     stateMachine: "State Machine 1",
+    capabilities: {
+      nativePointer: true,
+      startup: "native",
+      idle: { value: 0 },
+      reactions: {},
+      semantic: {},
+      hitAreas: [],
+    },
     transparent: true,
     fallbackEmoji: "🐈‍⬛",
     attribution: {
@@ -61,19 +83,22 @@ export const TASK_COACH_CHARACTERS: Record<TaskCoachCharacterId, TaskCoachCharac
     nameTranslationKey: "familyTask.taskCoach.cuteCharacterCat",
     nameFallback: "Cute Character Cat",
     assetFileName: "cute-character-cat.riv",
+    posterFileName: "cute-character-cat.png",
     artboard: "Artboard",
     stateMachine: "State Machine 1",
-    stateInput: {
-      name: "Number 1",
-      valueByState: {
-        IDLE: 0,
-        LISTENING: 1,
-        THINKING: 0,
-        SPEAKING: 1,
-        SUCCESS: 2,
-        ERROR: 0,
-        SLEEPING: 0,
+    capabilities: {
+      nativePointer: true,
+      startup: "greeting",
+      idle: { inputName: "Number 1", value: 0 },
+      reactions: {
+        wave: { value: 1, statePrefix: "hi", maxSeconds: 8 },
+        play: { value: 2, statePrefix: "fish", maxSeconds: 12 },
       },
+      semantic: { SUCCESS: "wave" },
+      hitAreas: [
+        { action: "play", x: 0.815, y: 0.467, radius: 0.07 },
+        { action: "wave", x: 0.815, y: 0.638, radius: 0.07 },
+      ],
     },
     transparent: false,
     fallbackEmoji: "🐱",
@@ -87,4 +112,17 @@ export const TASK_COACH_CHARACTERS: Record<TaskCoachCharacterId, TaskCoachCharac
 
 export function getTaskCoachCharacter(characterId: TaskCoachCharacterId): TaskCoachCharacterDefinition {
   return TASK_COACH_CHARACTERS[characterId];
+}
+
+export function characterActionAtPoint(
+  character: TaskCoachCharacterDefinition,
+  rect: { left: number; top: number; width: number; height: number },
+  clientX: number,
+  clientY: number
+): CharacterAction | undefined {
+  const size = Math.min(rect.width, rect.height);
+  if (!size) return undefined;
+  const x = (clientX - rect.left - (rect.width - size) / 2) / size;
+  const y = (clientY - rect.top - (rect.height - size) / 2) / size;
+  return character.capabilities.hitAreas.find((area) => Math.hypot(x - area.x, y - area.y) <= area.radius)?.action;
 }

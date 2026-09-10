@@ -14,12 +14,27 @@ vi.mock("react-i18next", () => ({
 vi.mock("../api/taskCoachApi", () => ({
   taskCoachApi: { getAdvice: vi.fn(), synthesizeSpeech: vi.fn() },
 }));
-vi.mock("@/components/english-coach/AudioPlayerBubble", () => ({ default: () => <div>audio player</div> }));
+
 vi.mock("../components/taskCoach/TaskCoachCharacterLoader", () => ({
-  TaskCoachCharacterLoader: ({ state, characterId }: { state: string; characterId: string }) => (
-    <div data-testid="task-coach-character" data-character-id={characterId}>
+  TaskCoachCharacterLoader: ({
+    state,
+    characterId,
+    onActivate,
+    actionLabel,
+  }: {
+    state: string;
+    characterId: string;
+    onActivate: () => void;
+    actionLabel: string;
+  }) => (
+    <button
+      aria-label={actionLabel}
+      onClick={onActivate}
+      data-testid="task-coach-character"
+      data-character-id={characterId}
+    >
       {state}
-    </div>
+    </button>
   ),
 }));
 
@@ -59,6 +74,17 @@ function deferred<T>() {
 describe("TaskCoachWidget", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(taskCoachApi.getAdvice).mockReset();
+    vi.mocked(taskCoachApi.synthesizeSpeech).mockReset();
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(function (this: HTMLMediaElement) {
+      Object.defineProperty(this, "paused", { configurable: true, value: false });
+      this.dispatchEvent(new Event("play"));
+      return Promise.resolve();
+    });
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(function (this: HTMLMediaElement) {
+      Object.defineProperty(this, "paused", { configurable: true, value: true });
+      this.dispatchEvent(new Event("pause"));
+    });
     localStorage.clear();
     Object.defineProperty(URL, "createObjectURL", {
       configurable: true,
@@ -181,7 +207,7 @@ describe("TaskCoachWidget", () => {
     expect(onRecommendation).toHaveBeenLastCalledWith("task-1");
 
     fireEvent.click(secondPlanItem);
-    expect(secondPlanItem).toHaveAttribute("aria-current", "step");
+    await waitFor(() => expect(secondPlanItem).toHaveAttribute("aria-current", "step"));
     expect(firstPlanItem).not.toHaveAttribute("aria-current");
     expect(onRecommendation).toHaveBeenLastCalledWith("task-2");
     await waitFor(() => expect(document.getElementById("family-task-task-2")?.scrollIntoView).toHaveBeenCalled());
@@ -224,12 +250,12 @@ describe("TaskCoachWidget", () => {
       />
     );
 
-    expect(await screen.findByText("audio player")).toBeVisible();
+    expect(await screen.findByRole("progressbar", { name: "Voice progress" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Hide latest response" }));
-    expect(screen.queryByText("audio player")).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar", { name: "Voice progress" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Show latest response" }));
-    expect(screen.getByText("audio player")).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: "Voice progress" })).toBeVisible();
   });
 
   it("lets children be changed after advice and ignores a late response for the previous child", async () => {
@@ -306,8 +332,12 @@ describe("TaskCoachWidget", () => {
     const selector = screen.getByRole("radiogroup", { name: "Choose a child for Task Coach" });
     const choices = within(selector).getAllByRole("radio");
     expect(choices).toHaveLength(12);
-    expect(choices[0]).toHaveClass("w-full", "justify-start");
-    expect(choices[0].parentElement).toHaveClass("max-h-[min(18rem,40vh)]", "overflow-y-auto", "overscroll-contain");
+    expect(choices[0]).toHaveTextContent("Kid 1");
+    expect(choices[0].parentElement).toHaveClass("task-coach-kids-scroll", "overflow-y-auto", "overscroll-contain");
+    expect(choices[0]).toHaveClass("justify-end", "text-right");
+    expect(choices[0].children[0]).toHaveAttribute("data-slot", "task-coach-child-name");
+    expect(choices[0].children[0]).toHaveClass("text-right");
+    expect(choices[0].children[1]).toHaveAttribute("data-slot", "task-coach-child-avatar");
 
     fireEvent.click(within(selector).getByRole("radio", { name: /Kid 12/ }));
     expect(screen.queryByRole("radiogroup", { name: "Choose a child for Task Coach" })).not.toBeInTheDocument();
@@ -578,7 +608,7 @@ describe("TaskCoachWidget", () => {
     const visibilityToggle = screen.getByRole("button", { name: "Hide Task Coach" });
     fireEvent.click(visibilityToggle);
     expect(onVisibilityChange).toHaveBeenLastCalledWith(false);
-    expect(screen.queryByTestId("task-coach-character")).not.toBeInTheDocument();
+    expect(screen.getByTestId("task-coach-character")).not.toBeVisible();
     expect(screen.queryByRole("button", { name: "Task Coach settings" })).not.toBeInTheDocument();
     const restoreToggle = screen.getByRole("button", { name: "Show Task Coach" });
     expect(restoreToggle).toBeVisible();
@@ -683,5 +713,71 @@ describe("TaskCoachWidget", () => {
 
     act(() => vi.advanceTimersByTime(2_500));
     expect(screen.getByTestId("task-coach-character")).toHaveTextContent("IDLE");
+  });
+  it("keeps a single audio session and reading position through expansion, then pauses on close", async () => {
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(advice);
+    vi.mocked(taskCoachApi.synthesizeSpeech).mockResolvedValueOnce(new Blob(["audio"]));
+    const audioConstructor = vi.spyOn(window, "Audio").mockImplementation(() => document.createElement("audio"));
+    const view = render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+    await screen.findByRole("button", { name: "Pause voice" });
+    const scroll = screen.getByLabelText("Advice content");
+    scroll.scrollTop = 120;
+    fireEvent.scroll(scroll);
+    fireEvent.click(screen.getByRole("button", { name: "Expand advice" }));
+    expect(screen.getByRole("dialog")).toBeVisible();
+    expect(screen.getByLabelText("Advice content").scrollTop).toBe(120);
+    expect(screen.getByRole("button", { name: "Pause voice" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Compact view" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Advice content").scrollTop).toBe(120);
+    expect(audioConstructor).toHaveBeenCalledTimes(1);
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Close advice" }));
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Show latest response" }));
+    expect(screen.getByRole("button", { name: "Play voice" })).toBeVisible();
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(1);
+    expect(taskCoachApi.getAdvice).toHaveBeenCalledTimes(1);
+    view.unmount();
+    audioConstructor.mockRestore();
+  });
+
+  it("supports keyboard kid navigation, selection, Escape and outside dismissal", () => {
+    localStorage.setItem("family-task-coach:preferences:auto-request", "false");
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child, { ...child, profileUuid: "child-2", displayName: "Second Kid" }]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={vi.fn()}
+      />
+    );
+    const choices = screen.getAllByRole("radio");
+    choices[0].focus();
+    fireEvent.keyDown(choices[0], { key: "ArrowDown" });
+    expect(choices[1]).toHaveFocus();
+    fireEvent.click(choices[1]);
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    const trigger = screen.getByRole("button", { name: "Choose or change child" });
+    expect(trigger).toHaveFocus();
+    fireEvent.click(trigger);
+    expect(screen.getByRole("radio", { name: /Second Kid/ })).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(trigger).toHaveFocus();
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    fireEvent.click(trigger);
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
   });
 });
