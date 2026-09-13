@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInsetHeader } from "@/contexts/InsetHeaderContext";
 import { DashboardAppHeader, DashboardHeader } from "../components/dashboard/DashboardHeader";
 import { DashboardProfileColumn } from "../components/dashboard/DashboardProfileColumn";
-import { TaskCoachWidget, type TaskCoachSuccessEvent } from "../components/taskCoach/TaskCoachWidget";
+import type { TaskCoachSuccessEvent } from "../components/taskCoach/TaskCoachWidget";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { FeatureFlag } from "@/services/featureFlagsApi";
 import { CapabilitySuggestions } from "../components/gates/CapabilitySuggestions";
 import { FamilyTaskPageShell } from "../components/layout/FamilyTaskPageShell";
 import { PROFILE_FALLBACK_COLORS } from "../domain/dashboard/color";
@@ -11,8 +13,14 @@ import { useFamilyTaskDashboardController } from "../hooks/useFamilyTaskDashboar
 import { useTrackFamilyTaskPageView } from "../hooks/useTrackFamilyTaskPageView";
 import type { TaskOccurrenceDto } from "../models/dto";
 
+const TaskCoachWidget = lazy(() =>
+  import("../components/taskCoach/TaskCoachWidget").then((module) => ({ default: module.TaskCoachWidget }))
+);
+
 export function FamilyTaskDashboardPage() {
   const { t, i18n } = useTranslation();
+  const assistantEnabled = useFeatureFlag(FeatureFlag.FAMILY_TASK_MANAGER_AI_ASSISTANT);
+  const assistantEnabledRef = useRef(assistantEnabled);
   const [showCompleted, setShowCompleted] = useState(false);
   const [coachVisible, setCoachVisible] = useState(true);
   const [recommendedTaskUuid, setRecommendedTaskUuid] = useState<string | null>(null);
@@ -41,6 +49,15 @@ export function FamilyTaskDashboardPage() {
   useTrackFamilyTaskPageView("dashboard");
 
   useEffect(() => {
+    assistantEnabledRef.current = assistantEnabled;
+    if (!assistantEnabled) {
+      setRecommendedTaskUuid(null);
+      setCoachSuccessEvent(null);
+      setCoachVisible(true);
+    }
+  }, [assistantEnabled]);
+
+  useEffect(() => {
     if (!isToday) {
       setRecommendedTaskUuid(null);
     }
@@ -48,7 +65,7 @@ export function FamilyTaskDashboardPage() {
 
   const handleDashboardComplete = async (task: TaskOccurrenceDto) => {
     const updatedTask = await handleComplete(task);
-    if (!updatedTask) {
+    if (!updatedTask || !assistantEnabledRef.current) {
       return;
     }
 
@@ -148,7 +165,7 @@ export function FamilyTaskDashboardPage() {
           <section className="min-h-0 min-w-0 flex-1 overflow-x-auto pb-2">
             <div
               data-slot="family-task-profile-strip"
-              className={`flex h-full w-max min-w-full snap-x gap-4 ${coachVisible ? "pr-32 sm:pr-40" : "pr-14"}`}
+              className={`flex h-full w-max min-w-full snap-x gap-4 ${assistantEnabled ? (coachVisible ? "pr-32 sm:pr-40" : "pr-14") : ""}`}
             >
               {visibleProfiles.map((profile, index) => (
                 <DashboardProfileColumn
@@ -156,7 +173,7 @@ export function FamilyTaskDashboardPage() {
                   profile={profile}
                   profileColor={profile.color ?? PROFILE_FALLBACK_COLORS[index % PROFILE_FALLBACK_COLORS.length]}
                   profileTasks={tasksByProfile[profile.profileUuid] ?? []}
-                  recommendedTaskUuid={recommendedTaskUuid}
+                  recommendedTaskUuid={assistantEnabled ? recommendedTaskUuid : null}
                   submittingByTaskUuid={submittingByTaskUuid}
                   onComplete={handleDashboardComplete}
                   showCompleted={showCompleted}
@@ -166,16 +183,20 @@ export function FamilyTaskDashboardPage() {
           </section>
         ) : null}
 
-        <TaskCoachWidget
-          isToday={isToday}
-          activeProfiles={activeProfiles}
-          profileFilter={profileFilter}
-          isSecondary={isSecondaryWithoutManageProfiles}
-          ownProfileUuid={ownProfileUuid}
-          successEvent={coachSuccessEvent}
-          onRecommendation={setRecommendedTaskUuid}
-          onVisibilityChange={setCoachVisible}
-        />
+        {assistantEnabled ? (
+          <Suspense fallback={null}>
+            <TaskCoachWidget
+              isToday={isToday}
+              activeProfiles={activeProfiles}
+              profileFilter={profileFilter}
+              isSecondary={isSecondaryWithoutManageProfiles}
+              ownProfileUuid={ownProfileUuid}
+              successEvent={coachSuccessEvent}
+              onRecommendation={setRecommendedTaskUuid}
+              onVisibilityChange={setCoachVisible}
+            />
+          </Suspense>
+        ) : null}
       </div>
     </FamilyTaskPageShell>
   );
