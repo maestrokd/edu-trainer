@@ -121,3 +121,27 @@ export default tseslint.config([
   },
 ]);
 ```
+
+## Feature flags
+
+Deployment availability comes from authenticated `GET /private/features` on the
+backend. Use the shared `useFeatureFlag(FeatureFlag.…)` hook; do not introduce Vite
+flags or local-storage overrides for the same capability. Existing authority routes
+and family permissions still apply independently.
+
+The hook shares an in-memory React Query snapshot and refetches when a consumer mounts,
+on window focus, and on reconnect. It does not poll or persist flags. Only literal
+`true` enables a known flag. Missing/malformed flags, initial loading, and request
+failures disable the feature, including failures after a previously enabled response.
+Unrelated pages continue to work when discovery is unavailable.
+
+`family-task-manager-ai-assistant` gates the whole Family Task dashboard assistant:
+its lazy-loaded widget, character assets, settings, advice, speech, highlights, and
+reserved layout space. Disabling unmounts it and stops playback; ordinary task
+completion and saved personal preferences are preserved.
+
+The flag defaults off in every backend environment. Deploy the backend before this
+frontend; enable through external backend properties and restart all backend instances.
+Open dashboards catch up on navigation, focus, or reconnect. The backend independently
+rejects new disabled assistant calls immediately after restart. English Coach voice
+is unchanged. See the backend README for configuration and rollout details.
