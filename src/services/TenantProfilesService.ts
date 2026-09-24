@@ -1,5 +1,6 @@
 import { del, get, patch, post } from "@/services/ApiService.ts";
 import { type TenantMembershipRole } from "@/services/AuthService.ts";
+import type { Locale5 } from "@/services/SettingsApiClient.ts";
 
 export const TenantProfileType = {
   ADULT: "ADULT",
@@ -26,7 +27,7 @@ export interface TenantProfileListItem {
   lastName: string | null;
   avatarEmoji: string | null;
   color: string | null;
-  locale: string | null;
+  locale: Locale5 | null;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -46,7 +47,7 @@ export interface CreateTenantProfileRequest {
   password: string;
   firstName?: string;
   lastName?: string;
-  locale?: string;
+  locale?: Locale5;
   displayName?: string;
   avatarEmoji?: string;
   color?: string;
@@ -57,7 +58,7 @@ export interface PatchTenantProfileRequest {
   firstName?: string;
   lastName?: string;
   password?: string;
-  locale?: string;
+  locale?: Locale5;
   displayName?: string;
   avatarEmoji?: string;
   color?: string;
