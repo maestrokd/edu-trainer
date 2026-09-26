@@ -216,6 +216,36 @@ describe("TaskCoachWidget", () => {
     await waitFor(() => expect(taskCoachApi.synthesizeSpeech).toHaveBeenCalledWith("child-1", planAdvice.speechText));
   });
 
+  it("renders the unavailable-now state without highlighting a task", async () => {
+    localStorage.setItem("family-task-coach:preferences:autoplay", "false");
+    const onRecommendation = vi.fn();
+    vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce({
+      ...advice,
+      state: TaskCoachState.NO_SUGGESTIONS_NOW,
+      recommendedTaskUuids: [],
+      planItems: [],
+      displayText: "No task fits this time of day right now.",
+      speechText: "No task fits this time of day right now.",
+      mascotCue: TaskCoachMascotCue.NEUTRAL,
+    });
+
+    render(
+      <TaskCoachWidget
+        isToday
+        activeProfiles={[child]}
+        profileFilter={[]}
+        isSecondary={false}
+        ownProfileUuid={null}
+        onRecommendation={onRecommendation}
+      />
+    );
+
+    expect(await screen.findByText("No task fits this time of day right now.")).toBeVisible();
+    expect(screen.queryByText("Now")).not.toBeInTheDocument();
+    await waitFor(() => expect(onRecommendation).toHaveBeenCalledWith(null));
+    expect(onRecommendation.mock.calls.some(([taskUuid]) => taskUuid !== null)).toBe(false);
+  });
+
   it("keeps localized advice visible when speech generation fails", async () => {
     vi.mocked(taskCoachApi.getAdvice).mockResolvedValueOnce(advice);
     vi.mocked(taskCoachApi.synthesizeSpeech).mockRejectedValueOnce(new Error("tts unavailable"));
