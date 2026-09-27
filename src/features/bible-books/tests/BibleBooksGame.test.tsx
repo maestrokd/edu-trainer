@@ -110,6 +110,14 @@ describe("BibleBooksGame", () => {
       "sm:grid"
     );
 
+    const languageSelect = screen.getByRole("combobox", { name: "Bible book language" });
+    expect(languageSelect.closest("div")).toHaveClass("space-y-1.5", "sm:space-y-2");
+    expect(screen.getByText("Bible book language")).toHaveClass("text-sm", "sm:text-base");
+    expect(screen.getByText("Changes only the book names and order used in this game.")).toHaveClass(
+      "sr-only",
+      "sm:not-sr-only"
+    );
+
     const firstChoice = screen.getByRole("button", { name: /First 5 Books/ });
     expect(firstChoice.parentElement).toHaveClass("grid-cols-2", "gap-2", "sm:gap-3");
     expect(firstChoice).toHaveClass("min-h-20", "p-3", "sm:min-h-28", "sm:p-4");

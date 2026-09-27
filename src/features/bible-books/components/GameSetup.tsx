@@ -1,14 +1,13 @@
-import { ArrowRight, BookOpen, Check, Languages } from "lucide-react";
+import { ArrowRight, BookOpen, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 import type { BibleBookLanguage, PracticeSetId } from "../model/bible-books.types";
+import { BibleBookLanguageSelect } from "./BibleBookLanguageSelect";
 
 interface PracticeSetOption {
   id: PracticeSetId;
@@ -77,31 +76,16 @@ export function GameSetup({
       </CardHeader>
 
       <CardContent className="space-y-4 px-3 sm:space-y-6 sm:px-8">
-        <div className="space-y-1.5 sm:space-y-2">
-          <Label htmlFor="bible-book-language" className="flex items-center gap-2 text-sm sm:text-base">
-            <Languages className="size-4" aria-hidden="true" />
-            {t("bibleBooksGame.setup.language.label")}
-          </Label>
-          <Select
-            value={selectedBibleLanguage}
-            onValueChange={(value) => onBibleLanguageChange(value as BibleBookLanguage)}
-          >
-            <SelectTrigger id="bible-book-language" className="h-11 w-full" aria-describedby="bible-book-language-hint">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="uk">Українська</SelectItem>
-              <SelectItem value="ru">Русский</SelectItem>
-            </SelectContent>
-          </Select>
-          <p
-            id="bible-book-language-hint"
-            className="sr-only sm:not-sr-only sm:text-xs sm:leading-relaxed sm:text-muted-foreground"
-          >
-            {t("bibleBooksGame.setup.language.hint")}
-          </p>
-        </div>
+        <BibleBookLanguageSelect
+          id="bible-book-language"
+          value={selectedBibleLanguage}
+          onChange={onBibleLanguageChange}
+          label={t("bibleBooksGame.setup.language.label")}
+          hint={t("bibleBooksGame.setup.language.hint")}
+          className="space-y-1.5 sm:space-y-2"
+          labelClassName="text-sm sm:text-base"
+          hintClassName="sr-only sm:not-sr-only"
+        />
 
         <fieldset className="space-y-2 sm:space-y-4">
           <legend className="text-sm font-semibold sm:text-base">{t("bibleBooksGame.setup.choosePracticeSet")}</legend>
