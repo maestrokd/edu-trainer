@@ -1115,6 +1115,86 @@
       "recordingFailed": "Запись не удалась. Попробуйте снова."
     }
   },
+  "bibleBooksGame": {
+    "pageTitle": "Книги Библии — Что дальше? | Edu Trainer",
+    "title": "Книги Библии",
+    "header": {
+      "mainMenuAria": "Назад в меню Edu Trainer"
+    },
+    "setup": {
+      "tagline": "Изучайте шаг за шагом",
+      "title": "Что дальше?",
+      "description": "Изучайте порядок книг Библии шаг за шагом.",
+      "infoAria": "Об этой игре",
+      "choosePracticeSet": "Выберите, что хотите изучать:",
+      "language": {
+        "label": "Язык названий книг Библии",
+        "hint": "Изменяет только названия и порядок книг в этой игре."
+      },
+      "questionCount_one": "{{count}} вопрос",
+      "questionCount_few": "{{count}} вопроса",
+      "questionCount_many": "{{count}} вопросов",
+      "questionCount_other": "{{count}} вопроса",
+      "practiceSets": {
+        "firstFive": {
+          "name": "Первые 5 книг",
+          "description": "Начните с первых пяти книг Библии."
+        },
+        "oldTestament": {
+          "name": "Ветхий Завет",
+          "description": "Изучайте все 39 книг Ветхого Завета."
+        },
+        "newTestament": {
+          "name": "Новый Завет",
+          "description": "Изучайте все 27 книг Нового Завета."
+        },
+        "allBooks": {
+          "name": "Все 66 книг",
+          "description": "Изучайте полный порядок книг Библии."
+        }
+      }
+    },
+    "quiz": {
+      "questionCount": "Вопрос {{current}} из {{total}}",
+      "score": "Счёт: {{score}}",
+      "scoreAria": "Правильных ответов сейчас: {{score}}",
+      "progressAria": "Прогресс раунда: вопрос {{current}} из {{total}}",
+      "prompt": "Что дальше?",
+      "chooseNext": "Выберите следующую книгу:",
+      "correctAnswer": "Правильный ответ",
+      "yourAnswer": "Ваш ответ",
+      "answerAria": {
+        "correct": "{{book}} — правильный ответ",
+        "incorrect": "{{book}} — ваш ответ, не совсем"
+      },
+      "feedback": {
+        "correct": "Правильно!",
+        "incorrect": "Не совсем.",
+        "explanation": "После {{currentBook}} идёт {{nextBook}}."
+      }
+    },
+    "results": {
+      "title": "Отличная работа!",
+      "description": "Вы изучаете порядок книг Библии!",
+      "youGot": "Ваш результат",
+      "outOf": "из {{total}}",
+      "correct": "правильно",
+      "scoreAria": "Правильных ответов: {{correct}} из {{total}}.",
+      "perfect": "Идеальный раунд — вы знали каждую следующую книгу!",
+      "missed_one": "{{count}} книгу стоит попробовать ещё раз.",
+      "missed_few": "{{count}} книги стоит попробовать ещё раз.",
+      "missed_many": "{{count}} книг стоит попробовать ещё раз.",
+      "missed_other": "{{count}} книги стоит попробовать ещё раз."
+    },
+    "actions": {
+      "mainMenu": "Главное меню",
+      "startPractice": "Начать тренировку",
+      "nextQuestion": "Следующий вопрос",
+      "seeResults": "Посмотреть результаты",
+      "playAgain": "Сыграть ещё раз",
+      "changePracticeSet": "Изменить набор"
+    }
+  },
   "familyTask": {
     "sidebar": {
       "title": "Семейные задачи",
