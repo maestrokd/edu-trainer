@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import App from "./App";
-import { expect, it } from "vitest";
-import { MemoryRouter } from "react-router";
+import { beforeEach, expect, it } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import i18n from "./i18n";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -11,6 +12,10 @@ const queryClient = new QueryClient({
       retry: false,
     },
   },
+});
+
+beforeEach(async () => {
+  await i18n.changeLanguage("en");
 });
 
 it("shows Home link", () => {
@@ -23,5 +28,19 @@ it("shows Home link", () => {
       </MemoryRouter>
     </QueryClientProvider>
   );
-  expect(screen.getByText("menu.categories.all")).toBeInTheDocument();
+  expect(screen.getByText("All")).toBeInTheDocument();
+});
+
+it("shows the public Bible Bookshelf route without authentication", () => {
+  render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={["/bible-bookshelf"]}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+
+  expect(screen.getByRole("heading", { name: "Bible Bookshelf", level: 1 })).toBeInTheDocument();
 });
