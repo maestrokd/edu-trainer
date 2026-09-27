@@ -42,5 +42,5 @@ it("shows the public Bible Bookshelf route without authentication", () => {
     </QueryClientProvider>
   );
 
-  expect(screen.getByRole("heading", { name: "Bible Bookshelf", level: 1 })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Set up your bookshelf", level: 1 })).toBeInTheDocument();
 });

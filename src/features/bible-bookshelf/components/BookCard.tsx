@@ -7,6 +7,7 @@ import { getBookTone } from "../lib/book-tones";
 
 interface BookCardProps {
   book: BibleBook;
+  compact?: boolean;
   isSelected: boolean;
   isHinted: boolean;
   onSelect: (bookId: string) => void;
@@ -14,7 +15,15 @@ interface BookCardProps {
   hintLabel: string;
 }
 
-export function BookCard({ book, isSelected, isHinted, onSelect, selectedLabel, hintLabel }: BookCardProps) {
+export function BookCard({
+  book,
+  compact = false,
+  isSelected,
+  isHinted,
+  onSelect,
+  selectedLabel,
+  hintLabel,
+}: BookCardProps) {
   const { ref, isDragging } = useDraggable({
     id: `book:${book.id}`,
     type: "book",
@@ -33,8 +42,9 @@ export function BookCard({ book, isSelected, isHinted, onSelect, selectedLabel, 
         if (!isDragging) onSelect(book.id);
       }}
       className={cn(
-        "group relative flex min-h-28 w-full touch-none items-center gap-2 overflow-hidden rounded-xl border border-l-8 px-3 py-4 text-left shadow-sm outline-none transition-[transform,box-shadow,border-color]",
+        "group relative flex w-full items-center gap-2 overflow-hidden rounded-xl border border-l-8 text-left shadow-sm outline-none transition-[transform,box-shadow,border-color]",
         "hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-4 focus-visible:ring-primary/35 motion-reduce:transform-none motion-reduce:transition-none",
+        compact ? "min-h-20 touch-pan-x px-2 py-3" : "min-h-28 touch-none px-3 py-4",
         getBookTone(book.order),
         isSelected && "ring-4 ring-primary/45 shadow-lg",
         isHinted && "ring-4 ring-amber-400/70 shadow-lg",
@@ -42,7 +52,12 @@ export function BookCard({ book, isSelected, isHinted, onSelect, selectedLabel, 
       )}
     >
       <GripVertical className="size-5 shrink-0 opacity-45" aria-hidden="true" />
-      <span className="min-w-0 flex-1 text-center text-base font-bold leading-snug break-words sm:text-lg">
+      <span
+        className={cn(
+          "min-w-0 flex-1 text-center font-bold leading-snug break-words",
+          compact ? "text-sm sm:text-base" : "text-base sm:text-lg"
+        )}
+      >
         {book.name}
       </span>
       {isHinted ? (

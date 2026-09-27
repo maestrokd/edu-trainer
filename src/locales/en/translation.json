@@ -1196,9 +1196,39 @@
     "title": "Bible Bookshelf",
     "subtitle": "Learn the order of the books of the Bible in a fun and interactive way!",
     "chooseGroup": "Choose a learning group",
+    "setup": {
+      "title": "Set up your bookshelf",
+      "description": "Choose the Bible-book language and how many books you want to arrange.",
+      "language": {
+        "label": "Bible book language",
+        "hint": "Changes only the book names and order used in this game."
+      },
+      "mode": {
+        "legend": "Choose a practice mode",
+        "groups": {
+          "name": "Learning groups",
+          "description": "Build the order five books at a time."
+        },
+        "testament": {
+          "name": "Whole testament",
+          "description": "Arrange every book of the Old or New Testament in one round."
+        }
+      },
+      "testament": {
+        "legend": "Choose a testament",
+        "old": {
+          "name": "Old Testament"
+        },
+        "new": {
+          "name": "New Testament"
+        },
+        "bookCount": "{{count}} books"
+      }
+    },
     "instruction": {
       "title": "Put the books in the correct order.",
-      "body": "Drag a book or tap to select it, then choose a shelf position."
+      "body": "Drag a book or tap to select it, then choose a shelf position.",
+      "testamentBody": "Build the complete testament. Scroll each row sideways to reach every book and shelf position."
     },
     "progress": {
       "value": "{{correct}} of {{total}} correct",
@@ -1208,13 +1238,19 @@
       "empty": "Empty"
     },
     "tray": {
-      "title": "Books to place"
+      "title": "Books to place",
+      "scrollHint": "Scroll sideways to find every book."
     },
     "actions": {
       "mainMenu": "Main Menu",
+      "start": "Start building",
+      "changeSetup": "Change setup",
       "hint": "Hint",
       "reset": "Reset",
-      "nextRound": "Next round"
+      "nextRound": "Next round",
+      "playAgain": "Play again",
+      "keepPlaying": "Keep playing",
+      "leaveRound": "Leave round"
     },
     "feedback": {
       "correctTitle": "Great job!",
@@ -1224,13 +1260,24 @@
     },
     "complete": {
       "title": "Shelf complete!",
-      "detail": "You put these books in the correct order."
+      "detail": "You put these books in the correct order.",
+      "testamentDetail": "You put all {{count}} books in the correct order."
+    },
+    "leave": {
+      "title": "Change setup?",
+      "description": "Your progress in this round will be lost."
+    },
+    "testament": {
+      "description": "All {{count}} books in one round",
+      "oldTip": "The Old Testament begins with {{first}} and ends with {{last}}.",
+      "newTip": "The New Testament begins with {{first}} and ends with {{last}}."
     },
     "tipLabel": "Tip:",
     "aria": {
       "mainMenu": "Back to the Edu Trainer menu",
       "shelf": "Bible book shelf",
       "scrollHint": "Swipe sideways to see every shelf position.",
+      "fullShelfScrollHint": "Scroll sideways to reach all shelf positions.",
       "filledSlot": "Shelf position {{position}}, {{book}}, correct and locked",
       "emptySlot": "Empty shelf position {{position}}",
       "hintedSlot": "hinted position",
@@ -1238,55 +1285,46 @@
       "hintedBook": "hinted book"
     },
     "groups": {
+      "range": "{{start}} through {{end}}",
       "law": {
         "label": "The Law",
-        "description": "Genesis through Deuteronomy",
         "tip": "The first five books of the Bible are often called the Law or Pentateuch."
       },
       "history": {
         "label": "Old Testament History",
-        "description": "Joshua through Esther",
         "tip": "These books tell much of Israel’s history, from entering the land through the return from exile."
       },
       "poetry-wisdom": {
         "label": "Poetry & Wisdom",
-        "description": "Job through Song of Solomon",
         "tip": "These books include poetry, songs, prayers, and wisdom."
       },
       "major-prophets": {
         "label": "Major Prophets",
-        "description": "Isaiah through Daniel",
         "tip": "The Major Prophets are longer prophetic books in the Old Testament."
       },
       "minor-prophets": {
         "label": "Minor Prophets",
-        "description": "Hosea through Malachi",
         "tip": "“Minor” describes the books’ shorter length, not their importance."
       },
       "gospels-acts": {
         "label": "Gospels & Acts",
-        "description": "Matthew through Acts",
-        "tip": "The four Gospels come first in the New Testament, followed by Acts."
+        "tip": "The four Gospels come first in the New Testament, followed by the history of the early church."
       },
       "pauline-letters": {
         "label": "Paul’s Letters",
-        "description": "Romans through Philemon",
-        "tip": "These New Testament letters run from Romans through Philemon."
+        "tip": "These letters form a long sequence in the New Testament."
       },
       "general-letters-revelation": {
         "label": "General Letters & Revelation",
-        "description": "Hebrews through Revelation",
-        "tip": "This final group ends with Revelation, the last book of the Bible."
+        "tip": "This final group ends with the Bible’s last book."
       },
       "gospels-general-letters": {
         "label": "Gospels, Acts & General Letters",
-        "description": "Matthew through Jude",
-        "tip": "In this order, the General Letters follow Acts."
+        "tip": "In this order, the General Letters follow the history of the early church."
       },
       "pauline-letters-revelation": {
         "label": "Paul’s Letters, Hebrews & Revelation",
-        "description": "Romans through Revelation",
-        "tip": "This group follows Paul’s letters through Hebrews and ends with Revelation."
+        "tip": "This group follows Paul’s letters and ends with the Bible’s last book."
       }
     }
   },

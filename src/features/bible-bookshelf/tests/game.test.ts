@@ -2,10 +2,48 @@ import { describe, expect, it } from "vitest";
 
 import { BIBLE_BOOKS_BY_LANGUAGE } from "@/features/bible-books/data/bibleBooks.registry";
 
-import { getBibleBookshelfGroupBooks, getBibleBookshelfGroups } from "../data/learning-groups";
-import { bibleBookshelfReducer, buildRoundWindows, createBibleBookshelfState, getRoundWindows } from "../lib/game";
+import {
+  getBibleBookshelfGroupBooks,
+  getBibleBookshelfGroups,
+  getBibleBookshelfTestamentBooks,
+} from "../data/learning-groups";
+import {
+  bibleBookshelfReducer,
+  buildRoundWindows,
+  createBibleBookshelfState,
+  getRoundWindows,
+  hasBibleBookshelfProgress,
+  type BibleBookshelfState,
+} from "../lib/game";
 
 const fixedRandom = () => 0.42;
+
+function startLawRound(language: "en" | "uk" | "ru" = "en") {
+  return bibleBookshelfReducer(createBibleBookshelfState(language), {
+    type: "start-game",
+    random: fixedRandom,
+  });
+}
+
+function startTestamentRound(testament: "OLD" | "NEW", language: "en" | "uk" | "ru" = "en") {
+  let state = createBibleBookshelfState(language);
+  state = bibleBookshelfReducer(state, { type: "set-mode", mode: "testament" });
+  state = bibleBookshelfReducer(state, { type: "set-testament", testament });
+  return bibleBookshelfReducer(state, { type: "start-game", random: fixedRandom });
+}
+
+function completeRound(state: BibleBookshelfState) {
+  let completed = state;
+  completed.roundBookIds.forEach((bookId, slotIndex) => {
+    if (completed.placedBySlot[slotIndex]) return;
+    completed = bibleBookshelfReducer(completed, {
+      type: "attempt-placement",
+      bookId,
+      slotIndex,
+    });
+  });
+  return completed;
+}
 
 describe("Bible Bookshelf learning groups", () => {
   it.each(["en", "uk", "ru"] as const)("covers the complete ordered %s canon exactly once", (language) => {
@@ -26,6 +64,14 @@ describe("Bible Bookshelf learning groups", () => {
     expect(getBibleBookshelfGroups("ru").at(-2)).toMatchObject({ startOrder: 40, endOrder: 51 });
     expect(getBibleBookshelfGroups("ru").at(-1)).toMatchObject({ startOrder: 52, endOrder: 66 });
   });
+
+  it.each(["en", "uk", "ru"] as const)("provides complete testament scopes in %s order", (language) => {
+    expect(getBibleBookshelfTestamentBooks(language, "OLD")).toHaveLength(39);
+    expect(getBibleBookshelfTestamentBooks(language, "NEW")).toHaveLength(27);
+    expect(getBibleBookshelfTestamentBooks(language, "NEW").map((book) => book.order)).toEqual(
+      Array.from({ length: 27 }, (_, index) => index + 40)
+    );
+  });
 });
 
 describe("Bible Bookshelf round windows", () => {
@@ -42,12 +88,38 @@ describe("Bible Bookshelf round windows", () => {
   });
 });
 
-describe("Bible Bookshelf game reducer", () => {
-  it("anchors Genesis and accepts only the correct placement", () => {
-    const initial = createBibleBookshelfState("en", "law", 0, fixedRandom);
-    expect(initial.placedBySlot).toEqual({ 0: "genesis" });
-    expect(initial.trayBookIds).toHaveLength(4);
+describe("Bible Bookshelf setup and reducer", () => {
+  it("starts in setup and anchors only learning-group rounds", () => {
+    const setup = createBibleBookshelfState("en");
+    expect(setup.phase).toBe("setup");
+    expect(setup.config).toMatchObject({ bibleLanguage: "en", mode: "groups", groupId: "law" });
 
+    const groupRound = startLawRound();
+    expect(groupRound.placedBySlot).toEqual({ 0: "genesis" });
+    expect(groupRound.trayBookIds).toHaveLength(4);
+    expect(hasBibleBookshelfProgress(groupRound)).toBe(false);
+
+    const testamentRound = startTestamentRound("OLD");
+    expect(testamentRound.placedBySlot).toEqual({});
+    expect(testamentRound.roundBookIds).toHaveLength(39);
+    expect(testamentRound.trayBookIds).toHaveLength(39);
+    expect(hasBibleBookshelfProgress(testamentRound)).toBe(false);
+  });
+
+  it("changes the local language only in setup, resets the group, and retains the testament", () => {
+    let state = createBibleBookshelfState("en");
+    state = bibleBookshelfReducer(state, { type: "set-group", groupId: "history" });
+    state = bibleBookshelfReducer(state, { type: "set-testament", testament: "NEW" });
+    state = bibleBookshelfReducer(state, { type: "set-bible-language", language: "ru" });
+
+    expect(state.config).toMatchObject({ bibleLanguage: "ru", groupId: "law", testament: "NEW" });
+
+    const playing = bibleBookshelfReducer(state, { type: "start-game", random: fixedRandom });
+    expect(bibleBookshelfReducer(playing, { type: "set-bible-language", language: "uk" })).toBe(playing);
+  });
+
+  it("accepts only correct placements and locks placed slots and books", () => {
+    const initial = startLawRound();
     const wrong = bibleBookshelfReducer(initial, {
       type: "attempt-placement",
       bookId: "leviticus",
@@ -64,79 +136,58 @@ describe("Bible Bookshelf game reducer", () => {
     });
     expect(correct.placedBySlot[1]).toBe("exodus");
     expect(correct.trayBookIds).not.toContain("exodus");
-    expect(correct.feedback?.kind).toBe("correct");
-
-    expect(
-      bibleBookshelfReducer(correct, {
-        type: "attempt-placement",
-        bookId: "leviticus",
-        slotIndex: 1,
-      })
-    ).toBe(correct);
-    expect(
-      bibleBookshelfReducer(correct, {
-        type: "attempt-placement",
-        bookId: "exodus",
-        slotIndex: 2,
-      })
-    ).toBe(correct);
+    expect(hasBibleBookshelfProgress(correct)).toBe(true);
+    expect(bibleBookshelfReducer(correct, { type: "attempt-placement", bookId: "leviticus", slotIndex: 1 })).toBe(
+      correct
+    );
+    expect(bibleBookshelfReducer(correct, { type: "attempt-placement", bookId: "exodus", slotIndex: 2 })).toBe(correct);
   });
 
-  it("completes, resets to the anchor, and wraps after the final window", () => {
-    let state = createBibleBookshelfState("en", "law", 0, fixedRandom);
-    state.roundBookIds.slice(1).forEach((bookId, index) => {
-      state = bibleBookshelfReducer(state, {
-        type: "attempt-placement",
-        bookId,
-        slotIndex: index + 1,
-      });
-    });
-    expect(state.isComplete).toBe(true);
+  it("completes, resets, advances group windows, and wraps after the final window", () => {
+    const completed = completeRound(startLawRound());
+    expect(completed.isComplete).toBe(true);
 
-    const reset = bibleBookshelfReducer(state, { type: "reset-round", random: fixedRandom });
+    const reset = bibleBookshelfReducer(completed, { type: "reset-round", random: fixedRandom });
     expect(reset.placedBySlot).toEqual({ 0: "genesis" });
     expect(reset.isComplete).toBe(false);
 
+    let historySetup = createBibleBookshelfState("en");
+    historySetup = bibleBookshelfReducer(historySetup, { type: "set-group", groupId: "history" });
+    let history = bibleBookshelfReducer(historySetup, { type: "start-game", random: fixedRandom });
     const historyWindows = getRoundWindows("en", "history");
-    let history = createBibleBookshelfState("en", "history", historyWindows.length - 1, fixedRandom);
     history = bibleBookshelfReducer(history, { type: "next-round", random: fixedRandom });
+    expect(history.windowIndex).toBe(1);
+    expect(history.roundBookIds).toEqual(historyWindows[1]);
+
+    for (let index = 1; index < historyWindows.length; index += 1) {
+      history = bibleBookshelfReducer(history, { type: "next-round", random: fixedRandom });
+    }
     expect(history.windowIndex).toBe(0);
     expect(history.roundBookIds).toEqual(historyWindows[0]);
   });
 
-  it("hints the next empty slot without placing a book", () => {
-    const initial = createBibleBookshelfState("en", "law", 0, fixedRandom);
+  it("hints the first empty slot without placing a book", () => {
+    const initial = startTestamentRound("NEW", "ru");
     const hinted = bibleBookshelfReducer(initial, { type: "show-hint" });
 
-    expect(hinted.hintSlotIndex).toBe(1);
-    expect(hinted.hintBookId).toBe("exodus");
-    expect(hinted.placedBySlot).toEqual(initial.placedBySlot);
+    expect(hinted.hintSlotIndex).toBe(0);
+    expect(hinted.hintBookId).toBe(initial.roundBookIds[0]);
+    expect(hinted.placedBySlot).toEqual({});
   });
 
-  it("changes groups, advances windows, and resets to Law when the locale changes", () => {
-    const initial = createBibleBookshelfState("en", "law", 0, fixedRandom);
-    const history = bibleBookshelfReducer(initial, {
-      type: "change-group",
-      groupId: "history",
-      random: fixedRandom,
-    });
+  it("completes and replays the same full testament while setup exit retains configuration", () => {
+    const completed = completeRound(startTestamentRound("NEW", "uk"));
+    expect(completed.isComplete).toBe(true);
+    expect(Object.keys(completed.placedBySlot)).toHaveLength(27);
 
-    expect(history.windowIndex).toBe(0);
-    expect(history.placedBySlot).toEqual({ 0: "joshua" });
+    const replayed = bibleBookshelfReducer(completed, { type: "play-again", random: fixedRandom });
+    expect(replayed.config).toEqual(completed.config);
+    expect(replayed.placedBySlot).toEqual({});
+    expect(replayed.trayBookIds).toHaveLength(27);
 
-    const historyWindows = getRoundWindows("en", "history");
-    const advanced = bibleBookshelfReducer(history, { type: "next-round", random: fixedRandom });
-    expect(advanced.windowIndex).toBe(1);
-    expect(advanced.roundBookIds).toEqual(historyWindows[1]);
-    expect(advanced.placedBySlot).toEqual({ 0: historyWindows[1][0] });
-
-    const localized = bibleBookshelfReducer(advanced, {
-      type: "change-language",
-      language: "uk",
-      random: fixedRandom,
-    });
-    expect(localized.groupId).toBe("law");
-    expect(localized.windowIndex).toBe(0);
-    expect(localized.placedBySlot).toEqual({ 0: "genesis" });
+    const setup = bibleBookshelfReducer(replayed, { type: "return-to-setup" });
+    expect(setup.phase).toBe("setup");
+    expect(setup.config).toEqual(replayed.config);
+    expect(setup.roundBookIds).toEqual([]);
   });
 });

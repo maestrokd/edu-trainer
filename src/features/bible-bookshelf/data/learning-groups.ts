@@ -1,5 +1,5 @@
 import { BIBLE_BOOKS_BY_LANGUAGE } from "@/features/bible-books/data/bibleBooks.registry";
-import type { BibleBook, BibleBookLanguage } from "@/features/bible-books/model/bible-books.types";
+import type { BibleBook, BibleBookLanguage, BibleTestament } from "@/features/bible-books/model/bible-books.types";
 
 export type BibleBookshelfGroupId =
   | "law"
@@ -75,4 +75,10 @@ export function getBibleBookshelfGroupBooks(language: BibleBookLanguage, groupId
   return [...BIBLE_BOOKS_BY_LANGUAGE[language]]
     .sort((left, right) => left.order - right.order)
     .filter((book) => book.order >= group.startOrder && book.order <= group.endOrder);
+}
+
+export function getBibleBookshelfTestamentBooks(language: BibleBookLanguage, testament: BibleTestament): BibleBook[] {
+  return [...BIBLE_BOOKS_BY_LANGUAGE[language]]
+    .sort((left, right) => left.order - right.order)
+    .filter((book) => book.testament === testament);
 }
