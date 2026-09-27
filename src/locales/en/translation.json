@@ -1115,6 +1115,221 @@
       "recordingFailed": "Recording failed. Please try again."
     }
   },
+  "bibleBooksGame": {
+    "pageTitle": "Bible Books — What Comes Next? | Edu Trainer",
+    "title": "Bible Books",
+    "header": {
+      "mainMenuAria": "Back to the Edu Trainer menu"
+    },
+    "setup": {
+      "tagline": "Learn one step at a time",
+      "title": "What Comes Next?",
+      "description": "Learn the order of the books of the Bible one step at a time.",
+      "infoAria": "About this game",
+      "choosePracticeSet": "Choose what you want to practice:",
+      "language": {
+        "label": "Bible book language",
+        "hint": "Changes only the book names and order used in this game."
+      },
+      "questionCount_one": "{{count}} question",
+      "questionCount_other": "{{count}} questions",
+      "practiceSets": {
+        "firstFive": {
+          "name": "First 5 Books",
+          "description": "Start with the first five books of the Bible."
+        },
+        "oldTestament": {
+          "name": "Old Testament",
+          "description": "Practice all 39 Old Testament books."
+        },
+        "newTestament": {
+          "name": "New Testament",
+          "description": "Practice all 27 New Testament books."
+        },
+        "allBooks": {
+          "name": "All 66 Books",
+          "description": "Practice the complete Bible book order."
+        }
+      }
+    },
+    "quiz": {
+      "questionCount": "Question {{current}} of {{total}}",
+      "score": "Score: {{score}}",
+      "scoreAria": "Correct answers so far: {{score}}",
+      "progressAria": "Round progress: question {{current}} of {{total}}",
+      "prompt": "What comes next?",
+      "chooseNext": "Choose the next book:",
+      "correctAnswer": "Correct answer",
+      "yourAnswer": "Your answer",
+      "answerAria": {
+        "correct": "{{book}} — Correct answer",
+        "incorrect": "{{book}} — Your answer, not quite"
+      },
+      "feedback": {
+        "correct": "Correct!",
+        "incorrect": "Not quite.",
+        "explanation": "{{nextBook}} comes after {{currentBook}}."
+      }
+    },
+    "results": {
+      "title": "Great work!",
+      "description": "You're learning the Bible book order!",
+      "youGot": "You got",
+      "outOf": "out of {{total}}",
+      "correct": "correct",
+      "scoreAria": "You got {{correct}} out of {{total}} correct.",
+      "perfect": "Perfect round — you knew every next book!",
+      "missed_one": "{{count}} book is ready for another try.",
+      "missed_other": "{{count}} books are ready for another try."
+    },
+    "actions": {
+      "mainMenu": "Main Menu",
+      "startPractice": "Start Practice",
+      "nextQuestion": "Next Question",
+      "seeResults": "See Results",
+      "playAgain": "Play Again",
+      "changePracticeSet": "Change Practice Set"
+    }
+  },
+  "bibleBookshelf": {
+    "pageTitle": "Bible Bookshelf | Edu Trainer",
+    "title": "Bible Bookshelf",
+    "subtitle": "Learn the order of the books of the Bible in a fun and interactive way!",
+    "chooseGroup": "Choose a learning group",
+    "setup": {
+      "title": "Set up your bookshelf",
+      "description": "Choose the Bible-book language and how many books you want to arrange.",
+      "language": {
+        "label": "Bible book language",
+        "hint": "Changes only the book names and order used in this game."
+      },
+      "mode": {
+        "legend": "Choose a practice mode",
+        "groups": {
+          "name": "Learning groups",
+          "description": "Build the order five books at a time."
+        },
+        "testament": {
+          "name": "Whole testament",
+          "description": "Arrange every book of the Old or New Testament in one round."
+        }
+      },
+      "testament": {
+        "legend": "Choose a testament",
+        "old": {
+          "name": "Old Testament"
+        },
+        "new": {
+          "name": "New Testament"
+        },
+        "bookCount": "{{count}} books"
+      }
+    },
+    "instruction": {
+      "title": "Put the books in the correct order.",
+      "body": "Drag a book or tap to select it, then choose a shelf position.",
+      "testamentBody": "Build the complete testament. Scroll each row sideways to reach every book and shelf position."
+    },
+    "progress": {
+      "value": "{{correct}} of {{total}} correct",
+      "compact": "{{correct}}/{{total}}",
+      "aria": "Books placed correctly: {{correct}} of {{total}}"
+    },
+    "shelf": {
+      "empty": "Empty"
+    },
+    "tray": {
+      "title": "Books to place",
+      "scrollHint": "Scroll sideways to find every book."
+    },
+    "actions": {
+      "mainMenu": "Main Menu",
+      "start": "Start building",
+      "changeSetup": "Change setup",
+      "hint": "Hint",
+      "reset": "Reset",
+      "nextRound": "Next round",
+      "playAgain": "Play again",
+      "keepPlaying": "Keep playing",
+      "leaveRound": "Leave round"
+    },
+    "feedback": {
+      "correctTitle": "Great job!",
+      "correctDetail": "{{book}} is in the right place.",
+      "incorrectTitle": "Almost!",
+      "incorrectDetail": "Try another spot."
+    },
+    "complete": {
+      "title": "Shelf complete!",
+      "detail": "You put these books in the correct order.",
+      "testamentDetail": "You put all {{count}} books in the correct order."
+    },
+    "leave": {
+      "title": "Change setup?",
+      "description": "Your progress in this round will be lost."
+    },
+    "testament": {
+      "description": "All {{count}} books in one round",
+      "oldTip": "The Old Testament begins with {{first}} and ends with {{last}}.",
+      "newTip": "The New Testament begins with {{first}} and ends with {{last}}."
+    },
+    "tipLabel": "Tip:",
+    "aria": {
+      "mainMenu": "Back to the Edu Trainer menu",
+      "info": "Game information",
+      "shelf": "Bible book shelf",
+      "scrollHint": "Swipe sideways to see every shelf position.",
+      "fullShelfScrollHint": "Scroll sideways to reach all shelf positions.",
+      "filledSlot": "Shelf position {{position}}, {{book}}, correct and locked",
+      "emptySlot": "Empty shelf position {{position}}",
+      "hintedSlot": "hinted position",
+      "selected": "selected",
+      "hintedBook": "hinted book"
+    },
+    "groups": {
+      "range": "{{start}} through {{end}}",
+      "law": {
+        "label": "The Law",
+        "tip": "The first five books of the Bible are often called the Law or Pentateuch."
+      },
+      "history": {
+        "label": "Old Testament History",
+        "tip": "These books tell much of Israel’s history, from entering the land through the return from exile."
+      },
+      "poetry-wisdom": {
+        "label": "Poetry & Wisdom",
+        "tip": "These books include poetry, songs, prayers, and wisdom."
+      },
+      "major-prophets": {
+        "label": "Major Prophets",
+        "tip": "The Major Prophets are longer prophetic books in the Old Testament."
+      },
+      "minor-prophets": {
+        "label": "Minor Prophets",
+        "tip": "“Minor” describes the books’ shorter length, not their importance."
+      },
+      "gospels-acts": {
+        "label": "Gospels & Acts",
+        "tip": "The four Gospels come first in the New Testament, followed by the history of the early church."
+      },
+      "pauline-letters": {
+        "label": "Paul’s Letters",
+        "tip": "These letters form a long sequence in the New Testament."
+      },
+      "general-letters-revelation": {
+        "label": "General Letters & Revelation",
+        "tip": "This final group ends with the Bible’s last book."
+      },
+      "gospels-general-letters": {
+        "label": "Gospels, Acts & General Letters",
+        "tip": "In this order, the General Letters follow the history of the early church."
+      },
+      "pauline-letters-revelation": {
+        "label": "Paul’s Letters, Hebrews & Revelation",
+        "tip": "This group follows Paul’s letters and ends with the Bible’s last book."
+      }
+    }
+  },
   "familyTask": {
     "sidebar": {
       "title": "Family Tasks",
@@ -1152,6 +1367,83 @@
       },
       "profiles": "Family Profiles",
       "quickActions": "Quick Actions"
+    },
+    "taskCoach": {
+      "launcher": "Task Coach",
+      "open": "Open Task Coach",
+      "title": "Task Coach",
+      "description": "Get a friendly suggestion for what to do next.",
+      "todayOnly": "Task Coach is available while viewing today’s tasks.",
+      "chooseChild": "Who would like coaching?",
+      "noChild": "No active child profile is available.",
+      "thinking": "Choosing a good next step...",
+      "autoplay": "Play voice automatically",
+      "preparingVoice": "Preparing voice...",
+      "playVoice": "Play voice",
+      "adviceError": "I couldn’t choose a task right now.",
+      "voiceError": "Voice playback is unavailable.",
+      "aiVoiceDisclosure": "Voice audio is AI-generated.",
+      "refresh": "Ask the cat for fresh advice",
+      "settings": "Task Coach settings",
+      "settingsDescription": "Choose your character, coaching style, and when advice and voice are generated.",
+      "childSelector": "Choose a child for Task Coach",
+      "showChildSelector": "Choose or change child",
+      "hideChildSelector": "Hide child selector",
+      "showResponse": "Show latest response",
+      "hideResponse": "Hide latest response",
+      "showCoach": "Show Task Coach",
+      "hideCoach": "Hide Task Coach",
+      "noResponse": "Ask the cat when you’re ready for a new suggestion.",
+      "character": "Character",
+      "characterHint": "Choose the character that stays with you on the task calendar.",
+      "coachStyle": "Coach style",
+      "coachStyleHint": "Choose how calm, cheerful, or silly the character sounds.",
+      "coachStyleGentle": "Gentle",
+      "coachStyleCheerful": "Cheerful",
+      "coachStyleSilly": "Silly",
+      "simpleCat": "Simple Cat (transparent)",
+      "cuteCharacterCat": "Cute Character Cat",
+      "autoRequest": "Automatically get advice",
+      "autoRequestHint": "Runs once when Task Coach activates or you change children. The cat always supports manual refresh.",
+      "plan": "Your task plan",
+      "planNow": "Now",
+      "planNext": "Next",
+      "planAfterThat": "After that",
+      "refreshPlanAvailable": "Nice work! Ready for an updated plan?",
+      "updatePlan": "Update my plan",
+      "completionRefresh": "After task completion",
+      "completionRefreshHint": "Choose when the coach updates appreciation and the next plan.",
+      "completionRefreshAuto": "Refresh automatically",
+      "completionRefreshPrompt": "Offer a refresh button",
+      "completionRefreshManual": "Wait for character click",
+      "characterCredit": "Character credit",
+      "createdBy": "Created by",
+      "marketplaceSource": "Character listing on the Rive Marketplace",
+      "remixOf": "Remix of",
+      "byCreator": "by",
+      "remixSource": "Original character source",
+      "characterLicense": "Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "characterAdapted": "Adapted for use in Kids Task Calendar.",
+      "noEndorsement": "The character creators do not endorse Kids Task Calendar.",
+      "toggleAdvice": "Open or close advice",
+      "collapse": "Compact view",
+      "expand": "Expand advice",
+      "adviceContent": "Advice content",
+      "updating": "Updating your plan…",
+      "stale": "Tasks changed. This advice needs an update.",
+      "pauseVoice": "Pause voice",
+      "voiceProgress": "Voice progress",
+      "refreshAdvice": "Refresh advice",
+      "closeAdvice": "Close advice",
+      "thinkingBadge": "Thinking",
+      "speakingBadge": "Speaking",
+      "successBadge": "Well done!",
+      "errorBadge": "Try again",
+      "sleepingBadge": "Resting",
+      "waveAction": "Wave",
+      "playAction": "Play",
+      "characterActions": "Character actions",
+      "askCoach": "Ask coach"
     },
     "gates": {
       "loginTitle": "Log in to continue",

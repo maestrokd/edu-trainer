@@ -3,15 +3,12 @@ import { FamilyRoutineSlot, FamilyTaskOccurrenceStatus, FamilyTaskSourceType } f
 import type { SlotBucket, TopSlot } from "./types";
 import { SECTION_SORT_ORDER, SLOT_BY_ROUTINE_SLOT } from "./types";
 
-export function resolveTaskBucket(
-  task: TaskOccurrenceDto,
-  routineSlotByUuid: Record<string, FamilyRoutineSlot>
-): SlotBucket {
+export function resolveTaskBucket(task: TaskOccurrenceDto): SlotBucket {
   if (task.sourceType === FamilyTaskSourceType.CHORE) {
     return "chores";
   }
 
-  const routineSlot = routineSlotByUuid[task.sourceUuid] ?? FamilyRoutineSlot.ANYTIME;
+  const routineSlot = task.routineSlot ?? FamilyRoutineSlot.ANYTIME;
   return SLOT_BY_ROUTINE_SLOT[routineSlot];
 }
 
@@ -42,10 +39,7 @@ export function resolveTaskIcon(task: TaskOccurrenceDto, bucket: SlotBucket): st
   return "✅";
 }
 
-export function groupTasksByProfile(
-  tasks: TaskOccurrenceDto[],
-  routineSlotByUuid: Record<string, FamilyRoutineSlot>
-): Record<string, TaskOccurrenceDto[]> {
+export function groupTasksByProfile(tasks: TaskOccurrenceDto[]): Record<string, TaskOccurrenceDto[]> {
   const grouped: Record<string, TaskOccurrenceDto[]> = {};
 
   for (const task of tasks) {
@@ -54,8 +48,8 @@ export function groupTasksByProfile(
 
   for (const profileUuid of Object.keys(grouped)) {
     grouped[profileUuid].sort((left, right) => {
-      const leftBucket = resolveTaskBucket(left, routineSlotByUuid);
-      const rightBucket = resolveTaskBucket(right, routineSlotByUuid);
+      const leftBucket = resolveTaskBucket(left);
+      const rightBucket = resolveTaskBucket(right);
       const leftOrder = SECTION_SORT_ORDER[leftBucket];
       const rightOrder = SECTION_SORT_ORDER[rightBucket];
 

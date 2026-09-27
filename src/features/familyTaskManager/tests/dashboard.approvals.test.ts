@@ -9,6 +9,7 @@ function buildTask(task: Partial<TaskOccurrenceDto>): TaskOccurrenceDto {
     uuid: task.uuid ?? "task-1",
     sourceType: task.sourceType ?? FamilyTaskSourceType.ROUTINE,
     sourceUuid: task.sourceUuid ?? "routine-1",
+    routineSlot: task.routineSlot ?? FamilyRoutineSlot.MORNING,
     assigneeProfileUuid: task.assigneeProfileUuid ?? "profile-1",
     title: task.title ?? "Task",
     emoji: task.emoji ?? null,
@@ -23,13 +24,6 @@ function buildTask(task: Partial<TaskOccurrenceDto>): TaskOccurrenceDto {
 }
 
 describe("approvals dashboard grouping", () => {
-  const routineSlotByUuid = {
-    "routine-morning": FamilyRoutineSlot.MORNING,
-    "routine-afternoon": FamilyRoutineSlot.AFTERNOON,
-    "routine-evening": FamilyRoutineSlot.EVENING,
-    "routine-anytime": FamilyRoutineSlot.ANYTIME,
-  };
-
   it("sorts profile groups by date and section order", () => {
     const tasks = [
       buildTask({
@@ -38,6 +32,7 @@ describe("approvals dashboard grouping", () => {
         title: "Evening check",
         scheduledFor: "2026-04-12",
         sourceUuid: "routine-evening",
+        routineSlot: FamilyRoutineSlot.EVENING,
       }),
       buildTask({
         uuid: "profile-1-morning",
@@ -45,6 +40,7 @@ describe("approvals dashboard grouping", () => {
         title: "Brush teeth",
         scheduledFor: "2026-04-11",
         sourceUuid: "routine-morning",
+        routineSlot: FamilyRoutineSlot.MORNING,
       }),
       buildTask({
         uuid: "profile-1-afternoon",
@@ -52,6 +48,7 @@ describe("approvals dashboard grouping", () => {
         title: "Homework",
         scheduledFor: "2026-04-11",
         sourceUuid: "routine-afternoon",
+        routineSlot: FamilyRoutineSlot.AFTERNOON,
       }),
       buildTask({
         uuid: "profile-1-chore",
@@ -67,10 +64,11 @@ describe("approvals dashboard grouping", () => {
         title: "Read book",
         scheduledFor: "2026-04-11T08:00:00Z",
         sourceUuid: "routine-morning",
+        routineSlot: FamilyRoutineSlot.MORNING,
       }),
     ];
 
-    const grouped = groupApprovalsByProfileDateAndSlot(tasks, routineSlotByUuid, SECTION_ORDER);
+    const grouped = groupApprovalsByProfileDateAndSlot(tasks, SECTION_ORDER);
     const profileOneDates = grouped["profile-1"].map((group) => group.dateKey);
     expect(profileOneDates).toEqual(["2026-04-11", "2026-04-12"]);
 
@@ -101,7 +99,7 @@ describe("approvals dashboard grouping", () => {
       }),
     ];
 
-    const grouped = groupApprovalsByProfileDateAndSlot(tasks, routineSlotByUuid, SECTION_ORDER);
+    const grouped = groupApprovalsByProfileDateAndSlot(tasks, SECTION_ORDER);
     expect(grouped["profile-1"][0].dateKey).toBe("unknown");
 
     const morningTitles = grouped["profile-1"][0].tasksBySection.morning?.map((task) => task.title);
