@@ -4,6 +4,7 @@ import { MultiplicationTrainerPage } from "@/features/multiplication-trainer";
 import { CompareNumbersTrainerPage } from "@/features/compare-numbers-trainer";
 import { RoundingTrainerPage } from "@/features/rounding-trainer";
 import { AddSubTrainerPage } from "@/features/add-sub-trainer";
+import { BibleBooksPage } from "@/features/bible-books";
 import CommonLayout from "@/layout/CommonLayout.tsx";
 import RegistrationPage from "@/pages/login/RegistrationPage.tsx";
 import DefaultLayout from "@/layout/DefaultLayout.tsx";
@@ -206,6 +207,7 @@ export default function App() {
         <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
         <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
         <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />
+        <Route path="/bible-books" element={<BibleBooksPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
