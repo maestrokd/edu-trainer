@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowDown, Check, ChevronRight, CircleHelp, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -17,26 +18,28 @@ interface AnswerOptionProps {
 }
 
 function AnswerOption({ book, correctAnswerId, selectedAnswerId, onSelect }: AnswerOptionProps) {
+  const { t } = useTranslation();
   const hasAnswered = selectedAnswerId !== null;
   const isCorrectAnswer = book.id === correctAnswerId;
   const isSelected = book.id === selectedAnswerId;
   const isSelectedIncorrect = hasAnswered && isSelected && !isCorrectAnswer;
   const showCorrectAnswer = hasAnswered && isCorrectAnswer;
 
-  let answerStatus = "";
-  if (showCorrectAnswer) answerStatus = " — Correct answer";
-  if (isSelectedIncorrect) answerStatus = " — Your answer, not quite";
+  let answerLabel = book.name;
+  if (showCorrectAnswer) answerLabel = t("bibleBooksGame.quiz.answerAria.correct", { book: book.name });
+  if (isSelectedIncorrect) answerLabel = t("bibleBooksGame.quiz.answerAria.incorrect", { book: book.name });
 
   return (
     <Button
       type="button"
       variant="outline"
       disabled={hasAnswered}
-      aria-label={`${book.name}${answerStatus}`}
+      aria-label={answerLabel}
       onClick={() => onSelect(book.id)}
       className={cn(
         "h-auto min-h-14 w-full justify-between whitespace-normal rounded-xl px-4 py-3 text-left text-base disabled:opacity-100",
-        showCorrectAnswer && "border-primary bg-primary/10 text-foreground",
+        showCorrectAnswer &&
+          "border-emerald-500 bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-200",
         isSelectedIncorrect && "border-destructive bg-destructive/10 text-destructive",
         hasAnswered && !showCorrectAnswer && !isSelectedIncorrect && "text-muted-foreground"
       )}
@@ -45,13 +48,13 @@ function AnswerOption({ book, correctAnswerId, selectedAnswerId, onSelect }: Ans
       {showCorrectAnswer && (
         <span className="flex items-center gap-1.5 text-xs font-semibold">
           <Check className="size-4" aria-hidden="true" />
-          Correct answer
+          {t("bibleBooksGame.quiz.correctAnswer")}
         </span>
       )}
       {isSelectedIncorrect && (
         <span className="flex items-center gap-1.5 text-xs font-semibold">
           <X className="size-4" aria-hidden="true" />
-          Your answer
+          {t("bibleBooksGame.quiz.yourAnswer")}
         </span>
       )}
     </Button>
@@ -79,6 +82,7 @@ export function QuizQuestion({
   onSelectAnswer,
   onNextQuestion,
 }: QuizQuestionProps) {
+  const { t } = useTranslation();
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const hasAnswered = selectedAnswerId !== null;
@@ -98,15 +102,15 @@ export function QuizQuestion({
       <CardHeader className="gap-4 border-b bg-muted/30 px-5 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
           <span className="font-semibold">
-            Question {questionNumber} of {totalQuestions}
+            {t("bibleBooksGame.quiz.questionCount", { current: questionNumber, total: totalQuestions })}
           </span>
-          <Badge variant="secondary" aria-label={`${score} correct answers so far`}>
-            Score: {score}
+          <Badge variant="secondary" aria-label={t("bibleBooksGame.quiz.scoreAria", { score })}>
+            {t("bibleBooksGame.quiz.score", { score })}
           </Badge>
         </div>
         <div
           role="progressbar"
-          aria-label={`Round progress: question ${questionNumber} of ${totalQuestions}`}
+          aria-label={t("bibleBooksGame.quiz.progressAria", { current: questionNumber, total: totalQuestions })}
           aria-valuemin={0}
           aria-valuemax={totalQuestions}
           aria-valuenow={questionNumber}
@@ -121,7 +125,9 @@ export function QuizQuestion({
 
       <CardContent className="space-y-6 px-5 sm:px-8">
         <section className="rounded-2xl border bg-muted/25 px-4 py-7 text-center sm:py-9">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What comes next?</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {t("bibleBooksGame.quiz.prompt")}
+          </p>
           <h1
             ref={questionHeadingRef}
             tabIndex={-1}
@@ -135,7 +141,7 @@ export function QuizQuestion({
         </section>
 
         <fieldset className="space-y-3">
-          <legend className="mb-3 text-base font-semibold">Choose the next book:</legend>
+          <legend className="mb-3 text-base font-semibold">{t("bibleBooksGame.quiz.chooseNext")}</legend>
           <div className="grid gap-3">
             {question.answerOptions.map((book) => (
               <AnswerOption
@@ -153,12 +159,22 @@ export function QuizQuestion({
           <div className="space-y-4" aria-live="polite">
             <Alert
               variant={isAnswerCorrect ? "default" : "destructive"}
-              className={cn(isAnswerCorrect && "border-primary/30 bg-primary/5")}
+              className={cn(
+                isAnswerCorrect &&
+                  "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-950/40 dark:text-emerald-200"
+              )}
             >
               {isAnswerCorrect ? <Check aria-hidden="true" /> : <X aria-hidden="true" />}
-              <AlertTitle>{isAnswerCorrect ? "Correct!" : "Not quite."}</AlertTitle>
-              <AlertDescription>
-                {question.correctNextBook.name} comes after {question.currentBook.name}.
+              <AlertTitle>
+                {isAnswerCorrect
+                  ? t("bibleBooksGame.quiz.feedback.correct")
+                  : t("bibleBooksGame.quiz.feedback.incorrect")}
+              </AlertTitle>
+              <AlertDescription className={cn(isAnswerCorrect && "text-emerald-800/90 dark:text-emerald-200/90")}>
+                {t("bibleBooksGame.quiz.feedback.explanation", {
+                  nextBook: question.correctNextBook.name,
+                  currentBook: question.currentBook.name,
+                })}
               </AlertDescription>
             </Alert>
 
@@ -169,7 +185,7 @@ export function QuizQuestion({
                 className="h-12 w-full text-base sm:w-auto"
                 onClick={onNextQuestion}
               >
-                {isLastQuestion ? "See Results" : "Next Question"}
+                {isLastQuestion ? t("bibleBooksGame.actions.seeResults") : t("bibleBooksGame.actions.nextQuestion")}
                 <ChevronRight aria-hidden="true" />
               </Button>
             </div>

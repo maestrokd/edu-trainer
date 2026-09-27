@@ -1,5 +1,6 @@
 import { BookOpen, Home } from "lucide-react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +10,7 @@ import { QuizQuestion } from "./QuizQuestion";
 import { QuizResults } from "./QuizResults";
 
 export function BibleBooksGame() {
+  const { t } = useTranslation();
   const { state, actions } = useBibleBooksQuiz();
 
   return (
@@ -19,12 +21,12 @@ export function BibleBooksGame() {
             <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <BookOpen className="size-5" aria-hidden="true" />
             </span>
-            <span>Bible Books</span>
+            <span>{t("bibleBooksGame.title")}</span>
           </div>
           <Button asChild variant="ghost" size="sm">
-            <Link to="/" aria-label="Back to the Edu Trainer menu">
+            <Link to="/" aria-label={t("bibleBooksGame.header.mainMenuAria")}>
               <Home aria-hidden="true" />
-              <span className="hidden sm:inline">Main Menu</span>
+              <span className="hidden sm:inline">{t("bibleBooksGame.actions.mainMenu")}</span>
             </Link>
           </Button>
         </div>
@@ -34,7 +36,9 @@ export function BibleBooksGame() {
         {state.phase === "setup" && (
           <GameSetup
             selectedPracticeSet={state.selectedPracticeSet}
+            selectedBibleLanguage={state.selectedBibleLanguage}
             onPracticeSetChange={actions.setSelectedPracticeSet}
+            onBibleLanguageChange={actions.setSelectedBibleLanguage}
             onStart={actions.startRound}
           />
         )}

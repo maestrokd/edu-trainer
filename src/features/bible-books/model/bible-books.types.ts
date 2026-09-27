@@ -20,6 +20,8 @@ export interface BibleBook {
   section: BibleSection;
 }
 
+export type BibleBookLanguage = "en" | "uk" | "ru";
+
 export type PracticeSetId = "FIRST_FIVE" | "OLD_TESTAMENT" | "NEW_TESTAMENT" | "ALL_BOOKS";
 
 export interface BibleBookTransition {

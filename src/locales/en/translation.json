@@ -1115,6 +1115,81 @@
       "recordingFailed": "Recording failed. Please try again."
     }
   },
+  "bibleBooksGame": {
+    "pageTitle": "Bible Books — What Comes Next? | Edu Trainer",
+    "title": "Bible Books",
+    "header": {
+      "mainMenuAria": "Back to the Edu Trainer menu"
+    },
+    "setup": {
+      "tagline": "Learn one step at a time",
+      "title": "What Comes Next?",
+      "description": "Learn the order of the books of the Bible one step at a time.",
+      "choosePracticeSet": "Choose what you want to practice:",
+      "language": {
+        "label": "Bible book language",
+        "hint": "Changes only the book names and order used in this game."
+      },
+      "questionCount_one": "{{count}} question",
+      "questionCount_other": "{{count}} questions",
+      "practiceSets": {
+        "firstFive": {
+          "name": "First 5 Books",
+          "description": "Start with the first five books of the Bible."
+        },
+        "oldTestament": {
+          "name": "Old Testament",
+          "description": "Practice all 39 Old Testament books."
+        },
+        "newTestament": {
+          "name": "New Testament",
+          "description": "Practice all 27 New Testament books."
+        },
+        "allBooks": {
+          "name": "All 66 Books",
+          "description": "Practice the complete Bible book order."
+        }
+      }
+    },
+    "quiz": {
+      "questionCount": "Question {{current}} of {{total}}",
+      "score": "Score: {{score}}",
+      "scoreAria": "Correct answers so far: {{score}}",
+      "progressAria": "Round progress: question {{current}} of {{total}}",
+      "prompt": "What comes next?",
+      "chooseNext": "Choose the next book:",
+      "correctAnswer": "Correct answer",
+      "yourAnswer": "Your answer",
+      "answerAria": {
+        "correct": "{{book}} — Correct answer",
+        "incorrect": "{{book}} — Your answer, not quite"
+      },
+      "feedback": {
+        "correct": "Correct!",
+        "incorrect": "Not quite.",
+        "explanation": "{{nextBook}} comes after {{currentBook}}."
+      }
+    },
+    "results": {
+      "title": "Great work!",
+      "description": "You're learning the Bible book order!",
+      "youGot": "You got",
+      "outOf": "out of {{total}}",
+      "correct": "correct",
+      "scoreAria": "You got {{correct}} out of {{total}} correct.",
+      "perfect": "Perfect round — you knew every next book!",
+      "missed_one": "{{count}} book is ready for another try.",
+      "missed_other": "{{count}} books are ready for another try."
+    },
+    "actions": {
+      "mainMenu": "Main Menu",
+      "startPractice": "Start Practice",
+      "nextQuestion": "Next Question",
+      "seeResults": "See Results",
+      "playAgain": "Play Again",
+      "changePracticeSet": "Change Practice Set"
+    }
+  },
   "familyTask": {
     "sidebar": {
       "title": "Family Tasks",

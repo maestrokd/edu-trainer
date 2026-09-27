@@ -56,7 +56,7 @@ describe("Bible books practice sets", () => {
 
 describe("Bible books round generation", () => {
   it("asks every First 5 transition exactly once", () => {
-    const round = generateBibleBooksRound("FIRST_FIVE", fixedRandom);
+    const round = generateBibleBooksRound("FIRST_FIVE", "en", fixedRandom);
 
     expect(round).toHaveLength(4);
     expect(new Set(round.map((question) => question.currentBook.id))).toEqual(
@@ -67,7 +67,7 @@ describe("Bible books round generation", () => {
   it.each(["OLD_TESTAMENT", "NEW_TESTAMENT", "ALL_BOOKS"] as const)(
     "creates ten unique questions for %s",
     (practiceSet) => {
-      const round = generateBibleBooksRound(practiceSet, fixedRandom);
+      const round = generateBibleBooksRound(practiceSet, "en", fixedRandom);
 
       expect(round).toHaveLength(10);
       expect(new Set(round.map((question) => question.currentBook.id)).size).toBe(10);
@@ -79,7 +79,7 @@ describe("Bible books round generation", () => {
     (practiceSet) => {
       const scopeBookIds = new Set(getBooksForPracticeSet(practiceSet).map((book) => book.id));
 
-      generateBibleBooksRound(practiceSet, fixedRandom).forEach((question) => {
+      generateBibleBooksRound(practiceSet, "en", fixedRandom).forEach((question) => {
         const optionIds = question.answerOptions.map((book) => book.id);
 
         expect(optionIds).toHaveLength(3);

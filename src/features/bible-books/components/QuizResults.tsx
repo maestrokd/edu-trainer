@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { BookOpen, RotateCcw, Settings2, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function QuizResults({
   onPlayAgain,
   onChangePracticeSet,
 }: QuizResultsProps) {
+  const { t } = useTranslation();
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -34,41 +36,47 @@ export function QuizResults({
         </div>
         <Badge variant="secondary" className="gap-1.5">
           <BookOpen aria-hidden="true" />
-          Bible Books
+          {t("bibleBooksGame.title")}
         </Badge>
         <div className="space-y-2">
           <CardTitle>
             <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-bold tracking-tight outline-none sm:text-4xl">
-              Great work!
+              {t("bibleBooksGame.results.title")}
             </h1>
           </CardTitle>
-          <CardDescription className="text-base">You&apos;re learning the Bible book order!</CardDescription>
+          <CardDescription className="text-base">{t("bibleBooksGame.results.description")}</CardDescription>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-5 px-5 sm:px-8">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">You got</p>
-          <p className="mt-1 text-5xl font-bold tracking-tight">
-            {correctAnswers} <span className="text-2xl text-muted-foreground">out of {totalQuestions}</span>
+          <p className="text-sm font-medium text-muted-foreground">{t("bibleBooksGame.results.youGot")}</p>
+          <p
+            className="mt-1 text-5xl font-bold tracking-tight"
+            aria-label={t("bibleBooksGame.results.scoreAria", { correct: correctAnswers, total: totalQuestions })}
+          >
+            {correctAnswers}{" "}
+            <span className="text-2xl text-muted-foreground">
+              {t("bibleBooksGame.results.outOf", { total: totalQuestions })}
+            </span>
           </p>
-          <p className="mt-2 text-sm font-medium text-muted-foreground">correct</p>
+          <p className="mt-2 text-sm font-medium text-muted-foreground">{t("bibleBooksGame.results.correct")}</p>
         </div>
         <p className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
           {missedQuestions === 0
-            ? "Perfect round — you knew every next book!"
-            : `${missedQuestions} ${missedQuestions === 1 ? "book is" : "books are"} ready for another try.`}
+            ? t("bibleBooksGame.results.perfect")
+            : t("bibleBooksGame.results.missed", { count: missedQuestions })}
         </p>
       </CardContent>
 
       <CardFooter className="grid gap-3 px-5 sm:grid-cols-2 sm:px-8">
         <Button size="lg" className="h-12 text-base" onClick={onPlayAgain}>
           <RotateCcw aria-hidden="true" />
-          Play Again
+          {t("bibleBooksGame.actions.playAgain")}
         </Button>
         <Button size="lg" variant="outline" className="h-12 text-base" onClick={onChangePracticeSet}>
           <Settings2 aria-hidden="true" />
-          Change Practice Set
+          {t("bibleBooksGame.actions.changePracticeSet")}
         </Button>
       </CardFooter>
     </Card>

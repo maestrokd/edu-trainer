@@ -1,76 +1,107 @@
-import { ArrowRight, BookOpen, Check } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Languages } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-import type { PracticeSetId } from "../model/bible-books.types";
+import type { BibleBookLanguage, PracticeSetId } from "../model/bible-books.types";
 
 interface PracticeSetOption {
   id: PracticeSetId;
-  name: string;
-  description: string;
-  questionCount: string;
+  translationKey: "firstFive" | "oldTestament" | "newTestament" | "allBooks";
+  questionCount: number;
 }
 
 const PRACTICE_SETS: readonly PracticeSetOption[] = [
   {
     id: "FIRST_FIVE",
-    name: "First 5 Books",
-    description: "Start with Genesis through Deuteronomy.",
-    questionCount: "4 questions",
+    translationKey: "firstFive",
+    questionCount: 4,
   },
   {
     id: "OLD_TESTAMENT",
-    name: "Old Testament",
-    description: "Practice Genesis through Malachi.",
-    questionCount: "10 questions",
+    translationKey: "oldTestament",
+    questionCount: 10,
   },
   {
     id: "NEW_TESTAMENT",
-    name: "New Testament",
-    description: "Practice Matthew through Revelation.",
-    questionCount: "10 questions",
+    translationKey: "newTestament",
+    questionCount: 10,
   },
   {
     id: "ALL_BOOKS",
-    name: "All 66 Books",
-    description: "Practice the complete Bible book order.",
-    questionCount: "10 questions",
+    translationKey: "allBooks",
+    questionCount: 10,
   },
 ] as const;
 
 interface GameSetupProps {
   selectedPracticeSet: PracticeSetId;
+  selectedBibleLanguage: BibleBookLanguage;
   onPracticeSetChange: (practiceSet: PracticeSetId) => void;
+  onBibleLanguageChange: (language: BibleBookLanguage) => void;
   onStart: () => void;
 }
 
-export function GameSetup({ selectedPracticeSet, onPracticeSetChange, onStart }: GameSetupProps) {
+export function GameSetup({
+  selectedPracticeSet,
+  selectedBibleLanguage,
+  onPracticeSetChange,
+  onBibleLanguageChange,
+  onStart,
+}: GameSetupProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="overflow-hidden border-border/80 shadow-md">
       <CardHeader className="gap-4 border-b bg-muted/35 px-5 py-6 sm:px-8 sm:py-8">
         <div className="flex items-center justify-between gap-3">
           <Badge variant="secondary" className="gap-1.5 px-2.5 py-1 text-xs uppercase tracking-wide">
             <BookOpen aria-hidden="true" />
-            Bible Books
+            {t("bibleBooksGame.title")}
           </Badge>
-          <span className="text-xs font-medium text-muted-foreground">Learn one step at a time</span>
+          <span className="text-xs font-medium text-muted-foreground">{t("bibleBooksGame.setup.tagline")}</span>
         </div>
         <div className="space-y-2">
           <CardTitle>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">What Comes Next?</h1>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("bibleBooksGame.setup.title")}</h1>
           </CardTitle>
           <CardDescription className="max-w-xl text-base leading-relaxed">
-            Learn the order of the books of the Bible one step at a time.
+            {t("bibleBooksGame.setup.description")}
           </CardDescription>
         </div>
       </CardHeader>
 
-      <CardContent className="px-5 sm:px-8">
+      <CardContent className="space-y-6 px-5 sm:px-8">
+        <div className="space-y-2">
+          <Label htmlFor="bible-book-language" className="flex items-center gap-2">
+            <Languages className="size-4" aria-hidden="true" />
+            {t("bibleBooksGame.setup.language.label")}
+          </Label>
+          <Select
+            value={selectedBibleLanguage}
+            onValueChange={(value) => onBibleLanguageChange(value as BibleBookLanguage)}
+          >
+            <SelectTrigger id="bible-book-language" className="h-11 w-full" aria-describedby="bible-book-language-hint">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="uk">Українська</SelectItem>
+              <SelectItem value="ru">Русский</SelectItem>
+            </SelectContent>
+          </Select>
+          <p id="bible-book-language-hint" className="text-xs leading-relaxed text-muted-foreground">
+            {t("bibleBooksGame.setup.language.hint")}
+          </p>
+        </div>
+
         <fieldset className="space-y-4">
-          <legend className="text-base font-semibold">Choose what you want to practice:</legend>
+          <legend className="text-base font-semibold">{t("bibleBooksGame.setup.choosePracticeSet")}</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {PRACTICE_SETS.map((practiceSet) => {
               const isSelected = practiceSet.id === selectedPracticeSet;
@@ -88,7 +119,9 @@ export function GameSetup({ selectedPracticeSet, onPracticeSetChange, onStart }:
                   )}
                 >
                   <span className="flex items-start justify-between gap-3">
-                    <span className="font-semibold">{practiceSet.name}</span>
+                    <span className="font-semibold">
+                      {t(`bibleBooksGame.setup.practiceSets.${practiceSet.translationKey}.name`)}
+                    </span>
                     <span
                       className={cn(
                         "flex size-5 shrink-0 items-center justify-center rounded-full border",
@@ -100,10 +133,10 @@ export function GameSetup({ selectedPracticeSet, onPracticeSetChange, onStart }:
                     </span>
                   </span>
                   <span className="mt-1.5 block text-sm leading-relaxed text-muted-foreground">
-                    {practiceSet.description}
+                    {t(`bibleBooksGame.setup.practiceSets.${practiceSet.translationKey}.description`)}
                   </span>
                   <span className="mt-2 block text-xs font-medium text-muted-foreground">
-                    {practiceSet.questionCount}
+                    {t("bibleBooksGame.setup.questionCount", { count: practiceSet.questionCount })}
                   </span>
                 </button>
               );
@@ -114,7 +147,7 @@ export function GameSetup({ selectedPracticeSet, onPracticeSetChange, onStart }:
 
       <CardFooter className="px-5 sm:justify-end sm:px-8">
         <Button size="lg" className="h-12 w-full text-base sm:w-auto" onClick={onStart}>
-          Start Practice
+          {t("bibleBooksGame.actions.startPractice")}
           <ArrowRight aria-hidden="true" />
         </Button>
       </CardFooter>

@@ -1,5 +1,11 @@
-import { BIBLE_BOOKS } from "../data/bibleBooks";
-import type { BibleBook, BibleBooksQuestion, BibleBookTransition, PracticeSetId } from "../model/bible-books.types";
+import { BIBLE_BOOKS_BY_LANGUAGE } from "../data/bibleBooks.registry";
+import type {
+  BibleBook,
+  BibleBookLanguage,
+  BibleBooksQuestion,
+  BibleBookTransition,
+  PracticeSetId,
+} from "../model/bible-books.types";
 
 const NORMAL_ROUND_SIZE = 10;
 
@@ -14,8 +20,11 @@ function shuffled<T>(values: readonly T[], random: () => number): T[] {
   return result;
 }
 
-export function getBooksForPracticeSet(practiceSet: PracticeSetId): BibleBook[] {
-  const books = [...BIBLE_BOOKS].sort((left, right) => left.order - right.order);
+export function getBooksForPracticeSet(
+  practiceSet: PracticeSetId,
+  bibleBookLanguage: BibleBookLanguage = "en"
+): BibleBook[] {
+  const books = [...BIBLE_BOOKS_BY_LANGUAGE[bibleBookLanguage]].sort((left, right) => left.order - right.order);
 
   switch (practiceSet) {
     case "FIRST_FIVE":
@@ -29,8 +38,11 @@ export function getBooksForPracticeSet(practiceSet: PracticeSetId): BibleBook[] 
   }
 }
 
-export function getTransitionsForPracticeSet(practiceSet: PracticeSetId): BibleBookTransition[] {
-  const books = getBooksForPracticeSet(practiceSet);
+export function getTransitionsForPracticeSet(
+  practiceSet: PracticeSetId,
+  bibleBookLanguage: BibleBookLanguage = "en"
+): BibleBookTransition[] {
+  const books = getBooksForPracticeSet(practiceSet, bibleBookLanguage);
 
   return books.slice(0, -1).map((currentBook, index) => ({
     currentBook,
@@ -56,10 +68,11 @@ function createAnswerOptions(
 
 export function generateBibleBooksRound(
   practiceSet: PracticeSetId,
+  bibleBookLanguage: BibleBookLanguage = "en",
   random: () => number = Math.random
 ): BibleBooksQuestion[] {
-  const practiceBooks = getBooksForPracticeSet(practiceSet);
-  const transitions = getTransitionsForPracticeSet(practiceSet);
+  const practiceBooks = getBooksForPracticeSet(practiceSet, bibleBookLanguage);
+  const transitions = getTransitionsForPracticeSet(practiceSet, bibleBookLanguage);
   const roundSize = practiceSet === "FIRST_FIVE" ? transitions.length : NORMAL_ROUND_SIZE;
 
   return shuffled(transitions, random)

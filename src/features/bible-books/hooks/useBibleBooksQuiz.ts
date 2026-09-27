@@ -1,13 +1,19 @@
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import { resolveBibleBookLanguage } from "../data/bibleBooks.registry";
 import { generateBibleBooksRound } from "../lib/quiz-generator";
-import type { BibleBooksQuestion, PracticeSetId } from "../model/bible-books.types";
+import type { BibleBookLanguage, BibleBooksQuestion, PracticeSetId } from "../model/bible-books.types";
 
 type GamePhase = "setup" | "playing" | "complete";
 
 export function useBibleBooksQuiz() {
+  const { i18n } = useTranslation();
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [selectedPracticeSet, setSelectedPracticeSet] = useState<PracticeSetId>("FIRST_FIVE");
+  const [selectedBibleLanguage, setSelectedBibleLanguage] = useState<BibleBookLanguage>(() =>
+    resolveBibleBookLanguage(i18n.resolvedLanguage ?? i18n.language)
+  );
   const [questions, setQuestions] = useState<BibleBooksQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
@@ -19,13 +25,13 @@ export function useBibleBooksQuiz() {
   const isCurrentAnswerCorrect = selectedAnswerId === currentQuestion?.correctNextBook.id;
 
   const startRound = useCallback(() => {
-    setQuestions(generateBibleBooksRound(selectedPracticeSet));
+    setQuestions(generateBibleBooksRound(selectedPracticeSet, selectedBibleLanguage));
     setCurrentQuestionIndex(0);
     setSelectedAnswerId(null);
     setCorrectAnswers(0);
     setMissedQuestions([]);
     setPhase("playing");
-  }, [selectedPracticeSet]);
+  }, [selectedBibleLanguage, selectedPracticeSet]);
 
   const selectAnswer = useCallback(
     (answerId: string) => {
@@ -69,6 +75,7 @@ export function useBibleBooksQuiz() {
     state: {
       phase,
       selectedPracticeSet,
+      selectedBibleLanguage,
       questions,
       currentQuestion,
       currentQuestionIndex,
@@ -81,6 +88,7 @@ export function useBibleBooksQuiz() {
     },
     actions: {
       setSelectedPracticeSet,
+      setSelectedBibleLanguage,
       startRound,
       selectAnswer,
       nextQuestion,

@@ -1,6 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import i18n from "@/i18n";
 
 import { BibleBooksGame } from "../components/BibleBooksGame";
 
@@ -9,6 +11,13 @@ const NEXT_BOOK_BY_NAME: Record<string, string> = {
   Exodus: "Leviticus",
   Leviticus: "Numbers",
   Numbers: "Deuteronomy",
+};
+
+const RUSSIAN_NEXT_BOOK_BY_NAME: Record<string, string> = {
+  Бытие: "Исход",
+  Исход: "Левит",
+  Левит: "Числа",
+  Числа: "Второзаконие",
 };
 
 function startFirstFiveRound() {
@@ -21,6 +30,10 @@ function startFirstFiveRound() {
 }
 
 describe("BibleBooksGame", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+  });
+
   it("completes a round, reports the score, and can play again", () => {
     startFirstFiveRound();
 
@@ -62,5 +75,78 @@ describe("BibleBooksGame", () => {
     expect(screen.getByText("Not quite.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: `${correctBook} — Correct answer` })).toBeDisabled();
     expect(screen.getByText("Your answer")).toBeInTheDocument();
+  });
+
+  it("uses the green success palette for a correct answer and feedback", () => {
+    startFirstFiveRound();
+
+    const currentBook = screen.getByTestId("current-book").textContent ?? "";
+    const correctBook = NEXT_BOOK_BY_NAME[currentBook];
+    fireEvent.click(screen.getByRole("button", { name: correctBook }));
+
+    expect(screen.getByRole("button", { name: `${correctBook} — Correct answer` })).toHaveClass(
+      "border-emerald-500",
+      "bg-emerald-100",
+      "text-emerald-800"
+    );
+    expect(screen.getByRole("alert")).toHaveClass("border-emerald-500/40", "bg-emerald-500/10", "text-emerald-800");
+  });
+
+  it("switches Bible books to Russian without changing the English application locale", async () => {
+    render(
+      <MemoryRouter>
+        <BibleBooksGame />
+      </MemoryRouter>
+    );
+    const changeLanguageSpy = vi.spyOn(i18n, "changeLanguage");
+    const languageSelect = screen.getByRole("combobox", { name: "Bible book language" });
+
+    fireEvent.keyDown(languageSelect, { key: "р" });
+
+    await waitFor(() => expect(languageSelect).toHaveTextContent("Русский"));
+    expect(changeLanguageSpy).not.toHaveBeenCalled();
+    expect(i18n.resolvedLanguage).toBe("en");
+    expect(screen.getByRole("heading", { name: "What Comes Next?" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Start Practice" }));
+    expect(screen.queryByRole("combobox", { name: "Bible book language" })).not.toBeInTheDocument();
+    expect(Object.keys(RUSSIAN_NEXT_BOOK_BY_NAME)).toContain(screen.getByTestId("current-book").textContent);
+
+    changeLanguageSpy.mockRestore();
+  });
+
+  it("preserves a local Russian book-language selection when playing again", async () => {
+    render(
+      <MemoryRouter>
+        <BibleBooksGame />
+      </MemoryRouter>
+    );
+    const languageSelect = screen.getByRole("combobox", { name: "Bible book language" });
+    fireEvent.keyDown(languageSelect, { key: "р" });
+    await waitFor(() => expect(languageSelect).toHaveTextContent("Русский"));
+    fireEvent.click(screen.getByRole("button", { name: "Start Practice" }));
+
+    for (let questionNumber = 1; questionNumber <= 4; questionNumber += 1) {
+      const currentBook = screen.getByTestId("current-book").textContent ?? "";
+      fireEvent.click(screen.getByRole("button", { name: RUSSIAN_NEXT_BOOK_BY_NAME[currentBook] }));
+      fireEvent.click(screen.getByRole("button", { name: questionNumber === 4 ? "See Results" : "Next Question" }));
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: "Play Again" }));
+    expect(Object.keys(RUSSIAN_NEXT_BOOK_BY_NAME)).toContain(screen.getByTestId("current-book").textContent);
+  });
+
+  it("defaults book language and all interface copy from a Ukrainian application locale", async () => {
+    await i18n.changeLanguage("uk-UA");
+
+    render(
+      <MemoryRouter>
+        <BibleBooksGame />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("combobox", { name: "Мова назв книг Біблії" })).toHaveTextContent("Українська");
+    expect(screen.getByRole("heading", { name: "Що далі?" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Почати практику" })).toBeInTheDocument();
   });
 });
