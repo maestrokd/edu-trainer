@@ -37,7 +37,7 @@ function AnswerOption({ book, correctAnswerId, selectedAnswerId, onSelect }: Ans
       aria-label={answerLabel}
       onClick={() => onSelect(book.id)}
       className={cn(
-        "h-auto min-h-14 w-full justify-between whitespace-normal rounded-xl px-4 py-3 text-left text-base disabled:opacity-100",
+        "h-auto min-h-11 w-full justify-between whitespace-normal rounded-lg px-3 py-2 text-left text-sm disabled:opacity-100 sm:min-h-14 sm:rounded-xl sm:px-4 sm:py-3 sm:text-base",
         showCorrectAnswer &&
           "border-emerald-500 bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-200",
         isSelectedIncorrect && "border-destructive bg-destructive/10 text-destructive",
@@ -46,15 +46,15 @@ function AnswerOption({ book, correctAnswerId, selectedAnswerId, onSelect }: Ans
     >
       <span>{book.name}</span>
       {showCorrectAnswer && (
-        <span className="flex items-center gap-1.5 text-xs font-semibold">
+        <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold" aria-hidden="true">
           <Check className="size-4" aria-hidden="true" />
-          {t("bibleBooksGame.quiz.correctAnswer")}
+          <span className="hidden sm:inline">{t("bibleBooksGame.quiz.correctAnswer")}</span>
         </span>
       )}
       {isSelectedIncorrect && (
-        <span className="flex items-center gap-1.5 text-xs font-semibold">
+        <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold" aria-hidden="true">
           <X className="size-4" aria-hidden="true" />
-          {t("bibleBooksGame.quiz.yourAnswer")}
+          <span className="hidden sm:inline">{t("bibleBooksGame.quiz.yourAnswer")}</span>
         </span>
       )}
     </Button>
@@ -98,13 +98,17 @@ export function QuizQuestion({
   }, [hasAnswered]);
 
   return (
-    <Card className="border-border/80 shadow-md">
-      <CardHeader className="gap-4 border-b bg-muted/30 px-5 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+    <Card className="gap-0 rounded-none border-0 bg-transparent py-0 shadow-none sm:gap-6 sm:rounded-xl sm:border sm:border-border/80 sm:bg-card sm:py-6 sm:shadow-md">
+      <CardHeader className="gap-2 border-b bg-muted/30 px-3 py-2 sm:gap-4 sm:px-8 sm:pt-0 sm:pb-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
           <span className="font-semibold">
             {t("bibleBooksGame.quiz.questionCount", { current: questionNumber, total: totalQuestions })}
           </span>
-          <Badge variant="secondary" aria-label={t("bibleBooksGame.quiz.scoreAria", { score })}>
+          <Badge
+            variant="secondary"
+            className="px-2 py-0 text-[11px] sm:text-xs"
+            aria-label={t("bibleBooksGame.quiz.scoreAria", { score })}
+          >
             {t("bibleBooksGame.quiz.score", { score })}
           </Badge>
         </div>
@@ -114,7 +118,7 @@ export function QuizQuestion({
           aria-valuemin={0}
           aria-valuemax={totalQuestions}
           aria-valuenow={questionNumber}
-          className="h-2 overflow-hidden rounded-full bg-secondary"
+          className="h-1 overflow-hidden rounded-full bg-secondary sm:h-2"
         >
           <div
             className="h-full rounded-full bg-primary transition-[width] duration-300"
@@ -123,26 +127,28 @@ export function QuizQuestion({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 px-5 sm:px-8">
-        <section className="rounded-2xl border bg-muted/25 px-4 py-7 text-center sm:py-9">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+      <CardContent className="space-y-3 px-3 py-3 sm:space-y-6 sm:px-8 sm:py-0">
+        <section className="border-0 bg-transparent px-2 py-1 text-center sm:rounded-2xl sm:border sm:bg-muted/25 sm:px-4 sm:py-9">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:text-xs">
             {t("bibleBooksGame.quiz.prompt")}
           </p>
           <h1
             ref={questionHeadingRef}
             tabIndex={-1}
             data-testid="current-book"
-            className="mt-4 text-3xl font-bold tracking-tight outline-none sm:text-4xl"
+            className="mt-1 text-2xl font-bold tracking-tight outline-none sm:mt-4 sm:text-4xl"
           >
             {question.currentBook.name}
           </h1>
-          <ArrowDown className="mx-auto my-3 size-5 text-muted-foreground" aria-hidden="true" />
-          <CircleHelp className="mx-auto size-10 text-primary" aria-hidden="true" />
+          <ArrowDown className="mx-auto my-3 hidden size-5 text-muted-foreground sm:block" aria-hidden="true" />
+          <CircleHelp className="mx-auto hidden size-10 text-primary sm:block" aria-hidden="true" />
         </section>
 
-        <fieldset className="space-y-3">
-          <legend className="mb-3 text-base font-semibold">{t("bibleBooksGame.quiz.chooseNext")}</legend>
-          <div className="grid gap-3">
+        <fieldset className="space-y-2 sm:space-y-3">
+          <legend className="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">
+            {t("bibleBooksGame.quiz.chooseNext")}
+          </legend>
+          <div className="grid gap-2 sm:gap-3">
             {question.answerOptions.map((book) => (
               <AnswerOption
                 key={book.id}
@@ -156,10 +162,11 @@ export function QuizQuestion({
         </fieldset>
 
         {hasAnswered && (
-          <div className="space-y-4" aria-live="polite">
+          <div className="space-y-2 sm:space-y-4" aria-live="polite">
             <Alert
               variant={isAnswerCorrect ? "default" : "destructive"}
               className={cn(
+                "px-3 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm",
                 isAnswerCorrect &&
                   "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-950/40 dark:text-emerald-200"
               )}
@@ -170,7 +177,9 @@ export function QuizQuestion({
                   ? t("bibleBooksGame.quiz.feedback.correct")
                   : t("bibleBooksGame.quiz.feedback.incorrect")}
               </AlertTitle>
-              <AlertDescription className={cn(isAnswerCorrect && "text-emerald-800/90 dark:text-emerald-200/90")}>
+              <AlertDescription
+                className={cn("text-xs sm:text-sm", isAnswerCorrect && "text-emerald-800/90 dark:text-emerald-200/90")}
+              >
                 {t("bibleBooksGame.quiz.feedback.explanation", {
                   nextBook: question.correctNextBook.name,
                   currentBook: question.currentBook.name,
@@ -182,7 +191,7 @@ export function QuizQuestion({
               <Button
                 ref={nextButtonRef}
                 size="lg"
-                className="h-12 w-full text-base sm:w-auto"
+                className="h-11 w-full text-sm sm:h-12 sm:w-auto sm:text-base"
                 onClick={onNextQuestion}
               >
                 {isLastQuestion ? t("bibleBooksGame.actions.seeResults") : t("bibleBooksGame.actions.nextQuestion")}

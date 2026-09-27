@@ -29,30 +29,32 @@ export function QuizResults({
   }, []);
 
   return (
-    <Card className="overflow-hidden border-border/80 text-center shadow-md">
-      <CardHeader className="items-center gap-4 border-b bg-muted/35 px-5 py-8 sm:px-8 sm:py-10">
-        <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-          <Trophy className="size-8" aria-hidden="true" />
+    <Card className="gap-3 overflow-hidden rounded-none border-0 bg-transparent py-0 text-center shadow-none sm:gap-6 sm:rounded-xl sm:border sm:border-border/80 sm:bg-card sm:py-6 sm:shadow-md">
+      <CardHeader className="items-center gap-2 border-b bg-muted/35 px-3 py-4 sm:gap-4 sm:px-8 sm:py-10">
+        <div className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm sm:size-16">
+          <Trophy className="size-6 sm:size-8" aria-hidden="true" />
         </div>
-        <Badge variant="secondary" className="gap-1.5">
+        <Badge variant="secondary" className="sr-only gap-1.5 sm:not-sr-only sm:flex">
           <BookOpen aria-hidden="true" />
           {t("bibleBooksGame.title")}
         </Badge>
         <div className="space-y-2">
           <CardTitle>
-            <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-bold tracking-tight outline-none sm:text-4xl">
+            <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold tracking-tight outline-none sm:text-4xl">
               {t("bibleBooksGame.results.title")}
             </h1>
           </CardTitle>
-          <CardDescription className="text-base">{t("bibleBooksGame.results.description")}</CardDescription>
+          <CardDescription className="sr-only sm:not-sr-only sm:text-base">
+            {t("bibleBooksGame.results.description")}
+          </CardDescription>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-5 px-5 sm:px-8">
+      <CardContent className="space-y-3 px-3 sm:space-y-5 sm:px-8">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{t("bibleBooksGame.results.youGot")}</p>
           <p
-            className="mt-1 text-5xl font-bold tracking-tight"
+            className="mt-1 text-4xl font-bold tracking-tight sm:text-5xl"
             aria-label={t("bibleBooksGame.results.scoreAria", { correct: correctAnswers, total: totalQuestions })}
           >
             {correctAnswers}{" "}
@@ -69,12 +71,12 @@ export function QuizResults({
         </p>
       </CardContent>
 
-      <CardFooter className="grid gap-3 px-5 sm:grid-cols-2 sm:px-8">
-        <Button size="lg" className="h-12 text-base" onClick={onPlayAgain}>
+      <CardFooter className="grid gap-2 px-3 pb-3 sm:grid-cols-2 sm:gap-3 sm:px-8 sm:pb-0">
+        <Button size="lg" className="h-11 text-sm sm:h-12 sm:text-base" onClick={onPlayAgain}>
           <RotateCcw aria-hidden="true" />
           {t("bibleBooksGame.actions.playAgain")}
         </Button>
-        <Button size="lg" variant="outline" className="h-12 text-base" onClick={onChangePracticeSet}>
+        <Button size="lg" variant="outline" className="h-11 text-sm sm:h-12 sm:text-base" onClick={onChangePracticeSet}>
           <Settings2 aria-hidden="true" />
           {t("bibleBooksGame.actions.changePracticeSet")}
         </Button>

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -52,6 +52,12 @@ describe("BibleBooksGame", () => {
     }
 
     expect(screen.getByRole("heading", { name: "Great work!" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Great work!" }).closest('[data-slot="card"]')).toHaveClass(
+      "rounded-none",
+      "border-0",
+      "sm:rounded-xl",
+      "sm:border"
+    );
     expect(
       screen.getByText((_, element) => element?.tagName === "P" && element.textContent === "4 out of 4")
     ).toBeInTheDocument();
@@ -75,6 +81,77 @@ describe("BibleBooksGame", () => {
     expect(screen.getByText("Not quite.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: `${correctBook} — Correct answer` })).toBeDisabled();
     expect(screen.getByText("Your answer")).toBeInTheDocument();
+  });
+
+  it("uses an edge-to-edge mobile setup with compact choices and accessible game information", async () => {
+    const { container } = render(
+      <MemoryRouter>
+        <BibleBooksGame />
+      </MemoryRouter>
+    );
+
+    expect(container.firstElementChild).toHaveClass("h-dvh", "overflow-hidden", "sm:bg-muted/25");
+    expect(container.querySelector("header")).toHaveClass("shrink-0");
+    expect(container.querySelector("main")).toHaveClass("min-h-0", "flex-1", "overflow-y-auto");
+
+    const setupCard = container.querySelector('[data-slot="card"]');
+    expect(setupCard).toHaveClass(
+      "rounded-none",
+      "border-0",
+      "bg-transparent",
+      "shadow-none",
+      "sm:rounded-xl",
+      "sm:border",
+      "sm:bg-card",
+      "sm:shadow-md"
+    );
+    expect(screen.getByRole("heading", { name: "What Comes Next?" }).closest('[data-slot="card-header"]')).toHaveClass(
+      "hidden",
+      "sm:grid"
+    );
+
+    const firstChoice = screen.getByRole("button", { name: /First 5 Books/ });
+    expect(firstChoice.parentElement).toHaveClass("grid-cols-2", "gap-2", "sm:gap-3");
+    expect(firstChoice).toHaveClass("min-h-20", "p-3", "sm:min-h-28", "sm:p-4");
+    expect(screen.getByText("Start with the first five books of the Bible.")).toHaveClass("sr-only", "sm:not-sr-only");
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "About this game" }), { key: "Enter" });
+    const informationMenu = await screen.findByRole("menu");
+    expect(within(informationMenu).getByText("What Comes Next?")).toBeVisible();
+    expect(
+      within(informationMenu).getByText("Learn the order of the books of the Bible one step at a time.")
+    ).toBeVisible();
+  });
+
+  it("uses compact mobile play controls and resets the content scroll position", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <BibleBooksGame />
+      </MemoryRouter>
+    );
+    const main = container.querySelector("main")!;
+    main.scrollTop = 120;
+
+    fireEvent.click(screen.getByRole("button", { name: "Start Practice" }));
+
+    expect(main.scrollTop).toBe(0);
+    const playCard = container.querySelector('[data-slot="card"]');
+    expect(playCard).toHaveClass("gap-0", "rounded-none", "border-0", "py-0", "sm:gap-6", "sm:rounded-xl");
+    expect(screen.getByTestId("current-book").closest("section")).toHaveClass(
+      "border-0",
+      "bg-transparent",
+      "sm:rounded-2xl",
+      "sm:border"
+    );
+
+    const currentBook = screen.getByTestId("current-book").textContent ?? "";
+    const correctBook = NEXT_BOOK_BY_NAME[currentBook];
+    const correctButton = screen.getByRole("button", { name: correctBook });
+    expect(correctButton).toHaveClass("min-h-11", "px-3", "py-2", "sm:min-h-14");
+
+    fireEvent.click(correctButton);
+    expect(screen.getByRole("alert")).toHaveClass("px-3", "py-2", "text-xs", "sm:px-4", "sm:py-3");
+    expect(screen.getByRole("button", { name: "Next Question" })).toHaveClass("h-11", "sm:h-12");
   });
 
   it("uses the green success palette for a correct answer and feedback", () => {

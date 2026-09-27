@@ -57,8 +57,8 @@ export function GameSetup({
   const { t } = useTranslation();
 
   return (
-    <Card className="overflow-hidden border-border/80 shadow-md">
-      <CardHeader className="gap-4 border-b bg-muted/35 px-5 py-6 sm:px-8 sm:py-8">
+    <Card className="gap-3 overflow-hidden rounded-none border-0 bg-transparent py-3 shadow-none sm:gap-6 sm:rounded-xl sm:border sm:border-border/80 sm:bg-card sm:py-6 sm:shadow-md">
+      <CardHeader className="hidden gap-4 border-b bg-muted/35 px-8 py-8 sm:grid">
         <div className="flex items-center justify-between gap-3">
           <Badge variant="secondary" className="gap-1.5 px-2.5 py-1 text-xs uppercase tracking-wide">
             <BookOpen aria-hidden="true" />
@@ -76,9 +76,9 @@ export function GameSetup({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 px-5 sm:px-8">
-        <div className="space-y-2">
-          <Label htmlFor="bible-book-language" className="flex items-center gap-2">
+      <CardContent className="space-y-4 px-3 sm:space-y-6 sm:px-8">
+        <div className="space-y-1.5 sm:space-y-2">
+          <Label htmlFor="bible-book-language" className="flex items-center gap-2 text-sm sm:text-base">
             <Languages className="size-4" aria-hidden="true" />
             {t("bibleBooksGame.setup.language.label")}
           </Label>
@@ -95,14 +95,17 @@ export function GameSetup({
               <SelectItem value="ru">Русский</SelectItem>
             </SelectContent>
           </Select>
-          <p id="bible-book-language-hint" className="text-xs leading-relaxed text-muted-foreground">
+          <p
+            id="bible-book-language-hint"
+            className="sr-only sm:not-sr-only sm:text-xs sm:leading-relaxed sm:text-muted-foreground"
+          >
             {t("bibleBooksGame.setup.language.hint")}
           </p>
         </div>
 
-        <fieldset className="space-y-4">
-          <legend className="text-base font-semibold">{t("bibleBooksGame.setup.choosePracticeSet")}</legend>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <fieldset className="space-y-2 sm:space-y-4">
+          <legend className="text-sm font-semibold sm:text-base">{t("bibleBooksGame.setup.choosePracticeSet")}</legend>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {PRACTICE_SETS.map((practiceSet) => {
               const isSelected = practiceSet.id === selectedPracticeSet;
 
@@ -113,13 +116,13 @@ export function GameSetup({
                   aria-pressed={isSelected}
                   onClick={() => onPracticeSetChange(practiceSet.id)}
                   className={cn(
-                    "relative min-h-28 rounded-xl border p-4 text-left transition-colors outline-none",
+                    "relative min-h-20 rounded-lg border p-3 text-left transition-colors outline-none sm:min-h-28 sm:rounded-xl sm:p-4",
                     "hover:border-primary/50 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                     isSelected ? "border-primary bg-primary/5 shadow-sm" : "bg-card"
                   )}
                 >
                   <span className="flex items-start justify-between gap-3">
-                    <span className="font-semibold">
+                    <span className="text-sm font-semibold leading-tight sm:text-base">
                       {t(`bibleBooksGame.setup.practiceSets.${practiceSet.translationKey}.name`)}
                     </span>
                     <span
@@ -132,10 +135,10 @@ export function GameSetup({
                       {isSelected && <Check className="size-3.5" />}
                     </span>
                   </span>
-                  <span className="mt-1.5 block text-sm leading-relaxed text-muted-foreground">
+                  <span className="sr-only sm:not-sr-only sm:mt-1.5 sm:block sm:text-sm sm:leading-relaxed sm:text-muted-foreground">
                     {t(`bibleBooksGame.setup.practiceSets.${practiceSet.translationKey}.description`)}
                   </span>
-                  <span className="mt-2 block text-xs font-medium text-muted-foreground">
+                  <span className="mt-1 block text-[11px] font-medium text-muted-foreground sm:mt-2 sm:text-xs">
                     {t("bibleBooksGame.setup.questionCount", { count: practiceSet.questionCount })}
                   </span>
                 </button>
@@ -145,8 +148,8 @@ export function GameSetup({
         </fieldset>
       </CardContent>
 
-      <CardFooter className="px-5 sm:justify-end sm:px-8">
-        <Button size="lg" className="h-12 w-full text-base sm:w-auto" onClick={onStart}>
+      <CardFooter className="px-3 sm:justify-end sm:px-8">
+        <Button size="lg" className="h-11 w-full text-sm sm:h-12 sm:w-auto sm:text-base" onClick={onStart}>
           {t("bibleBooksGame.actions.startPractice")}
           <ArrowRight aria-hidden="true" />
         </Button>
