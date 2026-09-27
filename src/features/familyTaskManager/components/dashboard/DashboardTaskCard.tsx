@@ -14,6 +14,7 @@ interface DashboardTaskCardProps {
   statusBadgeColor: string;
   isSubmitting: boolean;
   onComplete: (task: TaskOccurrenceDto) => void;
+  isRecommended?: boolean;
 }
 
 export function DashboardTaskCard({
@@ -24,6 +25,7 @@ export function DashboardTaskCard({
   statusBadgeColor,
   isSubmitting,
   onComplete,
+  isRecommended = false,
 }: DashboardTaskCardProps) {
   const { t } = useTranslation();
   const isOpen = task.status === FamilyTaskOccurrenceStatus.OPEN;
@@ -34,7 +36,9 @@ export function DashboardTaskCard({
 
   return (
     <article
-      className="relative overflow-hidden rounded-2xl border border-border/70 bg-card/80 px-3 py-2 shadow-sm"
+      id={`family-task-${task.uuid}`}
+      data-task-uuid={task.uuid}
+      className={`relative overflow-hidden rounded-2xl border bg-card/80 px-3 py-2 shadow-sm transition-shadow ${isRecommended ? "border-primary ring-2 ring-primary ring-offset-2 ring-offset-background" : "border-border/70"}`}
       style={statusStyle}
     >
       {isSubmitted ? (

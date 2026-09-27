@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -9,13 +9,20 @@ import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { AlertCircleIcon, Loader2 } from "lucide-react";
 import { validatePassword } from "@/services/PasswordValidator.ts";
+import type { Locale5 } from "@/services/SettingsApiClient.ts";
+
+const PROFILE_LOCALES: readonly { value: Locale5; translationKey: string; fallbackLabel: string }[] = [
+  { value: "en-US", translationKey: "pages.profileForm.locales.en", fallbackLabel: "English (US)" },
+  { value: "uk-UA", translationKey: "pages.profileForm.locales.uk", fallbackLabel: "Ukrainian" },
+  { value: "ru-RU", translationKey: "pages.profileForm.locales.ru", fallbackLabel: "Russian" },
+];
 
 export interface ProfileFormData {
   username: string;
   password?: string;
   firstName?: string;
   lastName?: string;
-  locale?: string;
+  locale: Locale5;
 }
 
 interface ProfileFormProps {
@@ -36,24 +43,19 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   onCancel,
 }) => {
   const { t } = useTranslation();
-  const [formData, setFormData] = useState<ProfileFormData>({
+  const [formData, setFormData] = useState<ProfileFormData>(() => ({
     username: "",
     password: "",
     firstName: "",
     lastName: "",
-    locale: "en-US", // Default locale
-  });
+    locale: "en-US",
+    ...initialData,
+  }));
   const [showPassword, setShowPassword] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [usernameError, setUsernameError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData((prev) => ({ ...prev, ...initialData }));
-    }
-  }, [initialData]);
-
-  const handleChange = (field: keyof ProfileFormData, value: string) => {
+  const handleChange = (field: Exclude<keyof ProfileFormData, "locale">, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (field === "password") {
       if (value) {
@@ -66,6 +68,8 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
       setUsernameError(null);
     }
   };
+
+  const selectedLocale = PROFILE_LOCALES.find((locale) => locale.value === formData.locale);
 
   const handleUsernameBlur = () => {
     const trimmed = formData.username.trim();
@@ -167,14 +171,22 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="locale">{t("pages.profileForm.locale", "Locale")}</Label>
-              <Select value={formData.locale} onValueChange={(val) => handleChange("locale", val)} disabled={isLoading}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t("pages.profileForm.localePlaceholder", "Select locale")} />
+              <Select
+                value={formData.locale}
+                onValueChange={(value) => setFormData((previous) => ({ ...previous, locale: value as Locale5 }))}
+                disabled={isLoading}
+              >
+                <SelectTrigger id="locale">
+                  <SelectValue placeholder={t("pages.profileForm.localePlaceholder", "Select locale")}>
+                    {selectedLocale ? t(selectedLocale.translationKey, selectedLocale.fallbackLabel) : undefined}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en-US">{t("pages.profileForm.locales.en", "English (US)")}</SelectItem>
-                  <SelectItem value="uk-UA">{t("pages.profileForm.locales.uk", "Українська")}</SelectItem>
-                  <SelectItem value="ru-RU">{t("pages.profileForm.locales.ru", "Русский")}</SelectItem>
+                  {PROFILE_LOCALES.map((locale) => (
+                    <SelectItem key={locale.value} value={locale.value}>
+                      {t(locale.translationKey, locale.fallbackLabel)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

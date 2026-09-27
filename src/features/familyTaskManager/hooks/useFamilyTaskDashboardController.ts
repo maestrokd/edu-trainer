@@ -7,10 +7,9 @@ import { groupTasksByProfile } from "../domain/dashboard/tasks";
 import { canManageFamilyTask } from "../domain/access";
 import { useFamilyContext } from "./useFamilyContext";
 import { useFamilyTaskAnalytics } from "./useFamilyTaskAnalytics";
-import { useRoutines } from "./useRoutines";
 import { useTaskOccurrences } from "./useTaskOccurrences";
 import type { TaskOccurrenceDto } from "../models/dto";
-import { FamilyRoutineSlot, FamilyTaskOccurrenceStatus } from "../models/enums";
+import { FamilyTaskOccurrenceStatus } from "../models/enums";
 
 const DASHBOARD_DATE_LOAD_DEBOUNCE_MS = 500;
 
@@ -18,8 +17,6 @@ export function useFamilyTaskDashboardController() {
   const { t } = useTranslation();
   const { principal } = useAuth();
   const { family, profiles, error: familyError } = useFamilyContext();
-  const routineFilters = useMemo(() => ({ active: true }), []);
-  const { routines } = useRoutines(routineFilters);
   const { track } = useFamilyTaskAnalytics();
 
   const [selectedDate, setSelectedDate] = useState(() => normalizeDay(new Date()));
@@ -34,13 +31,11 @@ export function useFamilyTaskDashboardController() {
   const canManage = canManageFamilyTask(principal);
   const isSecondaryWithoutManageProfiles = principal?.profileType === "SECONDARY" && !canManage;
   const ownProfileUuid = useMemo(() => {
-    if (!isSecondaryWithoutManageProfiles || !principal?.username) {
+    if (!isSecondaryWithoutManageProfiles || !principal?.id) {
       return null;
     }
-
-    const username = principal.username.toLowerCase();
-    return activeProfiles.find((profile) => profile.username.toLowerCase() === username)?.profileUuid ?? null;
-  }, [activeProfiles, canManage, isSecondaryWithoutManageProfiles, principal?.username]);
+    return activeProfiles.find((profile) => profile.profileUuid === principal.id)?.profileUuid ?? null;
+  }, [activeProfiles, isSecondaryWithoutManageProfiles, principal?.id]);
 
   useEffect(() => {
     if (selectedLocalDate === debouncedSelectedLocalDate) {
@@ -92,16 +87,6 @@ export function useFamilyTaskDashboardController() {
     });
   }, [debouncedSelectedLocalDate, isSecondaryWithoutManageProfiles, ownProfileUuid, profileFilter, track]);
 
-  const routineSlotByUuid = useMemo(() => {
-    const map: Record<string, FamilyRoutineSlot> = {};
-
-    for (const routine of routines) {
-      map[routine.uuid] = routine.routineSlot;
-    }
-
-    return map;
-  }, [routines]);
-
   const visibleProfiles = useMemo(() => {
     if (isSecondaryWithoutManageProfiles) {
       if (!ownProfileUuid) {
@@ -119,7 +104,7 @@ export function useFamilyTaskDashboardController() {
     return activeProfiles.filter((profile) => selectedProfileUuidSet.has(profile.profileUuid));
   }, [activeProfiles, isSecondaryWithoutManageProfiles, ownProfileUuid, profileFilter]);
 
-  const tasksByProfile = useMemo(() => groupTasksByProfile(tasks, routineSlotByUuid), [routineSlotByUuid, tasks]);
+  const tasksByProfile = useMemo(() => groupTasksByProfile(tasks), [tasks]);
   const shiftDate = useCallback(
     (direction: "prev" | "next") => setSelectedDate((prev) => addDays(prev, direction === "prev" ? -1 : 1)),
     []
@@ -143,6 +128,7 @@ export function useFamilyTaskDashboardController() {
           status: task.status,
         });
       }
+      return updatedTask;
     } finally {
       setSubmittingByTaskUuid((prev) => {
         const next = { ...prev };
@@ -162,8 +148,8 @@ export function useFamilyTaskDashboardController() {
     profileFilter,
     setProfileFilter,
     isSecondaryWithoutManageProfiles,
+    ownProfileUuid,
     tasksByProfile,
-    routineSlotByUuid,
     submittingByTaskUuid,
     loading,
     error,
