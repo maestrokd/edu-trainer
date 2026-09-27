@@ -1,12 +1,12 @@
 import { DragDropProvider } from "@dnd-kit/react";
-import { BookOpen, CheckCircle2, Languages, Lightbulb, PartyPopper, RotateCcw, Settings2, Sprout } from "lucide-react";
+import { CheckCircle2, Lightbulb, PartyPopper, RotateCcw, Settings2, Sprout } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
 import type { BibleBook } from "@/features/bible-books/model/bible-books.types";
 import { cn } from "@/lib/utils";
 
-import type { BibleBookshelfGroup } from "../data/learning-groups";
 import type { useBibleBookshelfGame } from "../hooks/useBibleBookshelfGame";
 import { BookCard } from "./BookCard";
 import { Bookshelf } from "./Bookshelf";
@@ -29,13 +28,10 @@ type BibleBookshelfGameController = ReturnType<typeof useBibleBookshelfGame>;
 
 interface BibleBookshelfPlayProps {
   game: BibleBookshelfGameController;
+  scopeLabel: string;
+  learningTip: string;
+  languageName: string;
 }
-
-const LANGUAGE_NAMES = {
-  en: "English",
-  uk: "Українська",
-  ru: "Русский",
-} as const;
 
 function parseDragId(id: string | number | undefined, prefix: string): string | null {
   const value = String(id ?? "");
@@ -51,7 +47,7 @@ function scrollToChild(containerId: string, childId: string, smooth: boolean) {
   container.scrollTo({ left: Math.max(0, left), behavior: smooth ? "smooth" : "auto" });
 }
 
-export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
+export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName }: BibleBookshelfPlayProps) {
   const { t } = useTranslation();
   const { state, data, actions } = game;
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
@@ -59,25 +55,6 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
   const completionActionRef = useRef<HTMLButtonElement>(null);
   const previousRoundIdRef = useRef(-1);
   const isFullTestament = state.config.mode === "testament";
-
-  const getGroupLabel = (group: BibleBookshelfGroup) => t(`bibleBookshelf.groups.${group.translationKey}.label`);
-  const getGroupTip = (group: BibleBookshelfGroup) => t(`bibleBookshelf.groups.${group.translationKey}.tip`);
-  const testamentKey = state.config.testament === "OLD" ? "old" : "new";
-  const scopeLabel = isFullTestament
-    ? t(`bibleBookshelf.setup.testament.${testamentKey}.name`)
-    : getGroupLabel(data.selectedGroup);
-  const scopeDescription = isFullTestament
-    ? t("bibleBookshelf.testament.description", { count: state.roundBookIds.length })
-    : t("bibleBookshelf.groups.range", {
-        start: data.selectedGroupBooks[0]?.name ?? "",
-        end: data.selectedGroupBooks.at(-1)?.name ?? "",
-      });
-  const learningTip = isFullTestament
-    ? t(`bibleBookshelf.testament.${testamentKey}Tip`, {
-        first: data.selectedTestamentBooks[0]?.name ?? "",
-        last: data.selectedTestamentBooks.at(-1)?.name ?? "",
-      })
-    : getGroupTip(data.selectedGroup);
 
   useEffect(() => {
     if (previousRoundIdRef.current === state.roundId) return;
@@ -130,64 +107,86 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl min-w-0 space-y-5 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-8">
-      <section className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-        <div className="min-w-0 max-w-3xl space-y-2">
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary" className="gap-1.5">
-              <BookOpen className="size-3.5" aria-hidden="true" />
-              {scopeLabel}
-            </Badge>
-            <Badge variant="outline" className="gap-1.5">
-              <Languages className="size-3.5" aria-hidden="true" />
-              {LANGUAGE_NAMES[state.config.bibleLanguage]}
-            </Badge>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("bibleBookshelf.title")}</h1>
-          <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">{scopeDescription}</p>
-        </div>
-        <Button variant="outline" onClick={requestSetup}>
-          <Settings2 aria-hidden="true" />
-          {t("bibleBookshelf.actions.changeSetup")}
-        </Button>
-      </section>
-
-      <Card className="min-w-0 gap-0 overflow-hidden border-amber-200/70 py-0 shadow-xl dark:border-amber-900/60">
-        <CardHeader className="border-b bg-card/95 px-4 py-5 sm:px-6">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <div className="flex gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                1
-              </span>
-              <div>
-                <h2
-                  ref={instructionRef}
-                  tabIndex={-1}
-                  className="text-xl font-bold tracking-tight outline-none sm:text-2xl"
+    <main className="mx-auto min-h-0 w-full max-w-7xl min-w-0 flex-1 overflow-x-hidden overflow-y-auto sm:px-6 sm:py-8">
+      <Card className="min-w-0 gap-0 overflow-hidden rounded-none border-0 py-0 shadow-none sm:rounded-xl sm:border sm:border-amber-200/70 sm:shadow-xl dark:sm:border-amber-900/60">
+        <div className="border-b bg-card/95 px-2 py-2 sm:px-6 sm:py-5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <div className="min-w-0 flex-1">
+              <h1
+                ref={instructionRef}
+                tabIndex={-1}
+                className="truncate text-sm font-bold tracking-tight outline-none sm:text-2xl"
+              >
+                {t("bibleBookshelf.instruction.title")}
+              </h1>
+              <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
+                <Badge
+                  variant="secondary"
+                  className="max-w-[55%] truncate px-1.5 py-0 text-xs sm:max-w-none sm:px-2.5 sm:py-0.5"
                 >
-                  {t("bibleBookshelf.instruction.title")}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-                  {t(isFullTestament ? "bibleBookshelf.instruction.testamentBody" : "bibleBookshelf.instruction.body")}
-                </p>
+                  {scopeLabel}
+                </Badge>
+                <span aria-hidden="true">·</span>
+                <span className="truncate">{languageName}</span>
               </div>
             </div>
-            <GameProgress
-              correct={data.correctCount}
-              total={state.roundBookIds.length}
-              label={t("bibleBookshelf.progress.aria", {
-                correct: data.correctCount,
-                total: state.roundBookIds.length,
-              })}
-              valueLabel={t("bibleBookshelf.progress.value", {
-                correct: data.correctCount,
-                total: state.roundBookIds.length,
-              })}
-            />
-          </div>
-        </CardHeader>
 
-        <CardContent className="min-w-0 space-y-5 bg-gradient-to-b from-amber-50/50 to-card px-3 py-5 dark:from-amber-950/10 sm:px-6">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10 sm:h-9 sm:w-auto sm:px-3"
+                onClick={requestSetup}
+                aria-label={t("bibleBookshelf.actions.changeSetup")}
+              >
+                <Settings2 aria-hidden="true" />
+                <span className="hidden sm:inline">{t("bibleBookshelf.actions.changeSetup")}</span>
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="size-10 sm:h-9 sm:w-auto sm:px-3"
+                onClick={actions.showHint}
+                disabled={state.isComplete}
+                aria-label={t("bibleBookshelf.actions.hint")}
+              >
+                <Lightbulb aria-hidden="true" />
+                <span className="hidden sm:inline">{t("bibleBookshelf.actions.hint")}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-10 sm:h-9 sm:w-auto sm:px-3"
+                onClick={actions.resetRound}
+                aria-label={t("bibleBookshelf.actions.reset")}
+              >
+                <RotateCcw aria-hidden="true" />
+                <span className="hidden sm:inline">{t("bibleBookshelf.actions.reset")}</span>
+              </Button>
+            </div>
+
+            <div className="w-full sm:ml-auto sm:w-auto">
+              <GameProgress
+                correct={data.correctCount}
+                total={state.roundBookIds.length}
+                label={t("bibleBookshelf.progress.aria", {
+                  correct: data.correctCount,
+                  total: state.roundBookIds.length,
+                })}
+                valueLabel={t("bibleBookshelf.progress.value", {
+                  correct: data.correctCount,
+                  total: state.roundBookIds.length,
+                })}
+                compactValueLabel={t("bibleBookshelf.progress.compact", {
+                  correct: data.correctCount,
+                  total: state.roundBookIds.length,
+                })}
+              />
+            </div>
+          </div>
+        </div>
+
+        <CardContent className="min-w-0 space-y-3 bg-gradient-to-b from-amber-50/50 to-card px-1 py-2 dark:from-amber-950/10 sm:space-y-5 sm:px-6 sm:py-5">
           <DragDropProvider
             onDragEnd={(event) => {
               if (event.canceled) return;
@@ -218,30 +217,15 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
               }}
             />
 
-            <section aria-labelledby="book-tray-heading" className="min-w-0 space-y-3">
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <div>
-                  <h3 id="book-tray-heading" className="text-lg font-bold">
-                    {state.isComplete ? t("bibleBookshelf.complete.title") : t("bibleBookshelf.tray.title")}
-                  </h3>
-                  {!state.isComplete ? <p className="text-sm text-muted-foreground">{scopeDescription}</p> : null}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary" onClick={actions.showHint} disabled={state.isComplete}>
-                    <Lightbulb aria-hidden="true" />
-                    {t("bibleBookshelf.actions.hint")}
-                  </Button>
-                  <Button variant="outline" onClick={actions.resetRound}>
-                    <RotateCcw aria-hidden="true" />
-                    {t("bibleBookshelf.actions.reset")}
-                  </Button>
-                </div>
-              </div>
+            <section aria-labelledby="book-tray-heading" className="min-w-0 space-y-2 sm:space-y-3">
+              <h2 id="book-tray-heading" className="px-2 text-base font-bold sm:px-0 sm:text-lg">
+                {state.isComplete ? t("bibleBookshelf.complete.title") : t("bibleBookshelf.tray.title")}
+              </h2>
 
               {state.isComplete ? (
                 <Alert
                   role="status"
-                  className="border-emerald-500/40 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100"
+                  className="mx-1 w-auto border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-emerald-900 sm:mx-0 sm:w-full sm:px-4 sm:py-3 dark:text-emerald-100"
                 >
                   <PartyPopper aria-hidden="true" />
                   <AlertTitle>{t("bibleBookshelf.complete.title")}</AlertTitle>
@@ -250,7 +234,7 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
                       count: state.roundBookIds.length,
                     })}
                   </AlertDescription>
-                  <div className="col-start-2 mt-3 flex flex-wrap gap-2">
+                  <div className="col-start-2 mt-2 flex flex-wrap gap-2 sm:mt-3">
                     <Button ref={completionActionRef} onClick={isFullTestament ? actions.playAgain : actions.nextRound}>
                       {t(isFullTestament ? "bibleBookshelf.actions.playAgain" : "bibleBookshelf.actions.nextRound")}
                     </Button>
@@ -305,11 +289,12 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
             </section>
           </DragDropProvider>
 
-          <div className="min-h-14" aria-live="polite" aria-atomic="true">
+          <div className="min-h-10 px-1 sm:min-h-14 sm:px-0" aria-live="polite" aria-atomic="true">
             {!state.isComplete && state.feedback && feedbackBook ? (
               <Alert
                 role="status"
                 className={cn(
+                  "px-3 py-2 sm:px-4 sm:py-3",
                   state.feedback.kind === "correct"
                     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100"
                     : "border-amber-500/50 bg-amber-500/10 text-amber-950 dark:text-amber-100"
@@ -320,12 +305,12 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
                 ) : (
                   <Lightbulb aria-hidden="true" />
                 )}
-                <AlertTitle>
+                <AlertTitle className="sr-only sm:not-sr-only">
                   {state.feedback.kind === "correct"
                     ? t("bibleBookshelf.feedback.correctTitle")
                     : t("bibleBookshelf.feedback.incorrectTitle")}
                 </AlertTitle>
-                <AlertDescription className="text-current/80">
+                <AlertDescription className="line-clamp-1 text-current/80">
                   {state.feedback.kind === "correct"
                     ? t("bibleBookshelf.feedback.correctDetail", { book: feedbackBook.name })
                     : t("bibleBookshelf.feedback.incorrectDetail")}
@@ -334,7 +319,7 @@ export function BibleBookshelfPlay({ game }: BibleBookshelfPlayProps) {
             ) : null}
           </div>
 
-          <aside className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-950 dark:text-emerald-100">
+          <aside className="hidden items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-950 sm:flex dark:text-emerald-100">
             <Sprout className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
             <p>
               <span className="font-bold">{t("bibleBookshelf.tipLabel")}</span> {learningTip}

@@ -1232,6 +1232,7 @@
     },
     "progress": {
       "value": "{{correct}} of {{total}} correct",
+      "compact": "{{correct}}/{{total}}",
       "aria": "Books placed correctly: {{correct}} of {{total}}"
     },
     "shelf": {
@@ -1275,6 +1276,7 @@
     "tipLabel": "Tip:",
     "aria": {
       "mainMenu": "Back to the Edu Trainer menu",
+      "info": "Game information",
       "shelf": "Bible book shelf",
       "scrollHint": "Swipe sideways to see every shelf position.",
       "fullShelfScrollHint": "Scroll sideways to reach all shelf positions.",

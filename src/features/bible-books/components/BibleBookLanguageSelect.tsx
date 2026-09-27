@@ -2,6 +2,7 @@ import { Languages } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 import type { BibleBookLanguage } from "../model/bible-books.types";
 
@@ -11,9 +12,17 @@ interface BibleBookLanguageSelectProps {
   onChange: (language: BibleBookLanguage) => void;
   label: string;
   hint: string;
+  hintClassName?: string;
 }
 
-export function BibleBookLanguageSelect({ id, value, onChange, label, hint }: BibleBookLanguageSelectProps) {
+export function BibleBookLanguageSelect({
+  id,
+  value,
+  onChange,
+  label,
+  hint,
+  hintClassName,
+}: BibleBookLanguageSelectProps) {
   const hintId = `${id}-hint`;
 
   return (
@@ -32,7 +41,7 @@ export function BibleBookLanguageSelect({ id, value, onChange, label, hint }: Bi
           <SelectItem value="ru">Русский</SelectItem>
         </SelectContent>
       </Select>
-      <p id={hintId} className="text-xs leading-relaxed text-muted-foreground">
+      <p id={hintId} className={cn("text-xs leading-relaxed text-muted-foreground", hintClassName)}>
         {hint}
       </p>
     </div>

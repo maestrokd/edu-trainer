@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -35,6 +35,14 @@ vi.mock("@dnd-kit/react", () => ({
   useDroppable: () => ({ ref: vi.fn(), isDropTarget: false }),
 }));
 
+vi.mock("@/components/ui/dropdown-menu", () => ({
+  DropdownMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+  DropdownMenuContent: ({ children }: { children: ReactNode }) => <div role="menu">{children}</div>,
+  DropdownMenuLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DropdownMenuSeparator: () => <hr />,
+}));
+
 function renderGame() {
   render(
     <MemoryRouter>
@@ -58,12 +66,22 @@ describe("BibleBookshelfGame", () => {
     expect(screen.getByRole("heading", { name: "Set up your bookshelf" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Bible book language" })).toHaveTextContent("English");
     expect(screen.getByRole("button", { name: /Learning groups/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Game information" })).toBeInTheDocument();
+    expect(within(screen.getByRole("menu")).getByText(/Choose the Bible-book language/)).toBeInTheDocument();
 
     startDefaultGame();
 
     expect(screen.getByLabelText("Shelf position 1, Genesis, correct and locked")).toBeInTheDocument();
     expect(screen.getAllByTestId(/^book-card-/)).toHaveLength(4);
     expect(screen.getByText("1 of 5 correct")).toBeInTheDocument();
+    expect(screen.getByText("1/5")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "Books placed correctly: 1 of 5" })).toHaveAttribute(
+      "aria-valuenow",
+      "1"
+    );
+    expect(screen.getByRole("button", { name: "Change setup" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hint" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Put the books in the correct order." })).toHaveFocus();
     });
@@ -83,7 +101,10 @@ describe("BibleBookshelfGame", () => {
     const russianGenesis = BIBLE_BOOKS_BY_LANGUAGE.ru.find((book) => book.id === "genesis")?.name ?? "";
     const russianDeuteronomy = BIBLE_BOOKS_BY_LANGUAGE.ru.find((book) => book.id === "deuteronomy")?.name ?? "";
     expect(screen.getByLabelText(`Shelf position 1, ${russianGenesis}, correct and locked`)).toBeInTheDocument();
-    expect(screen.getAllByText(`${russianGenesis} through ${russianDeuteronomy}`)).toHaveLength(2);
+    const infoMenu = screen.getByRole("menu");
+    expect(within(infoMenu).getByText(`${russianGenesis} through ${russianDeuteronomy}`)).toBeInTheDocument();
+    expect(within(infoMenu).getByText("Русский")).toBeInTheDocument();
+    expect(screen.getAllByText(`${russianGenesis} through ${russianDeuteronomy}`)).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Change setup" })).toBeInTheDocument();
 
     changeLanguageSpy.mockRestore();
