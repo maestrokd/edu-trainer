@@ -1274,6 +1274,9 @@
       "newTip": "The New Testament begins with {{first}} and ends with {{last}}."
     },
     "tipLabel": "Tip:",
+    "info": {
+      "groupColors": "Book group colors"
+    },
     "aria": {
       "mainMenu": "Back to the Edu Trainer menu",
       "info": "Game information",
@@ -1284,7 +1287,8 @@
       "emptySlot": "Empty shelf position {{position}}",
       "hintedSlot": "hinted position",
       "selected": "selected",
-      "hintedBook": "hinted book"
+      "hintedBook": "hinted book",
+      "bookGroup": "Book group: {{group}}"
     },
     "groups": {
       "range": "{{start}} through {{end}}",

@@ -6,6 +6,7 @@ import type { BibleBookLanguage, BibleTestament } from "@/features/bible-books/m
 
 import {
   getBibleBookshelfGroup,
+  getBibleBookshelfGroupForOrder,
   getBibleBookshelfGroupBooks,
   getBibleBookshelfGroups,
   getBibleBookshelfTestamentBooks,
@@ -39,6 +40,17 @@ export function useBibleBookshelfGame() {
 
   const booksById = useMemo(
     () => new Map(BIBLE_BOOKS_BY_LANGUAGE[state.config.bibleLanguage].map((book) => [book.id, book])),
+    [state.config.bibleLanguage]
+  );
+
+  const bookGroupsById = useMemo(
+    () =>
+      new Map(
+        BIBLE_BOOKS_BY_LANGUAGE[state.config.bibleLanguage].map((book) => [
+          book.id,
+          getBibleBookshelfGroupForOrder(state.config.bibleLanguage, book.order),
+        ])
+      ),
     [state.config.bibleLanguage]
   );
 
@@ -84,6 +96,7 @@ export function useBibleBookshelfGame() {
       roundBooks,
       trayBooks,
       booksById,
+      bookGroupsById,
       correctCount: Object.keys(state.placedBySlot).length,
       hasProgress: hasBibleBookshelfProgress(state),
     },
