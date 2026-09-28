@@ -69,6 +69,18 @@ export function getBibleBookshelfGroup(
   );
 }
 
+export function getBibleBookshelfGroupForOrder(language: BibleBookLanguage, order: number): BibleBookshelfGroup {
+  const group = getBibleBookshelfGroups(language).find(
+    (candidate) => order >= candidate.startOrder && order <= candidate.endOrder
+  );
+
+  if (!group) {
+    throw new RangeError(`No Bible Bookshelf group contains order ${order} for language ${language}`);
+  }
+
+  return group;
+}
+
 export function getBibleBookshelfGroupBooks(language: BibleBookLanguage, groupId: BibleBookshelfGroupId): BibleBook[] {
   const group = getBibleBookshelfGroup(language, groupId);
 

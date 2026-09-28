@@ -12,6 +12,8 @@ interface BibleBookLanguageSelectProps {
   onChange: (language: BibleBookLanguage) => void;
   label: string;
   hint: string;
+  className?: string;
+  labelClassName?: string;
   hintClassName?: string;
 }
 
@@ -21,13 +23,15 @@ export function BibleBookLanguageSelect({
   onChange,
   label,
   hint,
+  className,
+  labelClassName,
   hintClassName,
 }: BibleBookLanguageSelectProps) {
   const hintId = `${id}-hint`;
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="flex items-center gap-2">
+    <div className={cn("space-y-2", className)}>
+      <Label htmlFor={id} className={cn("flex items-center gap-2", labelClassName)}>
         <Languages className="size-4" aria-hidden="true" />
         {label}
       </Label>
