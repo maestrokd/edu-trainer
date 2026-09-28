@@ -1,12 +1,15 @@
 import type { ReactNode } from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BIBLE_BOOKS_BY_LANGUAGE } from "@/features/bible-books/data/bibleBooks.registry";
 import i18n from "@/i18n";
 
 import { BibleBookshelfGame } from "../components/BibleBookshelfGame";
+
+const scrollToMock = vi.fn();
+const originalScrollTo = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollTo");
 
 vi.mock("@dnd-kit/react", () => ({
   DragDropProvider: ({
@@ -57,7 +60,22 @@ function startDefaultGame() {
 
 describe("BibleBookshelfGame", () => {
   beforeEach(async () => {
+    scrollToMock.mockReset();
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      value: scrollToMock,
+    });
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
     await i18n.changeLanguage("en");
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    if (originalScrollTo) {
+      Object.defineProperty(HTMLElement.prototype, "scrollTo", originalScrollTo);
+    } else {
+      Reflect.deleteProperty(HTMLElement.prototype, "scrollTo");
+    }
   });
 
   it("opens on setup and starts the guided Law round", async () => {
@@ -71,8 +89,16 @@ describe("BibleBookshelfGame", () => {
 
     startDefaultGame();
 
-    expect(screen.getByLabelText("Shelf position 1, Genesis, correct and locked")).toBeInTheDocument();
-    expect(screen.getAllByTestId(/^book-card-/)).toHaveLength(4);
+    const anchoredSlot = screen.getByLabelText("Shelf position 1, Genesis, correct and locked");
+    const bookCards = screen.getAllByTestId(/^book-card-/);
+    expect(anchoredSlot).toHaveClass("min-h-36", "sm:min-h-44");
+    expect(bookCards).toHaveLength(4);
+    expect(bookCards[0]).toHaveClass("min-h-20", "sm:min-h-28");
+    expect(screen.getByTestId("bookshelf-scroll")).toHaveClass("overflow-x-auto");
+    expect(screen.getByTestId("bookshelf-tray-scroll")).toHaveClass("overflow-x-auto", "sm:overflow-x-visible");
+    expect(screen.getByTestId("bookshelf-tray-scroll").firstElementChild).toHaveClass(
+      "bible-bookshelf-group-tray-grid"
+    );
     expect(screen.getByText("1 of 5 correct")).toBeInTheDocument();
     expect(screen.getByText("1/5")).toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: "Books placed correctly: 1 of 5" })).toHaveAttribute(
@@ -133,6 +159,19 @@ describe("BibleBookshelfGame", () => {
     expect(screen.getByTestId("bookshelf-scroll")).toHaveClass("overflow-x-auto");
     expect(screen.getByTestId("bookshelf-tray-scroll")).toHaveClass("overflow-x-auto");
     expect(screen.getByTestId("bookshelf-tray-scroll").firstElementChild).toHaveClass("bible-bookshelf-full-tray-grid");
+    expect(screen.getAllByRole("button", { name: /^Empty shelf position/ })[0]).not.toHaveClass("sm:min-h-44");
+    expect(screen.getAllByTestId(/^book-card-/)[0]).not.toHaveClass("sm:min-h-28");
+  });
+
+  it("scrolls both group-mode regions to the hinted book without motion", async () => {
+    renderGame();
+    startDefaultGame();
+
+    fireEvent.click(screen.getByRole("button", { name: "Hint" }));
+
+    await waitFor(() => expect(scrollToMock).toHaveBeenCalledTimes(2));
+    expect(scrollToMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ behavior: "auto" }));
+    expect(scrollToMock).toHaveBeenNthCalledWith(2, expect.objectContaining({ behavior: "auto" }));
   });
 
   it("supports the 27-book New Testament configuration", () => {

@@ -19,7 +19,7 @@ import type { BibleBook } from "@/features/bible-books/model/bible-books.types";
 import { cn } from "@/lib/utils";
 
 import type { useBibleBookshelfGame } from "../hooks/useBibleBookshelfGame";
-import { BookCard } from "./BookCard";
+import { BookTray } from "./BookTray";
 import { Bookshelf } from "./Bookshelf";
 import { GameProgress } from "./GameProgress";
 import "./bible-bookshelf.css";
@@ -84,7 +84,7 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
   }, [state.feedback, state.isComplete, state.trayBookIds]);
 
   useEffect(() => {
-    if (!isFullTestament || state.hintBookId === null || state.hintSlotIndex === null) return;
+    if (state.hintBookId === null || state.hintSlotIndex === null) return;
     const timeout = window.setTimeout(() => {
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       scrollToChild("bookshelf-scroll", `bookshelf-slot-${state.hintSlotIndex}`, !prefersReducedMotion);
@@ -92,7 +92,7 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
     }, 0);
 
     return () => window.clearTimeout(timeout);
-  }, [isFullTestament, state.hintBookId, state.hintSlotIndex]);
+  }, [state.hintBookId, state.hintSlotIndex]);
 
   const getBook = (bookId: string | undefined): BibleBook | null =>
     bookId ? (data.booksById.get(bookId) ?? null) : null;
@@ -199,7 +199,7 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
           >
             <Bookshelf
               roundBooks={data.roundBooks}
-              compact={isFullTestament}
+              layout={state.config.mode}
               placedBySlot={state.placedBySlot}
               selectedBookId={state.selectedBookId}
               hintSlotIndex={state.hintSlotIndex}
@@ -217,12 +217,11 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
               }}
             />
 
-            <section aria-labelledby="book-tray-heading" className="min-w-0 space-y-2 sm:space-y-3">
-              <h2 id="book-tray-heading" className="px-2 text-base font-bold sm:px-0 sm:text-lg">
-                {state.isComplete ? t("bibleBookshelf.complete.title") : t("bibleBookshelf.tray.title")}
-              </h2>
-
-              {state.isComplete ? (
+            {state.isComplete ? (
+              <section aria-labelledby="book-tray-heading" className="min-w-0 space-y-2 sm:space-y-3">
+                <h2 id="book-tray-heading" className="px-2 text-base font-bold sm:px-0 sm:text-lg">
+                  {t("bibleBookshelf.complete.title")}
+                </h2>
                 <Alert
                   role="status"
                   className="mx-1 w-auto border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-emerald-900 sm:mx-0 sm:w-full sm:px-4 sm:py-3 dark:text-emerald-100"
@@ -245,48 +244,22 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
                     ) : null}
                   </div>
                 </Alert>
-              ) : isFullTestament ? (
-                <div className="space-y-2">
-                  <p className="text-center text-xs font-medium text-muted-foreground">
-                    {t("bibleBookshelf.tray.scrollHint")}
-                  </p>
-                  <div
-                    id="bookshelf-tray-scroll"
-                    data-testid="bookshelf-tray-scroll"
-                    className="max-w-full overflow-x-auto overscroll-x-contain pb-2"
-                  >
-                    <div className="bible-bookshelf-full-tray-grid w-max min-w-full gap-3">
-                      {data.trayBooks.map((book) => (
-                        <BookCard
-                          key={book.id}
-                          book={book}
-                          compact
-                          isSelected={state.selectedBookId === book.id}
-                          isHinted={state.hintBookId === book.id}
-                          onSelect={actions.selectBook}
-                          selectedLabel={t("bibleBookshelf.aria.selected")}
-                          hintLabel={t("bibleBookshelf.aria.hintedBook")}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                  {data.trayBooks.map((book) => (
-                    <BookCard
-                      key={book.id}
-                      book={book}
-                      isSelected={state.selectedBookId === book.id}
-                      isHinted={state.hintBookId === book.id}
-                      onSelect={actions.selectBook}
-                      selectedLabel={t("bibleBookshelf.aria.selected")}
-                      hintLabel={t("bibleBookshelf.aria.hintedBook")}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
+              </section>
+            ) : (
+              <BookTray
+                books={data.trayBooks}
+                layout={state.config.mode}
+                selectedBookId={state.selectedBookId}
+                hintBookId={state.hintBookId}
+                onSelect={actions.selectBook}
+                labels={{
+                  title: t("bibleBookshelf.tray.title"),
+                  scrollHint: t("bibleBookshelf.tray.scrollHint"),
+                  selected: t("bibleBookshelf.aria.selected"),
+                  hinted: t("bibleBookshelf.aria.hintedBook"),
+                }}
+              />
+            )}
           </DragDropProvider>
 
           <div className="min-h-10 px-1 sm:min-h-14 sm:px-0" aria-live="polite" aria-atomic="true">

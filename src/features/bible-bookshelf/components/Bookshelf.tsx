@@ -5,11 +5,12 @@ import type { BibleBook } from "@/features/bible-books/model/bible-books.types";
 import { cn } from "@/lib/utils";
 
 import { getBookTone } from "../lib/book-tones";
+import type { BibleBookshelfMode } from "../lib/game";
 
 interface BookshelfSlotProps {
   slotIndex: number;
   book: BibleBook | null;
-  compact: boolean;
+  layout: BibleBookshelfMode;
   selectedBookId: string | null;
   isHinted: boolean;
   isIncorrect: boolean;
@@ -25,13 +26,14 @@ interface BookshelfSlotProps {
 function BookshelfSlot({
   slotIndex,
   book,
-  compact,
+  layout,
   selectedBookId,
   isHinted,
   isIncorrect,
   onAttemptPlacement,
   labels,
 }: BookshelfSlotProps) {
+  const isFullTestament = layout === "testament";
   const { ref, isDropTarget } = useDroppable({
     id: `slot:${slotIndex}`,
     type: "shelf-slot",
@@ -49,7 +51,7 @@ function BookshelfSlot({
         aria-label={labels.filled(position, book.name)}
         className={cn(
           "relative flex flex-col justify-end rounded-xl border border-l-8 text-center shadow-lg",
-          compact ? "min-h-36 p-2" : "min-h-44 p-3",
+          isFullTestament ? "min-h-36 p-2" : "min-h-36 p-2 sm:min-h-44 sm:p-3",
           getBookTone(book.order)
         )}
       >
@@ -76,7 +78,7 @@ function BookshelfSlot({
       }}
       className={cn(
         "relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-amber-100/75 bg-black/10 text-amber-50 outline-none transition-[background-color,border-color,transform]",
-        compact ? "min-h-36 px-2" : "min-h-44 px-3",
+        isFullTestament ? "min-h-36 px-2" : "min-h-36 px-2 sm:min-h-44 sm:px-3",
         "hover:bg-white/10 focus-visible:ring-4 focus-visible:ring-white/70 motion-reduce:transform-none motion-reduce:transition-none",
         selectedBookId && "cursor-pointer border-white/80 bg-white/10",
         isDropTarget && "scale-[1.03] border-white bg-white/20",
@@ -95,7 +97,7 @@ function BookshelfSlot({
 
 interface BookshelfProps {
   roundBooks: BibleBook[];
-  compact?: boolean;
+  layout: BibleBookshelfMode;
   placedBySlot: Record<number, string>;
   selectedBookId: string | null;
   hintSlotIndex: number | null;
@@ -106,7 +108,7 @@ interface BookshelfProps {
 
 export function Bookshelf({
   roundBooks,
-  compact = false,
+  layout,
   placedBySlot,
   selectedBookId,
   hintSlotIndex,
@@ -114,11 +116,12 @@ export function Bookshelf({
   onAttemptPlacement,
   labels,
 }: BookshelfProps) {
+  const isFullTestament = layout === "testament";
   const booksById = new Map(roundBooks.map((book) => [book.id, book]));
 
   return (
     <section aria-label={labels.region} className="space-y-2">
-      <p className={cn("text-center text-xs font-medium text-muted-foreground", !compact && "sm:hidden")}>
+      <p className={cn("text-center text-xs font-medium text-muted-foreground", !isFullTestament && "sm:hidden")}>
         {labels.scrollHint}
       </p>
       <div
@@ -129,10 +132,17 @@ export function Bookshelf({
         <div
           className={cn(
             "rounded-2xl border-[10px] border-amber-700 bg-gradient-to-b from-amber-950 via-amber-900 to-amber-800 p-3 shadow-[inset_0_12px_24px_rgba(0,0,0,0.35),0_12px_30px_rgba(120,53,15,0.25)] dark:border-amber-900",
-            compact ? "w-max min-w-full" : "min-w-[44rem]"
+            isFullTestament ? "w-max min-w-full" : "w-max min-w-full sm:w-auto sm:min-w-[44rem]"
           )}
         >
-          <div className={cn("grid gap-3", compact ? "grid-flow-col auto-cols-[9rem]" : "grid-cols-5")}>
+          <div
+            className={cn(
+              "grid gap-3",
+              isFullTestament
+                ? "grid-flow-col auto-cols-[9rem]"
+                : "grid-flow-col auto-cols-[9rem] sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-5"
+            )}
+          >
             {roundBooks.map((_, slotIndex) => {
               const placedBookId = placedBySlot[slotIndex];
               return (
@@ -140,7 +150,7 @@ export function Bookshelf({
                   key={slotIndex}
                   slotIndex={slotIndex}
                   book={placedBookId ? (booksById.get(placedBookId) ?? null) : null}
-                  compact={compact}
+                  layout={layout}
                   selectedBookId={selectedBookId}
                   isHinted={hintSlotIndex === slotIndex}
                   isIncorrect={incorrectSlotIndex === slotIndex}
