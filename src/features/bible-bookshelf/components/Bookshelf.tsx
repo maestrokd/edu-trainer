@@ -4,12 +4,14 @@ import { Check, Lightbulb, LockKeyhole } from "lucide-react";
 import type { BibleBook } from "@/features/bible-books/model/bible-books.types";
 import { cn } from "@/lib/utils";
 
-import { getBookTone } from "../lib/book-tones";
+import type { BibleBookshelfGroup } from "../data/learning-groups";
+import { getBibleBookshelfGroupTone } from "../lib/book-tones";
 import type { BibleBookshelfMode } from "../lib/game";
 
 interface BookshelfSlotProps {
   slotIndex: number;
   book: BibleBook | null;
+  bookGroup: BibleBookshelfGroup | null;
   layout: BibleBookshelfMode;
   selectedBookId: string | null;
   isHinted: boolean;
@@ -20,12 +22,14 @@ interface BookshelfSlotProps {
     filled: (position: number, book: string) => string;
     emptyPosition: (position: number) => string;
     hinted: string;
+    groupDescription: (group: BibleBookshelfGroup) => string;
   };
 }
 
 function BookshelfSlot({
   slotIndex,
   book,
+  bookGroup,
   layout,
   selectedBookId,
   isHinted,
@@ -43,16 +47,19 @@ function BookshelfSlot({
   const position = slotIndex + 1;
 
   if (book) {
+    if (!bookGroup) throw new Error(`Missing Bible Bookshelf group for ${book.id}`);
+
     return (
       <div
         ref={ref}
         id={`bookshelf-slot-${slotIndex}`}
         role="group"
         aria-label={labels.filled(position, book.name)}
+        aria-description={labels.groupDescription(bookGroup)}
         className={cn(
-          "relative flex flex-col justify-end rounded-xl border border-l-8 text-center shadow-lg",
+          "relative flex flex-col justify-end rounded-xl border border-l-8 bg-card text-center text-card-foreground shadow-lg",
           isFullTestament ? "min-h-36 p-2" : "min-h-36 p-2 sm:min-h-44 sm:p-3",
-          getBookTone(book.order)
+          getBibleBookshelfGroupTone(bookGroup.id).spine
         )}
       >
         <span className="absolute left-2 top-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-sm font-bold text-foreground shadow-sm">
@@ -97,6 +104,7 @@ function BookshelfSlot({
 
 interface BookshelfProps {
   roundBooks: BibleBook[];
+  bookGroupsById: ReadonlyMap<string, BibleBookshelfGroup>;
   layout: BibleBookshelfMode;
   placedBySlot: Record<number, string>;
   selectedBookId: string | null;
@@ -108,6 +116,7 @@ interface BookshelfProps {
 
 export function Bookshelf({
   roundBooks,
+  bookGroupsById,
   layout,
   placedBySlot,
   selectedBookId,
@@ -150,6 +159,7 @@ export function Bookshelf({
                   key={slotIndex}
                   slotIndex={slotIndex}
                   book={placedBookId ? (booksById.get(placedBookId) ?? null) : null}
+                  bookGroup={placedBookId ? (bookGroupsById.get(placedBookId) ?? null) : null}
                   layout={layout}
                   selectedBookId={selectedBookId}
                   isHinted={hintSlotIndex === slotIndex}

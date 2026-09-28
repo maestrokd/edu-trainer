@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import { BIBLE_BOOKS_BY_LANGUAGE } from "@/features/bible-books/data/bibleBooks.registry";
 
 import {
+  getBibleBookshelfGroupForOrder,
   getBibleBookshelfGroupBooks,
   getBibleBookshelfGroups,
   getBibleBookshelfTestamentBooks,
 } from "../data/learning-groups";
+import { getBibleBookshelfGroupTone } from "../lib/book-tones";
 import {
   bibleBookshelfReducer,
   buildRoundWindows,
@@ -56,6 +58,7 @@ describe("Bible Bookshelf learning groups", () => {
     expect(localeBooks.map((book) => book.order)).toEqual(Array.from({ length: 66 }, (_, index) => index + 1));
     expect(groupBookIds).toEqual(canonBookIds);
     expect(new Set(groupBookIds).size).toBe(66);
+    expect(localeBooks.map((book) => getBibleBookshelfGroupForOrder(language, book.order).id)).toHaveLength(66);
   });
 
   it("uses eight English groups and seven contiguous Eastern-order groups", () => {
@@ -63,6 +66,22 @@ describe("Bible Bookshelf learning groups", () => {
     expect(getBibleBookshelfGroups("uk")).toHaveLength(7);
     expect(getBibleBookshelfGroups("ru").at(-2)).toMatchObject({ startOrder: 40, endOrder: 51 });
     expect(getBibleBookshelfGroups("ru").at(-1)).toMatchObject({ startOrder: 52, endOrder: 66 });
+  });
+
+  it.each(["en", "uk", "ru"] as const)("assigns a distinct tone to every active %s group", (language) => {
+    const groups = getBibleBookshelfGroups(language);
+    const tones = groups.map((group) => getBibleBookshelfGroupTone(group.id));
+
+    expect(new Set(tones.map((tone) => tone.spine)).size).toBe(groups.length);
+    expect(new Set(tones.map((tone) => tone.swatch)).size).toBe(groups.length);
+  });
+
+  it("resolves English and Eastern New Testament group boundaries", () => {
+    expect(getBibleBookshelfGroupForOrder("en", 44).id).toBe("gospels-acts");
+    expect(getBibleBookshelfGroupForOrder("en", 45).id).toBe("pauline-letters");
+    expect(getBibleBookshelfGroupForOrder("en", 58).id).toBe("general-letters-revelation");
+    expect(getBibleBookshelfGroupForOrder("ru", 51).id).toBe("gospels-general-letters");
+    expect(getBibleBookshelfGroupForOrder("ru", 52).id).toBe("pauline-letters-revelation");
   });
 
   it.each(["en", "uk", "ru"] as const)("provides complete testament scopes in %s order", (language) => {

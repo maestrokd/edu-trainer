@@ -4,20 +4,33 @@ import { GripVertical, Lightbulb } from "lucide-react";
 import type { BibleBook } from "@/features/bible-books/model/bible-books.types";
 import { cn } from "@/lib/utils";
 
-import { getBookTone } from "../lib/book-tones";
+import type { BibleBookshelfGroup } from "../data/learning-groups";
+import { getBibleBookshelfGroupTone } from "../lib/book-tones";
 import type { BibleBookshelfMode } from "../lib/game";
 
 interface BookCardProps {
   book: BibleBook;
+  group: BibleBookshelfGroup;
   layout: BibleBookshelfMode;
   isSelected: boolean;
   isHinted: boolean;
   onSelect: (bookId: string) => void;
   selectedLabel: string;
   hintLabel: string;
+  groupDescription: string;
 }
 
-export function BookCard({ book, layout, isSelected, isHinted, onSelect, selectedLabel, hintLabel }: BookCardProps) {
+export function BookCard({
+  book,
+  group,
+  layout,
+  isSelected,
+  isHinted,
+  onSelect,
+  selectedLabel,
+  hintLabel,
+  groupDescription,
+}: BookCardProps) {
   const isFullTestament = layout === "testament";
   const { ref, isDragging } = useDraggable({
     id: `book:${book.id}`,
@@ -33,16 +46,17 @@ export function BookCard({ book, layout, isSelected, isHinted, onSelect, selecte
       type="button"
       aria-pressed={isSelected}
       aria-label={`${book.name}${isSelected ? `, ${selectedLabel}` : ""}${isHinted ? `, ${hintLabel}` : ""}`}
+      aria-description={groupDescription}
       onClick={() => {
         if (!isDragging) onSelect(book.id);
       }}
       className={cn(
-        "group relative flex w-full items-center gap-2 overflow-hidden rounded-xl border border-l-8 text-left shadow-sm outline-none transition-[transform,box-shadow,border-color]",
+        "group relative flex w-full items-center gap-2 overflow-hidden rounded-xl border border-l-8 bg-card text-left text-card-foreground shadow-sm outline-none transition-[transform,box-shadow,border-color]",
         "hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-4 focus-visible:ring-primary/35 motion-reduce:transform-none motion-reduce:transition-none",
         isFullTestament
           ? "min-h-20 touch-pan-x px-2 py-3"
           : "min-h-20 touch-pan-x px-2 py-3 sm:min-h-28 sm:touch-none sm:px-3 sm:py-4",
-        getBookTone(book.order),
+        getBibleBookshelfGroupTone(group.id).spine,
         isSelected && "ring-4 ring-primary/45 shadow-lg",
         isHinted && "ring-4 ring-amber-400/70 shadow-lg",
         isDragging && "z-50 scale-105 opacity-90 shadow-xl"

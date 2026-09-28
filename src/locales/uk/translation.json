@@ -1278,6 +1278,9 @@
       "newTip": "Новий Заповіт починається книгою {{first}} і завершується книгою {{last}}."
     },
     "tipLabel": "Підказка:",
+    "info": {
+      "groupColors": "Кольори груп книг"
+    },
     "aria": {
       "mainMenu": "Назад до меню Edu Trainer",
       "info": "Інформація про гру",
@@ -1288,7 +1291,8 @@
       "emptySlot": "Вільне місце на полиці {{position}}",
       "hintedSlot": "підказане місце",
       "selected": "вибрано",
-      "hintedBook": "підказана книга"
+      "hintedBook": "підказана книга",
+      "bookGroup": "Група книг: {{group}}"
     },
     "groups": {
       "range": "Від {{start}} до {{end}}",

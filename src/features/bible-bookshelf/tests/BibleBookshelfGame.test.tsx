@@ -92,8 +92,14 @@ describe("BibleBookshelfGame", () => {
     const anchoredSlot = screen.getByLabelText("Shelf position 1, Genesis, correct and locked");
     const bookCards = screen.getAllByTestId(/^book-card-/);
     expect(anchoredSlot).toHaveClass("min-h-36", "sm:min-h-44");
+    expect(anchoredSlot).toHaveClass("border-l-sky-500", "bg-card", "text-card-foreground");
+    expect(anchoredSlot).toHaveAttribute("aria-description", "Book group: The Law");
     expect(bookCards).toHaveLength(4);
     expect(bookCards[0]).toHaveClass("min-h-20", "sm:min-h-28");
+    bookCards.forEach((bookCard) => {
+      expect(bookCard).toHaveClass("border-l-sky-500", "bg-card", "text-card-foreground");
+      expect(bookCard).toHaveAttribute("aria-description", "Book group: The Law");
+    });
     expect(screen.getByTestId("bookshelf-scroll")).toHaveClass("overflow-x-auto");
     expect(screen.getByTestId("bookshelf-tray-scroll")).toHaveClass("overflow-x-auto", "sm:overflow-x-visible");
     expect(screen.getByTestId("bookshelf-tray-scroll").firstElementChild).toHaveClass(
@@ -108,6 +114,9 @@ describe("BibleBookshelfGame", () => {
     expect(screen.getByRole("button", { name: "Change setup" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hint" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument();
+    const groupLegend = screen.getByRole("list", { name: "Book group colors" });
+    expect(within(groupLegend).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(groupLegend).getByText("The Law")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Put the books in the correct order." })).toHaveFocus();
     });
@@ -145,7 +154,12 @@ describe("BibleBookshelfGame", () => {
     });
 
     expect(screen.getByLabelText("Місце 1, Genesis, правильно й зафіксовано")).toBeInTheDocument();
+    expect(screen.getByLabelText("Місце 1, Genesis, правильно й зафіксовано")).toHaveAttribute(
+      "aria-description",
+      "Група книг: Закон"
+    );
     expect(screen.getByRole("button", { name: "Змінити налаштування" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Кольори груп книг" })).toBeInTheDocument();
   });
 
   it("renders all Old Testament slots and cards in horizontally scrollable regions", () => {
@@ -161,6 +175,15 @@ describe("BibleBookshelfGame", () => {
     expect(screen.getByTestId("bookshelf-tray-scroll").firstElementChild).toHaveClass("bible-bookshelf-full-tray-grid");
     expect(screen.getAllByRole("button", { name: /^Empty shelf position/ })[0]).not.toHaveClass("sm:min-h-44");
     expect(screen.getAllByTestId(/^book-card-/)[0]).not.toHaveClass("sm:min-h-28");
+    expect(screen.getByTestId("book-card-genesis")).toHaveClass("border-l-sky-500");
+    expect(screen.getByTestId("book-card-joshua")).toHaveClass("border-l-amber-500");
+    const groupLegend = screen.getByRole("list", { name: "Book group colors" });
+    expect(
+      within(groupLegend)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent)
+    ).toEqual(["The Law", "Old Testament History", "Poetry & Wisdom", "Major Prophets", "Minor Prophets"]);
+    expect(within(groupLegend).queryByText("Gospels & Acts")).not.toBeInTheDocument();
   });
 
   it("scrolls both group-mode regions to the hinted book without motion", async () => {
@@ -183,6 +206,11 @@ describe("BibleBookshelfGame", () => {
     expect(screen.getAllByRole("button", { name: /^Empty shelf position/ })).toHaveLength(27);
     expect(screen.getAllByTestId(/^book-card-/)).toHaveLength(27);
     expect(screen.getByText("0 of 27 correct")).toBeInTheDocument();
+    const groupLegend = screen.getByRole("list", { name: "Book group colors" });
+    expect(within(groupLegend).getAllByRole("listitem")).toHaveLength(3);
+    expect(within(groupLegend).getByText("Gospels & Acts")).toBeInTheDocument();
+    expect(within(groupLegend).getByText("Paul’s Letters")).toBeInTheDocument();
+    expect(within(groupLegend).getByText("General Letters & Revelation")).toBeInTheDocument();
   });
 
   it("places books through both tap and drag paths", () => {
@@ -192,7 +220,9 @@ describe("BibleBookshelfGame", () => {
     fireEvent.click(screen.getByRole("button", { name: "Exodus" }));
     expect(screen.getByRole("button", { name: "Exodus, selected" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "Empty shelf position 2" }));
-    expect(screen.getByLabelText("Shelf position 2, Exodus, correct and locked")).toBeInTheDocument();
+    const placedExodus = screen.getByLabelText("Shelf position 2, Exodus, correct and locked");
+    expect(placedExodus).toHaveClass("border-l-sky-500");
+    expect(placedExodus).toHaveAttribute("aria-description", "Book group: The Law");
 
     fireEvent.click(screen.getByRole("button", { name: "Reset" }));
     fireEvent.click(screen.getByRole("button", { name: "Simulate drag placement" }));

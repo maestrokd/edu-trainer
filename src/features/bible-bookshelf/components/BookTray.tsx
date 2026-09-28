@@ -1,11 +1,13 @@
 import type { BibleBook } from "@/features/bible-books/model/bible-books.types";
 import { cn } from "@/lib/utils";
 
+import type { BibleBookshelfGroup } from "../data/learning-groups";
 import type { BibleBookshelfMode } from "../lib/game";
 import { BookCard } from "./BookCard";
 
 interface BookTrayProps {
   books: BibleBook[];
+  bookGroupsById: ReadonlyMap<string, BibleBookshelfGroup>;
   layout: BibleBookshelfMode;
   selectedBookId: string | null;
   hintBookId: string | null;
@@ -15,10 +17,25 @@ interface BookTrayProps {
     scrollHint: string;
     selected: string;
     hinted: string;
+    groupDescription: (group: BibleBookshelfGroup) => string;
   };
 }
 
-export function BookTray({ books, layout, selectedBookId, hintBookId, onSelect, labels }: BookTrayProps) {
+function requireBookGroup(book: BibleBook, bookGroupsById: ReadonlyMap<string, BibleBookshelfGroup>) {
+  const group = bookGroupsById.get(book.id);
+  if (!group) throw new Error(`Missing Bible Bookshelf group for ${book.id}`);
+  return group;
+}
+
+export function BookTray({
+  books,
+  bookGroupsById,
+  layout,
+  selectedBookId,
+  hintBookId,
+  onSelect,
+  labels,
+}: BookTrayProps) {
   const isFullTestament = layout === "testament";
 
   return (
@@ -45,18 +62,23 @@ export function BookTray({ books, layout, selectedBookId, hintBookId, onSelect, 
               isFullTestament ? "bible-bookshelf-full-tray-grid" : "bible-bookshelf-group-tray-grid"
             )}
           >
-            {books.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                layout={layout}
-                isSelected={selectedBookId === book.id}
-                isHinted={hintBookId === book.id}
-                onSelect={onSelect}
-                selectedLabel={labels.selected}
-                hintLabel={labels.hinted}
-              />
-            ))}
+            {books.map((book) => {
+              const group = requireBookGroup(book, bookGroupsById);
+              return (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  group={group}
+                  layout={layout}
+                  isSelected={selectedBookId === book.id}
+                  isHinted={hintBookId === book.id}
+                  onSelect={onSelect}
+                  selectedLabel={labels.selected}
+                  hintLabel={labels.hinted}
+                  groupDescription={labels.groupDescription(group)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

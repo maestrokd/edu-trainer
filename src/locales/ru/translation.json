@@ -1278,6 +1278,9 @@
       "newTip": "Новый Завет начинается книгой {{first}} и заканчивается книгой {{last}}."
     },
     "tipLabel": "Подсказка:",
+    "info": {
+      "groupColors": "Цвета групп книг"
+    },
     "aria": {
       "mainMenu": "Назад в меню Edu Trainer",
       "info": "Информация об игре",
@@ -1288,7 +1291,8 @@
       "emptySlot": "Свободное место на полке {{position}}",
       "hintedSlot": "подсказанное место",
       "selected": "выбрано",
-      "hintedBook": "подсказанная книга"
+      "hintedBook": "подсказанная книга",
+      "bookGroup": "Группа книг: {{group}}"
     },
     "groups": {
       "range": "От {{start}} до {{end}}",

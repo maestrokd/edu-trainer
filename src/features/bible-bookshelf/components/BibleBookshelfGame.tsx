@@ -14,6 +14,7 @@ import {
 
 import type { BibleBookshelfGroup } from "../data/learning-groups";
 import { useBibleBookshelfGame } from "../hooks/useBibleBookshelfGame";
+import { getBibleBookshelfGroupTone } from "../lib/book-tones";
 import { BibleBookshelfPlay } from "./BibleBookshelfPlay";
 import { BibleBookshelfSetup } from "./BibleBookshelfSetup";
 
@@ -61,6 +62,9 @@ export function BibleBookshelfGame() {
     isFullTestament ? "bibleBookshelf.instruction.testamentBody" : "bibleBookshelf.instruction.body"
   );
   const languageName = LANGUAGE_NAMES[game.state.config.bibleLanguage];
+  const legendGroups = game.data.groups.filter((group) =>
+    game.data.roundBooks.some((book) => book.order >= group.startOrder && book.order <= group.endOrder)
+  );
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-amber-50/80 via-background to-sky-50/60 text-foreground dark:from-amber-950/20 dark:via-background dark:to-sky-950/20">
@@ -86,7 +90,10 @@ export function BibleBookshelfGame() {
                   <span className="hidden sm:inline">{t("bibleBookshelf.aria.info")}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-1rem)] p-2">
+              <DropdownMenuContent
+                align="end"
+                className="max-h-[calc(100dvh-1rem)] w-80 max-w-[calc(100vw-1rem)] overflow-y-auto p-2"
+              >
                 {game.state.phase === "setup" ? (
                   <>
                     <DropdownMenuLabel>{t("bibleBookshelf.setup.title")}</DropdownMenuLabel>
@@ -106,6 +113,24 @@ export function BibleBookshelfGame() {
                         <Languages className="size-4" aria-hidden="true" />
                         {languageName}
                       </p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <div className="space-y-2 px-2 py-2 text-sm">
+                      <p className="font-semibold">{t("bibleBookshelf.info.groupColors")}</p>
+                      <ul
+                        aria-label={t("bibleBookshelf.info.groupColors")}
+                        className="grid grid-cols-2 gap-x-3 gap-y-1.5"
+                      >
+                        {legendGroups.map((group) => (
+                          <li key={group.id} className="flex min-w-0 items-center gap-2 text-muted-foreground">
+                            <span
+                              className={`size-3 shrink-0 rounded-sm ${getBibleBookshelfGroupTone(group.id).swatch}`}
+                              aria-hidden="true"
+                            />
+                            <span className="min-w-0 leading-tight">{getGroupLabel(group)}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <DropdownMenuSeparator />
                     <div className="flex items-start gap-2 px-2 py-2 text-sm">

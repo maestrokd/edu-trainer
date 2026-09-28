@@ -199,6 +199,7 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
           >
             <Bookshelf
               roundBooks={data.roundBooks}
+              bookGroupsById={data.bookGroupsById}
               layout={state.config.mode}
               placedBySlot={state.placedBySlot}
               selectedBookId={state.selectedBookId}
@@ -214,6 +215,10 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
                 filled: (position, book) => t("bibleBookshelf.aria.filledSlot", { position, book }),
                 emptyPosition: (position) => t("bibleBookshelf.aria.emptySlot", { position }),
                 hinted: t("bibleBookshelf.aria.hintedSlot"),
+                groupDescription: (group) =>
+                  t("bibleBookshelf.aria.bookGroup", {
+                    group: t(`bibleBookshelf.groups.${group.translationKey}.label`),
+                  }),
               }}
             />
 
@@ -248,6 +253,7 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
             ) : (
               <BookTray
                 books={data.trayBooks}
+                bookGroupsById={data.bookGroupsById}
                 layout={state.config.mode}
                 selectedBookId={state.selectedBookId}
                 hintBookId={state.hintBookId}
@@ -257,6 +263,10 @@ export function BibleBookshelfPlay({ game, scopeLabel, learningTip, languageName
                   scrollHint: t("bibleBookshelf.tray.scrollHint"),
                   selected: t("bibleBookshelf.aria.selected"),
                   hinted: t("bibleBookshelf.aria.hintedBook"),
+                  groupDescription: (group) =>
+                    t("bibleBookshelf.aria.bookGroup", {
+                      group: t(`bibleBookshelf.groups.${group.translationKey}.label`),
+                    }),
                 }}
               />
             )}
