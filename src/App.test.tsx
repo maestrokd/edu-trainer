@@ -44,3 +44,20 @@ it("shows the public Bible Bookshelf route without authentication", () => {
 
   expect(screen.getByRole("heading", { name: "Set up your bookshelf", level: 1 })).toBeInTheDocument();
 });
+
+it("shows the public Powers of Ten Trainer route without authentication", () => {
+  render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={["/powers-of-ten-trainer"]}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+
+  expect(
+    screen.getByText("Choose operations, powers of ten, number types, and how answers should be entered.")
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Start" })).toBeEnabled();
+});

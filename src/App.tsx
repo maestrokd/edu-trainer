@@ -1,6 +1,7 @@
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { JumpingRabbitPage } from "@/features/jumping-rabbit";
 import { MultiplicationTrainerPage } from "@/features/multiplication-trainer";
+import { PowersOfTenTrainerPage } from "@/features/powers-of-ten-trainer";
 import { CompareNumbersTrainerPage } from "@/features/compare-numbers-trainer";
 import { RoundingTrainerPage } from "@/features/rounding-trainer";
 import { AddSubTrainerPage } from "@/features/add-sub-trainer";
@@ -203,6 +204,7 @@ export default function App() {
       <Route element={<CommonLayout />}>
         <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
         <Route path="/multiplication-trainer" element={<MultiplicationTrainerPage />} />
+        <Route path="/powers-of-ten-trainer" element={<PowersOfTenTrainerPage />} />
         <Route path="/multiplication-rabbit" element={<JumpingRabbitPage />} />
         <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
         <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
