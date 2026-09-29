@@ -15,10 +15,18 @@ describe("trainer setup translations", () => {
     expect(translations.addSubT.mode.quiz).toBe(quiz);
     expect(translations.multiT.mode.quiz).toBe(quiz);
     expect(translations.roundT.mode.quiz).toBe(quiz);
+    expect(translations.powersTenT.mode.quiz).toBe(quiz);
     expect(translations.menu.mainMenuLabel).toBe(mainMenu);
     expect(translations.addSubT.setup.sounds).toBe(soundFeedback);
     expect(translations.cmpNmbrGm.feedback.sound).toBe(soundFeedback);
     expect(translations.roundT.setup.sounds).toBe(soundFeedback);
+  });
+
+  it.each([en, uk, ru])("contains the complete powers-of-ten trainer translation groups", (translations) => {
+    expect(translations.powersTenT.title).toBeTruthy();
+    expect(translations.powersTenT.setup.powers).toBeTruthy();
+    expect(translations.powersTenT.notation.mixed).toBeTruthy();
+    expect(translations.powersTenT.table.incorrect).toContain("{{correct}}");
   });
 
   it("defaults every configurable trainer mode to quiz", () => {

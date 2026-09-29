@@ -239,6 +239,92 @@
       "incorrect": "Incorrect (correct: {{correct}})"
     }
   },
+  "powersTenT": {
+    "menu": "Menu",
+    "title": "Powers of Ten Trainer",
+    "newSession": "New session",
+    "changeSetup": "Change setup",
+    "showHistory": "Show history",
+    "summary": "Powers: 10^{{min}}–10^{{max}} · Accuracy: {{accuracy}}%",
+    "aria": {
+      "moreInfo": "More information about {{field}}",
+      "power": "Include ten to the power of {{power}}",
+      "timer": "Timer minutes",
+      "maxExercises": "Maximum exercises",
+      "correct": "Correct",
+      "wrong": "Incorrect"
+    },
+    "setup": {
+      "label": "Setup",
+      "intro": "Choose operations, powers of ten, number types, and how answers should be entered.",
+      "operationsAndPowers": "Operations and powers",
+      "operations": "Operations",
+      "operationRequired": "Select at least one operation.",
+      "powers": "Powers of ten",
+      "powersHint": "Select one or more powers from 10¹ through 10⁵.",
+      "powerRequired": "Select at least one power.",
+      "operands": "Numbers",
+      "numberTypes": "Number types",
+      "whole": "Whole numbers",
+      "decimals": "Decimals",
+      "numberTypeRequired": "Select at least one number type.",
+      "decimalPlaces": "Decimal places",
+      "magnitude": "Operand magnitude",
+      "digitsMode": "Digits range",
+      "rangeMode": "Numeric range",
+      "minDigits": "Min digits",
+      "maxDigits": "Max digits",
+      "minValue": "Min value",
+      "maxValue": "Max value",
+      "rangeInvalid": "The range must contain each selected number type.",
+      "presentation": "Presentation and help",
+      "notation": "Power display",
+      "showHint": "Show place-value hint",
+      "showHintHelp": "Show the direction and number of decimal places to move.",
+      "session": "Session options",
+      "answerMode": "Answer mode",
+      "timer": "Timer (minutes)",
+      "timerHint": "Leave empty for unlimited session time.",
+      "maxExercises": "Max exercises",
+      "maxExercisesHint": "Leave empty for an unlimited number of exercises.",
+      "sounds": "Sound feedback"
+    },
+    "operations": { "multiply": "Multiplication", "divide": "Division" },
+    "notation": { "numeric": "Numbers (1000)", "power": "Powers (10³)", "mixed": "Mixed" },
+    "mode": { "quiz": "Quiz", "input": "Keyboard input" },
+    "start": "Start",
+    "hint": {
+      "right": "right",
+      "left": "left",
+      "template": "Move the decimal point {{count}} places {{direction}}."
+    },
+    "sr": { "power": "ten to the power of {{power}}", "multiply": "multiplied by", "divide": "divided by" },
+    "input": {
+      "placeholder": "Answer",
+      "submit": "Submit",
+      "hint": "Use a dot or comma for decimals. Press Enter to submit."
+    },
+    "quiz": { "optionAria": "Answer option {{value}}" },
+    "stats": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "timeLeft": "Time left"
+    },
+    "finished": {
+      "time": "Time is up!",
+      "exercises": "Exercises complete ({{count}})."
+    },
+    "table": {
+      "example": "Example",
+      "answer": "Answer",
+      "result": "Result",
+      "empty": "Your answer history will appear here.",
+      "correct": "Correct",
+      "incorrect": "Incorrect (correct: {{correct}})"
+    }
+  },
   "roundT": {
     "menu": "Menu",
     "title": "Rounding Game",
