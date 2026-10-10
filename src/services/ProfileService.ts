@@ -1,4 +1,5 @@
 import { get } from "./ApiService";
+import type { LegalConsentState } from "@/services/LegalService.ts";
 
 export interface UserProfileDto {
   id: number;
@@ -10,6 +11,7 @@ export interface UserProfileDto {
   email: string | null;
   locale: string;
   verifiedEmail: boolean;
+  legalConsent: LegalConsentState;
 }
 
 export const getMe = async (): Promise<UserProfileDto> => {

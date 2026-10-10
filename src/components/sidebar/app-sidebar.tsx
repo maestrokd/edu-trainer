@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Command, LifeBuoy, Send, SquareTerminal, LogIn } from "lucide-react";
+import { Command, FileText, LifeBuoy, LogIn, Send, ShieldCheck, SquareTerminal } from "lucide-react";
 import { NavUser } from "@/components/sidebar/nav-user.tsx";
 import {
   Sidebar,
@@ -17,7 +17,7 @@ import { NavSecondary } from "@/components/sidebar/nav-secondary";
 import { useTranslation } from "react-i18next";
 import { Authority } from "@/contexts/AuthContext.tsx";
 
-const navSecondaryData = [
+const supportNavigation = [
   {
     title: "Support",
     url: "#",
@@ -34,6 +34,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const { principal } = useAuth();
   const { sidebarContent } = useSidebarContext();
+  const secondaryNavigation = React.useMemo(
+    () => [
+      ...supportNavigation,
+      {
+        title: t("legal.documents.terms"),
+        url: "/terms",
+        icon: FileText,
+        openInNewTab: true,
+      },
+      {
+        title: t("legal.documents.privacy"),
+        url: "/privacy",
+        icon: ShieldCheck,
+        openInNewTab: true,
+      },
+    ],
+    [t]
+  );
 
   const user = React.useMemo(() => {
     if (!principal) return null;
@@ -91,8 +109,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Dynamic Content */}
         {sidebarContent}
 
-        {/* Secondary Nav (Support, Feedback) - Pushed to bottom of content area */}
-        <NavSecondary items={navSecondaryData} className="mt-auto" />
+        {/* Secondary navigation is pushed to the bottom of the content area. */}
+        <NavSecondary items={secondaryNavigation} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         {user ? (

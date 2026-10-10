@@ -12,6 +12,7 @@ import { getMe, type UserProfileDto } from "@/services/ProfileService.ts";
 import TenantService from "@/services/TenantService.ts";
 import WebApp from "@twa-dev/sdk";
 import { jwtDecode } from "jwt-decode";
+import type { LegalConsentState, RegistrationLegalConsent } from "@/services/LegalService.ts";
 
 export const Authority = {
   MANAGE_PROFILES: "MANAGE_PROFILES",
@@ -61,6 +62,7 @@ export interface Principal {
   activeTenantUuid: string | null;
   activeTenantName: string | null;
   activeTenantRole: (typeof TenantMembershipRole)[keyof typeof TenantMembershipRole] | null;
+  legalConsent: LegalConsentState;
 }
 
 export const EmailVerificationType = {
@@ -81,6 +83,7 @@ interface AuthContextType {
     password: string,
     confirmPassword: string,
     confirmationCode: string,
+    legalConsent: RegistrationLegalConsent,
     invitationToken?: string
   ) => Promise<void>;
   doResetPassword: (
@@ -93,6 +96,7 @@ interface AuthContextType {
   loginWithTelegram: () => Promise<string>;
   doRefresh: () => Promise<string>;
   switchTenant: (tenantUuid: string) => Promise<void>;
+  refreshPrincipal: () => Promise<Principal>;
   logout: () => void;
   logoutAll: () => Promise<void>;
 }
@@ -169,6 +173,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string,
     confirmPassword: string,
     confirmationCode: string,
+    legalConsent: RegistrationLegalConsent,
     invitationToken?: string
   ): Promise<void> => {
     const authResponse = await post<LoginResponse>("/auth/registration", {
@@ -178,6 +183,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       confirmPassword,
       initData: telegramInitDataString,
       invitationToken,
+      age18Confirmed: legalConsent.age18Confirmed,
+      documents: legalConsent.documents,
     });
     await applyAuthenticatedSession(authResponse);
   };
@@ -218,6 +225,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const authResponse = await TenantService.switchTenant(tenantUuid);
     await applyAuthenticatedSession(authResponse);
     await queryClient.resetQueries();
+  };
+
+  const refreshPrincipal = async (): Promise<Principal> => {
+    if (!principal) {
+      throw new Error("Cannot refresh an unauthenticated principal");
+    }
+    const profile = await getMe();
+    const updatedPrincipal: Principal = {
+      ...principal,
+      username: profile.username,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      profileType: profile.profileType,
+      legalConsent: profile.legalConsent ?? { required: false, documents: [] },
+    };
+    setPrincipal(updatedPrincipal);
+    return updatedPrincipal;
   };
 
   const logout = () => {
@@ -305,6 +330,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loginWithTelegram,
         doRefresh: coordinatedRefresh,
         switchTenant,
+        refreshPrincipal,
         logout,
         logoutAll,
       }}
@@ -338,6 +364,7 @@ const fetchPrincipalData = async (token: string, authResponse?: LoginResponse): 
     activeTenantUuid: resolvedActiveTenantUuid,
     activeTenantName: resolveActiveTenantName(authResponse, resolvedActiveTenantUuid),
     activeTenantRole: resolvedActiveTenantRole,
+    legalConsent: profile.legalConsent ?? { required: false, documents: [] },
   };
 };
 

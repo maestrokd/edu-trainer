@@ -145,3 +145,25 @@ frontend; enable through external backend properties and restart all backend ins
 Open dashboards catch up on navigation, focus, or reconnect. The backend independently
 rejects new disabled assistant calls immediately after restart. English Coach voice
 is unchanged. See the backend README for configuration and rollout details.
+
+## Legal documents
+
+Terms and Privacy content is stored as immutable, English-language Markdown under
+`src/legal/terms/terms-v<version>.md` and
+`src/legal/privacy/privacy-v<version>.md`. The central registry discovers only files
+that follow those names. Do not substantively edit a published file; add a new
+version instead.
+
+To publish a new version:
+
+1. Add the approved Markdown file and deploy the frontend first.
+2. Add a backend Flyway migration that marks the previous row non-current and
+   inserts the new current `legal_document_versions` row with explicit published,
+   effective, and `acceptance_required` values.
+3. Deploy the backend when the new version becomes applicable.
+4. Verify `/public/legal/requirements`, `/terms` or `/privacy`, and the explicit
+   version route. A version marked as requiring acceptance automatically gates
+   PRIMARY users who have not accepted that exact version.
+
+Retain every published Markdown file and database version row so historical URLs
+and acceptance records continue to resolve.

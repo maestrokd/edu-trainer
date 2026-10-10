@@ -18,6 +18,8 @@ import { validatePassword } from "@/services/PasswordValidator.ts";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
 import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
 import { extractErrorCode } from "@/services/ApiService.ts";
+import { useRegistrationLegalConsent } from "@/hooks/use-registration-legal-consent.ts";
+import { RegistrationLegalConsentFields } from "@/components/legal/RegistrationLegalConsentFields.tsx";
 
 const formatDateTime = (value: string): string => {
   const date = new Date(value);
@@ -51,6 +53,7 @@ const InvitationRegistrationPage: React.FC = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const submitInFlightRef = useRef(false);
+  const legalConsent = useRegistrationLegalConsent(true);
 
   const navigateToSuccess = (data: ResolveTenantInvitationResponse) => {
     if (!token) return;
@@ -211,7 +214,7 @@ const InvitationRegistrationPage: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!invitation || !token || submitInFlightRef.current) return;
+    if (!invitation || !token || submitInFlightRef.current || !legalConsent.ready) return;
     if (!confirmationCode || codeError || passwordErrors.length > 0 || confirmError) return;
 
     submitInFlightRef.current = true;
@@ -219,7 +222,17 @@ const InvitationRegistrationPage: React.FC = () => {
     setSubmitError(null);
 
     try {
-      await doRegister(invitation.email, password, confirmPassword, confirmationCode, token);
+      await doRegister(
+        invitation.email,
+        password,
+        confirmPassword,
+        confirmationCode,
+        {
+          age18Confirmed: legalConsent.age18Confirmed,
+          documents: legalConsent.documents,
+        },
+        token
+      );
       notifier.success(
         t("pages.tenantInvitationRegistration.notifications.submitSuccess", {
           defaultValue: "Your account was created and invitation accepted.",
@@ -296,7 +309,8 @@ const InvitationRegistrationPage: React.FC = () => {
     !password ||
     !confirmPassword ||
     passwordErrors.length > 0 ||
-    !!confirmError;
+    !!confirmError ||
+    !legalConsent.ready;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-8">
@@ -434,6 +448,11 @@ const InvitationRegistrationPage: React.FC = () => {
                 </Label>
               </div>
             </div>
+
+            <RegistrationLegalConsentFields
+              state={legalConsent}
+              disabled={submitLoading || sendCodeLoading || isAuthenticated}
+            />
 
             <Button className="w-full" type="submit" disabled={disableSubmit}>
               {submitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
