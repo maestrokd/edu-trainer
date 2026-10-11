@@ -56,163 +56,184 @@ import {
   TemplateCollectionsPage,
 } from "@/features/familyTaskManager";
 import { FamilyManageRoute } from "@/features/familyTaskManager/components/gates/FamilyManageRoute";
+import { LegalConsentGate } from "@/components/legal/LegalConsentGate.tsx";
+import { LegalDocumentPage } from "@/pages/legal/LegalDocumentPage.tsx";
+import { LegalDocumentType } from "@/services/LegalService.ts";
 
 export default function App() {
   usePageTitle();
   return (
-    <Routes>
-      <Route
-        path="register"
-        element={
-          <DefaultLayout>
-            <RegistrationPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="password/reset"
-        element={
-          <DefaultLayout>
-            <ResetPasswordPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="login"
-        element={
-          <DefaultLayout>
-            <LoginPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="telegram/login"
-        element={
-          <DefaultLayout>
-            <LoginPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="auth/invitations/:token"
-        element={
-          <DefaultLayout>
-            <AcceptTenantInvitationPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="auth/invitations/:token/register"
-        element={
-          <DefaultLayout>
-            <InvitationRegistrationPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="auth/invitations/:token/success"
-        element={
-          <DefaultLayout>
-            <TenantInvitationSuccessPage />
-          </DefaultLayout>
-        }
-      />
-      <Route
-        element={
-          <WebLayout>
-            <Outlet />
-          </WebLayout>
-        }
-      >
-        <Route path="/" element={<MenuPage />} />
+    <LegalConsentGate>
+      <Routes>
+        <Route
+          path="terms/:version?"
+          element={
+            <DefaultLayout>
+              <LegalDocumentPage type={LegalDocumentType.TERMS} />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="privacy/:version?"
+          element={
+            <DefaultLayout>
+              <LegalDocumentPage type={LegalDocumentType.PRIVACY} />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="register"
+          element={
+            <DefaultLayout>
+              <RegistrationPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="password/reset"
+          element={
+            <DefaultLayout>
+              <ResetPasswordPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="login"
+          element={
+            <DefaultLayout>
+              <LoginPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="telegram/login"
+          element={
+            <DefaultLayout>
+              <LoginPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="auth/invitations/:token"
+          element={
+            <DefaultLayout>
+              <AcceptTenantInvitationPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="auth/invitations/:token/register"
+          element={
+            <DefaultLayout>
+              <InvitationRegistrationPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="auth/invitations/:token/success"
+          element={
+            <DefaultLayout>
+              <TenantInvitationSuccessPage />
+            </DefaultLayout>
+          }
+        />
+        <Route
+          element={
+            <WebLayout>
+              <Outlet />
+            </WebLayout>
+          }
+        >
+          <Route path="/" element={<MenuPage />} />
 
-        <Route element={<PrivateRoute />}>
-          <Route path="settings/tenants/select" element={<SelectTenantPage />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="settings/tenants/select" element={<SelectTenantPage />} />
 
-          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
-            <Route path="settings/tenant-profiles" element={<TenantProfilesPage />} />
-          </Route>
+            <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} />}>
+              <Route path="settings/tenant-profiles" element={<TenantProfilesPage />} />
+            </Route>
 
-          <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} requireTenantOwner />}>
-            <Route path="subscriptions" element={<SubscriptionPage />} />
-          </Route>
+            <Route element={<AuthorityRoute authority={Authority.MANAGE_SUBSCRIPTIONS} requireTenantOwner />}>
+              <Route path="subscriptions" element={<SubscriptionPage />} />
+            </Route>
 
-          <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} requireTenantOwner />}>
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
-            <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
-            <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
-            <Route path="settings/tenant-invitations" element={<TenantInvitationsPage />} />
-            <Route path="settings/tenant-invitations/create" element={<CreateTenantInvitationPage />} />
-            <Route path="settings/profiles/invitations/create" element={<CreateTenantInvitationPage />} />
-          </Route>
+            <Route element={<AuthorityRoute authority={Authority.MANAGE_PROFILES} requireTenantOwner />}>
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="settings/profiles" element={<SecondaryProfilesPage />} />
+              <Route path="settings/profiles/create" element={<CreateSecondaryProfilePage />} />
+              <Route path="settings/profiles/:id/edit" element={<EditSecondaryProfilePage />} />
+              <Route path="settings/tenant-invitations" element={<TenantInvitationsPage />} />
+              <Route path="settings/tenant-invitations/create" element={<CreateTenantInvitationPage />} />
+              <Route path="settings/profiles/invitations/create" element={<CreateTenantInvitationPage />} />
+            </Route>
 
-          <Route element={<AuthorityRoute authority={Authority.ENGLISH_COACH_OPENAI} />}>
-            <Route path="english-coach" element={<EnglishCoachPage />} />
-          </Route>
+            <Route element={<AuthorityRoute authority={Authority.ENGLISH_COACH_OPENAI} />}>
+              <Route path="english-coach" element={<EnglishCoachPage />} />
+            </Route>
 
-          <Route element={<AuthorityRoute authority={Authority.FAMILY_TASK_MANAGER} />}>
-            <Route path="family-tasks" element={<FamilyTaskDashboardPage />} />
-            <Route path="family-tasks/today" element={<TodayPage />} />
-            <Route path="family-tasks/rewards" element={<RewardsPage />} />
-            <Route path="family-tasks/lists" element={<ListsPage />} />
-            <Route path="family-tasks/lists/:listUuid" element={<ListDetailsPage />} />
-            <Route path="family-tasks/display" element={<SharedDisplayPage />} />
+            <Route element={<AuthorityRoute authority={Authority.FAMILY_TASK_MANAGER} />}>
+              <Route path="family-tasks" element={<FamilyTaskDashboardPage />} />
+              <Route path="family-tasks/today" element={<TodayPage />} />
+              <Route path="family-tasks/rewards" element={<RewardsPage />} />
+              <Route path="family-tasks/lists" element={<ListsPage />} />
+              <Route path="family-tasks/lists/:listUuid" element={<ListDetailsPage />} />
+              <Route path="family-tasks/display" element={<SharedDisplayPage />} />
 
-            <Route element={<FamilyManageRoute />}>
-              <Route path="family-tasks/tasks" element={<Navigate to="/family-tasks/tasks/chores" replace />} />
-              <Route path="family-tasks/tasks/chores" element={<ChoresPage />} />
-              <Route path="family-tasks/tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />
-              <Route path="family-tasks/tasks/routines" element={<RoutinesPage />} />
-              <Route path="family-tasks/tasks/routines/:routineUuid" element={<RoutineDetailsPage />} />
-              <Route path="family-tasks/approvals" element={<ApprovalsPage />} />
-              <Route path="family-tasks/chores" element={<ChoresPage />} />
-              <Route path="family-tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />
-              <Route path="family-tasks/routines" element={<RoutinesPage />} />
-              <Route
-                path="family-tasks/routines/exceptions"
-                element={<Navigate to="/family-tasks/routines" replace />}
-              />
-              <Route
-                path="family-tasks/routines/exceptions/new"
-                element={<Navigate to="/family-tasks/routines" replace />}
-              />
-              <Route path="family-tasks/routines/:routineUuid/exceptions" element={<RoutineExceptionsPage />} />
-              <Route
-                path="family-tasks/routines/:routineUuid/exceptions/new"
-                element={<RoutineExceptionDetailsPage />}
-              />
-              <Route
-                path="family-tasks/routines/:routineUuid/exceptions/:exceptionUuid"
-                element={<RoutineExceptionDetailsPage />}
-              />
-              <Route path="family-tasks/routines/:routineUuid" element={<RoutineDetailsPage />} />
-              <Route path="family-tasks/redemptions" element={<RewardRedemptionsPage />} />
-              <Route path="family-tasks/rewards/redemptions" element={<RewardRedemptionsPage />} />
-              <Route path="family-tasks/rewards/stars" element={<StarsAdjustmentsPage />} />
-              <Route path="family-tasks/rewards/:rewardUuid" element={<RewardDetailsPage />} />
-              <Route path="family-tasks/profiles" element={<ProfilesPage />} />
-              <Route path="family-tasks/profiles/new" element={<Navigate to="/settings/profiles/create" replace />} />
-              <Route path="family-tasks/profiles/:profileUuid" element={<ProfileDetailsPage />} />
-              <Route path="family-tasks/template-collections" element={<TemplateCollectionsPage />} />
-              <Route path="family-tasks/settings" element={<FamilyTaskSettingsPage />} />
+              <Route element={<FamilyManageRoute />}>
+                <Route path="family-tasks/tasks" element={<Navigate to="/family-tasks/tasks/chores" replace />} />
+                <Route path="family-tasks/tasks/chores" element={<ChoresPage />} />
+                <Route path="family-tasks/tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />
+                <Route path="family-tasks/tasks/routines" element={<RoutinesPage />} />
+                <Route path="family-tasks/tasks/routines/:routineUuid" element={<RoutineDetailsPage />} />
+                <Route path="family-tasks/approvals" element={<ApprovalsPage />} />
+                <Route path="family-tasks/chores" element={<ChoresPage />} />
+                <Route path="family-tasks/chores/:choreUuid" element={<ChoreDetailsPage />} />
+                <Route path="family-tasks/routines" element={<RoutinesPage />} />
+                <Route
+                  path="family-tasks/routines/exceptions"
+                  element={<Navigate to="/family-tasks/routines" replace />}
+                />
+                <Route
+                  path="family-tasks/routines/exceptions/new"
+                  element={<Navigate to="/family-tasks/routines" replace />}
+                />
+                <Route path="family-tasks/routines/:routineUuid/exceptions" element={<RoutineExceptionsPage />} />
+                <Route
+                  path="family-tasks/routines/:routineUuid/exceptions/new"
+                  element={<RoutineExceptionDetailsPage />}
+                />
+                <Route
+                  path="family-tasks/routines/:routineUuid/exceptions/:exceptionUuid"
+                  element={<RoutineExceptionDetailsPage />}
+                />
+                <Route path="family-tasks/routines/:routineUuid" element={<RoutineDetailsPage />} />
+                <Route path="family-tasks/redemptions" element={<RewardRedemptionsPage />} />
+                <Route path="family-tasks/rewards/redemptions" element={<RewardRedemptionsPage />} />
+                <Route path="family-tasks/rewards/stars" element={<StarsAdjustmentsPage />} />
+                <Route path="family-tasks/rewards/:rewardUuid" element={<RewardDetailsPage />} />
+                <Route path="family-tasks/profiles" element={<ProfilesPage />} />
+                <Route path="family-tasks/profiles/new" element={<Navigate to="/settings/profiles/create" replace />} />
+                <Route path="family-tasks/profiles/:profileUuid" element={<ProfileDetailsPage />} />
+                <Route path="family-tasks/template-collections" element={<TemplateCollectionsPage />} />
+                <Route path="family-tasks/settings" element={<FamilyTaskSettingsPage />} />
+              </Route>
             </Route>
           </Route>
         </Route>
-      </Route>
 
-      <Route element={<CommonLayout />}>
-        <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
-        <Route path="/multiplication-trainer" element={<MultiplicationTrainerPage />} />
-        <Route path="/powers-of-ten-trainer" element={<PowersOfTenTrainerPage />} />
-        <Route path="/multiplication-rabbit" element={<JumpingRabbitPage />} />
-        <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
-        <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
-        <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />
-        <Route path="/bible-books" element={<BibleBooksPage />} />
-        <Route path="/bible-bookshelf" element={<BibleBookshelfPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route element={<CommonLayout />}>
+          <Route path="/about" element={<h1 className="text-2xl">About Page</h1>} />
+          <Route path="/multiplication-trainer" element={<MultiplicationTrainerPage />} />
+          <Route path="/powers-of-ten-trainer" element={<PowersOfTenTrainerPage />} />
+          <Route path="/multiplication-rabbit" element={<JumpingRabbitPage />} />
+          <Route path="/compare-numbers" element={<CompareNumbersTrainerPage />} />
+          <Route path="/rounding-trainer" element={<RoundingTrainerPage />} />
+          <Route path="/add-sub-trainer" element={<AddSubTrainerPage />} />
+          <Route path="/bible-books" element={<BibleBooksPage />} />
+          <Route path="/bible-bookshelf" element={<BibleBookshelfPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </LegalConsentGate>
   );
 }

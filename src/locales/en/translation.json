@@ -1094,6 +1094,43 @@
       }
     }
   },
+  "legal": {
+    "documents": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
+    },
+    "document": {
+      "version": "Version {{version}}",
+      "effectiveDate": "Effective {{date}}"
+    },
+    "registration": {
+      "title": "Required confirmations",
+      "loading": "Loading the current legal documents...",
+      "age18": "I confirm that I am 18 years of age or older.",
+      "termsPrefix": "I agree to the",
+      "privacyPrefix": "I acknowledge the"
+    },
+    "gate": {
+      "title": "We've updated our legal documents",
+      "description": "Please review and confirm the required documents before continuing.",
+      "viewDocument": "View {{document}}",
+      "acceptTerms": "I agree to the updated Terms of Service.",
+      "acknowledgePrivacy": "I acknowledge the updated Privacy Policy.",
+      "continue": "Continue",
+      "submitting": "Saving...",
+      "submitError": "We couldn't save your confirmation. Please try again.",
+      "stillRequired": "Additional confirmation is still required. Review the listed documents and try again."
+    },
+    "actions": {
+      "retry": "Retry",
+      "viewCurrent": "View current version"
+    },
+    "errors": {
+      "requirementsUnavailable": "The current legal requirements are unavailable. Please try again.",
+      "contentUnavailable": "This legal document is temporarily unavailable. Please try again later.",
+      "versionNotFound": "That legal document version was not found."
+    }
+  },
   "errors": {
     "codes": {
       "TECHNICAL_ERROR": "A technical error occurred. Please try again.",
@@ -1115,6 +1152,9 @@
       "TOKEN_NOT_VALID": "Token not valid.",
       "MISSING_COOKIE": "Invalid or absent cookie.",
       "MISSING_REQUEST_HEADER": "Required request header is missing.",
+      "AGE_ATTESTATION_REQUIRED": "You must confirm that you are 18 years of age or older.",
+      "LEGAL_CONSENT_INVALID": "You must accept the current Terms and acknowledge the current Privacy Policy.",
+      "LEGAL_DOCUMENT_NOT_CURRENT": "The legal document version changed. Review the current version and try again.",
       "TENANT_MEMBERSHIP_NOT_FOUND": "No tenant membership found for this user.",
       "FORBIDDEN": "You do not have access to this action in the active tenant.",
       "IDEMPOTENCY_ERROR": "This request was already processed.",

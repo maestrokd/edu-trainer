@@ -5,6 +5,10 @@ import { validatePassword } from "@/services/PasswordValidator.ts";
 import { useNavigate } from "react-router-dom";
 import { notifier } from "@/services/NotificationService.ts";
 import { useApiErrorHandler } from "@/hooks/use-api-error-handler.ts";
+import {
+  useRegistrationLegalConsent,
+  type RegistrationLegalConsentState,
+} from "@/hooks/use-registration-legal-consent.ts";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,6 +37,7 @@ interface UseVerificationFormReturn {
   submitLoading: boolean;
   submitError: string | null;
   secondsLeft: number;
+  legalConsent: RegistrationLegalConsentState;
   handleEmailChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleEmailBlur: () => void;
   handleSendCode: () => Promise<void>;
@@ -66,6 +71,7 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
 
   const navigate = useNavigate();
   const { sendConfirmationCode, doRegister, doResetPassword } = useAuth();
+  const legalConsent = useRegistrationLegalConsent(mode === FormMode.REGISTRATION);
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -157,7 +163,15 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (emailError || !confirmationCode || codeError || passwordErrors.length > 0 || confirmError) return;
+    if (
+      emailError ||
+      !confirmationCode ||
+      codeError ||
+      passwordErrors.length > 0 ||
+      confirmError ||
+      !legalConsent.ready
+    )
+      return;
     setSubmitLoading(true);
     setSubmitError(null);
 
@@ -172,7 +186,10 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
         notifier.success(t("pages.resetPasswordPage.notifications.submitSuccess"));
         navigate("/login", { replace: true });
       } else {
-        await doRegister(trimmedEmail, password, confirmPassword, confirmationCode);
+        await doRegister(trimmedEmail, password, confirmPassword, confirmationCode, {
+          age18Confirmed: legalConsent.age18Confirmed,
+          documents: legalConsent.documents,
+        });
         notifier.success(t("pages.registrationPage.notifications.submitSuccess"));
         navigate("/", { replace: true });
       }
@@ -205,6 +222,7 @@ export function useRegistrationForm({ mode }: UseRegistrationFormProps): UseVeri
     submitLoading,
     submitError,
     secondsLeft,
+    legalConsent,
     handleEmailChange,
     handleEmailBlur,
     handleSendCode,

@@ -10,6 +10,7 @@ import { AlertCircleIcon, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FormMode, useRegistrationForm } from "@/hooks/use-registration-form.ts";
 import LanguageSelector, { LanguageSelectorMode } from "@/components/lang/LanguageSelector.tsx";
+import { RegistrationLegalConsentFields } from "@/components/legal/RegistrationLegalConsentFields.tsx";
 
 export interface VerificationFormProps {
   formMode: FormMode;
@@ -46,6 +47,7 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
     submitLoading,
     submitError,
     secondsLeft,
+    legalConsent,
     handleEmailChange,
     handleEmailBlur,
     handleSendCode,
@@ -197,6 +199,10 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
               )}
             </div>
 
+            {formMode === FormMode.REGISTRATION && (
+              <RegistrationLegalConsentFields state={legalConsent} disabled={submitLoading || sendCodeLoading} />
+            )}
+
             {/* Submit */}
             <Button
               className="w-full flex items-center justify-center"
@@ -211,7 +217,8 @@ const GenericRegistrationForm: React.FC<VerificationFormProps> = ({
                 !password ||
                 !confirmPassword ||
                 passwordErrors.length > 0 ||
-                !!confirmError
+                !!confirmError ||
+                !legalConsent.ready
               }
             >
               {submitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
